@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#08080a"/>
+  <circle cx="600" cy="300" r="360" fill="none" stroke="#17171b" stroke-width="2"/>
+  <circle cx="600" cy="300" r="240" fill="none" stroke="#17171b" stroke-width="2"/>
+  <text x="80" y="300" font-family="monospace" font-size="120" font-weight="700" letter-spacing="24" fill="#f4f4f5">ROOM</text>
+  <text x="84" y="370" font-family="system-ui, sans-serif" font-size="34" font-weight="600" fill="#e8ff59">THE AI IS WATCHING YOUR ROOM.</text>
+  <text x="84" y="430" font-family="system-ui, sans-serif" font-size="26" fill="#8b8b95">Play with friends. Make choices. The AI learns your group — then changes the game.</text>
+  <circle cx="1010" cy="180" r="14" fill="#e8ff59"/>
+</svg>

@@ -1,0 +1,102 @@
+import { getAiProvider } from "./provider";
+import type { GameState, Localized } from "@/game/types";
+
+// ─────────────────────────────────────────────────────────────
+// The narrator turns the engine's structured evidence into the
+// AI's voice. If no provider is configured (or it times out), the
+// deterministic text the engine already produced is kept as-is.
+//
+// It is ONLY ever asked to rephrase facts it is given. It cannot
+// change scores, winners, evidence or game state.
+// ─────────────────────────────────────────────────────────────
+
+const SYSTEM = `You are "THE AI", the unseen intelligence inside the party game ROOM.
+Voice: confident, observant, a little provocative, witty, concise. Never creepy, never moralizing.
+You will receive STRUCTURED EVIDENCE (facts derived from real in-game choices) and must rephrase it.
+Hard rules:
+- Only state what the evidence supports. Never invent evidence, numbers, names or motives.
+- Distinguish OBSERVATION ("X chose Y five times") from HYPOTHESIS ("I think X trusts Y — let's test it").
+- Never claim anything about real relationships, romance, sexuality, crime, health or mental state.
+- Max 2 short sentences per language. No emojis. No hashtags.
+Respond ONLY with JSON: {"en": "...", "es": "..."}`;
+
+interface NarrateInput {
+  kind: "observation" | "theory" | "theory_result" | "final" | "intervention";
+  evidence: string;
+  fallback: Localized;
+  /** extra structured context, already fact-checked by the engine */
+  context?: Record<string, unknown>;
+}
+
+export async function narrate(input: NarrateInput): Promise<Localized> {
+  const provider = getAiProvider();
+  if (!provider.available) return input.fallback;
+
+  const user = JSON.stringify(
+    {
+      moment: input.kind,
+      structured_evidence: input.evidence,
+      deterministic_version: input.fallback,
+      context: input.context ?? {},
+      instruction:
+        "Rephrase the deterministic_version in THE AI's voice. Keep every fact identical. Return {en, es}.",
+    },
+    null,
+    0,
+  );
+
+  const raw = await provider.complete({
+    system: SYSTEM,
+    user,
+    maxTokens: 260,
+    temperature: 0.85,
+    timeoutMs: 6500,
+  });
+  if (!raw) return input.fallback;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<Localized>;
+    const en = typeof parsed.en === "string" ? parsed.en.trim() : "";
+    const es = typeof parsed.es === "string" ? parsed.es.trim() : "";
+    if (en.length >= 3 && es.length >= 3 && en.length < 400 && es.length < 400) {
+      return { en, es };
+    }
+  } catch {
+    /* fall through */
+  }
+  return input.fallback;
+}
+
+/**
+ * After a state transition, polish the most recent AI message for the
+ * moments that matter. Returns a new state (or the same one).
+ */
+export async function polishLatestAiMessage(state: GameState): Promise<GameState> {
+  const provider = getAiProvider();
+  if (!provider.available) return state;
+  const last = state.aiMessages[state.aiMessages.length - 1];
+  if (!last) return state;
+  if (!["observation", "theory", "theory_result", "final"].includes(last.kind)) return state;
+
+  const round = state.rounds.find((r) => r.index === last.roundIndex);
+  const theory = round?.theoryId
+    ? state.theories.find((t) => t.id === round.theoryId)
+    : state.theories.find((t) => t.status === "testing" || t.status === "announced");
+
+  const polished = await narrate({
+    kind: last.kind === "final" ? "final" : (last.kind as NarrateInput["kind"]),
+    evidence: theory?.evidence ?? last.text.en,
+    fallback: last.text,
+    context: {
+      confidence: theory?.confidence,
+      theoryType: theory?.type,
+      players: state.players.map((p) => p.nickname),
+    },
+  });
+
+  if (polished === last.text) return state;
+  const aiMessages = state.aiMessages.map((m) =>
+    m.id === last.id ? { ...m, text: polished } : m,
+  );
+  return { ...state, aiMessages, version: state.version + 1 };
+}
