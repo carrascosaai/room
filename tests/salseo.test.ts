@@ -87,8 +87,9 @@ describe("secret missions", () => {
 
   it("a player only ever sees their own mission, until the end", () => {
     const started = startGame(room(6)).state;
+    const holderIds = new Set(started.missions.map((m) => m.playerId));
     const holderId = started.missions[0]!.playerId;
-    const otherId = started.players.find((p) => p.id !== holderId)!.id;
+    const otherId = started.players.find((p) => !holderIds.has(p.id))!.id;
     expect(projectView(started, holderId).myMission).toBeDefined();
     expect(projectView(started, otherId).myMission).toBeUndefined();
     // completed is hidden mid-game

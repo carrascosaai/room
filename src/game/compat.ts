@@ -112,6 +112,13 @@ export function wildcardPlayer(state: GameState): { id: string; score: number } 
     const wild = (1 - consistency) * 0.65 + (1 - avg) * 0.35;
     if (!worst || wild > worst.score) worst = { id, score: wild };
   }
-  // only call someone a wildcard if there's real signal
-  return worst && worst.score >= 0.42 ? worst : null;
+  // only call someone a wildcard if their unpredictability really stands out
+  const others = ids
+    .filter((id) => id !== worst?.id)
+    .map((id) => {
+      const prof = state.behavior[id];
+      return 1 - (prof?.consistency.value ?? 0.5);
+    });
+  const avgOther = others.length ? others.reduce((a, b) => a + b, 0) / others.length : 0.5;
+  return worst && worst.score >= 0.46 && worst.score > avgOther + 0.08 ? worst : null;
 }

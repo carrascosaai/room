@@ -21,11 +21,14 @@ knows. ~5–10 minutes. No app, no account, no login, free.
 | Server-authoritative game state machine (`LOBBY → … → FINAL_RESULTS`) | ✅ |
 | Realtime multiplayer — polling (always) + Supabase Realtime (when configured) | ✅ |
 | Disconnect / refresh / host-transfer / late-join handling | ✅ |
-| 110-question curated bilingual bank with hidden behavioral metadata | ✅ |
+| ~175-question curated bilingual bank with hidden behavioral metadata | ✅ |
 | Deterministic behavior model (13 dimensions, value/confidence/evidence/trend) | ✅ |
 | Group model (alliances, reciprocal trust, betrayals, alignment, predictions) | ✅ |
 | Theory engine — forms falsifiable theories, schedules a test, resolves it | ✅ |
 | AI moments — observation, **"I HAVE A THEORY"**, intervention, "I WAS WRONG" | ✅ |
+| Salseo — compatibility ("AFFINITY DETECTED"), clashing values, wildcard | ✅ |
+| Secret missions — 1–2 players get a private, checkable objective | ✅ |
+| Accusation rounds — "who here is the most ___?", room points, reveal | ✅ |
 | Dynamic round selection driven by the model (not random) | ✅ |
 | Server-side scoring | ✅ |
 | Final results + shareable card + Web Share API + viral loop | ✅ |
@@ -33,7 +36,7 @@ knows. ~5–10 minutes. No app, no account, no login, free.
 | AI provider abstraction (OpenAI-compatible) + deterministic fallback | ✅ |
 | Analytics abstraction (anonymous, disable-able) | ✅ |
 | Supabase migrations + RLS | ✅ |
-| 51 unit/integration tests + headless simulation (`npm run simulate`) | ✅ |
+| 60 unit/integration tests + headless simulation (`npm run simulate`) | ✅ |
 
 **Priority order followed:** multiplayer → fast gameplay → great first minute →
 behavioral learning → AI interventions → theory/salseo → results → shareability →
@@ -68,7 +71,7 @@ npm run dev          # dev server
 npm run build        # production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint
-npm test             # vitest (51 tests)
+npm test             # vitest (60 tests)
 npm run simulate     # headless: 10 bots, 100+ games, prints learning metrics
 bash scripts/e2e.sh  # HTTP end-to-end playthrough (needs dev server on :3111)
 ```
@@ -198,13 +201,33 @@ After ~7 rounds: **🧠 I HAVE A THEORY.** → the factual observation
 players → **THEORY STRENGTHENED / DISCARDED**. This is generated from real game
 data; evidence is never invented.
 
+### Salseo layer (`compat.ts`, `missions.ts`, accusation rounds)
+
+Drama, kept structured and bounded:
+
+- **Compatibility** — cosine-ish similarity of two players' behavior vectors +
+  answer alignment + `compat_probe` taste/values matches. Drives the
+  **"AFFINITY DETECTED"** beat (a bespoke test: one more taste question, side by
+  side, everyone else predicts), plus *most compatible pair*, *total opposites*
+  and *wildcard* in the results.
+- **Secret missions** — 1–2 players get a private objective at game start
+  ("Betray someone who's cooperating with you", "Match X's answer as often as you
+  can", "Finish in the bottom two"). Every check is **deterministic from the
+  final state**. Revealed at the end; the reveal itself is a moment. This is the
+  main "let's play again" driver — a different game each time.
+- **Accusation rounds** — "Who here is lying the most tonight?" Everyone points at
+  a player; the reveal shows the room's pick and whether the AI's data agrees.
+- **Nemesis / Drama MVP** — surfaced in the results from real friction
+  (betrayals + accusations + sustained disagreement).
+
 ### Content safety
 
 The engine separates **OBSERVATION** ("Carlos chose María 5 times") from
 **HYPOTHESIS** ("I want to test whether Carlos preferentially trusts María"). It
 never asserts relationships, romance, sexuality, crime, health or mental state —
-in the deterministic text and in the LLM system prompt. Salseo is ~10–20% of the
-game and only triggers on real repeated social patterns.
+in the deterministic text and in the LLM system prompt. Compatibility is a
+statement about **matching choices**, never feelings. Salseo rounds are a bounded
+share of the game (`tests/salseo.test.ts` enforces `< 35%`).
 
 ### Verifying it
 

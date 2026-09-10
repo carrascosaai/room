@@ -1,7 +1,8 @@
 import type { Question, QuestionOption, BehaviorTags, RoundKind } from "./types";
 
 // ─────────────────────────────────────────────────────────────
-// ROOM — curated question bank (110 items)
+// ROOM — curated question bank (~175 items: decisions, dilemmas, votes,
+// taste/values "compat probes" and accusation prompts)
 //
 // These are hand-written party-game prompts, NOT AI-generated.
 // Every option carries behavioral metadata (tags, [-1..1]) that
