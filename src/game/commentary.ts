@@ -104,29 +104,61 @@ export function interventionText(state: GameState, pair: [string, string]): Loca
   );
 }
 
-// Evidence strings are authored in English in the theory engine.
-// We keep a light Spanish rendering here so mixed-language rooms
-// still get Spanish. (The LLM layer does this better when enabled.)
+// Evidence strings are authored in English in the theory engine (they're the
+// canonical factual record, also fed to the LLM). We render clean Spanish here
+// from the known templates so mixed-language / no-API-key rooms read naturally.
+const ES_PATTERNS: [RegExp, (m: RegExpMatchArray) => string][] = [
+  [
+    /^(.+) and (.+) have chosen each other (\d+) times in selection rounds\.$/,
+    (m) => `${m[1]} y ${m[2]} se han elegido mutuamente ${m[3]} veces en rondas de elección.`,
+  ],
+  [
+    /^(.+) and (.+) made the same choice in (\d+) of (\d+) comparable rounds\.$/,
+    (m) => `${m[1]} y ${m[2]} eligieron lo mismo en ${m[3]} de ${m[4]} rondas comparables.`,
+  ],
+  [
+    /^(.+) and (.+) disagreed in (\d+) of (\d+) comparable rounds\.$/,
+    (m) => `${m[1]} y ${m[2]} discreparon en ${m[3]} de ${m[4]} rondas comparables.`,
+  ],
+  [
+    /^(.+) has chosen (.+) (\d+) times; (.+) has chosen (.+) (\d+) times\.$/,
+    (m) => `${m[1]} ha elegido a ${m[2]} ${m[3]} veces; ${m[4]} ha elegido a ${m[5]} ${m[6]} veces.`,
+  ],
+  [
+    /^(.+) correctly predicted (.+) in (\d+) of (\d+) attempts\.$/,
+    (m) => `${m[1]} predijo correctamente a ${m[2]} en ${m[3]} de ${m[4]} intentos.`,
+  ],
+  [
+    /^(.+) chose the higher-risk option in most rounds where risk was in play \((\d+) data points\)\.$/,
+    (m) => `${m[1]} eligió la opción más arriesgada en casi todas las rondas con riesgo en juego (${m[2]} datos).`,
+  ],
+  [
+    /^(.+) chose the safer option in most rounds where risk was in play \((\d+) data points\)\.$/,
+    (m) => `${m[1]} eligió la opción más segura en casi todas las rondas con riesgo en juego (${m[2]} datos).`,
+  ],
+  [
+    /^(.+) has sided with the apparent majority in (\d+) tracked rounds\.$/,
+    (m) => `${m[1]} se ha alineado con la mayoría aparente en ${m[2]} rondas registradas.`,
+  ],
+  [
+    /^(.+) has gone against the apparent majority in (\d+) tracked rounds\.$/,
+    (m) => `${m[1]} ha ido contra la mayoría aparente en ${m[2]} rondas registradas.`,
+  ],
+];
+
 function translateEvidence(evidence: string, _players: Player[]): string {
-  return evidence
-    .replace(/ have chosen each other /, " se han elegido mutuamente ")
-    .replace(/ times in selection rounds\./, " veces en rondas de elección.")
-    .replace(/ made the same choice in /, " hicieron la misma elección en ")
-    .replace(/ of /, " de ")
-    .replace(/ comparable rounds\./, " rondas comparables.")
-    .replace(/ disagreed in /, " no coincidieron en ")
-    .replace(/ has chosen /g, " ha elegido a ")
-    .replace(/ times;/, " veces;")
-    .replace(/ correctly predicted /, " predijo correctamente a ")
-    .replace(/ in (\d+) of (\d+) attempts\./, " en $1 de $2 intentos.")
-    .replace(/ chose the higher-risk option in most rounds where risk was in play /, " eligió la opción más arriesgada en la mayoría de rondas con riesgo en juego ")
-    .replace(/ chose the safer option in most rounds where risk was in play /, " eligió la opción más segura en la mayoría de rondas con riesgo en juego ")
-    .replace(/ has sided with the apparent majority in /, " se ha puesto del lado de la mayoría aparente en ")
-    .replace(/ has gone against the apparent majority in /, " ha ido contra la mayoría aparente en ")
-    .replace(/ tracked rounds\./, " rondas registradas.")
-    .replace(/\(([\d]+) data points\)/, "($1 datos)");
+  for (const [re, fn] of ES_PATTERNS) {
+    const m = evidence.match(re);
+    if (m) return fn(m);
+  }
+  return evidence;
 }
 
 function translateEvidenceShort(theory: Theory): string {
   return translateEvidence(theory.evidence, []).replace(/\.$/, "");
+}
+
+/** Public helper: a localized version of a theory's factual evidence. */
+export function evidenceLocalized(theory: Theory): Localized {
+  return L(theory.evidence, translateEvidence(theory.evidence, []));
 }

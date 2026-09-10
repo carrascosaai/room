@@ -87,25 +87,25 @@ export function buildFinalReport(state: GameState): FinalReport {
   const superlatives: Superlative[] = [
     {
       key: "most_competitive",
-      label: L("Most competitive", "El más competitivo"),
+      label: L("Most competitive", "Quien más compite"),
       playerId: mostCompetitive?.id ?? null,
       detail: L("Chose the winning move over the fair move most often.", "Eligió la jugada ganadora antes que la justa más veces."),
     },
     {
       key: "most_cooperative",
-      label: L("Most cooperative", "El más cooperativo"),
+      label: L("Most cooperative", "Quien más coopera"),
       playerId: mostCooperative?.id ?? null,
       detail: L("Kept choosing the option that helped the group.", "Siguió eligiendo la opción que ayudaba al grupo."),
     },
     {
       key: "most_unpredictable",
-      label: L("Most unpredictable", "El más impredecible"),
+      label: L("Most unpredictable", "Quien más sorprende"),
       playerId: mostUnpredictable?.id ?? null,
       detail: L("Changed patterns more than anyone else.", "Cambió de patrón más que nadie."),
     },
     {
       key: "most_trusted",
-      label: L("Most trusted", "El más confiable"),
+      label: L("Most trusted", "Quien más confianza genera"),
       playerId: mostTrusted?.id ?? null,
       detail: L(`Received ${trustedVotes} trust picks.`, `Recibió ${trustedVotes} elecciones de confianza.`),
     },
@@ -210,8 +210,8 @@ export function buildFinalReport(state: GameState): FinalReport {
         ? `Esta sala se organizó alrededor de ${allianceNames}, que acababan siempre en el mismo lado.`
         : `Esta sala se mantuvo fluida: ninguna pareja aguantó unida mucho tiempo.`,
       biggestBetrayal
-        ? `Los puntos de inflexión vinieron de ${nameOf(players, biggestBetrayal.from)}, dispuesto a romper la cooperación cuando compensaba.`
-        : `Nadie estuvo dispuesto a romper del todo la cooperación en el momento clave.`,
+        ? `Los puntos de inflexión vinieron de ${nameOf(players, biggestBetrayal.from)}, que no dudó en romper la cooperación cuando compensaba.`
+        : `Nadie llegó a romper del todo la cooperación en el momento clave.`,
       winner ? `${winner.nickname} lo leyó mejor que nadie.` : "",
     ]
       .filter(Boolean)

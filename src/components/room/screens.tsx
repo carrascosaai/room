@@ -150,7 +150,7 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
       ) : null}
 
       {r.theory ? (
-        <p className="mt-2 text-xs text-[var(--muted)]">{r.theory.evidence}</p>
+        <p className="mt-2 text-xs text-[var(--muted)]">{loc(r.theory.evidence)}</p>
       ) : null}
 
       <div className="mt-6 flex-1">

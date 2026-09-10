@@ -1,5 +1,6 @@
 import { QUESTIONS_BY_ID } from "./questions";
 import { currentRound, optionsForPlayer, respondents } from "./engine";
+import { evidenceLocalized } from "./commentary";
 import type { AiMessage, GamePhase, GameState, Localized, Theory } from "./types";
 import type { FinalReport } from "./report";
 
@@ -75,7 +76,7 @@ export interface PublicTheory {
   id: string;
   type: Theory["type"];
   players: string[];
-  evidence: string;
+  evidence: Localized;
   confidence: number;
   status: Theory["status"];
 }
@@ -85,7 +86,7 @@ function publicTheory(t: Theory): PublicTheory {
     id: t.id,
     type: t.type,
     players: t.players,
-    evidence: t.evidence,
+    evidence: evidenceLocalized(t),
     confidence: t.confidence,
     status: t.status,
   };
