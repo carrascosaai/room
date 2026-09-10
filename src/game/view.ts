@@ -1,6 +1,7 @@
 import { QUESTIONS_BY_ID } from "./questions";
 import { currentRound, optionsForPlayer, respondents } from "./engine";
 import { evidenceLocalized } from "./commentary";
+import { missionText } from "./missions";
 import type { AiMessage, GamePhase, GameState, Localized, Theory } from "./types";
 import type { FinalReport } from "./report";
 
@@ -70,6 +71,9 @@ export interface PlayerView {
   aiMessages: AiMessage[];
   theories: PublicTheory[];
   report?: FinalReport;
+
+  /** the viewer's own secret mission (only ever their own, until the end) */
+  myMission?: { text: Localized; completed?: boolean };
 }
 
 export interface PublicTheory {
@@ -128,6 +132,16 @@ export function projectView(
       .map(publicTheory),
     report: state.phase === "FINAL_RESULTS" ? state.report : undefined,
   };
+
+  if (viewerId) {
+    const mine = state.missions.find((m) => m.playerId === viewerId);
+    if (mine) {
+      view.myMission = {
+        text: missionText(mine, state.players),
+        completed: state.phase === "FINAL_RESULTS" ? mine.completed : undefined,
+      };
+    }
+  }
 
   if (round && state.phase !== "LOBBY" && state.phase !== "FINAL_RESULTS") {
     const allowed = respondents(round);

@@ -79,6 +79,7 @@
     "yourChoice": "Your choice",
     "chooseOne": "Choose one",
     "pickPlayer": "Pick a player",
+    "pointAtSomeone": "Point at someone",
     "predict": "Make your call",
     "locked": "Locked in",
     "waitingOthers": "Waiting for {count} more…",
@@ -89,7 +90,12 @@
     "predicting": "You're predicting — the others decide.",
     "answerRecorded": "Answer recorded. No changes.",
     "hostContinue": "Continue",
-    "hostAutoIn": "Auto-continue in {s}s"
+    "hostAutoIn": "Auto-continue in {s}s",
+    "secretMission": "YOUR SECRET MISSION",
+    "secretMissionHint": "Nobody else knows. It's revealed at the end.",
+    "missionDone": "MISSION COMPLETE",
+    "missionFailed": "MISSION FAILED",
+    "sameAnswer": "Same answer?"
   },
   "ai": {
     "name": "THE AI",
@@ -104,7 +110,12 @@
     "theoryDiscarded": "THEORY DISCARDED",
     "wasWrong": "I WAS WRONG.",
     "confidence": "confidence",
-    "evidence": "evidence"
+    "evidence": "evidence",
+    "affinityTitle": "AFFINITY DETECTED.",
+    "accusationTitle": "THE ROOM HAS SPOKEN.",
+    "missionsTitle": "SECRET MISSIONS.",
+    "confirmed": "CONFIRMED",
+    "notConfirmed": "NOT CONFIRMED"
   },
   "results": {
     "title": "THE AI HAS FIGURED OUT YOUR GROUP.",
@@ -114,6 +125,12 @@
     "mostCooperative": "Most cooperative",
     "biggestAlliance": "Biggest alliance",
     "biggestBetrayal": "Biggest betrayal",
+    "mostCompatible": "Most compatible pair",
+    "biggestClash": "Total opposites",
+    "wildcard": "The wildcard",
+    "salseoMvp": "Drama MVP",
+    "yourNemesis": "Your nemesis this game",
+    "secretMissions": "Secret missions",
     "aiAccuracy": "AI accuracy",
     "mostSurprising": "Most surprising pattern",
     "finalTheoryTitle": "THE AI'S FINAL THEORY",

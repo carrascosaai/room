@@ -19,6 +19,33 @@ function nameOf(view: PlayerView, id: string): string {
   return view.players.find((p) => p.id === id)?.nickname ?? "?";
 }
 
+// ─────────────────────────────────────────── SECRET MISSION
+
+export function SecretMissionBanner({ view }: { view: PlayerView }) {
+  const { t, loc } = useI18n();
+  const [open, setOpen] = useState(false);
+  if (!view.myMission) return null;
+  return (
+    <button
+      onClick={() => setOpen((o) => !o)}
+      className="mt-3 w-full rounded-xl border border-[var(--danger)]/40 bg-[var(--danger)]/5 px-3 py-2 text-left"
+    >
+      <span className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--danger)]">
+        {t("game.secretMission")}
+        <span>{open ? "–" : "+"}</span>
+      </span>
+      {open ? (
+        <span className="mt-1 block text-sm">
+          {loc(view.myMission.text)}
+          <span className="mt-1 block text-[11px] text-[var(--muted)]">
+            {t("game.secretMissionHint")}
+          </span>
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
 // ─────────────────────────────────────────── LOBBY
 
 export function Lobby({ view, room }: { view: PlayerView; room: UseRoom }) {
@@ -106,6 +133,11 @@ export function RoundIntro({ view }: { view: PlayerView }) {
       <div className="mt-8">
         <Dots />
       </div>
+      {view.myMission ? (
+        <div className="mt-10 w-full max-w-xs">
+          <SecretMissionBanner view={view} />
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -121,8 +153,14 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
 
   const prompt = r.body ?? r.prompt;
   const title = r.title ? loc(r.title) : null;
-  const isPlayerPick = r.kind === "group_vote" || r.kind === "trust";
+  const isPlayerPick = r.kind === "group_vote" || r.kind === "trust" || r.kind === "accusation";
+  const isAccusation = r.kind === "accusation";
   const waiting = Math.max(0, r.respondentCount - r.answeredCount);
+
+  // a fresh salseo message tied to this round (affinity / accusation framing)
+  const salseoMsg = [...view.aiMessages]
+    .reverse()
+    .find((m) => m.roundIndex === r.index && (m.kind === "affinity" || m.kind === "accusation"));
 
   const submit = (id: string) => {
     if (pending || r.iAnswered) return;
@@ -145,13 +183,23 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
         <Timer deadline={view.phaseDeadline} total={r.timeLimit} />
       </div>
 
+      {salseoMsg ? (
+        <div className="mt-3">
+          <AiCard title={t("ai.name")} tone="accent">
+            <AiSpeech text={salseoMsg.text} speed={14} />
+          </AiCard>
+        </div>
+      ) : null}
+
       {prompt ? (
         <h2 className="mt-3 text-[22px] font-semibold leading-snug">{loc(prompt)}</h2>
       ) : null}
 
-      {r.theory ? (
+      {r.theory && !salseoMsg ? (
         <p className="mt-2 text-xs text-[var(--muted)]">{loc(r.theory.evidence)}</p>
       ) : null}
+
+      <SecretMissionBanner view={view} />
 
       <div className="mt-6 flex-1">
         {!r.iRespond ? (
@@ -175,7 +223,13 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
               </p>
             ) : null}
             <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
-              {isPlayerPick ? t("game.pickPlayer") : r.iAmPredictor && !r.iAmParticipant ? t("game.predict") : t("game.chooseOne")}
+              {isAccusation
+                ? t("game.pointAtSomeone")
+                : isPlayerPick
+                  ? t("game.pickPlayer")
+                  : r.iAmPredictor && !r.iAmParticipant
+                    ? t("game.predict")
+                    : t("game.chooseOne")}
             </p>
             <div className="grid gap-2.5">
               {r.myOptions.map((o) => {
@@ -234,6 +288,16 @@ export function RevealScreen({ view, room }: { view: PlayerView; room: UseRoom }
   const myDelta = view.me ? (reveal?.scoreDelta[view.me.id] ?? 0) : 0;
   const wentAgainst = view.me ? reveal?.contrarians.includes(view.me.id) : false;
 
+  const resultMsg =
+    r &&
+    [...view.aiMessages]
+      .reverse()
+      .find(
+        (m) =>
+          m.roundIndex === r.index &&
+          (m.kind === "affinity" || m.kind === "accusation" || m.kind === "theory_result"),
+      );
+
   return (
     <div className="flex flex-1 flex-col px-5 pb-8 pt-4 animate-fade-up">
       <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-[var(--muted)]">
@@ -249,6 +313,14 @@ export function RevealScreen({ view, room }: { view: PlayerView; room: UseRoom }
               </p>
             ))}
           </div>
+
+          {resultMsg ? (
+            <div className="mt-4">
+              <AiCard title={t("ai.name")} tone="accent">
+                <AiSpeech text={resultMsg.text} speed={14} />
+              </AiCard>
+            </div>
+          ) : null}
 
           {wentAgainst ? (
             <p className="mt-3 text-sm font-semibold text-[var(--accent)]">
@@ -308,7 +380,7 @@ export function AiMoment({ view, room }: { view: PlayerView; room: UseRoom }) {
   const msg = useMemo(() => {
     const kinds =
       phase === "AI_THEORY"
-        ? ["theory"]
+        ? ["affinity", "theory"]
         : phase === "AI_OBSERVATION"
           ? ["observation"]
           : ["intervention"];
@@ -316,9 +388,12 @@ export function AiMoment({ view, room }: { view: PlayerView; room: UseRoom }) {
   }, [view.aiMessages, phase]);
 
   const theory = view.round?.theory;
+  const isAffinity = msg?.kind === "affinity";
   const title =
     phase === "AI_THEORY"
-      ? t("ai.theoryTitle")
+      ? isAffinity
+        ? t("ai.affinityTitle")
+        : t("ai.theoryTitle")
       : phase === "AI_INTERVENTION"
         ? t("ai.interventionTitle")
         : view.round && view.slotIndex === view.totalSlots - 1

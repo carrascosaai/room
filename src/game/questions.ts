@@ -1753,6 +1753,305 @@ export const QUESTIONS: Question[] = [
     options: [],
     theoryTestable: true,
   }),
+
+  // ═══════════ COMPAT_PROBE — same answer = chemistry ═══════════
+  // No behavioral tags: these measure taste/values, and the engine
+  // pairs whoever answered identically.
+  q({
+    id: "cp_night_out",
+    category: "social_choice",
+    kinds: ["compat_probe"],
+    en: "The perfect night:",
+    es: "La noche perfecta:",
+    options: [
+      o("A", "Loud, packed, out till dawn", "Ruidosa, llena, hasta el amanecer"),
+      o("B", "Small group, good conversation", "Grupo pequeño, buena conversación"),
+      o("C", "Just me and a screen", "Yo solo y una pantalla"),
+    ],
+    difficulty: 1,
+  }),
+  q({
+    id: "cp_argue",
+    category: "social_choice",
+    kinds: ["compat_probe"],
+    en: "In an argument you'd rather be:",
+    es: "En una discusión prefieres:",
+    options: [
+      o("A", "Right", "Tener razón"),
+      o("B", "Kind", "Ser amable"),
+      o("C", "Done with it", "Que se acabe ya"),
+    ],
+    difficulty: 1,
+  }),
+  q({
+    id: "cp_money_love",
+    category: "social_choice",
+    kinds: ["compat_probe"],
+    en: "Bigger red flag in someone:",
+    es: "Peor red flag en alguien:",
+    options: [
+      o("A", "Stingy with money", "Rácano con el dinero"),
+      o("B", "Rude to waiters", "Borde con los camareros"),
+      o("C", "Never on time", "Nunca puntual"),
+    ],
+    difficulty: 1,
+    socialSensitivity: 1,
+  }),
+  q({
+    id: "cp_plans",
+    category: "social_choice",
+    kinds: ["compat_probe"],
+    en: "Someone cancels plans last minute. You feel:",
+    es: "Alguien te cancela un plan a última hora. Sientes:",
+    options: [
+      o("A", "Relieved, honestly", "Alivio, sinceramente"),
+      o("B", "Annoyed", "Fastidio"),
+      o("C", "Nothing, it happens", "Nada, pasa"),
+    ],
+    difficulty: 1,
+  }),
+  q({
+    id: "cp_trip",
+    category: "social_choice",
+    kinds: ["compat_probe"],
+    en: "Dream trip:",
+    es: "Viaje soñado:",
+    options: [
+      o("A", "City, chaos, nightlife", "Ciudad, caos, vida nocturna"),
+      o("B", "Beach, nothing to do", "Playa, nada que hacer"),
+      o("C", "Mountains, no signal", "Montaña, sin cobertura"),
+    ],
+    difficulty: 1,
+  }),
+  q({
+    id: "cp_love_language",
+    category: "light_spicy",
+    kinds: ["compat_probe"],
+    en: "You show you like someone by:",
+    es: "Demuestras que alguien te gusta:",
+    options: [
+      o("A", "Teasing them non-stop", "Picándole sin parar"),
+      o("B", "Going quiet and weird", "Poniéndote raro y callado"),
+      o("C", "Being very obvious", "Siendo muy evidente"),
+    ],
+    difficulty: 1,
+    socialSensitivity: 2,
+  }),
+  q({
+    id: "cp_ick",
+    category: "light_spicy",
+    kinds: ["compat_probe"],
+    en: "Instant turn-off:",
+    es: "Corta el rollo al instante:",
+    options: [
+      o("A", "Talks about their ex", "Habla de su ex"),
+      o("B", "No sense of humour", "Sin sentido del humor"),
+      o("C", "Too keen too fast", "Demasiado intenso demasiado pronto"),
+    ],
+    difficulty: 1,
+    socialSensitivity: 2,
+  }),
+  q({
+    id: "cp_first_move",
+    category: "light_spicy",
+    kinds: ["compat_probe"],
+    en: "Making the first move is:",
+    es: "Dar el primer paso es:",
+    options: [
+      o("A", "Exciting", "Emocionante"),
+      o("B", "Terrifying", "Aterrador"),
+      o("C", "Someone else's job", "Cosa de otra persona"),
+    ],
+    difficulty: 1,
+    socialSensitivity: 2,
+  }),
+  q({
+    id: "cp_texting",
+    category: "social_choice",
+    kinds: ["compat_probe"],
+    en: "Your texting style:",
+    es: "Tu estilo escribiendo:",
+    options: [
+      o("A", "Instant replies", "Respondo al momento"),
+      o("B", "Hours later, one word", "Horas después, una palabra"),
+      o("C", "Voice notes only", "Solo notas de voz"),
+    ],
+    difficulty: 1,
+  }),
+  q({
+    id: "cp_secret",
+    category: "light_spicy",
+    kinds: ["compat_probe"],
+    en: "A secret is safe with you:",
+    es: "Un secreto está a salvo contigo:",
+    options: [
+      o("A", "Always", "Siempre"),
+      o("B", "Unless it's really good", "Salvo que sea muy bueno"),
+      o("C", "Absolutely not", "Para nada"),
+    ],
+    difficulty: 1,
+    socialSensitivity: 1,
+  }),
+  q({
+    id: "cp_conflict_style",
+    category: "social_choice",
+    kinds: ["compat_probe"],
+    en: "When you're upset with someone:",
+    es: "Cuando te enfadas con alguien:",
+    options: [
+      o("A", "I say it straight away", "Lo digo al momento"),
+      o("B", "I go cold for a while", "Me pongo distante un tiempo"),
+      o("C", "I pretend it's fine", "Hago como que no pasa nada"),
+    ],
+    difficulty: 1,
+    socialSensitivity: 1,
+  }),
+  q({
+    id: "cp_group_role",
+    category: "group_behavior",
+    kinds: ["compat_probe"],
+    en: "In a group you're the one who:",
+    es: "En un grupo eres quien:",
+    options: [
+      o("A", "Plans everything", "Organiza todo"),
+      o("B", "Shows up and vibes", "Aparece y fluye"),
+      o("C", "Causes the chaos", "Provoca el caos"),
+    ],
+    difficulty: 1,
+  }),
+
+  // ═══════════ ACCUSATION — point at a player ═══════════
+  q({
+    id: "acc_liar",
+    category: "light_spicy",
+    kinds: ["accusation"],
+    en: "Who here is lying the most tonight?",
+    es: "¿Quién de aquí está mintiendo más esta noche?",
+    options: [],
+    socialSensitivity: 2,
+  }),
+  q({
+    id: "acc_flirt",
+    category: "light_spicy",
+    kinds: ["accusation"],
+    en: "Who's trying hardest to impress someone in this room?",
+    es: "¿Quién se está esforzando más por impresionar a alguien de esta sala?",
+    options: [],
+    socialSensitivity: 3,
+  }),
+  q({
+    id: "acc_drama",
+    category: "light_spicy",
+    kinds: ["accusation"],
+    en: "Who would start the drama if this group fell apart?",
+    es: "¿Quién montaría el pollo si este grupo se rompiera?",
+    options: [],
+    socialSensitivity: 3,
+  }),
+  q({
+    id: "acc_snake",
+    category: "betrayal",
+    kinds: ["accusation"],
+    en: "Who here would sell the rest of you out to win?",
+    es: "¿Quién de aquí os vendería a los demás por ganar?",
+    options: [],
+    socialSensitivity: 2,
+  }),
+  q({
+    id: "acc_secret_mission",
+    category: "betrayal",
+    kinds: ["accusation"],
+    en: "Who is playing their own game right now?",
+    es: "¿Quién está jugando a su propio juego ahora mismo?",
+    options: [],
+    socialSensitivity: 2,
+  }),
+  q({
+    id: "acc_faker",
+    category: "group_behavior",
+    kinds: ["accusation"],
+    en: "Who's just agreeing with everything to stay safe?",
+    es: "¿Quién dice que sí a todo solo para no mojarse?",
+    options: [],
+    socialSensitivity: 2,
+  }),
+  q({
+    id: "acc_wildcard",
+    category: "uncertainty",
+    kinds: ["accusation"],
+    en: "Who has no idea what they're doing but it's working?",
+    es: "¿Quién no tiene ni idea de lo que hace pero le está saliendo bien?",
+    options: [],
+    socialSensitivity: 1,
+  }),
+  q({
+    id: "acc_softest",
+    category: "trust",
+    kinds: ["accusation"],
+    en: "Who would crack first under real pressure?",
+    es: "¿Quién se rompería primero bajo presión de verdad?",
+    options: [],
+    socialSensitivity: 2,
+  }),
+
+  // ═══════════ EXTRA LIGHT SPICY (individual + vote) ═══════════
+  q({
+    id: "spicy_reconnect_ex",
+    category: "light_spicy",
+    kinds: ["individual"],
+    en: "An ex texts 'hey, been thinking about you'. You:",
+    es: "Un ex te escribe 'hey, he estado pensando en ti'. Tú:",
+    options: [
+      o("A", "Reply right away", "Respondes al momento", { impulsivity: 0.6, risk: 0.4 }),
+      o("B", "Leave it on read", "Lo dejas en visto", { consistency: 0.4, patience: 0.4 }),
+      o("C", "Screenshot it to the group chat", "Captura al grupo", { socialAlignment: 0.5, loyalty: -0.2, impulsivity: 0.4 }),
+    ],
+    socialSensitivity: 3,
+  }),
+  q({
+    id: "spicy_group_crush",
+    category: "light_spicy",
+    kinds: ["individual"],
+    en: "You realise two of your friends like each other. You:",
+    es: "Te das cuenta de que dos amigos tuyos se gustan. Tú:",
+    options: [
+      o("A", "Play matchmaker", "Haces de celestina", { socialAlignment: 0.5, impulsivity: 0.4 }),
+      o("B", "Say nothing, watch it unfold", "No dices nada y observas", { patience: 0.6, individualism: 0.3 }),
+      o("C", "Tell everyone", "Se lo cuentas a todos", { loyalty: -0.4, impulsivity: 0.6 }),
+    ],
+    socialSensitivity: 3,
+  }),
+  q({
+    id: "spicy_jealous",
+    category: "light_spicy",
+    kinds: ["individual"],
+    en: "Your closest friend gets a new best friend. You feel:",
+    es: "Tu mejor amigo se echa un nuevo mejor amigo. Sientes:",
+    options: [
+      o("A", "Genuinely happy", "Alegría de verdad", { cooperation: 0.5, trust: 0.4 }),
+      o("B", "A little threatened", "Un poco amenazado", { individualism: 0.4, competitiveness: 0.4 }),
+      o("C", "Ready to compete", "Listo para competir", { competitiveness: 0.7, loyalty: 0.3 }),
+    ],
+    socialSensitivity: 2,
+  }),
+  q({
+    id: "spicy_who_first_kiss_story",
+    category: "light_spicy",
+    kinds: ["accusation"],
+    en: "Whose dating life would make the best TV show?",
+    es: "¿La vida amorosa de quién sería la mejor serie?",
+    options: [],
+    socialSensitivity: 3,
+  }),
+  q({
+    id: "spicy_overshare",
+    category: "light_spicy",
+    kinds: ["accusation"],
+    en: "Who overshares the second they get comfortable?",
+    es: "¿Quién cuenta demasiado en cuanto coge confianza?",
+    options: [],
+    socialSensitivity: 2,
+  }),
 ];
 
 // ---------- Indexes / helpers ----------
@@ -1765,9 +2064,9 @@ export function questionsForKind(kind: RoundKind): Question[] {
   return QUESTIONS.filter((q) => q.kinds.includes(kind));
 }
 
-/** Player-target rounds (group_vote / trust) have their options built at runtime from the roster. */
+/** Player-target rounds have their options built at runtime from the roster. */
 export function isPlayerTargetKind(kind: RoundKind): boolean {
-  return kind === "group_vote" || kind === "trust";
+  return kind === "group_vote" || kind === "trust" || kind === "accusation";
 }
 
 export const QUESTION_COUNT = QUESTIONS.length;

@@ -2,6 +2,7 @@ import { QUESTIONS, QUESTIONS_BY_ID } from "./questions";
 import { underexploredDimensions } from "./behavior";
 import { detectTheories, candidateToTheory, type TheoryCandidate } from "./theories";
 import { pairMetrics } from "./group";
+import { allCompatibility } from "./compat";
 import { mulberry32, hashString, shuffle } from "@/lib/rng";
 import type {
   Dimension,
@@ -23,16 +24,17 @@ import type {
 
 export const DEFAULT_PLAN: RoundSlot[] = [
   { type: "warmup", focus: ["risk", "impulsivity"] },
+  { type: "compat_probe" }, // early taste read → chemistry
   { type: "group_vote" },
   { type: "individual", focus: ["risk", "greed"] },
   { type: "majority_minority", focus: ["risk", "conformity", "contrarianism"] },
-  { type: "trust" },
   { type: "observation_slot" },
   { type: "social_dilemma" },
-  { type: "individual", focus: ["loyalty", "cooperation"] },
-  { type: "theory_slot" }, // announce
+  { type: "accusation_slot" }, // the room points at someone
+  { type: "affinity_slot" }, // AFINIDAD DETECTADA
+  { type: "theory_slot" }, // announce (social-biased)
   { type: "theory_slot" }, // test (paired)
-  { type: "group_vote" },
+  { type: "trust" },
   { type: "intervention_slot" },
   { type: "majority_minority", focus: ["conformity", "contrarianism", "risk"] },
   { type: "final_slot" },
@@ -50,6 +52,10 @@ function timeLimitFor(kind: RoundKind): number {
       return 25;
     case "prediction":
       return 15;
+    case "accusation":
+      return 16;
+    case "compat_probe":
+      return 16;
     default:
       return 20;
   }
@@ -88,7 +94,7 @@ function chooseQuestion(
 ): Question {
   const rand = rngFor(state, "q" + salt);
   const wantDims = focus ?? (underexploredDimensions(Object.values(state.behavior)) as Dimension[]);
-  const playerTarget = kind === "group_vote" || kind === "trust";
+  const playerTarget = kind === "group_vote" || kind === "trust" || kind === "accusation";
   const matches = (q: (typeof QUESTIONS)[number]) =>
     q.kinds.includes(kind) && (playerTarget ? q.options.length === 0 : q.options.length >= 2);
   const pool = QUESTIONS.filter((q) => matches(q) && !state.usedQuestionIds.includes(q.id));
@@ -150,7 +156,8 @@ export function buildRoundForSlot(state: GameState, slotIndex: number): BuildRes
 
     case "individual":
     case "majority_minority":
-    case "prediction": {
+    case "prediction":
+    case "compat_probe": {
       const q = chooseQuestion(state, slot.type, slot.focus, idBase);
       return {
         round: makeRound({
@@ -159,8 +166,21 @@ export function buildRoundForSlot(state: GameState, slotIndex: number): BuildRes
           kind: slot.type,
           questionId: q.id,
           participants: allIds,
+          title: slot.type === "compat_probe" ? L("Same answer?", "¿La misma respuesta?") : undefined,
         }),
       };
+    }
+
+    case "accusation": {
+      return { round: buildAccusationRound(state, index, idBase) };
+    }
+
+    case "accusation_slot": {
+      return { round: buildAccusationRound(state, index, idBase) };
+    }
+
+    case "affinity_slot": {
+      return buildAffinitySlot(state, index, idBase);
     }
 
     case "group_vote":
@@ -260,14 +280,23 @@ function makeObservationRound(
 }
 
 function pickTheoryCandidate(state: GameState): TheoryCandidate | null {
-  const cands = detectTheories(state.players, state.behavior, state.group);
+  let cands = detectTheories(state.players, state.behavior, state.group);
+  // the affinity slot already delivered a compatibility beat — don't repeat it
+  const hadCompat = state.theories.some(
+    (t) => t.type === "high_compatibility" || t.type === "clashing_values",
+  );
+  if (hadCompat) cands = cands.filter((c) => c.type !== "high_compatibility" && c.type !== "clashing_values");
   if (cands.length === 0) return null;
-  // prefer ~1 social theory for salseo, otherwise strongest
   const rand = rngFor(state, "theorypick");
   cands.sort((a, b) => b.salience - a.salience);
-  const wantSocial = rand() < 0.45;
-  const social = cands.find((c) => c.social);
-  if (wantSocial && social) return social;
+  // Salseo bias: unless a non-social theory is much stronger, go social.
+  const social = cands.filter((c) => c.social);
+  const nonSocial = cands.filter((c) => !c.social);
+  const wantSocial = rand() < 0.7;
+  if (social.length && (wantSocial || !nonSocial.length)) return social[0]!;
+  if (social.length && nonSocial.length && nonSocial[0]!.salience - social[0]!.salience < 0.3) {
+    return social[0]!;
+  }
   return cands[0]!;
 }
 
@@ -357,6 +386,35 @@ function buildTheoryTest(state: GameState, slotIndex: number, id: string, theory
         ),
         optionsByPlayer,
         timeLimit: 22,
+      }),
+    };
+  }
+
+  // high_compatibility / clashing_values -> one more taste question, side by side
+  if (["high_compatibility", "clashing_values"].includes(theory.type) && p1 && p2) {
+    const q = chooseQuestion(state, "compat_probe", undefined, id + "cv");
+    const predOpts: QuestionOption[] = [
+      { id: "yes", label: L("They'll match again", "Vuelven a coincidir"), tags: {} },
+      { id: "no", label: L("Not this time", "Esta vez no"), tags: {} },
+    ];
+    return {
+      round: makeRound({
+        id,
+        index: slotIndex,
+        kind: "ai_theory_test",
+        questionId: q.id,
+        participants: [p1, p2],
+        predictors: others,
+        theoryId: theory.id,
+        title:
+          theory.type === "clashing_values"
+            ? L("Opposites", "Polos opuestos")
+            : L("Testing the theory", "Poniendo la teoría a prueba"),
+        body: L(
+          `${nameOf(state, p1)} and ${nameOf(state, p2)}: same question, same time. Everyone else — call it.`,
+          `${nameOf(state, p1)} y ${nameOf(state, p2)}: misma pregunta, a la vez. El resto, mojaos.`,
+        ),
+        optionsByPlayer: Object.fromEntries(others.map((o) => [o, predOpts])),
       }),
     };
   }
@@ -543,5 +601,95 @@ function buildInterventionSlot(state: GameState, slotIndex: number, id: string):
         ],
       },
     }),
+  };
+}
+
+// ---------- salseo builders ----------
+
+function buildAccusationRound(state: GameState, slotIndex: number, id: string): Round {
+  const roster = state.players.filter((p) => p.connected);
+  const list = roster.length >= 3 ? roster : state.players;
+  const q = chooseQuestion(state, "accusation", undefined, id);
+  return makeRound({
+    id,
+    index: slotIndex,
+    kind: "accusation",
+    questionId: q.id,
+    participants: list.map((p) => p.id),
+    title: L("Point at someone", "Señalad a alguien"),
+    body: q.prompt,
+    // everyone can point at anyone (including nobody? no — must pick someone else)
+    optionsByPlayer: Object.fromEntries(
+      list.map((p) => [
+        p.id,
+        list
+          .filter((x) => x.id !== p.id)
+          .map((x) => ({ id: x.id, label: { en: x.nickname, es: x.nickname }, tags: {} as Record<string, number> })),
+      ]),
+    ),
+  });
+}
+
+function buildAffinitySlot(state: GameState, slotIndex: number, id: string): BuildResult {
+  const ids = state.players.map((p) => p.id);
+  const compat = allCompatibility(state);
+  const top = compat.find((c) => c.grounded) ?? compat[0];
+
+  if (!top || ids.length < 4) {
+    // not enough signal — fall back to a compat_probe for everyone
+    const q = chooseQuestion(state, "compat_probe", undefined, id);
+    return {
+      round: makeRound({
+        id,
+        index: slotIndex,
+        kind: "compat_probe",
+        questionId: q.id,
+        participants: ids,
+        title: L("Same answer?", "¿La misma respuesta?"),
+      }),
+    };
+  }
+
+  const [p1, p2] = [top.a, top.b];
+  const others = ids.filter((x) => x !== p1 && x !== p2);
+  const q = chooseQuestion(state, "compat_probe", undefined, id + "aff");
+
+  // attach a high_compatibility theory so this resolves with a verdict + confidence
+  const theory: Theory = {
+    id: "t_aff_" + hashString(p1 + p2 + slotIndex).toString(36),
+    type: "high_compatibility",
+    players: [p1, p2],
+    evidenceCount: top.comparable + top.tasteMatches,
+    evidence: `${nameOf(state, p1)} and ${nameOf(state, p2)} have matched on ${Math.round(top.alignmentRatio * top.comparable) + top.tasteMatches} of their comparable answers so far.`,
+    confidence: Number(Math.min(0.85, 0.4 + top.score * 0.5).toFixed(2)),
+    status: "announced",
+    createdRound: slotIndex,
+    prediction: "the two players will give the same answer again",
+  };
+
+  const predOpts = [
+    { id: "yes", label: L("They'll match again", "Vuelven a coincidir"), tags: {} as Record<string, number> },
+    { id: "no", label: L("Not this time", "Esta vez no"), tags: {} as Record<string, number> },
+  ];
+
+  return {
+    round: makeRound({
+      id,
+      index: slotIndex,
+      kind: "ai_theory_test",
+      questionId: q.id,
+      participants: [p1, p2],
+      predictors: others,
+      theoryId: theory.id,
+      title: L("Affinity detected", "Afinidad detectada"),
+      body: L(
+        `${nameOf(state, p1)} and ${nameOf(state, p2)}: one more question, at the same time. Everyone else — call it.`,
+        `${nameOf(state, p1)} y ${nameOf(state, p2)}: una pregunta más, a la vez. El resto, mojaos.`,
+      ),
+      optionsByPlayer: {
+        ...Object.fromEntries(others.map((o) => [o, predOpts])),
+      },
+    }),
+    theoryPatch: [theory],
   };
 }

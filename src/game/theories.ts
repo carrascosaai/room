@@ -72,6 +72,20 @@ export function detectTheories(
       });
     }
 
+    // high compatibility — alignment AND taste matches (salseo)
+    if ((m.comparable >= 3 && m.alignmentRatio >= 0.7) || m.tasteMatches >= 2) {
+      const matched = Math.round(m.alignmentRatio * m.comparable) + m.tasteMatches;
+      out.push({
+        type: "high_compatibility",
+        players: [m.a, m.b],
+        evidenceCount: m.comparable + m.tasteMatches,
+        evidence: `${A} and ${B} have given the same answer ${matched} times, including on taste and values.`,
+        confidence: Math.min(0.85, 0.35 + m.alignmentRatio * 0.4 + m.tasteMatches * 0.08),
+        salience: 0.85 + m.tasteMatches * 0.1,
+        social: true,
+      });
+    }
+
     if (m.comparable >= 4 && m.alignmentRatio <= 0.25) {
       out.push({
         type: "rivalry",
@@ -81,6 +95,19 @@ export function detectTheories(
         confidence: Math.min(0.8, 1 - m.alignmentRatio),
         salience: 0.55 + (1 - m.alignmentRatio) * 0.35,
         social: false,
+      });
+    }
+
+    // clashing values — opposite on taste/values AND they accused each other (salseo)
+    if (m.tasteMatches === 0 && m.comparable >= 4 && m.alignmentRatio <= 0.35 && m.accusationsExchanged >= 1) {
+      out.push({
+        type: "clashing_values",
+        players: [m.a, m.b],
+        evidenceCount: m.comparable,
+        evidence: `${A} and ${B} disagreed on ${m.comparable - Math.round(m.alignmentRatio * m.comparable)} of ${m.comparable} choices and pointed at each other.`,
+        confidence: Math.min(0.8, 0.4 + (1 - m.alignmentRatio) * 0.4),
+        salience: 0.8,
+        social: true,
       });
     }
 
@@ -205,6 +232,12 @@ function predictionFor(type: TheoryType): string {
       return "the predictor will again correctly call the target's choice";
     case "repeated_selection":
       return "the player will select the same target again";
+    case "high_compatibility":
+      return "the two players will give the same answer again";
+    case "clashing_values":
+      return "the two players will give opposite answers again";
+    case "wildcard":
+      return "nobody will correctly predict the player";
   }
 }
 
@@ -235,10 +268,15 @@ export function resolveTheory(
       held = !!ctx.selections && p1 !== undefined && ctx.selections[p1] === p2;
       break;
     case "alliance":
+    case "high_compatibility":
       if (ctx.choices && p1 && p2) held = ctx.choices[p1] === ctx.choices[p2];
       break;
     case "rivalry":
+    case "clashing_values":
       if (ctx.choices && p1 && p2) held = ctx.choices[p1] !== ctx.choices[p2];
+      break;
+    case "wildcard":
+      held = ctx.predictionCorrect === false;
       break;
     case "conformist":
       held =

@@ -14,6 +14,32 @@ function nameOf(view: PlayerView, id: string | null): string {
   return view.players.find((p) => p.id === id)?.nickname ?? "—";
 }
 
+function PairCard({
+  label,
+  names,
+  note,
+  tone = "default",
+}: {
+  label: string;
+  names: string;
+  note?: string;
+  tone?: "default" | "danger";
+}) {
+  return (
+    <div
+      className={`rounded-2xl border p-3 ${
+        tone === "danger"
+          ? "border-[var(--danger)]/40 bg-[var(--danger)]/5"
+          : "border-[var(--border)] bg-[var(--surface)]"
+      }`}
+    >
+      <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">{label}</p>
+      <p className="mt-1.5 text-sm font-semibold leading-tight">{names}</p>
+      {note ? <p className="mt-0.5 text-xs text-[var(--accent)]">{note}</p> : null}
+    </div>
+  );
+}
+
 export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
   const { t, loc } = useI18n();
   const [copied, copy] = useCopy();
@@ -27,6 +53,7 @@ export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
   if (!report) return null;
 
   const accuracyPct = Math.round(report.aiAccuracy * 100);
+  const missionsMsg = view.aiMessages.find((m) => m.kind === "missions");
 
   async function share() {
     trackClient("share_clicked", { accuracy: accuracyPct });
@@ -102,6 +129,62 @@ export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
           );
         })}
       </div>
+
+      {/* salseo */}
+      <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+        {report.mostCompatible ? (
+          <PairCard
+            label={t("results.mostCompatible")}
+            names={`${nameOf(view, report.mostCompatible.a)} + ${nameOf(view, report.mostCompatible.b)}`}
+            note={`${report.mostCompatible.percent}%`}
+          />
+        ) : null}
+        {report.biggestClash ? (
+          <PairCard
+            label={t("results.biggestClash")}
+            names={`${nameOf(view, report.biggestClash.a)} vs ${nameOf(view, report.biggestClash.b)}`}
+          />
+        ) : null}
+        {report.wildcardId ? (
+          <PairCard label={t("results.wildcard")} names={nameOf(view, report.wildcardId)} />
+        ) : null}
+        {report.salseoMvpId ? (
+          <PairCard label={t("results.salseoMvp")} names={nameOf(view, report.salseoMvpId)} tone="danger" />
+        ) : null}
+      </div>
+
+      {/* your nemesis */}
+      {view.me && report.nemesis[view.me.id] ? (
+        <p className="mt-3 rounded-2xl border border-[var(--danger)]/40 bg-[var(--danger)]/5 p-3 text-sm">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--danger)]">
+            {t("results.yourNemesis")}:{" "}
+          </span>
+          <span className="font-semibold">{nameOf(view, report.nemesis[view.me.id]!)}</span>
+        </p>
+      ) : null}
+
+      {/* secret missions revealed */}
+      {report.missions.length > 0 ? (
+        <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">
+            {t("results.secretMissions")}
+          </p>
+          {missionsMsg ? (
+            <p className="mt-1.5 text-sm text-[var(--muted)]">{loc(missionsMsg.text)}</p>
+          ) : null}
+          <ul className="mt-2 space-y-2">
+            {report.missions.map((m, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm">
+                <span>{m.completed ? "✅" : "❌"}</span>
+                <span>
+                  <span className="font-semibold">{nameOf(view, m.playerId)}</span>
+                  <span className="text-[var(--muted)]"> — {loc(m.text)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {/* surprising pattern */}
       <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">

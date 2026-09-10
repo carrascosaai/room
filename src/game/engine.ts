@@ -1,5 +1,9 @@
-import { applyChoice, emptyProfile } from "./behavior";
+import { applyChoice, emptyProfile, topReadings } from "./behavior";
 import {
+  accusationText,
+  affinityResultText,
+  affinityText,
+  missionsRevealText,
   observationText,
   theoryAnnounceText,
   theoryResultText,
@@ -9,13 +13,16 @@ import { buildFinalReport } from "./report";
 import {
   concentration,
   emptyGroupModel,
+  recordAccusation,
   recordAlignment,
   recordDilemma,
   recordPrediction,
   recordProtection,
   recordSelection,
+  recordTasteMatch,
   setVoteConcentration,
 } from "./group";
+import { assignMissions, evaluateMissions } from "./missions";
 import { scoreDilemma, scoreMajorityMinority, POINTS } from "./scoring";
 import { buildRoundForSlot, DEFAULT_PLAN } from "./selector";
 import { resolveTheory } from "./theories";
@@ -79,6 +86,7 @@ export function createGame(code: string, host: { id: string; nickname: string; l
     behavior: {},
     group: emptyGroupModel(),
     theories: [],
+    missions: [],
     outcomes: [],
     aiMessages: [],
     version: 1,
@@ -197,6 +205,7 @@ export function startGame(s: GameState): { state: GameState; error?: string } {
     phase: "ROUND_INTRO",
     startedAt: now(),
     behavior,
+    missions: assignMissions(s.players, s.seed),
     currentRoundIndex: 0,
     phaseDeadline: now() + MIN_DISPLAY_MS.ROUND_INTRO!,
   };
@@ -342,7 +351,8 @@ function enterFromIntro(s: GameState): GameState {
     const text = theory
       ? theoryAnnounceText(theory, s.players)
       : L("I have a theory. Let me test it.", "Tengo una teoría. Voy a ponerla a prueba.");
-    const msg = aiMessage(s, "theory", text, round.index);
+    const isAff = theory?.type === "high_compatibility" || theory?.type === "clashing_values";
+    const msg = aiMessage(s, isAff ? "affinity" : "theory", text, round.index);
     const theories = s.theories.map((t) =>
       t.id === round.theoryId ? { ...t, status: "testing" as const } : t,
     );
@@ -371,8 +381,24 @@ function enterFromIntro(s: GameState): GameState {
     });
   }
 
+  let extra: Partial<GameState> = {};
+  // affinity slot: an ai_theory_test that carries its own just-announced theory
+  if (round.kind === "ai_theory_test" && round.theoryId) {
+    const theory = s.theories.find((t) => t.id === round.theoryId);
+    if (theory && theory.status === "announced") {
+      const isAffinity = theory.type === "high_compatibility" || theory.type === "clashing_values";
+      const text = isAffinity ? affinityText(theory, s.players) : theoryAnnounceText(theory, s.players);
+      const msg = aiMessage(s, isAffinity ? "affinity" : "theory", text, round.index);
+      extra = {
+        aiMessages: [...s.aiMessages, msg],
+        theories: s.theories.map((t) => (t.id === theory.id ? { ...t, status: "testing" as const } : t)),
+      };
+    }
+  }
+
   return bump({
     ...s,
+    ...extra,
     phase: "ANSWERING",
     phaseDeadline: round.timeLimit > 0 ? now() + round.timeLimit * 1000 : undefined,
   });
@@ -443,6 +469,94 @@ function doReveal(s: GameState): GameState {
   }
 
   // --- per-kind resolution ---
+  if (round.kind === "compat_probe") {
+    // pair up everyone who gave the same answer
+    const byOption = new Map<string, string[]>();
+    for (const a of roundAnswers) {
+      const arr = byOption.get(a.optionId) ?? [];
+      arr.push(a.playerId);
+      byOption.set(a.optionId, arr);
+    }
+    let matchedPairs = 0;
+    for (const group_ of byOption.values()) {
+      for (let i = 0; i < group_.length; i++) {
+        for (let j = i + 1; j < group_.length; j++) {
+          group = recordTasteMatch(group, group_[i]!, group_[j]!);
+          matchedPairs++;
+        }
+      }
+    }
+    recordPairAlignment(roundAnswers, (a, b, matched) => {
+      group = recordAlignment(group, a, b, matched);
+    });
+    // small reward for the rarer answer (being distinctive) and for matching
+    const sizes = [...byOption.values()].map((g) => g.length);
+    const biggest = Math.max(0, ...sizes);
+    for (const [opt, g] of byOption) {
+      const isBig = g.length === biggest && sizes.filter((s2) => s2 === biggest).length === 1;
+      for (const pid of g) add(pid, isBig ? POINTS.majorityBonus : POINTS.contrarianBonus);
+      void opt;
+    }
+    if (matchedPairs > 0) {
+      const pair = [...byOption.values()].find((g) => g.length >= 2);
+      if (pair && pair.length === 2) {
+        lines.push(
+          L(
+            `${nameOf(pair[0]!)} and ${nameOf(pair[1]!)} gave the exact same answer.`,
+            `${nameOf(pair[0]!)} y ${nameOf(pair[1]!)} dieron exactamente la misma respuesta.`,
+          ),
+        );
+      }
+    } else {
+      lines.push(L("Everyone answered differently.", "Cada uno respondió algo distinto."));
+    }
+  }
+
+  if (round.kind === "accusation") {
+    const tally = new Map<string, number>();
+    for (const a of roundAnswers) {
+      tally.set(a.optionId, (tally.get(a.optionId) ?? 0) + 1);
+      group = recordAccusation(group, a.playerId, a.optionId);
+    }
+    const sorted = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+    const top = sorted[0];
+    const tied = sorted.filter((e) => e[1] === (top?.[1] ?? 0)).length > 1;
+    const targetId = tied ? null : (top?.[0] ?? null);
+    const votes = top?.[1] ?? 0;
+    // does the room's pick line up with the AI's read?
+    let matchesData = false;
+    if (targetId) {
+      const prof = behavior[targetId];
+      const readings = prof
+        ? topReadings(prof, { minConfidence: 0.4, minEvidence: 2, limit: 3 })
+        : [];
+      const flagged = s.theories.some(
+        (t) => t.players.includes(targetId) && t.status !== "forming",
+      );
+      matchesData = flagged || readings.length > 0;
+      lines.push(
+        L(
+          `The room pointed at ${nameOf(targetId)} (${votes}/${roundAnswers.length}).`,
+          `La sala señaló a ${nameOf(targetId)} (${votes}/${roundAnswers.length}).`,
+        ),
+      );
+      // reward everyone who voted with the room
+      for (const a of roundAnswers) {
+        if (a.optionId === targetId) add(a.playerId, POINTS.majorityBonus);
+      }
+    } else {
+      lines.push(L("The room split. Nobody stood out.", "La sala se dividió. Nadie destacó."));
+    }
+    aiMsgs.push(
+      aiMessage(
+        s,
+        "accusation",
+        accusationText(targetId ? nameOf(targetId) : null, votes, roundAnswers.length, matchesData),
+        round.index,
+      ),
+    );
+  }
+
   if (round.kind === "individual") {
     const labelFor = (a: Answer) =>
       optionsFromRound(round, a.playerId).find((o) => o.id === a.optionId)?.label;
@@ -600,11 +714,20 @@ function doReveal(s: GameState): GameState {
     if (round.pairs) {
       anyBetray = round.pairs.some(([a, b]) => (choices[a] ?? "A") !== "A" || (choices[b] ?? "A") !== "A");
     }
+    const isMatchTheory =
+      theory?.type === "high_compatibility" || theory?.type === "clashing_values";
+    const pairMatched =
+      isMatchTheory && theory
+        ? choices[theory.players[0]!] === choices[theory.players[1]!]
+        : false;
     for (const pid of round.predictors ?? []) {
       const a = answerOf(pid);
       if (!a) continue;
       let correct = false;
-      if (round.pairs) {
+      if (isMatchTheory) {
+        // "yes" == they'll match again
+        correct = (a.optionId === "yes") === pairMatched;
+      } else if (round.pairs) {
         // option "B" == "someone betrays"
         correct = (a.optionId === "B") === anyBetray;
       } else if (Object.keys(selections).length && theory) {
@@ -645,12 +768,18 @@ function doReveal(s: GameState): GameState {
           ? { ...t, status: res.status, priorConfidence: t.confidence, confidence: res.confidence }
           : t,
       );
-      const resultText = theoryResultText({ ...theory, confidence: res.confidence }, res.held);
-      aiMsgs.push(aiMessage(s, "theory_result", resultText, round.index));
+      const resultText = isMatchTheory
+        ? affinityResultText({ ...theory, confidence: res.confidence }, res.held)
+        : theoryResultText({ ...theory, confidence: res.confidence }, res.held);
+      aiMsgs.push(aiMessage(s, isMatchTheory ? "affinity" : "theory_result", resultText, round.index));
       lines.push(
         res.held
-          ? L("THEORY STRENGTHENED", "TEORÍA REFORZADA")
-          : L("THEORY DISCARDED", "TEORÍA DESCARTADA"),
+          ? isMatchTheory
+            ? L("CONFIRMED", "CONFIRMADO")
+            : L("THEORY STRENGTHENED", "TEORÍA REFORZADA")
+          : isMatchTheory
+            ? L("NOT CONFIRMED", "SIN CONFIRMAR")
+            : L("THEORY DISCARDED", "TEORÍA DESCARTADA"),
       );
       // scoring: fooling the AI pays
       for (const pid of theory.players) {
@@ -720,14 +849,27 @@ function recordPairAlignment(
 function nextRound(s: GameState): GameState {
   const nextSlotIndex = s.rounds.length;
   if (nextSlotIndex >= s.plan.length) {
-    const report = buildFinalReport(s);
-    const finalMsg = aiMessage(s, "final", report.finalTheory, s.plan.length);
+    const missions = evaluateMissions(s);
+    const withMissions = { ...s, missions };
+    const report = buildFinalReport(withMissions);
+    const msgs: AiMessage[] = [];
+    if (missions.length > 0) {
+      msgs.push(
+        aiMessage(
+          s,
+          "missions",
+          missionsRevealText(missions.length, missions.filter((m) => m.completed).length),
+          s.plan.length,
+        ),
+      );
+    }
+    msgs.push(aiMessage(s, "final", report.finalTheory, s.plan.length + 1));
     return bump({
-      ...s,
+      ...withMissions,
       phase: "FINAL_RESULTS",
       endedAt: now(),
       report,
-      aiMessages: [...s.aiMessages, finalMsg],
+      aiMessages: [...s.aiMessages, ...msgs],
     });
   }
 

@@ -79,6 +79,7 @@
     "yourChoice": "Tu elección",
     "chooseOne": "Elige una",
     "pickPlayer": "Elige a un jugador",
+    "pointAtSomeone": "Señala a alguien",
     "predict": "Moja",
     "locked": "Bloqueada",
     "waitingOthers": "Esperando a {count} más…",
@@ -89,7 +90,12 @@
     "predicting": "Tú predices — deciden los demás.",
     "answerRecorded": "Respuesta registrada. Sin cambios.",
     "hostContinue": "Continuar",
-    "hostAutoIn": "Auto-continúa en {s}s"
+    "hostAutoIn": "Auto-continúa en {s}s",
+    "secretMission": "TU MISIÓN SECRETA",
+    "secretMissionHint": "Nadie más lo sabe. Se revela al final.",
+    "missionDone": "MISIÓN COMPLETADA",
+    "missionFailed": "MISIÓN FALLIDA",
+    "sameAnswer": "¿La misma respuesta?"
   },
   "ai": {
     "name": "LA IA",
@@ -104,7 +110,12 @@
     "theoryDiscarded": "TEORÍA DESCARTADA",
     "wasWrong": "ME EQUIVOQUÉ.",
     "confidence": "confianza",
-    "evidence": "evidencia"
+    "evidence": "evidencia",
+    "affinityTitle": "AFINIDAD DETECTADA.",
+    "accusationTitle": "LA SALA HA HABLADO.",
+    "missionsTitle": "MISIONES SECRETAS.",
+    "confirmed": "CONFIRMADO",
+    "notConfirmed": "SIN CONFIRMAR"
   },
   "results": {
     "title": "LA IA HA DESCIFRADO A VUESTRO GRUPO.",
@@ -114,6 +125,12 @@
     "mostCooperative": "Quien más coopera",
     "biggestAlliance": "La mayor alianza",
     "biggestBetrayal": "La mayor traición",
+    "mostCompatible": "La pareja más compatible",
+    "biggestClash": "Polos opuestos",
+    "wildcard": "El comodín",
+    "salseoMvp": "MVP del salseo",
+    "yourNemesis": "Tu némesis de esta partida",
+    "secretMissions": "Misiones secretas",
     "aiAccuracy": "Precisión de la IA",
     "mostSurprising": "El patrón más sorprendente",
     "finalTheoryTitle": "LA TEORÍA FINAL DE LA IA",

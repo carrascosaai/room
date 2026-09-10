@@ -74,6 +74,9 @@ export function observationText(state: GameState, isFinal: boolean): { text: Loc
 
 /** "I HAVE A THEORY." announcement text. */
 export function theoryAnnounceText(theory: Theory, players: Player[]): Localized {
+  if (theory.type === "high_compatibility" || theory.type === "clashing_values") {
+    return affinityText(theory, players);
+  }
   const factEn = theory.evidence;
   const factEs = translateEvidence(theory.evidence, players);
   return L(
@@ -92,6 +95,58 @@ export function theoryResultText(theory: Theory, held: boolean): Localized {
   return L(
     `I was wrong. My theory doesn't hold up. ${theory.evidence.replace(/\.$/, "")}, but not when I pushed on it.`,
     `Me equivoqué. Mi teoría no se sostiene. Lo observé, pero no cuando apreté.`,
+  );
+}
+
+export function affinityText(theory: Theory, players: Player[]): Localized {
+  const a = players.find((p) => p.id === theory.players[0])?.nickname ?? "?";
+  const b = players.find((p) => p.id === theory.players[1])?.nickname ?? "?";
+  if (theory.type === "clashing_values") {
+    return L(
+      `${a} and ${b} are opposites. Every values question, they split. Let's confirm it.`,
+      `${a} y ${b} sois polos opuestos. Cada pregunta de valores, os separáis. Vamos a confirmarlo.`,
+    );
+  }
+  return L(
+    `Affinity detected. ${a} and ${b} keep giving the exact same answers — taste included. One more, at the same time.`,
+    `Afinidad detectada. ${a} y ${b} dais exactamente las mismas respuestas, gustos incluidos. Una más, a la vez.`,
+  );
+}
+
+export function affinityResultText(theory: Theory, held: boolean): Localized {
+  const clash = theory.type === "clashing_values";
+  if (held) {
+    return clash
+      ? L("Confirmed. You two do not agree on anything.", "Confirmado. Vosotros dos no coincidís en nada.")
+      : L("Confirmed. That's real chemistry — on paper, at least.", "Confirmado. Eso es química de verdad. Sobre el papel, al menos.");
+  }
+  return clash
+    ? L("Huh. This time you matched. I'll keep watching.", "Vaya. Esta vez coincidisteis. Seguiré mirando.")
+    : L("You broke the pattern right when it mattered. Suspicious.", "Rompisteis el patrón justo cuando importaba. Sospechoso.");
+}
+
+export function accusationText(
+  targetName: string | null,
+  votes: number,
+  total: number,
+  matchesData: boolean,
+): Localized {
+  if (!targetName) {
+    return L("The room couldn't agree. Nobody's off the hook.", "La sala no se pone de acuerdo. Nadie se libra.");
+  }
+  const en = `The room pointed at ${targetName} (${votes}/${total}). ${
+    matchesData ? "My data says the same." : "My data isn't so sure."
+  }`;
+  const es = `La sala ha señalado a ${targetName} (${votes}/${total}). ${
+    matchesData ? "Mis datos dicen lo mismo." : "Mis datos no lo tienen tan claro."
+  }`;
+  return L(en, es);
+}
+
+export function missionsRevealText(count: number, completed: number): Localized {
+  return L(
+    `${count === 1 ? "One player" : `${count} players`} had a secret mission. ${completed} pulled it off.`,
+    `${count === 1 ? "Una persona tenía" : `${count} personas tenían`} una misión secreta. ${completed} la ${completed === 1 ? "completó" : "completaron"}.`,
   );
 }
 

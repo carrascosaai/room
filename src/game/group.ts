@@ -26,6 +26,8 @@ export function emptyEdge(from: string, to: string): RelationEdge {
     comparableCount: 0,
     predictedCorrect: 0,
     predictedTotal: 0,
+    accusedCount: 0,
+    matchedTasteCount: 0,
   };
 }
 
@@ -92,6 +94,23 @@ export function recordAlignment(
   return next;
 }
 
+export function recordAccusation(g: GroupModel, from: string, to: string): GroupModel {
+  const e = getEdge(g, from, to);
+  return withEdge(g, { ...e, accusedCount: e.accusedCount + 1 });
+}
+
+export function recordTasteMatch(g: GroupModel, a: string, b: string): GroupModel {
+  let next = g;
+  for (const [from, to] of [
+    [a, b],
+    [b, a],
+  ] as const) {
+    const e = getEdge(next, from, to);
+    next = withEdge(next, { ...e, matchedTasteCount: e.matchedTasteCount + 1 });
+  }
+  return next;
+}
+
 export function recordPrediction(
   g: GroupModel,
   predictor: string,
@@ -121,6 +140,8 @@ export interface PairMetric {
   cooperation: number;
   betrayal: number;
   oneWayLoyalty: number; // a->b selections minus b->a
+  tasteMatches: number; // same compat_probe answer
+  accusationsExchanged: number; // a->b + b->a accusation points
 }
 
 export function pairMetrics(g: GroupModel, players: string[]): PairMetric[] {
@@ -141,6 +162,8 @@ export function pairMetrics(g: GroupModel, players: string[]): PairMetric[] {
         cooperation: ab.cooperatedCount,
         betrayal: ab.betrayedCount + ba.betrayedCount,
         oneWayLoyalty: ab.selectedCount - ba.selectedCount,
+        tasteMatches: ab.matchedTasteCount,
+        accusationsExchanged: ab.accusedCount + ba.accusedCount,
       });
     }
   }

@@ -1,5 +1,7 @@
 import { topReadings } from "./behavior";
 import { pairMetrics, getEdge } from "./group";
+import { allCompatibility, biggestClash, wildcardPlayer } from "./compat";
+import { missionText } from "./missions";
 import type { GameState, Localized, Player } from "./types";
 
 // ─────────────────────────────────────────────────────────────
@@ -18,6 +20,17 @@ export interface FinalReport {
   superlatives: Superlative[];
   biggestAlliance: { a: string; b: string; detail: Localized } | null;
   biggestBetrayal: { from: string; to: string; detail: Localized } | null;
+  mostCompatible: { a: string; b: string; percent: number } | null;
+  biggestClash: { a: string; b: string; percent: number } | null;
+  wildcardId: string | null;
+  salseoMvpId: string | null;
+  /** playerId -> the person they clashed with most */
+  nemesis: Record<string, string>;
+  missions: {
+    playerId: string;
+    text: Localized;
+    completed: boolean;
+  }[];
   aiAccuracy: number; // 0..1
   theoriesTested: number;
   theoriesHeld: number;
@@ -218,10 +231,57 @@ export function buildFinalReport(state: GameState): FinalReport {
       .join(" "),
   };
 
+  // --- salseo: compatibility, clash, wildcard, nemesis, MVP ---
+  const compat = allCompatibility(state).filter((c) => c.grounded);
+  const topCompat = compat[0] ?? null;
+  const clash = biggestClash(state);
+  const wc = wildcardPlayer(state);
+
+  const nemesis: Record<string, string> = {};
+  for (const p of players) {
+    let worst: { id: string; score: number } | null = null;
+    for (const m of metrics) {
+      if (m.a !== p.id && m.b !== p.id) continue;
+      const other = m.a === p.id ? m.b : m.a;
+      // "nemesis energy" needs real friction: a betrayal, an accusation, or
+      // sustained disagreement — not just a couple of different answers.
+      const disagreement = m.comparable >= 4 ? Math.max(0, 0.55 - m.alignmentRatio) : 0;
+      const score = m.betrayal * 1 + m.accusationsExchanged * 0.7 + disagreement * 1.5;
+      if (!worst || score > worst.score) worst = { id: other, score };
+    }
+    if (worst && worst.score >= 1) nemesis[p.id] = worst.id;
+  }
+
+  // salseo MVP: most betrayals dealt + times accused + swings + being in a social theory
+  const salseoMvp = argmax(players, (p) => {
+    const dealt = players.reduce((acc, o) => acc + (o.id === p.id ? 0 : getEdge(state.group, p.id, o.id).betrayedCount), 0);
+    const accused = players.reduce((acc, o) => acc + (o.id === p.id ? 0 : getEdge(state.group, o.id, p.id).accusedCount), 0);
+    const inSocial = state.theories.some(
+      (t) => t.players.includes(p.id) && t.status !== "forming" && ["mutual_bond", "one_way_loyalty", "high_compatibility", "clashing_values", "rivalry"].includes(t.type),
+    );
+    return dealt * 2 + accused * 1.5 + (inSocial ? 2 : 0);
+  });
+
+  const missions = state.missions.map((m) => ({
+    playerId: m.playerId,
+    text: missionText(m, players),
+    completed: !!m.completed,
+  }));
+
   return {
     superlatives,
     biggestAlliance,
     biggestBetrayal,
+    mostCompatible: topCompat
+      ? { a: topCompat.a, b: topCompat.b, percent: Math.round(topCompat.score * 100) }
+      : null,
+    biggestClash: clash
+      ? { a: clash.a, b: clash.b, percent: Math.round((1 - clash.score) * 100) }
+      : null,
+    wildcardId: wc?.id ?? null,
+    salseoMvpId: salseoMvp?.id ?? null,
+    nemesis,
+    missions,
     aiAccuracy: Number(aiAccuracy.toFixed(2)),
     theoriesTested: tested.length,
     theoriesHeld: held,

@@ -70,6 +70,9 @@ export type RoundKind =
   | "majority_minority" // Round type D — safe vs risky, conformity signal
   | "prediction" // predict what the room / a player will do
   | "trust" // choose who to rely on
+  | "accusation" // point at a player — "who here is the most ___?"
+  | "compat_probe" // private taste/values answer; the engine pairs the matches
+  | "revenge" // a wronged player docks points from someone
   // engine-generated special rounds:
   | "ai_observation"
   | "ai_theory"
@@ -110,6 +113,8 @@ export interface RelationEdge {
   comparableCount: number;
   predictedCorrect: number;
   predictedTotal: number;
+  accusedCount: number; // times `from` pointed at `to` in accusation rounds
+  matchedTasteCount: number; // times `from` and `to` gave the same compat_probe answer
 }
 
 export interface GroupModel {
@@ -130,7 +135,10 @@ export type TheoryType =
   | "rivalry"
   | "prediction_link"
   | "risk_seeker"
-  | "risk_averse";
+  | "risk_averse"
+  | "high_compatibility" // two players keep thinking alike — salseo
+  | "clashing_values" // two players are opposites on values — salseo
+  | "wildcard"; // one player nobody can predict
 
 export type TheoryStatus =
   | "forming"
@@ -230,11 +238,37 @@ export interface AiMessage {
     | "theory_result"
     | "intervention"
     | "quip"
-    | "final";
+    | "final"
+    | "affinity" // "AFINIDAD DETECTADA" — two players keep matching
+    | "accusation" // the room pointed at someone
+    | "missions"; // secret missions revealed
   /** localized text; both langs always present so mixed-language rooms work */
   text: Localized;
   roundIndex: number;
   at: number;
+}
+
+// ---------- Secret missions ----------
+
+export type MissionId =
+  | "betray_twice"
+  | "never_cooperate"
+  | "win_trust_votes"
+  | "mirror_target"
+  | "oppose_target"
+  | "finish_bottom"
+  | "stay_risky"
+  | "get_protected"
+  | "fixate_on_one"
+  | "go_unnoticed";
+
+export interface MissionAssignment {
+  playerId: string;
+  missionId: MissionId;
+  /** for missions that reference another player */
+  targetId?: string;
+  /** filled at FINAL_RESULTS */
+  completed?: boolean;
 }
 
 export interface RoundOutcome {
@@ -267,6 +301,7 @@ export interface GameState {
   behavior: Record<string, BehaviorProfile>; // playerId -> profile
   group: GroupModel;
   theories: Theory[];
+  missions: MissionAssignment[];
 
   outcomes: RoundOutcome[];
   aiMessages: AiMessage[];
@@ -288,6 +323,8 @@ export type RoundSlotType =
   | "observation_slot"
   | "theory_slot"
   | "intervention_slot"
+  | "accusation_slot"
+  | "affinity_slot"
   | "final_slot";
 
 export interface RoundSlot {
