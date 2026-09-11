@@ -244,21 +244,22 @@ Needed only for production / serverless (Vercel), where lambdas don't share
 memory.
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Run the migration: paste `supabase/migrations/0001_init.sql` into the Supabase
-   SQL editor, **or** with the CLI:
+2. Run the migrations, in order: paste `supabase/migrations/0001_init.sql` then
+   `supabase/migrations/0002_schedule_cleanup.sql` into the Supabase SQL editor,
+   **or** with the CLI:
    ```bash
    supabase link --project-ref <ref>
    supabase db push
    ```
 3. Copy **Project URL**, **anon key**, **service_role key** into your env.
-4. The migration already:
+4. `0001_init.sql`:
    - creates `rooms` (live `jsonb` state + `version` for optimistic concurrency),
      `game_events` (analytics), `game_archives` (finished-game snapshots);
    - enables **RLS**: anon can only `SELECT rooms` (for Realtime); all writes are
      server-only via the service role;
    - adds `rooms` to the `supabase_realtime` publication with `replica identity full`.
-5. Optional: schedule `select public.purge_stale_rooms();` via `pg_cron` to GC old
-   rooms.
+5. `0002_schedule_cleanup.sql` schedules `purge_stale_rooms()` via `pg_cron` to run
+   every 30 minutes, so abandoned rooms don't sit in the table forever at scale.
 
 **Schema note.** A ROOM game is a small, self-consistent object the engine
 rewrites atomically each transition, so it's stored as one versioned `jsonb`
