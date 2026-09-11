@@ -62,6 +62,9 @@ import type {
 export const MIN_PLAYERS = 3;
 export const MAX_PLAYERS = 10;
 export const DISCONNECT_GRACE_MS = 45_000;
+/** don't persist a heartbeat more often than this — clients poll every 1-3s,
+ *  but presence only needs to be accurate to within DISCONNECT_GRACE_MS */
+const HEARTBEAT_THROTTLE_MS = 8_000;
 
 const L = (en: string, es: string): Localized => ({ en, es });
 
@@ -159,8 +162,16 @@ export function setConnected(s: GameState, playerId: string, connected: boolean)
 }
 
 export function heartbeat(s: GameState, playerId: string): GameState {
-  const players = s.players.map((p) =>
-    p.id === playerId ? { ...p, connected: true, lastSeen: now() } : p,
+  const p = s.players.find((x) => x.id === playerId);
+  if (!p) return s;
+  const t = now();
+  // throttle: skip the write when we just heard from this player. Every
+  // client polls every 1-3s, so without this every single poll from every
+  // player was a database write — enough concurrent players and the row's
+  // optimistic-concurrency version churns faster than requests can land.
+  if (p.connected && t - p.lastSeen < HEARTBEAT_THROTTLE_MS) return s;
+  const players = s.players.map((x) =>
+    x.id === playerId ? { ...x, connected: true, lastSeen: t } : x,
   );
   return { ...s, players }; // no version bump — heartbeats are cheap
 }
