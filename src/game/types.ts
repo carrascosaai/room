@@ -81,6 +81,8 @@ export type RoundKind =
   | "movement_switch" // the room gets one more chance to convince someone to switch
   | "throne" // one seat, real power; the room can vote to overthrow whoever holds it
   | "whisper" // a private mole + private intel, out loud negotiation, then the room votes
+  | "chemistry" // the AI tests a compatible pair's chemistry live, the room bets on the match
+  | "faceoff" // the AI puts two players head-to-head, the room votes who wins
   // engine-generated special rounds:
   | "ai_observation"
   | "ai_theory"
@@ -238,6 +240,8 @@ export interface Round {
   };
   /** movement_switch: the movement round this one gives a second chance on */
   followsRoundId?: string;
+  /** faceoff: the two contestants the room votes between (they don't vote themselves) */
+  faceoffPair?: [string, string];
   /** which director move produced this round (for the manipulation log) */
   directorMoveId?: string;
 }
@@ -306,6 +310,8 @@ export interface AiMessage {
     | "movement" // "levantaos y moveos"
     | "throne_result" // who holds the throne now, and why
     | "whisper_result" // whether the room caught the mole
+    | "chemistry_result" // whether the tested pair actually matched
+    | "faceoff_result" // who won the head-to-head
     | "confession"; // the director's manipulation log at the end
   /** localized text; both langs always present so mixed-language rooms work */
   text: Localized;
@@ -365,7 +371,9 @@ export type DirectorSignal =
   | "throne_empty"
   | "throne_challenge"
   | "whisper_mole"
-  | "movement_switch";
+  | "movement_switch"
+  | "chemistry"
+  | "clash";
 
 export interface DirectorMove {
   id: string;

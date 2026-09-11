@@ -189,7 +189,9 @@
     "moleBadge": "ERES EL TOPO",
     "intelBadge": "INFORMACIÓN REAL",
     "whoIsMoleQuestion": "¿Quién es el topo?",
-    "switchBadge": "ÚLTIMA LLAMADA"
+    "switchBadge": "ÚLTIMA LLAMADA",
+    "faceoffVoteQuestion": "¿Quién gana?",
+    "chemistryBetQuestion": "¿Van a coincidir?"
   },
   "stage": {
     "openOnPhone": "Abrid ROOM en el móvil para jugar",

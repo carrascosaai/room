@@ -66,6 +66,8 @@ const AI_TAGS: Record<string, string> = {
   movement: "🧍  EN PIE",
   throne_result: "👑  EL TRONO",
   whisper_result: "🕵  RED DE SUSURROS",
+  chemistry_result: "🔥  QUÍMICA",
+  faceoff_result: "⚔   ENFRENTAMIENTO",
   quip: "💬  LA IA",
   confession: "🕯   CONFESIÓN DE LA IA",
 };

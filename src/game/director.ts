@@ -1,17 +1,23 @@
 import { topReadings } from "./behavior";
 import { pairMetrics, getEdge } from "./group";
-import { allCompatibility, wildcardPlayer } from "./compat";
+import { allCompatibility, biggestClash, wildcardPlayer } from "./compat";
 import { chooseQuestion, makeRound, playerOptions, rngFor } from "./selector";
 import {
   ACCUSATIONS,
   GENERIC_ACCUSATIONS,
   DEAL_TASKS,
+  FACEOFF_PROMPTS,
   MOVEMENT_STATEMENTS,
   PROPHECIES,
   TALK,
   WARMUP_FOCUS,
+  chemistryBetOptions,
+  chemistryCallout,
+  chemistryStageInstruction,
+  chemistryTalk,
   consequenceOptions,
   dealChoiceOptions,
+  faceoffOptions,
   moleBriefing,
   movementOptions,
   prophecyBetOptions,
@@ -72,9 +78,18 @@ interface Signals {
   boredPlayer: string | null;
   runawayLeader: string | null;
   coziestPair: [string, string] | null;
+  chemistryPair: [string, string] | null;
+  clashPair: [string, string] | null;
   harmony: number; // 0..1
   lastTheoryFailed: boolean;
   grudge: { from: string; to: string } | null;
+}
+
+/** has this exact pair already had this mechanic run on them? */
+function pairTested(state: GameState, kind: "chemistry" | "faceoff", pair: [string, string]): boolean {
+  return state.directorLog.some(
+    (m) => m.kind === kind && m.targets.includes(pair[0]) && m.targets.includes(pair[1]),
+  );
 }
 
 function readSignals(state: GameState): Signals {
@@ -100,6 +115,18 @@ function readSignals(state: GameState): Signals {
   // coziest grounded pair
   const compat = allCompatibility(state).filter((c) => c.grounded);
   const cozy = compat[0] && compat[0].score > 0.62 ? ([compat[0].a, compat[0].b] as [string, string]) : null;
+
+  // best untested pair for a live chemistry check (can be less strict than "cozy" —
+  // just needs to be the strongest match nobody's seen tested yet)
+  const chemCandidate = compat.find((c) => c.score > 0.55 && !pairTested(state, "chemistry", [c.a, c.b]));
+  const chemistryPair = chemCandidate ? ([chemCandidate.a, chemCandidate.b] as [string, string]) : null;
+
+  // biggest untested clash for a face-off
+  const clash = biggestClash(state);
+  const clashPair =
+    clash && clash.score < 0.4 && !pairTested(state, "faceoff", [clash.a, clash.b])
+      ? ([clash.a, clash.b] as [string, string])
+      : null;
 
   // harmony = average pairwise alignment on comparable rounds
   const metrics = pairMetrics(state.group, ids).filter((m) => m.comparable >= 2);
@@ -127,6 +154,8 @@ function readSignals(state: GameState): Signals {
     boredPlayer: bored?.id ?? null,
     runawayLeader: runaway,
     coziestPair: cozy,
+    chemistryPair,
+    clashPair,
     harmony,
     lastTheoryFailed,
     grudge,
@@ -219,18 +248,29 @@ export function buildDirectorRound(state: GameState): DirectorResult {
   const midTotal = Math.max(1, total - 5); // rounds that aren't warmup / finale
   const soFar = Math.max(1, index - 3);
   const desired: Record<string, number> = {
-    interrogation: 0.2,
-    deal: 0.1,
-    prophecy: 0.12,
-    movement: 0.14,
-    throne: 0.14,
-    whisper: 0.12,
-    filler: 0.18,
+    interrogation: 0.16,
+    deal: 0.08,
+    prophecy: 0.1,
+    movement: 0.12,
+    throne: 0.12,
+    whisper: 0.1,
+    chemistry: 0.11,
+    faceoff: 0.09,
+    filler: 0.12,
   };
   void midTotal;
 
   type Opt = {
-    kind: "interrogation" | "deal" | "prophecy" | "movement" | "throne" | "whisper" | "filler";
+    kind:
+      | "interrogation"
+      | "deal"
+      | "prophecy"
+      | "movement"
+      | "throne"
+      | "whisper"
+      | "chemistry"
+      | "faceoff"
+      | "filler";
     signal: DirectorSignal;
     boost: number;
     build: () => DirectorResult;
@@ -285,6 +325,24 @@ export function buildDirectorRound(state: GameState): DirectorResult {
     boost: 0.12,
     build: () => whisper(state, index, moveId, rand),
   });
+  // chemistry — the AI's most-compatible untested pair, tested live
+  if (sig.chemistryPair) {
+    opts.push({
+      kind: "chemistry",
+      signal: "chemistry",
+      boost: 0.3,
+      build: () => chemistry(state, index, moveId, sig.chemistryPair!, rand),
+    });
+  }
+  // face-off — the biggest untested clash, put head-to-head
+  if (sig.clashPair) {
+    opts.push({
+      kind: "faceoff",
+      signal: "clash",
+      boost: 0.25,
+      build: () => faceoff(state, index, moveId, sig.clashPair!, "clash", rand),
+    });
+  }
   // filler — a clean contested vote
   opts.push({
     kind: "filler",
@@ -678,6 +736,101 @@ function whisper(state: GameState, index: number, moveId: string, rand: () => nu
   };
 }
 
+function chemistry(
+  state: GameState,
+  index: number,
+  moveId: string,
+  pair: [string, string],
+  rand: () => number,
+): DirectorResult {
+  void rand;
+  const [p1, p2] = pair;
+  const n1 = name(state, p1);
+  const n2 = name(state, p2);
+  const q = chooseQuestion(state, "compat_probe", undefined, "chem" + index);
+  const others = state.players.map((p) => p.id).filter((x) => x !== p1 && x !== p2);
+  const bet = chemistryBetOptions();
+
+  return {
+    round: makeRound({
+      id: `r${index}`,
+      index,
+      kind: "chemistry",
+      questionId: q.id,
+      participants: pair,
+      predictors: others,
+      directorMoveId: moveId,
+      title: L("Chemistry check", "Prueba de química"),
+      body: chemistryCallout(n1, n2),
+      talkSeconds: 10,
+      talkPrompt: chemistryTalk(n1, n2),
+      stageInstruction: chemistryStageInstruction(n1, n2),
+      optionsByPlayer: {
+        [p1]: q.options,
+        [p2]: q.options,
+        ...Object.fromEntries(others.map((o) => [o, bet])),
+      },
+      timeLimit: 18,
+    }),
+    move: {
+      id: moveId,
+      roundIndex: index,
+      kind: "chemistry",
+      signal: "chemistry",
+      targets: pair,
+      reason: L(
+        `I noticed ${n1} and ${n2} kept landing on the same side, so I put it to the test in front of everyone.`,
+        `Noté que ${n1} y ${n2} llevaban cayendo del mismo lado, así que lo puse a prueba delante de todos.`,
+      ),
+    },
+  };
+}
+
+function faceoff(
+  state: GameState,
+  index: number,
+  moveId: string,
+  pair: [string, string],
+  signal: DirectorSignal,
+  rand: () => number,
+): DirectorResult {
+  const [p1, p2] = pair;
+  const n1 = name(state, p1);
+  const n2 = name(state, p2);
+  const spec = pick(rand, FACEOFF_PROMPTS);
+  const others = state.players.map((p) => p.id).filter((x) => x !== p1 && x !== p2);
+  const choice = faceoffOptions(n1, p1, n2, p2);
+
+  return {
+    round: makeRound({
+      id: `r${index}`,
+      index,
+      kind: "faceoff",
+      participants: others,
+      faceoffPair: pair,
+      directorMoveId: moveId,
+      title: L("The face-off", "El enfrentamiento"),
+      body: spec.prompt(n1, n2),
+      talkSeconds: 20,
+      talkPrompt: spec.talk(n1, n2),
+      stageInstruction: spec.stage(n1, n2),
+      optionsByPlayer: Object.fromEntries(others.map((o) => [o, choice])),
+      timeLimit: 20,
+    }),
+    move: {
+      id: moveId,
+      roundIndex: index,
+      kind: "faceoff",
+      signal,
+      targets: pair,
+      reason: L(
+        `${n1} and ${n2} were too far apart to ignore, so I put them face to face and let the room pick a side.`,
+        `${n1} y ${n2} estaban demasiado alejados como para ignorarlo, así que los puse cara a cara y dejé que la sala eligiera bando.`,
+      ),
+    },
+  };
+}
+
 function movementSwitch(
   state: GameState,
   index: number,
@@ -724,7 +877,7 @@ export function noteSpotlight(state: GameState, move: DirectorMove): GameState {
   const lastSpotlightRound = { ...state.director.lastSpotlightRound };
   for (const t of move.targets) lastSpotlightRound[t] = move.roundIndex;
   const beats = { ...state.director.beats };
-  const beatKey = ["prophecy", "movement", "deal", "interrogation", "throne", "whisper"].includes(move.kind)
+  const beatKey = ["prophecy", "movement", "deal", "interrogation", "throne", "whisper", "chemistry", "faceoff"].includes(move.kind)
     ? move.kind
     : move.kind === "movement_switch"
       ? "movement"

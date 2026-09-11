@@ -270,6 +270,84 @@ export function whoIsMolePrompt(): Localized {
   return L("Who is the mole?", "¿Quién es el topo?");
 }
 
+// ---------- CHEMISTRY ----------
+// The AI puts its most-compatible pair on the spot: both answer the same
+// private question at once, in front of everyone. The room bets on whether
+// they'll match.
+
+export function chemistryCallout(n1: string, n2: string): Localized {
+  return L(
+    `I've noticed ${n1} and ${n2} keep landing on the same side. Let's see if that's real.`,
+    `He notado que ${n1} y ${n2} llevan cayendo del mismo lado. Vamos a ver si es real.`,
+  );
+}
+
+export function chemistryTalk(n1: string, n2: string): Localized {
+  return L(
+    `${n1}, ${n2} — no talking, no looking at each other. Everyone else: get ready to bet.`,
+    `${n1}, ${n2} — sin hablar, sin miraros. El resto: preparaos para apostar.`,
+  );
+}
+
+export function chemistryStageInstruction(n1: string, n2: string): Localized {
+  return L(
+    `${n1} and ${n2} answer in secret. Everyone else: will they match?`,
+    `${n1} y ${n2} responden en secreto. El resto: ¿coincidirán?`,
+  );
+}
+
+export function chemistryBetOptions(): QuestionOption[] {
+  return [
+    { id: "yes", label: L("They'll match", "Van a coincidir"), tags: {} },
+    { id: "no", label: L("No chance", "Ni de broma"), tags: {} },
+  ];
+}
+
+// ---------- FACE-OFF ----------
+// The AI puts two players head-to-head on a provocative comparison.
+// Everyone else votes; the contestants don't vote on themselves.
+
+export interface FaceoffPrompt {
+  id: string;
+  prompt: (n1: string, n2: string) => Localized;
+  talk: (n1: string, n2: string) => Localized;
+  stage: (n1: string, n2: string) => Localized;
+}
+
+export const FACEOFF_PROMPTS: FaceoffPrompt[] = [
+  {
+    id: "fake",
+    prompt: (n1, n2) => L(`${n1} or ${n2} — who's faker?`, `${n1} o ${n2} — ¿quién es más falso?`),
+    talk: (n1, n2) => L(`${n1}, ${n2} — make your case. Everyone else decides.`, `${n1}, ${n2} — defendeos. El resto decide.`),
+    stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
+  },
+  {
+    id: "self_interest",
+    prompt: (n1, n2) => L(`${n1} or ${n2} — who'd sell the group out first?`, `${n1} o ${n2} — ¿quién vendería antes al grupo?`),
+    talk: (n1, n2) => L(`${n1}, ${n2} — 20 seconds each to argue it's not you.`, `${n1}, ${n2} — 20 segundos cada uno para defender que no sois vosotros.`),
+    stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
+  },
+  {
+    id: "unreadable",
+    prompt: (n1, n2) => L(`${n1} or ${n2} — who's harder to actually trust?`, `${n1} o ${n2} — ¿de quién te fías menos de verdad?`),
+    talk: (n1, n2) => L(`${n1}, ${n2} — the room is deciding right now.`, `${n1}, ${n2} — la sala está decidiendo ahora mismo.`),
+    stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
+  },
+  {
+    id: "loudest",
+    prompt: (n1, n2) => L(`${n1} or ${n2} — who's been playing everyone else this whole time?`, `${n1} o ${n2} — ¿quién ha estado jugando con el resto toda la noche?`),
+    talk: (n1, n2) => L(`${n1}, ${n2} — face each other. Talk it out.`, `${n1}, ${n2} — encaraos. Habladlo.`),
+    stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
+  },
+];
+
+export function faceoffOptions(n1: string, id1: string, n2: string, id2: string): QuestionOption[] {
+  return [
+    { id: id1, label: L(n1, n1), tags: {} },
+    { id: id2, label: L(n2, n2), tags: {} },
+  ];
+}
+
 // ---------- WARM-UP (director gathers data quietly) ----------
 
 export const WARMUP_FOCUS: Dimension[][] = [

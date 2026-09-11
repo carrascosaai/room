@@ -189,7 +189,9 @@
     "moleBadge": "YOU'RE THE MOLE",
     "intelBadge": "REAL INTEL",
     "whoIsMoleQuestion": "Who is the mole?",
-    "switchBadge": "LAST CALL"
+    "switchBadge": "LAST CALL",
+    "faceoffVoteQuestion": "Who wins?",
+    "chemistryBetQuestion": "Will they match?"
   },
   "stage": {
     "openOnPhone": "Open ROOM on your phone to play",

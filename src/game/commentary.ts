@@ -246,6 +246,32 @@ export function whisperResultText(moleName: string, caught: boolean): Localized 
   );
 }
 
+export function chemistryResultText(n1: string, n2: string, matched: boolean): Localized {
+  if (matched) {
+    return L(
+      `${n1} and ${n2} gave the exact same answer, unprompted. That's chemistry.`,
+      `${n1} y ${n2} dieron exactamente la misma respuesta, sin hablarlo. Eso es química.`,
+    );
+  }
+  return L(
+    `${n1} and ${n2} didn't match. So much for that theory.`,
+    `${n1} y ${n2} no coincidieron. Se acabó esa teoría.`,
+  );
+}
+
+export function faceoffResultText(winnerName: string, loserName: string, tie: boolean): Localized {
+  if (tie) {
+    return L(
+      `The room couldn't choose between ${winnerName} and ${loserName}. A tie.`,
+      `La sala no pudo elegir entre ${winnerName} y ${loserName}. Empate.`,
+    );
+  }
+  return L(
+    `The room picked ${winnerName} over ${loserName}.`,
+    `La sala eligió a ${winnerName} antes que a ${loserName}.`,
+  );
+}
+
 export function movementText(
   statement: Localized,
   alone: string | null,

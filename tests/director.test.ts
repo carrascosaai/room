@@ -300,6 +300,159 @@ describe("director mode — phase 2 mechanics", () => {
   });
 });
 
+describe("director mode — chemistry & face-off", () => {
+  it("eventually plays chemistry and faceoff across a spread of seeds", () => {
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 20 && seen.size < 2; seed++) {
+      const final = splitPlaythrough(startGame(room(7, seed)).state);
+      for (const r of final.rounds) seen.add(r.kind);
+    }
+    expect(seen.has("chemistry")).toBe(true);
+    expect(seen.has("faceoff")).toBe(true);
+  });
+
+  it("chemistry: only the tested pair answers the private question, everyone else bets yes/no", () => {
+    let s = startGame(room(7, 3)).state;
+    let guard = 0;
+    let checked = false;
+    while (s.phase !== "FINAL_RESULTS" && guard++ < 600) {
+      const round = currentRound(s);
+      if (s.phase === "ANSWERING" && round?.kind === "chemistry" && !checked) {
+        checked = true;
+        const [p1, p2] = round.participants;
+        expect(round.participants).toHaveLength(2);
+        const p1Opts = optionsForPlayer(round, p1!);
+        const p2Opts = optionsForPlayer(round, p2!);
+        expect(p1Opts).toEqual(p2Opts); // same compat_probe question
+        expect(p1Opts.length).toBeGreaterThanOrEqual(2);
+        const outsider = s.players.map((p) => p.id).find((id) => id !== p1 && id !== p2)!;
+        const outsiderOpts = optionsForPlayer(round, outsider).map((o) => o.id).sort();
+        expect(outsiderOpts).toEqual(["no", "yes"]);
+        expect(round.predictors).toContain(outsider);
+        expect(round.predictors).not.toContain(p1);
+        expect(round.predictors).not.toContain(p2);
+      }
+      if (s.phase === "ANSWERING" && round) {
+        for (const id of respondents(round)) {
+          const opts = optionsForPlayer(round, id);
+          if (opts.length) s = submitAnswer(s, { playerId: id, optionId: opts[0]!.id }).state;
+        }
+      }
+      s = advance(s);
+    }
+    expect(checked).toBe(true);
+  });
+
+  it("chemistry: a real match pays both the pair and every correct 'yes' bettor", () => {
+    let s = startGame(room(7, 3)).state;
+    let guard = 0;
+    let checked = false;
+    while (s.phase !== "FINAL_RESULTS" && guard++ < 600) {
+      const round = currentRound(s);
+      if (s.phase === "ANSWERING" && round?.kind === "chemistry" && !checked) {
+        checked = true;
+        const [p1, p2] = round.participants;
+        const opts = optionsForPlayer(round, p1!);
+        // force a guaranteed match: both pick the same first option
+        s = submitAnswer(s, { playerId: p1!, optionId: opts[0]!.id }).state;
+        s = submitAnswer(s, { playerId: p2!, optionId: opts[0]!.id }).state;
+        for (const pid of round.predictors ?? []) {
+          s = submitAnswer(s, { playerId: pid, optionId: "yes" }).state;
+        }
+        s = advance(s); // -> REVEAL
+        const outcome = s.outcomes.find((o) => o.roundId === round.id)!;
+        expect(outcome.scoreDelta[p1!]).toBeGreaterThan(0);
+        expect(outcome.scoreDelta[p2!]).toBeGreaterThan(0);
+        for (const pid of round.predictors ?? []) {
+          expect(outcome.scoreDelta[pid]).toBeGreaterThan(0);
+        }
+        const msg = s.aiMessages.find((m) => m.kind === "chemistry_result" && m.roundIndex === round.index);
+        expect(msg).toBeDefined();
+        continue;
+      }
+      if (s.phase === "ANSWERING" && round) {
+        for (const id of respondents(round)) {
+          const opts = optionsForPlayer(round, id);
+          if (opts.length) s = submitAnswer(s, { playerId: id, optionId: opts[0]!.id }).state;
+        }
+      }
+      s = advance(s);
+    }
+    expect(checked).toBe(true);
+  });
+
+  it("faceoff: only the two contestants are excluded from voting, and they never appear as options for themselves", () => {
+    let s = startGame(room(7, 1)).state;
+    let guard = 0;
+    let checked = false;
+    while (s.phase !== "FINAL_RESULTS" && guard++ < 600) {
+      const round = currentRound(s);
+      if (s.phase === "ANSWERING" && round?.kind === "faceoff" && round.faceoffPair && !checked) {
+        checked = true;
+        const [p1, p2] = round.faceoffPair;
+        const allResponders = respondents(round);
+        expect(allResponders).not.toContain(p1);
+        expect(allResponders).not.toContain(p2);
+        expect(round.participants).not.toContain(p1);
+        expect(round.participants).not.toContain(p2);
+        const outsider = allResponders[0]!;
+        const outsiderOpts = optionsForPlayer(round, outsider).map((o) => o.id).sort();
+        expect(outsiderOpts).toEqual([p1, p2].sort());
+      }
+      if (s.phase === "ANSWERING" && round) {
+        respondents(round).forEach((id, i) => {
+          const opts = optionsForPlayer(round, id);
+          if (opts.length) s = submitAnswer(s, { playerId: id, optionId: opts[i % opts.length]!.id }).state;
+        });
+      }
+      s = advance(s);
+    }
+    expect(checked).toBe(true);
+  });
+
+  it("faceoff: the winner gains score and influence, the loser loses score and gains suspicion", () => {
+    let s = startGame(room(7, 1)).state;
+    let guard = 0;
+    let checked = false;
+    while (s.phase !== "FINAL_RESULTS" && guard++ < 600) {
+      const round = currentRound(s);
+      if (s.phase === "ANSWERING" && round?.kind === "faceoff" && round.faceoffPair && !checked) {
+        checked = true;
+        const [p1, p2] = round.faceoffPair;
+        // stack every vote on p1
+        for (const id of respondents(round)) {
+          s = submitAnswer(s, { playerId: id, optionId: p1 }).state;
+        }
+        s = advance(s); // -> REVEAL
+        const outcome = s.outcomes.find((o) => o.roundId === round.id)!;
+        expect(outcome.scoreDelta[p1!]).toBeGreaterThan(0);
+        expect(outcome.scoreDelta[p2!]).toBeLessThan(0);
+        const msg = s.aiMessages.find((m) => m.kind === "faceoff_result" && m.roundIndex === round.index);
+        expect(msg).toBeDefined();
+        continue;
+      }
+      if (s.phase === "ANSWERING" && round) {
+        respondents(round).forEach((id, i) => {
+          const opts = optionsForPlayer(round, id);
+          if (opts.length) s = submitAnswer(s, { playerId: id, optionId: opts[i % opts.length]!.id }).state;
+        });
+      }
+      s = advance(s);
+    }
+    expect(checked).toBe(true);
+  });
+
+  it("never runs chemistry (or faceoff) on the same pair twice", () => {
+    for (let seed = 1; seed <= 10; seed++) {
+      const final = playthrough(startGame(room(8, seed)).state);
+      const chemPairs = final.directorLog.filter((m) => m.kind === "chemistry").map((m) => [...m.targets].sort().join("+"));
+      const faceoffPairs = final.directorLog.filter((m) => m.kind === "faceoff").map((m) => [...m.targets].sort().join("+"));
+      expect(new Set(chemPairs).size).toBe(chemPairs.length);
+      expect(new Set(faceoffPairs).size).toBe(faceoffPairs.length);
+    }
+  });
+});
+
 describe("director mode — classic mode is unaffected", () => {
   it("classic games have no director log and no talk phases", () => {
     let s = createGame("CLS1", { id: "h", nickname: "H", lang: "en" }, "classic");

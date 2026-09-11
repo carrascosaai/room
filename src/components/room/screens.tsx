@@ -248,11 +248,20 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
   const isInterrogation = r.kind === "interrogation";
   const isThrone = r.kind === "throne";
   const isWhisper = r.kind === "whisper";
+  const isFaceoff = r.kind === "faceoff";
+  const isChemistry = r.kind === "chemistry";
   const isDealAccusing = isDeal && r.iAmPredictor && !r.iAmParticipant;
   const isPlayerPick =
-    r.kind === "group_vote" || r.kind === "trust" || r.kind === "accusation" || isDealAccusing || isThrone || isWhisper;
+    r.kind === "group_vote" ||
+    r.kind === "trust" ||
+    r.kind === "accusation" ||
+    isDealAccusing ||
+    isThrone ||
+    isWhisper ||
+    isFaceoff;
   const isAccusation = r.kind === "accusation";
   const isProphecyBet = isProphecy && r.iAmPredictor && !r.iAmParticipant;
+  const isChemistryBet = isChemistry && r.iAmPredictor && !r.iAmParticipant;
   const waiting = Math.max(0, r.respondentCount - r.answeredCount);
 
   // a fresh salseo message tied to this round (affinity / accusation framing)
@@ -412,12 +421,20 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
               <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
                 {t("director.whoIsMoleQuestion")}
               </p>
+            ) : isFaceoff ? (
+              <p className="mb-3 text-xs uppercase tracking-widest text-[var(--danger)]">
+                {t("director.faceoffVoteQuestion")}
+              </p>
+            ) : isChemistryBet ? (
+              <p className="mb-3 text-xs uppercase tracking-widest text-[var(--trust)]">
+                {t("director.chemistryBetQuestion")}
+              </p>
             ) : r.iAmPredictor && !r.iAmParticipant ? (
               <p className="mb-3 text-xs uppercase tracking-widest text-[var(--trust)]">
                 {t("game.predicting")}
               </p>
             ) : null}
-            {!isInterrogation && !isDealAccusing && !isProphecyBet && !isThrone && !isWhisper ? (
+            {!isInterrogation && !isDealAccusing && !isProphecyBet && !isThrone && !isWhisper && !isFaceoff && !isChemistryBet ? (
               <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
                 {isAccusation
                   ? t("game.pointAtSomeone")
@@ -510,6 +527,8 @@ export function RevealScreen({ view, room }: { view: PlayerView; room: UseRoom }
     "movement",
     "throne_result",
     "whisper_result",
+    "chemistry_result",
+    "faceoff_result",
   ];
   const resultMsg =
     r &&

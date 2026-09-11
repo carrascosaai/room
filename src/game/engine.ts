@@ -3,7 +3,9 @@ import {
   accusationText,
   affinityResultText,
   affinityText,
+  chemistryResultText,
   dealRevealText,
+  faceoffResultText,
   hotSeatVerdictText,
   missionsRevealText,
   movementText,
@@ -459,6 +461,12 @@ function enterFromIntro(s: GameState): GameState {
     msgs.push(aiMessage(s, "quip", round.body, round.index));
   }
   if (round.kind === "whisper" && round.body) {
+    msgs.push(aiMessage(s, "quip", round.body, round.index));
+  }
+  if (round.kind === "chemistry" && round.body) {
+    msgs.push(aiMessage(s, "quip", round.body, round.index));
+  }
+  if (round.kind === "faceoff" && round.body) {
     msgs.push(aiMessage(s, "quip", round.body, round.index));
   }
 
@@ -1110,6 +1118,74 @@ function doReveal(s: GameState): GameState {
       aiMessage(s, "whisper_result", whisperResultText(nameOf(moleId), caught), round.index),
     );
     lines.push(caught ? L("THE MOLE WAS CAUGHT", "EL TOPO FUE DESCUBIERTO") : L("THE MOLE ESCAPED", "EL TOPO SE ESCAPÓ"));
+  }
+
+  if (round.kind === "chemistry") {
+    const [p1, p2] = round.participants;
+    const a1 = roundAnswers.find((a) => a.playerId === p1)?.optionId;
+    const a2 = roundAnswers.find((a) => a.playerId === p2)?.optionId;
+    const matched = a1 !== undefined && a1 === a2;
+
+    if (a1 !== undefined && a2 !== undefined) {
+      if (matched) group = recordTasteMatch(group, p1!, p2!);
+      group = recordAlignment(group, p1!, p2!, matched);
+    }
+    for (const a of roundAnswers) {
+      if (!round.predictors?.includes(a.playerId)) continue;
+      const betYes = a.optionId === "yes";
+      if (betYes === matched) add(a.playerId, POINTS.predictAnotherPlayer);
+    }
+    if (matched) {
+      add(p1!, 60);
+      add(p2!, 60);
+      rep(p1!, "trust", 8);
+      rep(p2!, "trust", 8);
+    } else {
+      add(p1!, 15);
+      add(p2!, 15);
+    }
+    aiMsgs.push(
+      aiMessage(s, "chemistry_result", chemistryResultText(nameOf(p1!), nameOf(p2!), matched), round.index),
+    );
+    lines.push(matched ? L("CHEMISTRY CONFIRMED", "QUÍMICA CONFIRMADA") : L("NO CHEMISTRY", "SIN QUÍMICA"));
+  }
+
+  if (round.kind === "faceoff" && round.faceoffPair) {
+    const [p1, p2] = round.faceoffPair;
+    const tally = new Map<string, number>();
+    for (const a of roundAnswers) {
+      tally.set(a.optionId, (tally.get(a.optionId) ?? 0) + 1);
+      group = recordAccusation(group, a.playerId, a.optionId);
+    }
+    const v1 = tally.get(p1) ?? 0;
+    const v2 = tally.get(p2) ?? 0;
+    const tie = v1 === v2;
+    const winner = v1 >= v2 ? p1 : p2;
+    const loser = v1 >= v2 ? p2 : p1;
+
+    if (tie) {
+      add(p1, 20);
+      add(p2, 20);
+    } else {
+      add(winner, 50);
+      rep(winner, "influence", 10);
+      rep(winner, "trust", 5);
+      add(loser, -20);
+      rep(loser, "suspicion", 15);
+    }
+    aiMsgs.push(
+      aiMessage(
+        s,
+        "faceoff_result",
+        faceoffResultText(nameOf(tie ? p1 : winner), nameOf(tie ? p2 : loser), tie),
+        round.index,
+      ),
+    );
+    lines.push(
+      tie
+        ? L("THE ROOM CAN'T DECIDE", "LA SALA NO SE DECIDE")
+        : L(`${nameOf(winner)} WINS THE ROOM`, `${nameOf(winner)} SE GANA A LA SALA`),
+    );
   }
 
   // throne perk: the holder's points are doubled on every round they play, except the throne round itself

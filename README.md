@@ -32,6 +32,8 @@ Two modes, picked at room creation:
 | **The throne** — a challengeable seat of power that doubles the holder's points | ✅ |
 | **The whisper network** — a secret mole, private intel, public accusation | ✅ |
 | **Movement re-vote ("last call")** — a talk-it-out follow-up after a real split | ✅ |
+| **Chemistry check** — the AI's most-compatible pair tested live, the room bets on the match | ✅ |
+| **Face-off** — two clashing players head-to-head, the room votes who wins | ✅ |
 | Talk phases (`DISCUSSION`) — a timed, out-loud window before every director round | ✅ |
 | Reputation economy (trust / suspicion / influence) that the director manipulates | ✅ |
 | Shared "stage" screen (`/stage/CODE`) — cast it, no player identity needed | ✅ |
@@ -78,7 +80,7 @@ src/game/engine.ts           DISCUSSION phase + reveal logic for each mechanic
 src/app/stage/[code]/        the shared screen
 ```
 
-### The seven mechanics
+### The nine mechanics
 
 - **🔥 Interrogation** — the director names a target from real behavioral data
   ("the room thinks you'd burn everyone here to win") and gives them 45 seconds
@@ -122,13 +124,24 @@ src/app/stage/[code]/        the shared screen
   The mole briefing and the intel text are visible **only** to their
   recipients — enforced by `projectView` and asserted in
   `tests/director.test.ts`.
+- **🔥 Chemistry check** — the director picks its most-compatible untested
+  pair and puts them on the spot: both answer the same private question at
+  once, no talking, no looking at each other. Everyone else bets on whether
+  they'll match. A real match ("that's chemistry") pays the pair and every
+  correct bettor; a miss pays nobody much. Never runs on the same pair twice.
+- **⚔️ Face-off** — the director picks its biggest untested clash (two
+  players who read as opposites) and puts them head-to-head on a
+  provocative comparison ("who's faker?"). Everyone *else* votes — the two
+  contestants don't vote on themselves. The winner gains score and
+  influence; the loser loses score and gains suspicion.
 
 ### The director's brain (`director.ts`)
 
 Every non-warm-up round it reads deterministic signals — a bored player who
 hasn't been in the spotlight, a runaway leader, a suspiciously cozy pair, a
 room that's agreeing on everything, a theory that just failed, an empty or
-too-comfortable throne — and picks whichever mechanic addresses the strongest
+too-comfortable throne, the most-compatible pair nobody's tested yet, the
+biggest untested clash — and picks whichever mechanic addresses the strongest
 signal, weighted against a target mix so **no mechanic dominates and nothing
 repeats back-to-back** (`tests/director.test.ts` asserts both). A genuine
 split on an "on your feet" round forces an immediate "last call" follow-up
@@ -195,7 +208,7 @@ npm run dev                        # dev server
 npm run build                      # production build
 npm run typecheck                  # tsc --noEmit
 npm run lint                       # eslint
-npm test                           # vitest (76 tests)
+npm test                           # vitest (82 tests)
 npm run simulate                   # headless: 10 bots, 100+ games, prints learning metrics
 npx tsx scripts/ejemplo.ts         # narrated classic-mode example game (Spanish)
 npx tsx scripts/ejemplo-directo.ts # narrated director-mode example game (Spanish)
