@@ -172,7 +172,12 @@ export function DiscussionScreen({ view }: { view: PlayerView }) {
 
       {r.hotSeatId ? (
         <p className="mt-6 rounded-full border border-[var(--danger)]/50 bg-[var(--danger)]/10 px-4 py-1.5 text-sm font-mono uppercase tracking-widest text-[var(--danger)]">
+          {r.kind === "throne" ? "👑 " : ""}
           {nameOf(view, r.hotSeatId)}
+        </p>
+      ) : r.kind === "throne" ? (
+        <p className="mt-6 rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-4 py-1.5 text-sm font-mono uppercase tracking-widest text-[var(--accent)]">
+          👑 {t("director.throneEmptyBadge")}
         </p>
       ) : null}
 
@@ -187,6 +192,25 @@ export function DiscussionScreen({ view }: { view: PlayerView }) {
           </p>
           <p className="mt-1 text-sm">{loc(r.mySecretDeal.task)}</p>
           <p className="mt-2 text-xs text-[var(--muted)]">{t("director.dealWarning")}</p>
+        </div>
+      ) : null}
+
+      {r.myWhisper ? (
+        <div
+          className={`mt-6 w-full max-w-xs rounded-2xl border p-4 text-left ${
+            r.myWhisper.kind === "mole"
+              ? "border-[var(--danger)]/50 bg-[var(--danger)]/10"
+              : "border-[var(--trust)]/50 bg-[var(--trust)]/10"
+          }`}
+        >
+          <p
+            className={`text-[10px] font-mono uppercase tracking-widest ${
+              r.myWhisper.kind === "mole" ? "text-[var(--danger)]" : "text-[var(--trust)]"
+            }`}
+          >
+            {r.myWhisper.kind === "mole" ? t("director.moleBadge") : t("director.intelBadge")}
+          </p>
+          <p className="mt-1 text-sm">{loc(r.myWhisper.text)}</p>
         </div>
       ) : null}
 
@@ -220,10 +244,13 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
   const title = r.title ? loc(r.title) : null;
   const isDeal = r.kind === "deal";
   const isProphecy = r.kind === "prophecy";
-  const isMovement = r.kind === "movement";
+  const isMovement = r.kind === "movement" || r.kind === "movement_switch";
   const isInterrogation = r.kind === "interrogation";
+  const isThrone = r.kind === "throne";
+  const isWhisper = r.kind === "whisper";
   const isDealAccusing = isDeal && r.iAmPredictor && !r.iAmParticipant;
-  const isPlayerPick = r.kind === "group_vote" || r.kind === "trust" || r.kind === "accusation" || isDealAccusing;
+  const isPlayerPick =
+    r.kind === "group_vote" || r.kind === "trust" || r.kind === "accusation" || isDealAccusing || isThrone || isWhisper;
   const isAccusation = r.kind === "accusation";
   const isProphecyBet = isProphecy && r.iAmPredictor && !r.iAmParticipant;
   const waiting = Math.max(0, r.respondentCount - r.answeredCount);
@@ -268,6 +295,15 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
         </p>
       ) : null}
 
+      {isThrone ? (
+        <div className="mt-3 text-center">
+          <p className="inline-block rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-3 py-1.5 text-xs font-mono uppercase tracking-widest text-[var(--accent)]">
+            👑 {r.hotSeatId ? nameOf(view, r.hotSeatId) : t("director.throneEmptyBadge")}
+          </p>
+          <p className="mt-1 text-[11px] text-[var(--muted)]">{t("director.throneBonusHint")}</p>
+        </div>
+      ) : null}
+
       {prompt ? (
         <h2 className="mt-3 text-[22px] font-semibold leading-snug">{loc(prompt)}</h2>
       ) : null}
@@ -294,6 +330,25 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
         <p className="mt-3 text-xs text-[var(--muted)]">{t("director.dealOutsiderHint")}</p>
       ) : null}
 
+      {r.myWhisper ? (
+        <div
+          className={`mt-3 rounded-2xl border p-4 ${
+            r.myWhisper.kind === "mole"
+              ? "border-[var(--danger)]/50 bg-[var(--danger)]/10"
+              : "border-[var(--trust)]/50 bg-[var(--trust)]/10"
+          }`}
+        >
+          <p
+            className={`text-[10px] font-mono uppercase tracking-widest ${
+              r.myWhisper.kind === "mole" ? "text-[var(--danger)]" : "text-[var(--trust)]"
+            }`}
+          >
+            {r.myWhisper.kind === "mole" ? t("director.moleBadge") : t("director.intelBadge")}
+          </p>
+          <p className="mt-1 text-sm">{loc(r.myWhisper.text)}</p>
+        </div>
+      ) : null}
+
       {r.theory && !salseoMsg ? (
         <p className="mt-2 text-xs text-[var(--muted)]">{loc(r.theory.evidence)}</p>
       ) : null}
@@ -301,9 +356,16 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
       <SecretMissionBanner view={view} />
 
       {isMovement && r.liveTally ? (
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <TallyBar label={t("director.movementTallyLeft")} count={r.liveTally.A ?? 0} />
-          <TallyBar label={t("director.movementTallyRight")} count={r.liveTally.B ?? 0} />
+        <div className="mt-4">
+          {r.kind === "movement_switch" ? (
+            <p className="mb-2 text-center text-[10px] font-mono uppercase tracking-widest text-[var(--danger)]">
+              {t("director.switchBadge")}
+            </p>
+          ) : null}
+          <div className="grid grid-cols-2 gap-2">
+            <TallyBar label={t("director.movementTallyLeft")} count={r.liveTally.A ?? 0} />
+            <TallyBar label={t("director.movementTallyRight")} count={r.liveTally.B ?? 0} />
+          </div>
         </div>
       ) : null}
 
@@ -342,12 +404,20 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
               <p className="mb-3 text-xs uppercase tracking-widest text-[var(--trust)]">
                 {t("director.prophecyBetQuestion")}
               </p>
+            ) : isThrone ? (
+              <p className="mb-3 text-xs uppercase tracking-widest text-[var(--accent)]">
+                {t("director.throneVoteQuestion")}
+              </p>
+            ) : isWhisper ? (
+              <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
+                {t("director.whoIsMoleQuestion")}
+              </p>
             ) : r.iAmPredictor && !r.iAmParticipant ? (
               <p className="mb-3 text-xs uppercase tracking-widest text-[var(--trust)]">
                 {t("game.predicting")}
               </p>
             ) : null}
-            {!isInterrogation && !isDealAccusing && !isProphecyBet ? (
+            {!isInterrogation && !isDealAccusing && !isProphecyBet && !isThrone && !isWhisper ? (
               <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
                 {isAccusation
                   ? t("game.pointAtSomeone")
@@ -438,6 +508,8 @@ export function RevealScreen({ view, room }: { view: PlayerView; room: UseRoom }
     "prophecy_result",
     "deal_reveal",
     "movement",
+    "throne_result",
+    "whisper_result",
   ];
   const resultMsg =
     r &&

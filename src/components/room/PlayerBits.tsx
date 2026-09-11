@@ -35,6 +35,7 @@ export function PlayerList({ view, highlight = [] }: { view: PlayerView; highlig
         >
           <Avatar player={p} size={22} />
           <span className={p.connected ? "" : "text-[var(--muted)] line-through"}>{p.nickname}</span>
+          {view.throneHolderId === p.id ? <span aria-label="throne">👑</span> : null}
           {p.isHost ? <span className="text-[10px] font-mono uppercase text-[var(--muted)]">★</span> : null}
           {view.me?.id === p.id ? (
             <span className="text-[10px] font-mono uppercase text-[var(--muted)]">you</span>
@@ -54,7 +55,10 @@ export function Leaderboard({ view }: { view: PlayerView }) {
         <li key={p.id} className="flex items-center gap-3">
           <span className="w-4 text-right font-mono text-xs text-[var(--muted)]">{i + 1}</span>
           <Avatar player={p} size={22} />
-          <span className="min-w-0 flex-1 truncate text-sm">{p.nickname}</span>
+          <span className="min-w-0 flex-1 truncate text-sm">
+            {p.nickname}
+            {view.throneHolderId === p.id ? <span className="ml-1" aria-label="throne">👑</span> : null}
+          </span>
           <span className="tabnums text-sm font-semibold">{p.score}</span>
           <span className="relative h-1 w-16 overflow-hidden rounded-full bg-[var(--border)]">
             <span

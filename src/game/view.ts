@@ -46,6 +46,8 @@ export interface PlayerView {
 
   totalSlots: number;
   slotIndex: number;
+  /** director mode: who currently holds the throne (public — everyone sees this) */
+  throneHolderId?: string;
 
   round?: {
     id: string;
@@ -73,6 +75,8 @@ export interface PlayerView {
     liveTally?: Record<string, number>;
     /** the viewer's own secret pact (only the two dealmakers get this) */
     mySecretDeal?: { task: Localized; reward: number };
+    /** the viewer's own private whisper — only the mole or an intel recipient gets this */
+    myWhisper?: { kind: "mole" | "intel"; text: Localized };
     prophecyCall?: Localized;
   };
 
@@ -148,6 +152,7 @@ export function projectView(
     maxPlayers: 10,
     totalSlots: totalRounds(state),
     slotIndex: state.currentRoundIndex,
+    throneHolderId: state.throneHolderId,
     aiMessages: state.aiMessages,
     theories: state.theories
       .filter((t) => t.status !== "forming")
@@ -174,7 +179,7 @@ export function projectView(
     const q = round.questionId ? QUESTIONS_BY_ID[round.questionId] : undefined;
 
     let liveTally: Record<string, number> | undefined;
-    if (round.liveTally && (isStage || round.kind === "movement")) {
+    if (round.liveTally && (isStage || round.kind === "movement" || round.kind === "movement_switch")) {
       liveTally = {};
       for (const a of roundAnswers) liveTally[a.optionId] = (liveTally[a.optionId] ?? 0) + 1;
     }
@@ -182,6 +187,16 @@ export function projectView(
     let mySecretDeal: { task: Localized; reward: number } | undefined;
     if (round.secretDeal && viewerId && round.secretDeal.players.includes(viewerId)) {
       mySecretDeal = { task: round.secretDeal.task, reward: round.secretDeal.reward };
+    }
+
+    let myWhisper: { kind: "mole" | "intel"; text: Localized } | undefined;
+    if (round.whisper && viewerId) {
+      if (viewerId === round.whisper.moleId) {
+        myWhisper = { kind: "mole", text: round.whisper.moleBriefing };
+      } else {
+        const intel = round.whisper.intel.find((i) => i.playerId === viewerId);
+        if (intel) myWhisper = { kind: "intel", text: intel.text };
+      }
     }
 
     view.round = {
@@ -213,6 +228,7 @@ export function projectView(
       iAmHotSeat,
       liveTally,
       mySecretDeal,
+      myWhisper,
       prophecyCall: round.prophecy?.label,
     };
   }

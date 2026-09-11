@@ -182,7 +182,14 @@
     "reputationTrust": "Trust",
     "reputationSuspicion": "Suspicion",
     "reputationInfluence": "Influence",
-    "talkTimerLabel": "talk"
+    "talkTimerLabel": "talk",
+    "throneEmptyBadge": "The throne is empty",
+    "throneVoteQuestion": "Who deserves the throne?",
+    "throneBonusHint": "Double points while you hold it",
+    "moleBadge": "YOU'RE THE MOLE",
+    "intelBadge": "REAL INTEL",
+    "whoIsMoleQuestion": "Who is the mole?",
+    "switchBadge": "LAST CALL"
   },
   "stage": {
     "openOnPhone": "Open ROOM on your phone to play",

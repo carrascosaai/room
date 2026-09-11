@@ -29,10 +29,14 @@ Two modes, picked at room creation:
 | Area | Status |
 | --- | --- |
 | **AI director mode** — interrogations, secret deals, prophecies, physical "everyone move" rounds | ✅ |
+| **The throne** — a challengeable seat of power that doubles the holder's points | ✅ |
+| **The whisper network** — a secret mole, private intel, public accusation | ✅ |
+| **Movement re-vote ("last call")** — a talk-it-out follow-up after a real split | ✅ |
 | Talk phases (`DISCUSSION`) — a timed, out-loud window before every director round | ✅ |
 | Reputation economy (trust / suspicion / influence) that the director manipulates | ✅ |
 | Shared "stage" screen (`/stage/CODE`) — cast it, no player identity needed | ✅ |
 | End-of-game **AI confession** — the director's full move log with reasons | ✅ |
+| LLM polish across every AI moment (not just classic mode), with a never-re-polish cost guard | ✅ |
 | Classic mode preserved as a selectable, fully working alternative | ✅ |
 | Landing page (ES/EN), create/join flow (mode picker), QR join | ✅ |
 | Server-authoritative game state machine (`LOBBY → … → FINAL_RESULTS`) | ✅ |
@@ -53,7 +57,7 @@ Two modes, picked at room creation:
 | AI provider abstraction (OpenAI-compatible) + deterministic fallback | ✅ |
 | Analytics abstraction (anonymous, disable-able) | ✅ |
 | Supabase migrations + RLS | ✅ |
-| 68 unit/integration tests + headless simulation (`npm run simulate`) | ✅ |
+| 76 unit/integration tests + headless simulation (`npm run simulate`) | ✅ |
 
 **Priority order followed:** multiplayer → fast gameplay → great first minute →
 behavioral learning → AI interventions → theory/salseo → results → shareability →
@@ -74,7 +78,7 @@ src/game/engine.ts           DISCUSSION phase + reveal logic for each mechanic
 src/app/stage/[code]/        the shared screen
 ```
 
-### The four mechanics
+### The seven mechanics
 
 - **🔥 Interrogation** — the director names a target from real behavioral data
   ("the room thinks you'd burn everyone here to win") and gives them 45 seconds
@@ -95,15 +99,40 @@ src/app/stage/[code]/        the shared screen
   moves to a side (the phone tap just records where they moved). Whoever
   stands **alone** is flagged and rewarded for it. Used both mid-game (to
   break up a room that's agreeing on everything) and as the finale.
+- **↔️ Last call (movement re-vote)** — whenever "on your feet" produced a real
+  split (both sides got at least one vote), the director can immediately run a
+  follow-up round on the same statement: 20 more seconds to talk each other
+  into switching sides, then a second tap. Anyone who switches gets a small
+  bonus (and a hit to influence — "got talked into it"); whoever's still alone
+  after the second call gets a bigger one. Modeled as a normal round linked to
+  the movement round via `followsRoundId`, so it reuses the existing
+  `DISCUSSION → ANSWERING` machine unchanged.
+- **👑 The throne** — a seat of real power. Empty at first: whoever gets the
+  plurality of votes claims it and **doubles every point they score** on every
+  other round while they hold it. Once held, the round becomes a public
+  challenge — the incumbent keeps it on a tie ("ties go to the incumbent"),
+  someone has to strictly out-poll them to take it. Who holds it is public
+  (crown badge on the phone UI and the shared screen); losing it spikes the
+  ex-holder's suspicion.
+- **🕵️ The whisper network** — the director privately makes one player "the
+  mole" (preferring the group's hardest-to-read wildcard) and slips one or two
+  other players a piece of real, genuine intel about the room. Everyone talks,
+  then the room votes on who the mole is. Caught: the mole loses big and
+  whoever correctly named them scores. Uncaught: the mole scores big instead.
+  The mole briefing and the intel text are visible **only** to their
+  recipients — enforced by `projectView` and asserted in
+  `tests/director.test.ts`.
 
 ### The director's brain (`director.ts`)
 
 Every non-warm-up round it reads deterministic signals — a bored player who
 hasn't been in the spotlight, a runaway leader, a suspiciously cozy pair, a
-room that's agreeing on everything, a theory that just failed — and picks
-whichever mechanic addresses the strongest signal, weighted against a target
-mix so **no mechanic dominates and nothing repeats back-to-back**
-(`tests/director.test.ts` asserts both). The first 3 rounds are quiet
+room that's agreeing on everything, a theory that just failed, an empty or
+too-comfortable throne — and picks whichever mechanic addresses the strongest
+signal, weighted against a target mix so **no mechanic dominates and nothing
+repeats back-to-back** (`tests/director.test.ts` asserts both). A genuine
+split on an "on your feet" round forces an immediate "last call" follow-up
+before the director picks anything else. The first 3 rounds are quiet
 data-gathering; the last 2 are the built-up finale (a face-off interrogation,
 then everyone on their feet).
 
@@ -166,7 +195,7 @@ npm run dev                        # dev server
 npm run build                      # production build
 npm run typecheck                  # tsc --noEmit
 npm run lint                       # eslint
-npm test                           # vitest (68 tests)
+npm test                           # vitest (76 tests)
 npm run simulate                   # headless: 10 bots, 100+ games, prints learning metrics
 npx tsx scripts/ejemplo.ts         # narrated classic-mode example game (Spanish)
 npx tsx scripts/ejemplo-directo.ts # narrated director-mode example game (Spanish)
@@ -365,19 +394,8 @@ Core gameplay is complete and playable end-to-end. Deferred:
   versioned `jsonb` doc — deliberate for a 5–10 min ephemeral game).
 - **Server-driven display-phase timers** (currently the host client nudges
   display phases; `ANSWERING` already auto-advances server-side on timeout/all-in).
-- **Movement re-vote** — right now "on your feet" is a single tap; a second
-  "switch sides after talking" tap (tracked in the model as `switched: []`,
-  already stubbed) would close the loop the pitch described.
-- Two more director mechanics from the original pitch weren't built in this
-  pass: **the whisper network** (asymmetric private intel + open negotiation)
-  and **the throne** (a challengeable seat of power). The director + content
-  architecture (`director.ts` / `directorContent.ts`) is built to take more
-  mechanics as additional signal → move mappings.
 - Richer round types (multi-party dilemmas beyond pairs, live prediction markets).
 - Persisted cross-session player identity / rematch with memory of past games.
-- LLM polish for director moments (verdict, prophecy result, confession) — the
-  abstraction (`ai/narrator.ts`) supports it; only the classic-mode moments are
-  wired to it today.
 - Rendered OG image per result (currently a static branded `og.svg`).
 - More AI-provider adapters (Anthropic, local) — the abstraction is ready.
 - Sound design and haptics.

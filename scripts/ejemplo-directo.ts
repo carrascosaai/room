@@ -64,6 +64,9 @@ const AI_TAGS: Record<string, string> = {
   prophecy_result: "🔮  RESULTADO DE LA PROFECÍA",
   deal_reveal: "🤝  REVELACIÓN DEL TRATO",
   movement: "🧍  EN PIE",
+  throne_result: "👑  EL TRONO",
+  whisper_result: "🕵  RED DE SUSURROS",
+  quip: "💬  LA IA",
   confession: "🕯   CONFESIÓN DE LA IA",
 };
 
@@ -103,6 +106,20 @@ function run(seed: number) {
         console.log(
           `  [secreto — solo ${NAME[round.secretDeal.players[0]]} y ${NAME[round.secretDeal.players[1]]} lo ven]: ${round.secretDeal.task.es} (+${round.secretDeal.reward} a repartir)`,
         );
+      }
+      if (round.kind === "throne") {
+        console.log(
+          state.throneHolderId
+            ? `  👑 [en juego: ${NAME[state.throneHolderId]} defiende el trono]`
+            : `  👑 [el trono está vacío — se lo lleva quien más votos consiga]`,
+        );
+      }
+      if (round.whisper) {
+        const recipients = round.whisper.intel.map((i) => NAME[i.playerId]).join(", ");
+        console.log(`  🕵 [secreto — topo: ${NAME[round.whisper.moleId]} · información real para: ${recipients || "nadie"}]`);
+      }
+      if (round.followsRoundId) {
+        console.log(`  ↔️  [última llamada — siguen de pie con opción a cambiarse]`);
       }
     }
 

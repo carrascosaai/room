@@ -18,7 +18,7 @@ import { getStore } from "@/store";
 import { makeRoomCode, uuid } from "@/lib/id";
 import { track } from "@/lib/analytics";
 
-const AI_POLISH_KINDS = new Set(["AI_OBSERVATION", "AI_THEORY"]);
+const AI_POLISH_KINDS = new Set(["AI_OBSERVATION", "AI_THEORY", "DISCUSSION", "REVEAL", "FINAL_RESULTS"]);
 
 function meta(stage = false) {
   return { storeKind: getStore().kind, aiEnabled: getAiProvider().available, stage };

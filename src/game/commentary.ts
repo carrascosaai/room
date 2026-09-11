@@ -213,6 +213,39 @@ export function prophecyResultText(name: string, held: boolean, defied: boolean)
   );
 }
 
+export function throneResultText(
+  newHolderName: string,
+  previousHolderName: string | null,
+  changed: boolean,
+): Localized {
+  if (!previousHolderName) {
+    return L(
+      `The throne goes to ${newHolderName}. Double points, starting now.`,
+      `El trono es para ${newHolderName}. Puntos dobles, a partir de ahora.`,
+    );
+  }
+  if (changed) {
+    return L(
+      `${previousHolderName} is out. ${newHolderName} takes the throne.`,
+      `${previousHolderName} está fuera. ${newHolderName} se lleva el trono.`,
+    );
+  }
+  return L(
+    `The room isn't done with ${previousHolderName} yet. The throne holds.`,
+    `La sala no ha terminado con ${previousHolderName} todavía. El trono aguanta.`,
+  );
+}
+
+export function whisperResultText(moleName: string, caught: boolean): Localized {
+  if (caught) {
+    return L(`Caught. ${moleName} was the mole.`, `Pillado. ${moleName} era el topo.`);
+  }
+  return L(
+    `${moleName} was the mole — and got away with it.`,
+    `${moleName} era el topo — y se salió con la suya.`,
+  );
+}
+
 export function movementText(
   statement: Localized,
   alone: string | null,

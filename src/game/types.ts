@@ -77,7 +77,10 @@ export type RoundKind =
   | "interrogation" // one player defends themselves out loud; the room rates + judges
   | "deal" // the AI privately offers two players a secret pact; the room hunts the tell
   | "prophecy" // the AI predicts one player's next move, out loud, in front of everyone
-  | "movement" // everyone physically moves to a side; then convince someone to switch
+  | "movement" // everyone physically moves to a side
+  | "movement_switch" // the room gets one more chance to convince someone to switch
+  | "throne" // one seat, real power; the room can vote to overthrow whoever holds it
+  | "whisper" // a private mole + private intel, out loud negotiation, then the room votes
   // engine-generated special rounds:
   | "ai_observation"
   | "ai_theory"
@@ -227,6 +230,14 @@ export interface Round {
     predictedOptionId: string;
     label: Localized;
   };
+  /** whisper: a private mole + private facts, only ever seen by their recipient */
+  whisper?: {
+    moleId: string;
+    moleBriefing: Localized;
+    intel: { playerId: string; text: Localized }[];
+  };
+  /** movement_switch: the movement round this one gives a second chance on */
+  followsRoundId?: string;
   /** which director move produced this round (for the manipulation log) */
   directorMoveId?: string;
 }
@@ -293,9 +304,13 @@ export interface AiMessage {
     | "prophecy_result" // whether the prophecy held
     | "deal_reveal" // whether a secret deal existed / was caught
     | "movement" // "levantaos y moveos"
+    | "throne_result" // who holds the throne now, and why
+    | "whisper_result" // whether the room caught the mole
     | "confession"; // the director's manipulation log at the end
   /** localized text; both langs always present so mixed-language rooms work */
   text: Localized;
+  /** true once an LLM has rephrased this message — never re-polished after */
+  polished?: boolean;
   roundIndex: number;
   at: number;
 }
@@ -346,7 +361,11 @@ export type DirectorSignal =
   | "theory_failed"
   | "grudge"
   | "cadence"
-  | "finale";
+  | "finale"
+  | "throne_empty"
+  | "throne_challenge"
+  | "whisper_mole"
+  | "movement_switch";
 
 export interface DirectorMove {
   id: string;
@@ -392,6 +411,8 @@ export interface GameState {
 
   director: DirectorState;
   directorLog: DirectorMove[];
+  /** director mode: who currently holds the throne, if it's been claimed */
+  throneHolderId?: string;
 
   outcomes: RoundOutcome[];
   aiMessages: AiMessage[];

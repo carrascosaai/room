@@ -145,7 +145,12 @@ function StageDiscussion({ view }: { view: PlayerView }) {
       </div>
       {r.hotSeatId ? (
         <p className="mt-8 rounded-full border border-[var(--danger)]/50 bg-[var(--danger)]/10 px-5 py-2 font-mono text-lg uppercase tracking-widest text-[var(--danger)]">
+          {r.kind === "throne" ? "👑 " : ""}
           {nameOf(view, r.hotSeatId)}
+        </p>
+      ) : r.kind === "throne" ? (
+        <p className="mt-8 rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-5 py-2 font-mono text-lg uppercase tracking-widest text-[var(--accent)]">
+          👑 {t("director.throneEmptyBadge")}
         </p>
       ) : null}
       {r.prophecyCall ? <p className="mt-8 max-w-2xl text-2xl font-semibold">{loc(r.prophecyCall)}</p> : null}
@@ -170,13 +175,24 @@ function StageAnswering({ view }: { view: PlayerView }) {
     <div className="flex w-full flex-col items-center text-center">
       {r.hotSeatId ? (
         <p className="mb-4 rounded-full border border-[var(--danger)]/50 bg-[var(--danger)]/10 px-4 py-1.5 font-mono text-sm uppercase tracking-widest text-[var(--danger)]">
+          {r.kind === "throne" ? "👑 " : ""}
           {nameOf(view, r.hotSeatId)}
+        </p>
+      ) : r.kind === "throne" ? (
+        <p className="mb-4 rounded-full border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-4 py-1.5 font-mono text-sm uppercase tracking-widest text-[var(--accent)]">
+          👑 {t("director.throneEmptyBadge")}
         </p>
       ) : null}
       {prompt ? <h1 className="max-w-2xl text-3xl font-bold leading-snug">{loc(prompt)}</h1> : null}
 
       {r.liveTally ? (
-        <div className="mt-10 grid w-full max-w-lg grid-cols-2 gap-4">
+        <div className="mt-10 w-full max-w-lg">
+          {r.kind === "movement_switch" ? (
+            <p className="mb-3 text-center font-mono text-xs uppercase tracking-widest text-[var(--danger)]">
+              {t("director.switchBadge")}
+            </p>
+          ) : null}
+          <div className="grid grid-cols-2 gap-4">
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
             <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
               {t("director.movementTallyLeft")}
@@ -188,6 +204,7 @@ function StageAnswering({ view }: { view: PlayerView }) {
               {t("director.movementTallyRight")}
             </p>
             <p className="tabnums mt-1 text-5xl font-bold">{r.liveTally.B ?? 0}</p>
+          </div>
           </div>
         </div>
       ) : null}

@@ -182,7 +182,14 @@
     "reputationTrust": "Confianza",
     "reputationSuspicion": "Sospecha",
     "reputationInfluence": "Influencia",
-    "talkTimerLabel": "hablando"
+    "talkTimerLabel": "hablando",
+    "throneEmptyBadge": "El trono está vacío",
+    "throneVoteQuestion": "¿Quién merece el trono?",
+    "throneBonusHint": "Puntos dobles mientras lo lleves",
+    "moleBadge": "ERES EL TOPO",
+    "intelBadge": "INFORMACIÓN REAL",
+    "whoIsMoleQuestion": "¿Quién es el topo?",
+    "switchBadge": "ÚLTIMA LLAMADA"
   },
   "stage": {
     "openOnPhone": "Abrid ROOM en el móvil para jugar",

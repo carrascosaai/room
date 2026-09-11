@@ -203,6 +203,73 @@ export const TALK = {
   react: L("React. Say something. The AI wants to see the room move.", "Reaccionad. Decid algo. La IA quiere ver moverse la sala."),
 };
 
+// ---------- THE THRONE ----------
+// One seat, real power (double points while held). The room can vote
+// to overthrow whoever's on it, but only after they've defended it
+// out loud.
+
+export function throneClaimBody(): Localized {
+  return L(
+    "The throne is empty. Whoever wins it doubles every point they score while they hold it.",
+    "El trono está vacío. Quien lo gane dobla cada punto que consiga mientras lo lleve.",
+  );
+}
+
+export function throneClaimTalk(): Localized {
+  return L(
+    "Make your case — out loud — for why it should be you.",
+    "Defended en voz alta por qué debería ser vuestro.",
+  );
+}
+
+export function throneChallengeBody(holder: string): Localized {
+  return L(
+    `${holder} holds the throne — double points, every round. Does the room let them keep it?`,
+    `${holder} lleva el trono — puntos dobles, cada ronda. ¿La sala le deja seguir?`,
+  );
+}
+
+export function throneChallengeTalk(holder: string): Localized {
+  return L(
+    `${holder} defends the throne. Anyone who wants it, speak up now.`,
+    `${holder} defiende el trono. Quien lo quiera, que hable ahora.`,
+  );
+}
+
+export function throneStageInstruction(): Localized {
+  return L("Vote for who deserves the throne.", "Votad quién merece el trono.");
+}
+
+// ---------- THE WHISPER NETWORK ----------
+// One player is privately the mole; a couple of others get real,
+// privately delivered intel. Everyone talks, then the room votes
+// on who the mole is.
+
+export function moleBriefing(): Localized {
+  return L(
+    "You're the mole this round. Nobody else knows. Muddy the water — but don't get caught.",
+    "Esta ronda eres el topo. Nadie más lo sabe. Enturbia el ambiente — que no te pillen.",
+  );
+}
+
+export function whisperOutsiderHint(): Localized {
+  return L(
+    "Someone here is playing their own game tonight. Talk. Figure out who.",
+    "Alguien aquí juega esta noche a su propio juego. Hablad. Averiguad quién.",
+  );
+}
+
+export function whisperTalkPrompt(): Localized {
+  return L(
+    "Trade what you know. Out loud, or lean in and whisper it.",
+    "Intercambiad lo que sabéis. En voz alta, o inclinaos y susurradlo.",
+  );
+}
+
+export function whoIsMolePrompt(): Localized {
+  return L("Who is the mole?", "¿Quién es el topo?");
+}
+
 // ---------- WARM-UP (director gathers data quietly) ----------
 
 export const WARMUP_FOCUS: Dimension[][] = [

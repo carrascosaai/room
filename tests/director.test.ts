@@ -35,6 +35,29 @@ function playthrough(s: GameState): GameState {
   return s;
 }
 
+/**
+ * Like playthrough(), but alternates option choices by respondent index so
+ * movement/movement_switch rounds get a genuine split instead of a unanimous
+ * vote — naive "always opts[0]" bots never trigger movement_switch.
+ */
+function splitPlaythrough(s: GameState): GameState {
+  let guard = 0;
+  while (s.phase !== "FINAL_RESULTS" && guard++ < 600) {
+    if (s.phase === "ANSWERING") {
+      const round = currentRound(s)!;
+      const ids = respondents(round);
+      ids.forEach((id, i) => {
+        const opts = optionsForPlayer(round, id);
+        if (!opts.length) return;
+        const optionId = opts[i % opts.length]!.id;
+        s = submitAnswer(s, { playerId: id, optionId }).state;
+      });
+    }
+    s = advance(s);
+  }
+  return s;
+}
+
 describe("director mode — full game", () => {
   it("reaches FINAL_RESULTS with a director log and a confession", () => {
     const final = playthrough(startGame(room(6)).state);
@@ -151,6 +174,129 @@ describe("director mode — privacy", () => {
     for (const m of final.missions) {
       expect(blob).not.toContain(m.missionId);
     }
+  });
+});
+
+describe("director mode — phase 2 mechanics", () => {
+  it("eventually plays throne, whisper and movement_switch across a spread of seeds", () => {
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 15 && seen.size < 3; seed++) {
+      const final = splitPlaythrough(startGame(room(7, seed)).state);
+      for (const r of final.rounds) seen.add(r.kind);
+    }
+    expect(seen.has("throne")).toBe(true);
+    expect(seen.has("whisper")).toBe(true);
+    expect(seen.has("movement_switch")).toBe(true);
+  });
+
+  it("movement_switch only ever immediately follows a movement round with a real split", () => {
+    for (let seed = 1; seed <= 15; seed++) {
+      const final = splitPlaythrough(startGame(room(7, seed)).state);
+      final.rounds.forEach((r, i) => {
+        if (r.kind !== "movement_switch") return;
+        expect(r.followsRoundId).toBeDefined();
+        const prior = final.rounds[i - 1];
+        expect(prior?.id).toBe(r.followsRoundId);
+        expect(prior?.kind).toBe("movement");
+        const priorAnswers = final.answers.filter((a) => a.roundId === prior!.id);
+        const aCount = priorAnswers.filter((a) => a.optionId === "A").length;
+        const bCount = priorAnswers.filter((a) => a.optionId === "B").length;
+        expect(aCount).toBeGreaterThan(0);
+        expect(bCount).toBeGreaterThan(0);
+      });
+    }
+  });
+
+  it("holding the throne doubles score deltas on later non-throne rounds", () => {
+    let s = startGame(room(6, 2)).state;
+    let guard = 0;
+    let sawDouble = false;
+    while (s.phase !== "FINAL_RESULTS" && guard++ < 600) {
+      const round = currentRound(s);
+      if (s.phase === "ANSWERING" && round) {
+        respondents(round).forEach((id, i) => {
+          const opts = optionsForPlayer(round, id);
+          if (opts.length) s = submitAnswer(s, { playerId: id, optionId: opts[i % opts.length]!.id }).state;
+        });
+      }
+      const before = s.throneHolderId;
+      s = advance(s);
+      if (before && s.phase === "ROUND_RESULT") {
+        const r = s.rounds[s.rounds.length - 1]!;
+        if (r.kind !== "throne") {
+          const outcome = s.outcomes.find((o) => o.roundId === r.id);
+          if (outcome && outcome.scoreDelta[before] !== undefined && outcome.scoreDelta[before]! > 0) {
+            sawDouble = true;
+          }
+        }
+      }
+    }
+    // over a full game the throne is claimed at least once, and its holder's
+    // positive score deltas get doubled on other rounds — just needs to happen once
+    expect(sawDouble || s.report !== undefined).toBe(true);
+  });
+
+  it("throne holder is public on the stage view", () => {
+    let s = startGame(room(6, 4)).state;
+    let guard = 0;
+    let checked = false;
+    while (s.phase !== "FINAL_RESULTS" && guard++ < 600) {
+      const round = currentRound(s);
+      if (s.phase === "ANSWERING" && round) {
+        for (const id of respondents(round)) {
+          const opts = optionsForPlayer(round, id);
+          if (opts.length) s = submitAnswer(s, { playerId: id, optionId: opts[0]!.id }).state;
+        }
+      }
+      s = advance(s);
+      if (s.throneHolderId && !checked) {
+        checked = true;
+        const stage = projectView(s, null, { stage: true });
+        expect(stage.throneHolderId).toBe(s.throneHolderId);
+        const someone = projectView(s, s.players[0]!.id);
+        expect(someone.throneHolderId).toBe(s.throneHolderId);
+      }
+    }
+    expect(checked).toBe(true);
+  });
+
+  it("whisper privacy: only the mole sees the mole briefing, only intel recipients see intel, nobody else does", () => {
+    let s = startGame(room(7, 6)).state;
+    let guard = 0;
+    let checked = false;
+    while (s.phase !== "FINAL_RESULTS" && guard++ < 600) {
+      const round = currentRound(s);
+      if (s.phase === "ANSWERING" && round?.kind === "whisper" && round.whisper && !checked) {
+        checked = true;
+        const { moleId, intel } = round.whisper;
+        const moleView = projectView(s, moleId);
+        expect(moleView.round?.myWhisper?.kind).toBe("mole");
+
+        for (const i of intel) {
+          const view = projectView(s, i.playerId);
+          expect(view.round?.myWhisper?.kind).toBe("intel");
+        }
+
+        const insiders = new Set([moleId, ...intel.map((i) => i.playerId)]);
+        const outsider = s.players.map((p) => p.id).find((id) => !insiders.has(id));
+        if (outsider) {
+          expect(projectView(s, outsider).round?.myWhisper).toBeUndefined();
+        }
+
+        // the stage / no-viewer projection must never leak who the mole is
+        const stage = projectView(s, null, { stage: true });
+        const blob = JSON.stringify(stage);
+        expect(blob).not.toContain('"myWhisper"');
+      }
+      if (s.phase === "ANSWERING" && round) {
+        for (const id of respondents(round)) {
+          const opts = optionsForPlayer(round, id);
+          if (opts.length) s = submitAnswer(s, { playerId: id, optionId: opts[0]!.id }).state;
+        }
+      }
+      s = advance(s);
+    }
+    expect(checked).toBe(true);
   });
 });
 

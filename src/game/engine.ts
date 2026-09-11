@@ -11,6 +11,8 @@ import {
   prophecyResultText,
   theoryAnnounceText,
   theoryResultText,
+  throneResultText,
+  whisperResultText,
 } from "./commentary";
 import { QUESTIONS_BY_ID } from "./questions";
 import { buildFinalReport } from "./report";
@@ -450,8 +452,14 @@ function enterFromIntro(s: GameState): GameState {
   if (round.kind === "deal" && round.body) {
     msgs.push(aiMessage(s, "quip", round.body, round.index));
   }
-  if (round.kind === "movement" && round.stageInstruction) {
+  if ((round.kind === "movement" || round.kind === "movement_switch") && round.stageInstruction) {
     msgs.push(aiMessage(s, "movement", round.stageInstruction, round.index));
+  }
+  if (round.kind === "throne" && round.body) {
+    msgs.push(aiMessage(s, "quip", round.body, round.index));
+  }
+  if (round.kind === "whisper" && round.body) {
+    msgs.push(aiMessage(s, "quip", round.body, round.index));
   }
 
   const next = { ...s, ...extra, aiMessages: [...s.aiMessages, ...msgs] };
@@ -513,6 +521,7 @@ function doReveal(s: GameState): GameState {
   let behavior = { ...s.behavior };
   let group = s.group;
   let theories = [...s.theories];
+  let throneHolderId = s.throneHolderId;
   const scoreDelta: Record<string, number> = {};
   const lines: Localized[] = [];
   const aiMsgs: AiMessage[] = [];
@@ -981,6 +990,133 @@ function doReveal(s: GameState): GameState {
     }
   }
 
+  if (round.kind === "movement_switch" && round.followsRoundId) {
+    const priorAnswers = s.answers.filter((a) => a.roundId === round.followsRoundId);
+    const priorOf = (pid: string) => priorAnswers.find((a) => a.playerId === pid)?.optionId;
+
+    const tally = new Map<string, string[]>();
+    for (const a of roundAnswers) {
+      const arr = tally.get(a.optionId) ?? [];
+      arr.push(a.playerId);
+      tally.set(a.optionId, arr);
+    }
+    let alone: string | null = null;
+    for (const [, g] of tally) if (g.length === 1) alone = g[0]!;
+
+    const switched = roundAnswers
+      .filter((a) => {
+        const before = priorOf(a.playerId);
+        return before !== undefined && before !== a.optionId;
+      })
+      .map((a) => a.playerId);
+
+    if (alone) {
+      add(alone, POINTS.contrarianBonus + 25);
+      rep(alone, "influence", 10);
+    }
+    for (const pid of switched) {
+      add(pid, 15);
+      rep(pid, "influence", -5);
+    }
+    recordPairAlignment(roundAnswers, (x, y, matched) => {
+      group = recordAlignment(group, x, y, matched);
+    });
+    const statement = round.body ?? L("", "");
+    const moveCounts = { left: (tally.get("A") ?? []).length, right: (tally.get("B") ?? []).length };
+    aiMsgs.push(
+      aiMessage(s, "movement", movementText(statement, alone, switched, s.players, moveCounts), round.index),
+    );
+    if (switched.length > 0) {
+      lines.push(
+        switched.length === 1
+          ? L(`${nameOf(switched[0]!)} got talked into switching.`, `A ${nameOf(switched[0]!)} le convencieron de cambiarse.`)
+          : L(`${switched.length} people switched sides.`, `${switched.length} personas se cambiaron de lado.`),
+      );
+    } else if (alone) {
+      lines.push(L(`${nameOf(alone)} still stood alone.`, `${nameOf(alone)} se quedó solo igualmente.`));
+    }
+  }
+
+  if (round.kind === "throne") {
+    const tally = new Map<string, number>();
+    for (const a of roundAnswers) tally.set(a.optionId, (tally.get(a.optionId) ?? 0) + 1);
+    const sorted = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+    const previousHolderId = s.throneHolderId ?? null;
+    const topEntry = sorted[0] ?? null;
+
+    let newHolderId: string | null;
+    if (!previousHolderId) {
+      // empty throne: plurality claims it (deterministic tiebreak: first in sorted order)
+      newHolderId = topEntry ? topEntry[0] : null;
+    } else {
+      const holderVotes = tally.get(previousHolderId) ?? 0;
+      const topVotes = topEntry ? topEntry[1] : 0;
+      const topIsHolder = topEntry ? topEntry[0] === previousHolderId : true;
+      // ties go to the incumbent — someone has to strictly out-poll them
+      newHolderId = topIsHolder || topVotes <= holderVotes ? previousHolderId : topEntry![0];
+    }
+
+    const changed = newHolderId !== null && newHolderId !== previousHolderId;
+    if (newHolderId) {
+      throneHolderId = newHolderId;
+      add(newHolderId, changed ? 120 : 60);
+      rep(newHolderId, "influence", changed ? 20 : 10);
+      rep(newHolderId, "trust", 8);
+      if (changed && previousHolderId) {
+        rep(previousHolderId, "suspicion", 10);
+        rep(previousHolderId, "influence", -10);
+      }
+    }
+
+    aiMsgs.push(
+      aiMessage(
+        s,
+        "throne_result",
+        throneResultText(nameOf(newHolderId ?? previousHolderId ?? ""), previousHolderId ? nameOf(previousHolderId) : null, changed),
+        round.index,
+      ),
+    );
+    lines.push(
+      changed
+        ? L("THE THRONE CHANGES HANDS", "EL TRONO CAMBIA DE MANOS")
+        : L("THE THRONE HOLDS", "EL TRONO AGUANTA"),
+    );
+  }
+
+  if (round.kind === "whisper" && round.whisper) {
+    const moleId = round.whisper.moleId;
+    const tally = new Map<string, number>();
+    for (const a of roundAnswers) tally.set(a.optionId, (tally.get(a.optionId) ?? 0) + 1);
+    const sorted = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+    const tied = sorted.length > 1 && sorted[0]![1] === sorted[1]![1];
+    const topPick = tied ? null : (sorted[0]?.[0] ?? null);
+    const caught = topPick === moleId;
+
+    if (caught) {
+      add(moleId, -100);
+      rep(moleId, "suspicion", 25);
+      for (const a of roundAnswers) {
+        if (a.optionId === moleId) {
+          add(a.playerId, POINTS.predictAnotherPlayer);
+          rep(a.playerId, "influence", 4);
+        }
+      }
+    } else {
+      add(moleId, POINTS.foolAiHypothesis + 50);
+      rep(moleId, "influence", 15);
+      rep(moleId, "suspicion", -5);
+    }
+    aiMsgs.push(
+      aiMessage(s, "whisper_result", whisperResultText(nameOf(moleId), caught), round.index),
+    );
+    lines.push(caught ? L("THE MOLE WAS CAUGHT", "EL TOPO FUE DESCUBIERTO") : L("THE MOLE ESCAPED", "EL TOPO SE ESCAPÓ"));
+  }
+
+  // throne perk: the holder's points are doubled on every round they play, except the throne round itself
+  if (s.throneHolderId && round.kind !== "throne" && scoreDelta[s.throneHolderId] !== undefined) {
+    scoreDelta[s.throneHolderId] = scoreDelta[s.throneHolderId]! * 2;
+  }
+
   // apply score + reputation deltas to players
   const players = s.players.map((p) => {
     const r = repDelta[p.id];
@@ -1014,6 +1150,7 @@ function doReveal(s: GameState): GameState {
     behavior,
     group,
     theories,
+    throneHolderId,
     outcomes: [...s.outcomes, outcome],
     aiMessages: [...s.aiMessages, ...aiMsgs],
     usedQuestionIds,

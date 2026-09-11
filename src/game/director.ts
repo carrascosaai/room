@@ -1,6 +1,6 @@
 import { topReadings } from "./behavior";
 import { pairMetrics, getEdge } from "./group";
-import { allCompatibility } from "./compat";
+import { allCompatibility, wildcardPlayer } from "./compat";
 import { chooseQuestion, makeRound, playerOptions, rngFor } from "./selector";
 import {
   ACCUSATIONS,
@@ -8,11 +8,21 @@ import {
   DEAL_TASKS,
   MOVEMENT_STATEMENTS,
   PROPHECIES,
+  TALK,
   WARMUP_FOCUS,
   consequenceOptions,
   dealChoiceOptions,
+  moleBriefing,
   movementOptions,
   prophecyBetOptions,
+  throneChallengeBody,
+  throneChallengeTalk,
+  throneClaimBody,
+  throneClaimTalk,
+  throneStageInstruction,
+  whisperOutsiderHint,
+  whisperTalkPrompt,
+  whoIsMolePrompt,
 } from "./directorContent";
 import { hashString, pick, shuffle } from "@/lib/rng";
 import type {
@@ -138,6 +148,19 @@ export function buildDirectorRound(state: GameState): DirectorResult {
   const rand = rngFor(state, "dir" + index);
   const moveId = "d" + hashString("dir" + index + state.seed).toString(36);
 
+  // ── FORCED FOLLOW-UP: a movement round with a real split always gets one
+  //    more "convince someone" chance, right away. Not part of the weighted
+  //    mix — this always wins. ──
+  const priorRound = state.rounds[state.rounds.length - 1];
+  if (priorRound && priorRound.kind === "movement" && !state.rounds.some((r) => r.followsRoundId === priorRound.id)) {
+    const priorAnswers = state.answers.filter((a) => a.roundId === priorRound.id);
+    const aCount = priorAnswers.filter((a) => a.optionId === "A").length;
+    const bCount = priorAnswers.filter((a) => a.optionId === "B").length;
+    if (aCount > 0 && bCount > 0) {
+      return movementSwitch(state, index, moveId, priorRound, rand);
+    }
+  }
+
   // ── WARM-UP: gather data quietly, no drama ──
   if (index < 3) {
     const focus = WARMUP_FOCUS[index % WARMUP_FOCUS.length]!;
@@ -196,16 +219,18 @@ export function buildDirectorRound(state: GameState): DirectorResult {
   const midTotal = Math.max(1, total - 5); // rounds that aren't warmup / finale
   const soFar = Math.max(1, index - 3);
   const desired: Record<string, number> = {
-    interrogation: 0.28,
-    deal: 0.16,
-    prophecy: 0.18,
-    movement: 0.18,
-    filler: 0.2,
+    interrogation: 0.2,
+    deal: 0.1,
+    prophecy: 0.12,
+    movement: 0.14,
+    throne: 0.14,
+    whisper: 0.12,
+    filler: 0.18,
   };
   void midTotal;
 
   type Opt = {
-    kind: "interrogation" | "deal" | "prophecy" | "movement" | "filler";
+    kind: "interrogation" | "deal" | "prophecy" | "movement" | "throne" | "whisper" | "filler";
     signal: DirectorSignal;
     boost: number;
     build: () => DirectorResult;
@@ -246,6 +271,20 @@ export function buildDirectorRound(state: GameState): DirectorResult {
     boost: sig.harmony > 0.7 ? 0.35 : 0.1,
     build: () => movement(state, index, moveId, sig.harmony > 0.7 ? "too_much_harmony" : "cadence", rand),
   });
+  // the throne — claim it if empty, contest it if held
+  opts.push({
+    kind: "throne",
+    signal: state.throneHolderId ? "throne_challenge" : "throne_empty",
+    boost: state.throneHolderId ? 0.15 : 0.3,
+    build: () => throne(state, index, moveId, rand),
+  });
+  // the whisper network — a private mole, private intel, then a public vote
+  opts.push({
+    kind: "whisper",
+    signal: "whisper_mole",
+    boost: 0.12,
+    build: () => whisper(state, index, moveId, rand),
+  });
   // filler — a clean contested vote
   opts.push({
     kind: "filler",
@@ -269,7 +308,7 @@ export function buildDirectorRound(state: GameState): DirectorResult {
     const used = (beats[o.kind] ?? 0) / soFar;
     const deficit = desired[o.kind]! - used; // positive => under-used
     let score = deficit * 3 + o.boost + rand() * 0.25;
-    if ((lastKind === "interrogation" && o.kind === "interrogation") || (lastKind === "movement" && o.kind === "movement")) {
+    if (lastKind === o.kind) {
       score -= 2; // no repeats back to back
     }
     if (score > bestScore) { bestScore = score; best = o; }
@@ -517,17 +556,181 @@ function movement(
   };
 }
 
+function throne(state: GameState, index: number, moveId: string, rand: () => number): DirectorResult {
+  void rand;
+  const roster = connectedPlayers(state);
+  const ids = roster.map((p) => p.id);
+  const holderId = state.throneHolderId;
+  const optionsByPlayer = Object.fromEntries(roster.map((p) => [p.id, playerOptions(roster, [p.id])]));
+
+  if (!holderId || !ids.includes(holderId)) {
+    return {
+      round: makeRound({
+        id: `r${index}`,
+        index,
+        kind: "throne",
+        participants: ids,
+        directorMoveId: moveId,
+        title: L("The throne", "El trono"),
+        body: throneClaimBody(),
+        talkSeconds: 20,
+        talkPrompt: throneClaimTalk(),
+        stageInstruction: throneStageInstruction(),
+        optionsByPlayer,
+        timeLimit: 20,
+      }),
+      move: {
+        id: moveId,
+        roundIndex: index,
+        kind: "throne",
+        signal: "throne_empty",
+        targets: [],
+        reason: L(
+          "I left a seat of real power empty and let you fight over it.",
+          "Dejé un asiento de poder real vacío y os dejé pelearos por él.",
+        ),
+      },
+    };
+  }
+
+  const n = name(state, holderId);
+  return {
+    round: makeRound({
+      id: `r${index}`,
+      index,
+      kind: "throne",
+      participants: ids,
+      hotSeatId: holderId,
+      directorMoveId: moveId,
+      title: L("The throne", "El trono"),
+      body: throneChallengeBody(n),
+      talkSeconds: 25,
+      talkPrompt: throneChallengeTalk(n),
+      stageInstruction: throneStageInstruction(),
+      optionsByPlayer,
+      timeLimit: 20,
+    }),
+    move: {
+      id: moveId,
+      roundIndex: index,
+      kind: "throne",
+      signal: "throne_challenge",
+      targets: [holderId],
+      reason: L(
+        `${n} was sitting comfortably on the throne, so I opened it up to a challenge.`,
+        `${n} estaba cómodo en el trono, así que abrí la posibilidad de que se lo disputaran.`,
+      ),
+    },
+  };
+}
+
+function whisper(state: GameState, index: number, moveId: string, rand: () => number): DirectorResult {
+  const roster = connectedPlayers(state);
+  const ids = roster.map((p) => p.id);
+  const wc = wildcardPlayer(state);
+  const moleId = wc && ids.includes(wc.id) ? wc.id : pick(rand, ids);
+  const others = ids.filter((x) => x !== moleId);
+
+  const metrics = [...pairMetrics(state.group, ids)]
+    .filter((m) => m.comparable >= 2 || m.mutualSelection >= 1)
+    .sort((a, b) => b.alignmentRatio * b.comparable + b.mutualSelection * 2 - (a.alignmentRatio * a.comparable + a.mutualSelection * 2));
+  const recipients = shuffle(rand, others).slice(0, Math.min(2, others.length));
+  const intel = recipients.map((pid, i) => {
+    const m = metrics[i];
+    const text = m
+      ? L(
+          `${name(state, m.a)} and ${name(state, m.b)} have been landing on the same side a lot.`,
+          `${name(state, m.a)} y ${name(state, m.b)} llevan cayendo del mismo lado bastante.`,
+        )
+      : L("The room is more divided than it looks.", "La sala está más dividida de lo que parece.");
+    return { playerId: pid, text };
+  });
+
+  const optionsByPlayer = Object.fromEntries(roster.map((p) => [p.id, playerOptions(roster, [p.id])]));
+
+  return {
+    round: makeRound({
+      id: `r${index}`,
+      index,
+      kind: "whisper",
+      participants: ids,
+      directorMoveId: moveId,
+      title: L("The whisper network", "La red de susurros"),
+      body: whisperOutsiderHint(),
+      whisper: { moleId, moleBriefing: moleBriefing(), intel },
+      talkSeconds: 45,
+      talkPrompt: whisperTalkPrompt(),
+      stageInstruction: whoIsMolePrompt(),
+      optionsByPlayer,
+      timeLimit: 20,
+    }),
+    move: {
+      id: moveId,
+      roundIndex: index,
+      kind: "whisper",
+      signal: "whisper_mole",
+      targets: [moleId],
+      reason: L(
+        `I made ${name(state, moleId)} the mole and watched who they could fool.`,
+        `Convertí a ${name(state, moleId)} en el topo y vi a quién era capaz de engañar.`,
+      ),
+    },
+  };
+}
+
+function movementSwitch(
+  state: GameState,
+  index: number,
+  moveId: string,
+  priorRound: Round,
+  rand: () => number,
+): DirectorResult {
+  void rand;
+  const ids = connectedPlayers(state).map((p) => p.id);
+  return {
+    round: makeRound({
+      id: `r${index}`,
+      index,
+      kind: "movement_switch",
+      participants: ids,
+      directorMoveId: moveId,
+      liveTally: true,
+      followsRoundId: priorRound.id,
+      title: L("Last call", "Última llamada"),
+      body: priorRound.body,
+      stageInstruction: priorRound.stageInstruction,
+      talkSeconds: 20,
+      talkPrompt: TALK.convince,
+      optionsByPlayer: { "*": movementOptions() },
+      timeLimit: 15,
+    }),
+    move: {
+      id: moveId,
+      roundIndex: index,
+      kind: "movement_switch",
+      signal: "movement_switch",
+      targets: [],
+      reason: L(
+        "I gave the room one more chance to talk someone out of their answer.",
+        "Le di a la sala una oportunidad más de convencer a alguien de que cambiara su respuesta.",
+      ),
+    },
+  };
+}
+
 // ---------- director state bookkeeping ----------
 
 export function noteSpotlight(state: GameState, move: DirectorMove): GameState {
   const lastSpotlightRound = { ...state.director.lastSpotlightRound };
   for (const t of move.targets) lastSpotlightRound[t] = move.roundIndex;
   const beats = { ...state.director.beats };
-  const beatKey = ["prophecy", "movement", "deal", "interrogation"].includes(move.kind)
+  const beatKey = ["prophecy", "movement", "deal", "interrogation", "throne", "whisper"].includes(move.kind)
     ? move.kind
-    : move.signal === "warmup"
-      ? "warmup"
-      : "filler";
+    : move.kind === "movement_switch"
+      ? "movement"
+      : move.signal === "warmup"
+        ? "warmup"
+        : "filler";
   beats[beatKey] = (beats[beatKey] ?? 0) + 1;
   const players = state.players.map((p) =>
     move.targets.includes(p.id) ? { ...p, spotlightCount: p.spotlightCount + 1 } : p,

@@ -1,5 +1,5 @@
 import { getAiProvider } from "./provider";
-import type { GameState, Localized } from "@/game/types";
+import type { AiMessage, GameState, Localized } from "@/game/types";
 
 // ─────────────────────────────────────────────────────────────
 // The narrator turns the engine's structured evidence into the
@@ -21,7 +21,7 @@ Hard rules:
 Respond ONLY with JSON: {"en": "...", "es": "..."}`;
 
 interface NarrateInput {
-  kind: "observation" | "theory" | "theory_result" | "final" | "intervention";
+  kind: AiMessage["kind"];
   evidence: string;
   fallback: Localized;
   /** extra structured context, already fact-checked by the engine */
@@ -75,8 +75,9 @@ export async function polishLatestAiMessage(state: GameState): Promise<GameState
   const provider = getAiProvider();
   if (!provider.available) return state;
   const last = state.aiMessages[state.aiMessages.length - 1];
-  if (!last) return state;
-  if (!["observation", "theory", "theory_result", "final"].includes(last.kind)) return state;
+  // never re-polish: a message is sent to the LLM at most once, ever, no
+  // matter how many times a client polls while the phase sits on it
+  if (!last || last.polished) return state;
 
   const round = state.rounds.find((r) => r.index === last.roundIndex);
   const theory = round?.theoryId
@@ -84,7 +85,7 @@ export async function polishLatestAiMessage(state: GameState): Promise<GameState
     : state.theories.find((t) => t.status === "testing" || t.status === "announced");
 
   const polished = await narrate({
-    kind: last.kind === "final" ? "final" : (last.kind as NarrateInput["kind"]),
+    kind: last.kind,
     evidence: theory?.evidence ?? last.text.en,
     fallback: last.text,
     context: {
@@ -94,9 +95,8 @@ export async function polishLatestAiMessage(state: GameState): Promise<GameState
     },
   });
 
-  if (polished === last.text) return state;
   const aiMessages = state.aiMessages.map((m) =>
-    m.id === last.id ? { ...m, text: polished } : m,
+    m.id === last.id ? { ...m, text: polished, polished: true } : m,
   );
   return { ...state, aiMessages, version: state.version + 1 };
 }
