@@ -9,10 +9,21 @@ import { getStoredPlayer } from "./player";
 // reads a projected view and posts intents. It polls (adaptive
 // interval) and, when Supabase is configured, also subscribes to
 // realtime row changes for instant updates.
+//
+// Polling is a SAFETY NET, not the primary update path, whenever
+// realtime is actually connected — this is what lets many rooms run
+// concurrently without turning every phone into a request-per-second
+// hammer on the server. Every request here fans out across however
+// many rooms are live at once, so this interval is a scale lever, not
+// just a UX one.
 // ─────────────────────────────────────────────────────────────
 
 const FAST_MS = 1100;
 const SLOW_MS = 2600;
+/** poll interval once realtime has confirmed it's connected — realtime
+ *  pushes the real updates instantly; this just guards against a missed
+ *  message or a silently dead channel. */
+const REALTIME_BACKOFF_MS = 12_000;
 
 type Status = "connecting" | "live" | "error" | "gone";
 
@@ -47,6 +58,7 @@ export function useRoom(code: string): UseRoom {
   const viewRef = useRef<PlayerView | null>(null);
   const busyAdvance = useRef(false);
   const mounted = useRef(true);
+  const realtimeLive = useRef(false);
 
   if (playerIdRef.current === null && typeof window !== "undefined") {
     playerIdRef.current = getStoredPlayer(code)?.id ?? null;
@@ -78,12 +90,16 @@ export function useRoom(code: string): UseRoom {
     }
   }, [code]);
 
-  // adaptive polling
+  // adaptive polling — backs way off once realtime confirms it's live
   useEffect(() => {
     mounted.current = true;
     let timer: ReturnType<typeof setTimeout>;
     const loop = async () => {
       await refresh();
+      if (realtimeLive.current) {
+        timer = setTimeout(loop, REALTIME_BACKOFF_MS);
+        return;
+      }
       const v = viewRef.current;
       const fast =
         v?.phase === "ANSWERING" ||
@@ -100,7 +116,8 @@ export function useRoom(code: string): UseRoom {
     };
   }, [refresh]);
 
-  // Supabase realtime (optional, snappier)
+  // Supabase realtime (the primary update path when available — polling
+  // above only kicks back into full speed if this drops)
   useEffect(() => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -121,24 +138,26 @@ export function useRoom(code: string): UseRoom {
               void refresh();
             },
           )
-          .subscribe();
+          .subscribe((subStatus) => {
+            realtimeLive.current = subStatus === "SUBSCRIBED";
+          });
       } catch {
-        /* realtime optional */
+        /* realtime optional — polling above stays at full speed */
       }
     })();
     return () => {
       cancelled = true;
+      realtimeLive.current = false;
       channel?.unsubscribe();
     };
   }, [code, refresh]);
 
-  // host / timer-driven auto-advance for display + answering phases
+  // host / timer-driven auto-advance for display + answering phases.
+  // Runs on its own local 1s clock (no network cost) so it keeps noticing
+  // a deadline has passed even while the network poll itself has backed
+  // off to REALTIME_BACKOFF_MS — "time is up" is a client-side fact, it
+  // doesn't need a round trip to detect.
   useEffect(() => {
-    if (!view) return;
-    const isHost = view.me?.isHost ?? false;
-    const deadline = view.phaseDeadline ?? 0;
-    const now = Date.now();
-
     const displayPhases = [
       "ROUND_INTRO",
       "DISCUSSION",
@@ -148,19 +167,28 @@ export function useRoom(code: string): UseRoom {
       "AI_THEORY",
       "AI_INTERVENTION",
     ];
-    const shouldNudge =
-      (view.phase === "ANSWERING" && deadline && now >= deadline) ||
-      (displayPhases.includes(view.phase) && deadline && now >= deadline && isHost);
-
-    if (!shouldNudge || busyAdvance.current) return;
-    busyAdvance.current = true;
-    const pid = playerIdRef.current;
-    (async () => {
-      if (pid) await post(`/api/rooms/${code}/advance`, { playerId: pid });
-      await refresh();
-      busyAdvance.current = false;
-    })();
-  }, [view, code, refresh]);
+    const tick = () => {
+      const v = viewRef.current;
+      if (!v) return;
+      const isHost = v.me?.isHost ?? false;
+      const deadline = v.phaseDeadline ?? 0;
+      const now = Date.now();
+      const shouldNudge =
+        (v.phase === "ANSWERING" && deadline && now >= deadline) ||
+        (displayPhases.includes(v.phase) && deadline && now >= deadline && isHost);
+      if (!shouldNudge || busyAdvance.current) return;
+      busyAdvance.current = true;
+      const pid = playerIdRef.current;
+      (async () => {
+        if (pid) await post(`/api/rooms/${code}/advance`, { playerId: pid });
+        await refresh();
+        busyAdvance.current = false;
+      })();
+    };
+    const interval = setInterval(tick, 1000);
+    tick();
+    return () => clearInterval(interval);
+  }, [code, refresh]);
 
   const answer = useCallback(
     async (optionId: string, targetId?: string) => {
