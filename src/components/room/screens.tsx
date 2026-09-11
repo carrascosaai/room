@@ -81,6 +81,17 @@ export function Lobby({ view, room }: { view: PlayerView; room: UseRoom }) {
         </div>
       </div>
 
+      {isHost ? (
+        <a
+          href={`/stage/${view.code}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-block text-xs font-mono uppercase tracking-widest text-[var(--accent)] underline underline-offset-4"
+        >
+          {t("lobby.openStage")} →
+        </a>
+      ) : null}
+
       <div className="mt-7 flex items-center justify-between">
         <span className="text-sm font-semibold">
           {t("lobby.playersJoined", { count: view.players.length, max: view.maxPlayers })}
@@ -142,6 +153,60 @@ export function RoundIntro({ view }: { view: PlayerView }) {
   );
 }
 
+// ─────────────────────────────────────────── DISCUSSION (talk out loud)
+
+export function DiscussionScreen({ view }: { view: PlayerView }) {
+  const { t, loc } = useI18n();
+  const r = view.round;
+  if (!r) return null;
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center px-6 text-center animate-fade-up">
+      <p className="font-mono text-xs uppercase tracking-[0.35em] text-[var(--danger)]">
+        {t("director.talkNow")}
+      </p>
+
+      <div className="mt-6">
+        <Timer deadline={view.phaseDeadline} total={r.talkSeconds ?? r.timeLimit} />
+      </div>
+
+      {r.hotSeatId ? (
+        <p className="mt-6 rounded-full border border-[var(--danger)]/50 bg-[var(--danger)]/10 px-4 py-1.5 text-sm font-mono uppercase tracking-widest text-[var(--danger)]">
+          {nameOf(view, r.hotSeatId)}
+        </p>
+      ) : null}
+
+      {r.prophecyCall ? (
+        <p className="mt-6 text-lg font-semibold leading-snug">{loc(r.prophecyCall)}</p>
+      ) : null}
+
+      {r.mySecretDeal ? (
+        <div className="mt-6 w-full max-w-xs rounded-2xl border border-[var(--danger)]/50 bg-[var(--danger)]/10 p-4 text-left">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--danger)]">
+            {t("director.dealBadge")}
+          </p>
+          <p className="mt-1 text-sm">{loc(r.mySecretDeal.task)}</p>
+          <p className="mt-2 text-xs text-[var(--muted)]">{t("director.dealWarning")}</p>
+        </div>
+      ) : null}
+
+      <p className="mt-8 max-w-xs text-2xl font-bold leading-tight">
+        {r.talkPrompt ? loc(r.talkPrompt) : t("director.talkNow")}
+      </p>
+
+      {r.stageInstruction ? (
+        <p className="mt-4 max-w-xs text-sm text-[var(--muted)]">{loc(r.stageInstruction)}</p>
+      ) : null}
+
+      {view.myMission ? (
+        <div className="mt-8 w-full max-w-xs">
+          <SecretMissionBanner view={view} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────── ANSWER
 
 export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }) {
@@ -153,8 +218,14 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
 
   const prompt = r.body ?? r.prompt;
   const title = r.title ? loc(r.title) : null;
-  const isPlayerPick = r.kind === "group_vote" || r.kind === "trust" || r.kind === "accusation";
+  const isDeal = r.kind === "deal";
+  const isProphecy = r.kind === "prophecy";
+  const isMovement = r.kind === "movement";
+  const isInterrogation = r.kind === "interrogation";
+  const isDealAccusing = isDeal && r.iAmPredictor && !r.iAmParticipant;
+  const isPlayerPick = r.kind === "group_vote" || r.kind === "trust" || r.kind === "accusation" || isDealAccusing;
   const isAccusation = r.kind === "accusation";
+  const isProphecyBet = isProphecy && r.iAmPredictor && !r.iAmParticipant;
   const waiting = Math.max(0, r.respondentCount - r.answeredCount);
 
   // a fresh salseo message tied to this round (affinity / accusation framing)
@@ -191,8 +262,36 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
         </div>
       ) : null}
 
+      {isInterrogation && r.hotSeatId ? (
+        <p className="mt-3 rounded-full border border-[var(--danger)]/50 bg-[var(--danger)]/10 px-3 py-1.5 text-center text-xs font-mono uppercase tracking-widest text-[var(--danger)]">
+          {t("director.hotSeatBadge")} · {nameOf(view, r.hotSeatId)}
+        </p>
+      ) : null}
+
       {prompt ? (
         <h2 className="mt-3 text-[22px] font-semibold leading-snug">{loc(prompt)}</h2>
+      ) : null}
+
+      {r.prophecyCall ? (
+        <div className="mt-3 rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/5 px-3 py-2 text-sm">
+          {loc(r.prophecyCall)}
+        </div>
+      ) : null}
+
+      {r.mySecretDeal ? (
+        <div className="mt-3 rounded-2xl border border-[var(--danger)]/50 bg-[var(--danger)]/10 p-4">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--danger)]">
+            {t("director.dealBadge")}
+          </p>
+          <p className="mt-1 text-sm font-semibold">{t("director.dealYourTask")}</p>
+          <p className="mt-1 text-sm">{loc(r.mySecretDeal.task)}</p>
+          <p className="mt-2 text-xs text-[var(--accent)]">
+            {t("director.dealReward", { n: r.mySecretDeal.reward })}
+          </p>
+          <p className="mt-1 text-xs text-[var(--muted)]">{t("director.dealWarning")}</p>
+        </div>
+      ) : isDealAccusing ? (
+        <p className="mt-3 text-xs text-[var(--muted)]">{t("director.dealOutsiderHint")}</p>
       ) : null}
 
       {r.theory && !salseoMsg ? (
@@ -201,8 +300,22 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
 
       <SecretMissionBanner view={view} />
 
+      {isMovement && r.liveTally ? (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <TallyBar label={t("director.movementTallyLeft")} count={r.liveTally.A ?? 0} />
+          <TallyBar label={t("director.movementTallyRight")} count={r.liveTally.B ?? 0} />
+        </div>
+      ) : null}
+
       <div className="mt-6 flex-1">
-        {!r.iRespond ? (
+        {isInterrogation && r.iAmHotSeat ? (
+          <div className="mt-6 flex flex-col items-center gap-3 text-center">
+            <span className="rounded-full border border-[var(--danger)] px-4 py-2 text-sm font-semibold text-[var(--danger)]">
+              {t("director.hotSeatBadge")}
+            </span>
+            <p className="text-sm text-[var(--muted)]">{t("director.hotSeatWaiting")}</p>
+          </div>
+        ) : !r.iRespond ? (
           <p className="mt-10 text-center text-sm text-[var(--muted)]">{t("game.spectating")}</p>
         ) : r.iAnswered ? (
           <div className="mt-10 flex flex-col items-center gap-3 text-center">
@@ -217,21 +330,35 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
           </div>
         ) : (
           <>
-            {r.iAmPredictor && !r.iAmParticipant ? (
+            {isInterrogation && !r.iAmHotSeat ? (
+              <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
+                {t("director.rateThem")}
+              </p>
+            ) : isDealAccusing ? (
+              <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
+                {t("director.dealAccuseWho")}
+              </p>
+            ) : isProphecyBet ? (
+              <p className="mb-3 text-xs uppercase tracking-widest text-[var(--trust)]">
+                {t("director.prophecyBetQuestion")}
+              </p>
+            ) : r.iAmPredictor && !r.iAmParticipant ? (
               <p className="mb-3 text-xs uppercase tracking-widest text-[var(--trust)]">
                 {t("game.predicting")}
               </p>
             ) : null}
-            <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
-              {isAccusation
-                ? t("game.pointAtSomeone")
-                : isPlayerPick
-                  ? t("game.pickPlayer")
-                  : r.iAmPredictor && !r.iAmParticipant
-                    ? t("game.predict")
-                    : t("game.chooseOne")}
-            </p>
-            <div className="grid gap-2.5">
+            {!isInterrogation && !isDealAccusing && !isProphecyBet ? (
+              <p className="mb-3 text-xs uppercase tracking-widest text-[var(--muted)]">
+                {isAccusation
+                  ? t("game.pointAtSomeone")
+                  : isPlayerPick
+                    ? t("game.pickPlayer")
+                    : r.iAmPredictor && !r.iAmParticipant
+                      ? t("game.predict")
+                      : t("game.chooseOne")}
+              </p>
+            ) : null}
+            <div className={isInterrogation ? "grid gap-2" : "grid gap-2.5"}>
               {r.myOptions.map((o) => {
                 const asPlayer = view.players.find((p) => p.id === o.id);
                 return (
@@ -241,7 +368,13 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
                     disabled={!!pending}
                     className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-4 text-left text-[15px] transition active:scale-[0.99] hover:border-[var(--accent)] disabled:opacity-50"
                   >
-                    {asPlayer ? <Avatar player={asPlayer} size={26} /> : (
+                    {asPlayer ? (
+                      <Avatar player={asPlayer} size={26} />
+                    ) : isInterrogation ? (
+                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[var(--border)] font-mono text-xs text-[var(--muted)]">
+                        {o.id}
+                      </span>
+                    ) : (
                       <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-[var(--border)] font-mono text-xs text-[var(--muted)]">
                         {o.id.toUpperCase().slice(0, 1)}
                       </span>
@@ -256,6 +389,15 @@ export function AnswerScreen({ view, room }: { view: PlayerView; room: UseRoom }
       </div>
 
       <MiniStandings view={view} />
+    </div>
+  );
+}
+
+function TallyBar({ label, count }: { label: string; count: number }) {
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-center">
+      <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">{label}</p>
+      <p className="tabnums text-2xl font-bold">{count}</p>
     </div>
   );
 }
@@ -288,15 +430,20 @@ export function RevealScreen({ view, room }: { view: PlayerView; room: UseRoom }
   const myDelta = view.me ? (reveal?.scoreDelta[view.me.id] ?? 0) : 0;
   const wentAgainst = view.me ? reveal?.contrarians.includes(view.me.id) : false;
 
+  const RESULT_KINDS = [
+    "affinity",
+    "accusation",
+    "theory_result",
+    "verdict",
+    "prophecy_result",
+    "deal_reveal",
+    "movement",
+  ];
   const resultMsg =
     r &&
     [...view.aiMessages]
       .reverse()
-      .find(
-        (m) =>
-          m.roundIndex === r.index &&
-          (m.kind === "affinity" || m.kind === "accusation" || m.kind === "theory_result"),
-      );
+      .find((m) => m.roundIndex === r.index && RESULT_KINDS.includes(m.kind));
 
   return (
     <div className="flex flex-1 flex-col px-5 pb-8 pt-4 animate-fade-up">

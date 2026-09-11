@@ -51,7 +51,12 @@
     "nicknamePlaceholder": "p. ej. Fernando",
     "maxPlayers": "Jugadores máx.",
     "createButton": "Crear sala",
-    "creating": "Creando…"
+    "creating": "Creando…",
+    "modeLabel": "Cómo queréis jugar",
+    "modeDirectorTitle": "EN DIRECTO — IA directora",
+    "modeDirectorDesc": "Interrogatorios, tratos secretos, profecías, todos de pie. Ruidoso. Recomendado si estáis en la misma sala.",
+    "modeClassicTitle": "Clásico",
+    "modeClassicDesc": "Rondas más tranquilas, solo en el móvil. Bien para grupos en remoto o silenciosos."
   },
   "join": {
     "title": "Unirse a una sala",
@@ -72,7 +77,8 @@
     "startButton": "Empezar sala",
     "youAreHost": "Eres el anfitrión",
     "leave": "Salir de la sala",
-    "joinUrl": "Entra en"
+    "joinUrl": "Entra en",
+    "openStage": "Abrir pantalla compartida"
   },
   "game": {
     "roundIntro": "Ronda {n}",
@@ -146,6 +152,45 @@
     "resultText": "La IA acertó con nosotros el {accuracy}%. ¿Crees que tu grupo puede engañarla?",
     "copyLink": "Copiar enlace del resultado",
     "linkCopied": "Enlace copiado"
+  },
+  "director": {
+    "talkNow": "HABLAD — EN VOZ ALTA",
+    "hotSeatBadge": "EN EL PUNTO DE MIRA",
+    "hotSeatWaiting": "Todos te juzgan. Habla.",
+    "hotSeatIsTalking": "{name} está hablando. Juzgadle.",
+    "rateThem": "¿Te lo crees?",
+    "rate1": "No me lo trago",
+    "rate2": "Meh",
+    "rate3": "Vale, cuela",
+    "rate4": "Convincente",
+    "rate5": "Totalmente convencido",
+    "dealBadge": "TRATO SECRETO",
+    "dealYourTask": "Vuestra misión secreta",
+    "dealReward": "+{n} pts a repartir si lo lográis",
+    "dealWarning": "Nadie más puede saberlo. Actuad con normalidad.",
+    "dealOutsiderHint": "Dos personas de aquí han recibido un mensaje secreto. Buscad el tell.",
+    "dealAccuseWho": "¿Quién crees que tenía un trato?",
+    "prophecyBadge": "LA IA HA HABLADO",
+    "prophecyBetQuestion": "¿Acierta la IA?",
+    "prophecySubjectHint": "Todos han oído la predicción. Te toca.",
+    "movementBadge": "EN PIE",
+    "movementInstruction": "Levantaos. Moveos a un lado.",
+    "movementTallyLeft": "IZQUIERDA",
+    "movementTallyRight": "DERECHA",
+    "confessionTitle": "LO QUE OS HICE",
+    "confessionSubtitle": "Cada jugada, y por qué.",
+    "reputationTrust": "Confianza",
+    "reputationSuspicion": "Sospecha",
+    "reputationInfluence": "Influencia",
+    "talkTimerLabel": "hablando"
+  },
+  "stage": {
+    "openOnPhone": "Abrid ROOM en el móvil para jugar",
+    "joinAt": "Entrad en",
+    "waitingForPlayers": "Esperando jugadores…",
+    "waitingForAnswers": "Esperando a la sala…",
+    "castHint": "Proyectad esta pantalla, o apoyad el móvil donde todos lo vean.",
+    "modeLabel": "PANTALLA"
   },
   "errors": {
     "room_full": "Esta sala está llena.",

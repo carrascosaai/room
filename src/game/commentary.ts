@@ -150,6 +150,109 @@ export function missionsRevealText(count: number, completed: number): Localized 
   );
 }
 
+// ---------- director mechanics ----------
+
+export function hotSeatVerdictText(
+  name: string,
+  believed: boolean,
+  avgRating: number,
+): Localized {
+  if (believed) {
+    return L(
+      `The room bought it. ${name} talked their way out — average ${avgRating.toFixed(1)}/5.`,
+      `La sala se lo tragó. ${name} habló y salió — media de ${avgRating.toFixed(1)}/5.`,
+    );
+  }
+  return L(
+    `The room didn't buy it. ${name} — ${avgRating.toFixed(1)}/5. I'm marking that.`,
+    `La sala no se lo tragó. ${name} — ${avgRating.toFixed(1)}/5. Lo apunto.`,
+  );
+}
+
+export function accusationConsequenceText(name: string, exiled: boolean): Localized {
+  return exiled
+    ? L(`${name} sits out the next round. The room has spoken.`, `${name} se salta la próxima ronda. La sala ha hablado.`)
+    : L("", "");
+}
+
+export function dealRevealText(
+  existed: boolean,
+  caught: boolean,
+  aName: string,
+  bName: string,
+): Localized {
+  if (!existed) {
+    return L(
+      "There was no deal. You spent all that energy suspecting each other for nothing.",
+      "No había ningún trato. Habéis gastado toda esa energía sospechando entre vosotros para nada.",
+    );
+  }
+  if (caught) {
+    return L(
+      `Caught. ${aName} and ${bName} had a deal — and the room saw it. They lose everything.`,
+      `Pillados. ${aName} y ${bName} tenían un trato, y la sala lo vio. Lo pierden todo.`,
+    );
+  }
+  return L(
+    `${aName} and ${bName} had a deal. Nobody caught it. That's how it's done.`,
+    `${aName} y ${bName} tenían un trato. Nadie lo pilló. Así se hace.`,
+  );
+}
+
+export function prophecyResultText(name: string, held: boolean, defied: boolean): Localized {
+  if (held) {
+    return L(
+      `I called it. ${name} did exactly what I said. I've got you.`,
+      `Lo dije. ${name} hizo exactamente lo que dije. Te tengo.`,
+    );
+  }
+  void defied;
+  return L(
+    `${name} defied me — right in front of everyone. Fine. I didn't see that coming.`,
+    `${name} me llevó la contraria — delante de todos. Vale. No me lo esperaba.`,
+  );
+}
+
+export function movementText(
+  statement: Localized,
+  alone: string | null,
+  switched: string[],
+  players: Player[],
+  counts: { left: number; right: number } = { left: 0, right: 0 },
+): Localized {
+  const nameOf = (id: string) => players.find((p) => p.id === id)?.nickname ?? "?";
+  const parts: { en: string; es: string }[] = [];
+  if (alone) {
+    parts.push({
+      en: `${nameOf(alone)} stood alone on that one.`,
+      es: `${nameOf(alone)} se quedó solo en esa.`,
+    });
+  }
+  if (switched.length === 1) {
+    parts.push({
+      en: `${nameOf(switched[0]!)} got talked into switching sides.`,
+      es: `A ${nameOf(switched[0]!)} le convencieron para cambiarse de lado.`,
+    });
+  } else if (switched.length > 1) {
+    parts.push({
+      en: `${switched.length} people switched sides after talking.`,
+      es: `${switched.length} personas se cambiaron de lado tras hablar.`,
+    });
+  }
+  if (parts.length === 0) {
+    if (counts.left > 0 && counts.right > 0) {
+      parts.push({
+        en: `The room split ${counts.left}-${counts.right}. Nobody stood alone.`,
+        es: `La sala se dividió ${counts.left}-${counts.right}. Nadie se quedó solo.`,
+      });
+    } else {
+      parts.push({ en: "The room moved as one.", es: "La sala se movió como una sola." });
+    }
+  }
+  void statement;
+  return { en: parts.map((p) => p.en).join(" "), es: parts.map((p) => p.es).join(" ") };
+}
+
 export function interventionText(state: GameState, pair: [string, string]): Localized {
   const a = state.players.find((p) => p.id === pair[0])?.nickname ?? "?";
   const b = state.players.find((p) => p.id === pair[1])?.nickname ?? "?";

@@ -1,5 +1,5 @@
 import { QUESTIONS_BY_ID } from "./questions";
-import { currentRound, optionsForPlayer, respondents } from "./engine";
+import { currentRound, optionsForPlayer, respondents, totalRounds } from "./engine";
 import { evidenceLocalized } from "./commentary";
 import { missionText } from "./missions";
 import type { AiMessage, GamePhase, GameState, Localized, Theory } from "./types";
@@ -17,6 +17,9 @@ export interface PlayerViewPlayer {
   score: number;
   isHost: boolean;
   connected: boolean;
+  trust: number;
+  suspicion: number;
+  influence: number;
 }
 
 export interface RevealAnswerRow {
@@ -28,10 +31,13 @@ export interface RevealAnswerRow {
 export interface PlayerView {
   code: string;
   phase: GamePhase;
+  mode: "director" | "classic";
   version: number;
   phaseDeadline?: number;
   storeKind: "memory" | "supabase";
   aiEnabled: boolean;
+  /** true when this projection is for the shared "stage" screen */
+  stage: boolean;
 
   me: { id: string; isHost: boolean; connected: boolean } | null;
   players: PlayerViewPlayer[];
@@ -58,6 +64,16 @@ export interface PlayerView {
     respondentCount: number;
     theory?: PublicTheory;
     participants: string[];
+    // ── talk / stage ──
+    talkSeconds?: number;
+    talkPrompt?: Localized;
+    stageInstruction?: Localized;
+    hotSeatId?: string;
+    iAmHotSeat: boolean;
+    liveTally?: Record<string, number>;
+    /** the viewer's own secret pact (only the two dealmakers get this) */
+    mySecretDeal?: { task: Localized; reward: number };
+    prophecyCall?: Localized;
   };
 
   reveal?: {
@@ -101,19 +117,22 @@ const REVEAL_PHASES: GamePhase[] = ["REVEAL", "ROUND_RESULT"];
 export function projectView(
   state: GameState,
   viewerId: string | null,
-  meta: { storeKind?: "memory" | "supabase"; aiEnabled?: boolean } = {},
+  meta: { storeKind?: "memory" | "supabase"; aiEnabled?: boolean; stage?: boolean } = {},
 ): PlayerView {
   const me = viewerId ? state.players.find((p) => p.id === viewerId) ?? null : null;
   const round = currentRound(state);
   const roundAnswers = round ? state.answers.filter((a) => a.roundId === round.id) : [];
+  const isStage = meta.stage === true;
 
   const view: PlayerView = {
     code: state.code,
     phase: state.phase,
+    mode: state.mode,
     version: state.version,
     phaseDeadline: state.phaseDeadline,
     storeKind: meta.storeKind ?? "memory",
     aiEnabled: meta.aiEnabled ?? false,
+    stage: isStage,
     me: me ? { id: me.id, isHost: me.isHost, connected: me.connected } : null,
     players: state.players.map((p) => ({
       id: p.id,
@@ -121,10 +140,13 @@ export function projectView(
       score: p.score,
       isHost: p.isHost,
       connected: p.connected,
+      trust: p.trust,
+      suspicion: p.suspicion,
+      influence: p.influence,
     })),
     minPlayers: 3,
     maxPlayers: 10,
-    totalSlots: state.plan.length,
+    totalSlots: totalRounds(state),
     slotIndex: state.currentRoundIndex,
     aiMessages: state.aiMessages,
     theories: state.theories
@@ -148,7 +170,19 @@ export function projectView(
     const iAmParticipant = viewerId ? round.participants.includes(viewerId) : false;
     const iAmPredictor = viewerId ? (round.predictors ?? []).includes(viewerId) : false;
     const iRespond = viewerId ? allowed.includes(viewerId) : false;
+    const iAmHotSeat = !!viewerId && !!round.hotSeatId && viewerId === round.hotSeatId;
     const q = round.questionId ? QUESTIONS_BY_ID[round.questionId] : undefined;
+
+    let liveTally: Record<string, number> | undefined;
+    if (round.liveTally && (isStage || round.kind === "movement")) {
+      liveTally = {};
+      for (const a of roundAnswers) liveTally[a.optionId] = (liveTally[a.optionId] ?? 0) + 1;
+    }
+
+    let mySecretDeal: { task: Localized; reward: number } | undefined;
+    if (round.secretDeal && viewerId && round.secretDeal.players.includes(viewerId)) {
+      mySecretDeal = { task: round.secretDeal.task, reward: round.secretDeal.reward };
+    }
 
     view.round = {
       id: round.id,
@@ -158,7 +192,7 @@ export function projectView(
       body: round.body,
       prompt: q?.prompt,
       timeLimit: round.timeLimit,
-      myOptions: viewerId && iRespond ? optionsForPlayer(round, viewerId) : [],
+      myOptions: viewerId && (iRespond || iAmHotSeat) ? optionsForPlayer(round, viewerId) : [],
       iRespond,
       iAmParticipant,
       iAmPredictor,
@@ -172,6 +206,14 @@ export function projectView(
       theory: round.theoryId
         ? state.theories.filter((t) => t.id === round.theoryId).map(publicTheory)[0]
         : undefined,
+      talkSeconds: round.talkSeconds,
+      talkPrompt: round.talkPrompt,
+      stageInstruction: round.stageInstruction,
+      hotSeatId: round.hotSeatId,
+      iAmHotSeat,
+      liveTally,
+      mySecretDeal,
+      prophecyCall: round.prophecy?.label,
     };
   }
 

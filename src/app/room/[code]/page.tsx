@@ -11,6 +11,7 @@ import { JoinForm } from "@/components/room/JoinForm";
 import {
   AiMoment,
   AnswerScreen,
+  DiscussionScreen,
   Lobby,
   RevealScreen,
   RoundIntro,
@@ -75,17 +76,19 @@ export default function RoomPage() {
         </div>
       </header>
 
-      <Stage view={view!} room={room} />
+      <PhaseView view={view!} room={room} />
     </>
   );
 }
 
-function Stage({ view, room }: { view: NonNullable<ReturnType<typeof useRoom>["view"]>; room: ReturnType<typeof useRoom> }) {
+function PhaseView({ view, room }: { view: NonNullable<ReturnType<typeof useRoom>["view"]>; room: ReturnType<typeof useRoom> }) {
   switch (view.phase) {
     case "LOBBY":
       return <Lobby view={view} room={room} />;
     case "ROUND_INTRO":
       return <RoundIntro view={view} />;
+    case "DISCUSSION":
+      return <DiscussionScreen view={view} />;
     case "ANSWERING":
       return <AnswerScreen view={view} room={room} />;
     case "REVEAL":

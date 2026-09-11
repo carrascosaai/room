@@ -1,4 +1,4 @@
-import { advance, createGame, currentRound, optionsForPlayer, startGame, submitAnswer, respondents } from "./engine";
+import { advance, createGame, currentRound, freshPlayer, optionsForPlayer, startGame, submitAnswer, respondents } from "./engine";
 import { QUESTIONS_BY_ID } from "./questions";
 import { mulberry32 } from "@/lib/rng";
 import type { Dimension, GameState, Lang } from "./types";
@@ -169,10 +169,15 @@ export function runSimulatedGame(
     mutateAt?: number;
     mutate?: (bots: BotSpec[]) => BotSpec[];
     missionAware?: boolean;
+    mode?: "director" | "classic";
   } = {},
 ): SimResult {
   const rand = mulberry32(opts.seed ?? 12345);
-  let state = createGame("SIM1", { id: bots[0]!.id, nickname: bots[0]!.nickname, lang: "en" });
+  let state = createGame(
+    "SIM1",
+    { id: bots[0]!.id, nickname: bots[0]!.nickname, lang: "en" },
+    opts.mode ?? "classic",
+  );
   state = { ...state, seed: opts.seed ?? 12345 };
   for (const b of bots.slice(1)) {
     const res = addBot(state, b);
@@ -222,22 +227,11 @@ export function runSimulatedGame(
 }
 
 function addBot(state: GameState, b: BotSpec): GameState {
-  // inline of engine.addPlayer without the connected re-check noise
-  const t = Date.now();
   return {
     ...state,
     players: [
       ...state.players,
-      {
-        id: b.id,
-        nickname: b.nickname,
-        lang: b.lang ?? "en",
-        isHost: false,
-        connected: true,
-        joinedAt: t,
-        lastSeen: t,
-        score: 0,
-      },
+      freshPlayer({ id: b.id, nickname: b.nickname, lang: b.lang ?? "en" }, false),
     ],
     version: state.version + 1,
   };

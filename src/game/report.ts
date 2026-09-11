@@ -39,6 +39,11 @@ export interface FinalReport {
   finalTheory: Localized;
   winnerId: string | null;
   standings: { playerId: string; score: number }[];
+
+  /** director mode only — "what the AI did and why", most recent first */
+  directorLog: { round: number; kind: string; targets: string[]; reason: Localized }[];
+  /** final reputation snapshot, director mode */
+  reputation: { playerId: string; trust: number; suspicion: number; influence: number }[];
 }
 
 const L = (en: string, es: string): Localized => ({ en, es });
@@ -292,6 +297,16 @@ export function buildFinalReport(state: GameState): FinalReport {
     standings: [...players]
       .map((p) => ({ playerId: p.id, score: p.score }))
       .sort((a, b) => b.score - a.score),
+    directorLog: [...state.directorLog]
+      .filter((m) => m.signal !== "warmup")
+      .reverse()
+      .map((m) => ({ round: m.roundIndex, kind: m.kind, targets: m.targets, reason: m.reason })),
+    reputation: players.map((p) => ({
+      playerId: p.id,
+      trust: p.trust,
+      suspicion: p.suspicion,
+      influence: p.influence,
+    })),
   };
 }
 

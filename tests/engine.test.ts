@@ -16,7 +16,7 @@ import { projectView } from "@/game/view";
 import type { GameState, Lang } from "@/game/types";
 
 function seedRoom(n: number): GameState {
-  let s = createGame("TEST", { id: "host", nickname: "Host", lang: "en" });
+  let s = createGame("TEST", { id: "host", nickname: "Host", lang: "en" }, "classic");
   for (let i = 1; i < n; i++) {
     s = addPlayer(s, { id: `p${i}`, nickname: `P${i}`, lang: "en" }).state;
   }
@@ -174,7 +174,7 @@ describe("view projection — no hidden data leaks", () => {
 describe("mixed-language rooms", () => {
   it("keeps both languages on every AI message", () => {
     const langs: Lang[] = ["es", "en", "es", "en", "es"];
-    let s = createGame("MIX", { id: "host", nickname: "Host", lang: langs[0]! });
+    let s = createGame("MIX", { id: "host", nickname: "Host", lang: langs[0]! }, "classic");
     for (let i = 1; i < langs.length; i++) {
       s = addPlayer(s, { id: `p${i}`, nickname: `P${i}`, lang: langs[i]! }).state;
     }

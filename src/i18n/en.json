@@ -51,7 +51,12 @@
     "nicknamePlaceholder": "e.g. Fernando",
     "maxPlayers": "Max players",
     "createButton": "Create room",
-    "creating": "Creating…"
+    "creating": "Creating…",
+    "modeLabel": "How you want to play",
+    "modeDirectorTitle": "LIVE — AI director",
+    "modeDirectorDesc": "Interrogations, secret deals, prophecies, everyone on their feet. Loud. Recommended with people in the same room.",
+    "modeClassicTitle": "Classic",
+    "modeClassicDesc": "Quieter, phone-only rounds. Good for remote / quiet groups."
   },
   "join": {
     "title": "Join a room",
@@ -72,7 +77,8 @@
     "startButton": "Start room",
     "youAreHost": "You're the host",
     "leave": "Leave room",
-    "joinUrl": "Join at"
+    "joinUrl": "Join at",
+    "openStage": "Open shared screen"
   },
   "game": {
     "roundIntro": "Round {n}",
@@ -146,6 +152,45 @@
     "resultText": "The AI got us {accuracy}% right. Think your group can fool it?",
     "copyLink": "Copy result link",
     "linkCopied": "Link copied"
+  },
+  "director": {
+    "talkNow": "TALK — OUT LOUD",
+    "hotSeatBadge": "ON THE SPOT",
+    "hotSeatWaiting": "Everyone's judging. Talk.",
+    "hotSeatIsTalking": "{name} is talking. Judge them.",
+    "rateThem": "Do you believe them?",
+    "rate1": "Not buying it",
+    "rate2": "Meh",
+    "rate3": "Fair enough",
+    "rate4": "Convincing",
+    "rate5": "Completely sold",
+    "dealBadge": "SECRET DEAL",
+    "dealYourTask": "Your secret task",
+    "dealReward": "+{n} pts split between you if you pull it off",
+    "dealWarning": "Nobody else can know. Act normal.",
+    "dealOutsiderHint": "Two people here got a secret message. Watch for the tell.",
+    "dealAccuseWho": "Who do you think had a deal?",
+    "prophecyBadge": "THE AI HAS SPOKEN",
+    "prophecyBetQuestion": "Is the AI right?",
+    "prophecySubjectHint": "Everyone heard the call. Your move.",
+    "movementBadge": "ON YOUR FEET",
+    "movementInstruction": "Stand up. Move to a side.",
+    "movementTallyLeft": "LEFT",
+    "movementTallyRight": "RIGHT",
+    "confessionTitle": "WHAT I DID TO YOU",
+    "confessionSubtitle": "Every move, and why.",
+    "reputationTrust": "Trust",
+    "reputationSuspicion": "Suspicion",
+    "reputationInfluence": "Influence",
+    "talkTimerLabel": "talk"
+  },
+  "stage": {
+    "openOnPhone": "Open ROOM on your phone to play",
+    "joinAt": "Join at",
+    "waitingForPlayers": "Waiting for players…",
+    "waitingForAnswers": "Waiting on the room…",
+    "castHint": "Cast this screen, or prop the phone up where everyone can see it.",
+    "modeLabel": "STAGE"
   },
   "errors": {
     "room_full": "This room is full.",

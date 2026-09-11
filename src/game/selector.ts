@@ -40,11 +40,11 @@ export const DEFAULT_PLAN: RoundSlot[] = [
   { type: "final_slot" },
 ];
 
-function rngFor(state: GameState, salt: string): () => number {
+export function rngFor(state: GameState, salt: string): () => number {
   return mulberry32((state.seed ^ hashString(salt)) >>> 0);
 }
 
-function timeLimitFor(kind: RoundKind): number {
+export function timeLimitFor(kind: RoundKind): number {
   switch (kind) {
     case "social_dilemma":
     case "ai_intervention":
@@ -62,7 +62,7 @@ function timeLimitFor(kind: RoundKind): number {
 }
 
 /** Build the A/B/... options for a player-target round from the roster. */
-function playerOptions(players: Player[], exclude: string[]): QuestionOption[] {
+export function playerOptions(players: Player[], exclude: string[]): QuestionOption[] {
   return players
     .filter((p) => !exclude.includes(p.id))
     .map((p) => ({ id: p.id, label: { en: p.nickname, es: p.nickname }, tags: {} }));
@@ -86,7 +86,7 @@ function scoreQuestion(q: Question, wantDims: Dimension[], rand: () => number): 
   return s;
 }
 
-function chooseQuestion(
+export function chooseQuestion(
   state: GameState,
   kind: RoundKind,
   focus: Dimension[] | undefined,
@@ -111,7 +111,9 @@ function chooseQuestion(
   return best;
 }
 
-function makeRound(partial: Omit<Round, "createdAt" | "timeLimit"> & { timeLimit?: number }): Round {
+export function makeRound(
+  partial: Omit<Round, "createdAt" | "timeLimit"> & { timeLimit?: number },
+): Round {
   return {
     ...partial,
     timeLimit: partial.timeLimit ?? timeLimitFor(partial.kind),

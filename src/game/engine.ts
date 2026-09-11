@@ -3,8 +3,12 @@ import {
   accusationText,
   affinityResultText,
   affinityText,
+  dealRevealText,
+  hotSeatVerdictText,
   missionsRevealText,
+  movementText,
   observationText,
+  prophecyResultText,
   theoryAnnounceText,
   theoryResultText,
 } from "./commentary";
@@ -23,6 +27,11 @@ import {
   setVoteConcentration,
 } from "./group";
 import { assignMissions, evaluateMissions } from "./missions";
+import {
+  buildDirectorRound,
+  defaultTargetRounds,
+  noteSpotlight,
+} from "./director";
 import { scoreDilemma, scoreMajorityMinority, POINTS } from "./scoring";
 import { buildRoundForSlot, DEFAULT_PLAN } from "./selector";
 import { resolveTheory } from "./theories";
@@ -30,6 +39,7 @@ import { hashString } from "@/lib/rng";
 import type {
   AiMessage,
   Answer,
+  GameMode,
   GameState,
   Lang,
   Localized,
@@ -61,25 +71,42 @@ function now(): number {
 
 // ---------- creation & lobby ----------
 
-export function createGame(code: string, host: { id: string; nickname: string; lang: Lang }): GameState {
-  const t = now();
-  const player: Player = {
-    id: host.id,
-    nickname: host.nickname.slice(0, 20),
-    lang: host.lang,
-    isHost: true,
+export function freshPlayer(
+  p: { id: string; nickname: string; lang: Lang },
+  isHost: boolean,
+  t: number = Date.now(),
+): Player {
+  return {
+    id: p.id,
+    nickname: p.nickname.trim().slice(0, 20) || "Player",
+    lang: p.lang,
+    isHost,
     connected: true,
     joinedAt: t,
     lastSeen: t,
     score: 0,
+    trust: 50,
+    suspicion: 50,
+    influence: 50,
+    spotlightCount: 0,
   };
+}
+
+export function createGame(
+  code: string,
+  host: { id: string; nickname: string; lang: Lang },
+  mode: GameMode = "director",
+): GameState {
+  const t = now();
   return {
     code,
     phase: "LOBBY",
+    mode,
     createdAt: t,
-    players: [player],
+    players: [freshPlayer(host, true, t)],
     hostId: host.id,
     plan: DEFAULT_PLAN,
+    targetRounds: 12,
     rounds: [],
     currentRoundIndex: -1,
     answers: [],
@@ -87,6 +114,8 @@ export function createGame(code: string, host: { id: string; nickname: string; l
     group: emptyGroupModel(),
     theories: [],
     missions: [],
+    director: { lastSpotlightRound: {}, beats: {} },
+    directorLog: [],
     outcomes: [],
     aiMessages: [],
     version: 1,
@@ -112,16 +141,7 @@ export function addPlayer(
     return { state: s, error: "nickname_taken" };
   }
   const t = now();
-  const player: Player = {
-    id: p.id,
-    nickname,
-    lang: p.lang,
-    isHost: false,
-    connected: true,
-    joinedAt: t,
-    lastSeen: t,
-    score: 0,
-  };
+  const player = freshPlayer({ ...p, nickname }, false, t);
   const next: GameState = { ...s, players: [...s.players, player] };
   if (s.phase !== "LOBBY") next.behavior[p.id] = emptyProfile();
   return { state: bump(next) };
@@ -206,17 +226,33 @@ export function startGame(s: GameState): { state: GameState; error?: string } {
     startedAt: now(),
     behavior,
     missions: assignMissions(s.players, s.seed),
+    targetRounds: s.mode === "director" ? defaultTargetRounds(s.players.length) : s.plan.length,
     currentRoundIndex: 0,
     phaseDeadline: now() + MIN_DISPLAY_MS.ROUND_INTRO!,
   };
-  const build = buildRoundForSlot(next, 0);
-  next = {
-    ...next,
-    rounds: [build.round],
-    theories: build.theoryPatch ? [...next.theories, ...build.theoryPatch] : next.theories,
-    usedQuestionIds: build.round.questionId ? [build.round.questionId] : [],
-  };
+
+  if (s.mode === "director") {
+    const { round, move } = buildDirectorRound(next);
+    next = noteSpotlight(next, move);
+    next = {
+      ...next,
+      rounds: [round],
+      usedQuestionIds: round.questionId ? [round.questionId] : [],
+    };
+  } else {
+    const build = buildRoundForSlot(next, 0);
+    next = {
+      ...next,
+      rounds: [build.round],
+      theories: build.theoryPatch ? [...next.theories, ...build.theoryPatch] : next.theories,
+      usedQuestionIds: build.round.questionId ? [build.round.questionId] : [],
+    };
+  }
   return { state: bump(next) };
+}
+
+export function totalRounds(s: GameState): number {
+  return s.mode === "director" ? s.targetRounds : s.plan.length;
 }
 
 // ---------- answers ----------
@@ -301,6 +337,13 @@ export function advance(s: GameState): GameState {
     case "ROUND_INTRO":
       return enterFromIntro(s);
 
+    case "DISCUSSION":
+      return bump({
+        ...s,
+        phase: "ANSWERING",
+        phaseDeadline: now() + (currentRound(s)?.timeLimit ?? 20) * 1000,
+      });
+
     case "ANSWERING":
       return doReveal(s);
 
@@ -382,23 +425,48 @@ function enterFromIntro(s: GameState): GameState {
   }
 
   let extra: Partial<GameState> = {};
+  const msgs: AiMessage[] = [];
+
   // affinity slot: an ai_theory_test that carries its own just-announced theory
   if (round.kind === "ai_theory_test" && round.theoryId) {
     const theory = s.theories.find((t) => t.id === round.theoryId);
     if (theory && theory.status === "announced") {
       const isAffinity = theory.type === "high_compatibility" || theory.type === "clashing_values";
       const text = isAffinity ? affinityText(theory, s.players) : theoryAnnounceText(theory, s.players);
-      const msg = aiMessage(s, isAffinity ? "affinity" : "theory", text, round.index);
+      msgs.push(aiMessage(s, isAffinity ? "affinity" : "theory", text, round.index));
       extra = {
-        aiMessages: [...s.aiMessages, msg],
         theories: s.theories.map((t) => (t.id === theory.id ? { ...t, status: "testing" as const } : t)),
       };
     }
   }
 
+  // director mechanics: push the framing line for the stage
+  if (round.kind === "interrogation" && round.body) {
+    msgs.push(aiMessage(s, "hot_seat", round.body, round.index));
+  }
+  if (round.kind === "prophecy" && round.prophecy) {
+    msgs.push(aiMessage(s, "prophecy", round.prophecy.label, round.index));
+  }
+  if (round.kind === "deal" && round.body) {
+    msgs.push(aiMessage(s, "quip", round.body, round.index));
+  }
+  if (round.kind === "movement" && round.stageInstruction) {
+    msgs.push(aiMessage(s, "movement", round.stageInstruction, round.index));
+  }
+
+  const next = { ...s, ...extra, aiMessages: [...s.aiMessages, ...msgs] };
+
+  // rounds with an out-loud talk window go through DISCUSSION first
+  if (round.talkSeconds && round.talkSeconds > 0) {
+    return bump({
+      ...next,
+      phase: "DISCUSSION",
+      phaseDeadline: now() + round.talkSeconds * 1000,
+    });
+  }
+
   return bump({
-    ...s,
-    ...extra,
+    ...next,
     phase: "ANSWERING",
     phaseDeadline: round.timeLimit > 0 ? now() + round.timeLimit * 1000 : undefined,
   });
@@ -451,9 +519,14 @@ function doReveal(s: GameState): GameState {
   let majorityOptionId: string | undefined;
   let contrarians: string[] | undefined;
 
+  const repDelta: Record<string, { trust: number; suspicion: number; influence: number }> = {};
   const nameOf = (id: string) => s.players.find((p) => p.id === id)?.nickname ?? "?";
   const add = (id: string, n: number) => {
     scoreDelta[id] = (scoreDelta[id] ?? 0) + n;
+  };
+  const rep = (id: string, f: "trust" | "suspicion" | "influence", n: number) => {
+    repDelta[id] ??= { trust: 0, suspicion: 0, influence: 0 };
+    repDelta[id]![f] += n;
   };
 
   // participation points
@@ -789,8 +862,137 @@ function doReveal(s: GameState): GameState {
     }
   }
 
-  // apply score deltas to players
-  const players = s.players.map((p) => ({ ...p, score: p.score + (scoreDelta[p.id] ?? 0) }));
+  // ── DIRECTOR MECHANICS ──
+
+  if (round.kind === "interrogation" && round.hotSeatId) {
+    const target = round.hotSeatId;
+    const ratings = roundAnswers
+      .filter((a) => (round.predictors ?? round.participants).includes(a.playerId))
+      .map((a) => Number(a.optionId))
+      .filter((n) => n >= 1 && n <= 5);
+    const avg = ratings.length ? ratings.reduce((x, y) => x + y, 0) / ratings.length : 3;
+    const believed = avg >= 3;
+    if (believed) {
+      add(target, POINTS.winAiChallenge);
+      rep(target, "trust", 12);
+      rep(target, "influence", 8);
+      rep(target, "suspicion", -10);
+    } else {
+      add(target, -100);
+      rep(target, "suspicion", 18);
+      rep(target, "trust", -8);
+    }
+    aiMsgs.push(aiMessage(s, "verdict", hotSeatVerdictText(nameOf(target), believed, avg), round.index));
+    lines.push(hotSeatVerdictText(nameOf(target), believed, avg));
+  }
+
+  if (round.kind === "prophecy" && round.prophecy) {
+    const subject = round.prophecy.subjectId;
+    const choice = answerOf(subject)?.optionId;
+    const held = choice === round.prophecy.predictedOptionId;
+    if (held) {
+      add(subject, 50);
+      rep(subject, "suspicion", 8); // being readable = being watched
+    } else {
+      add(subject, POINTS.foolAiHypothesis + 50);
+      rep(subject, "influence", 15);
+    }
+    for (const pid of round.predictors ?? []) {
+      const a = answerOf(pid);
+      if (!a) continue;
+      const correct = (a.optionId === "yes") === held;
+      if (correct) {
+        add(pid, POINTS.predictAnotherPlayer);
+        rep(pid, "influence", 4);
+      }
+      group = recordPrediction(group, pid, subject, correct);
+    }
+    aiMsgs.push(aiMessage(s, "prophecy_result", prophecyResultText(nameOf(subject), held, !held), round.index));
+    lines.push(held ? L("I CALLED IT", "LO DIJE") : L("I WAS WRONG", "ME EQUIVOQUÉ"));
+  }
+
+  if (round.kind === "deal" && round.secretDeal) {
+    const [a, b] = round.secretDeal.players;
+    const ca = answerOf(a)?.optionId;
+    const cb = answerOf(b)?.optionId;
+    const pulledOff = !!ca && ca === cb;
+    // the room points at who they think had a deal
+    const accused = new Map<string, number>();
+    for (const pid of round.predictors ?? []) {
+      const opt = answerOf(pid)?.optionId;
+      if (opt) accused.set(opt, (accused.get(opt) ?? 0) + 1);
+      if (opt) group = recordAccusation(group, pid, opt);
+    }
+    const topTwo = [...accused.entries()].sort((x, y) => y[1] - x[1]).slice(0, 2).map((e) => e[0]);
+    const caught = topTwo.includes(a) && topTwo.includes(b);
+    if (pulledOff && !caught) {
+      add(a, round.secretDeal.reward / 2);
+      add(b, round.secretDeal.reward / 2);
+      rep(a, "influence", 15);
+      rep(b, "influence", 15);
+    } else if (pulledOff && caught) {
+      add(a, -150);
+      add(b, -150);
+      rep(a, "suspicion", 25);
+      rep(b, "suspicion", 25);
+      for (const pid of round.predictors ?? []) {
+        const opt = answerOf(pid)?.optionId;
+        if (opt === a || opt === b) add(pid, POINTS.predictAnotherPlayer);
+      }
+    }
+    aiMsgs.push(
+      aiMessage(s, "deal_reveal", dealRevealText(pulledOff, caught, nameOf(a), nameOf(b)), round.index),
+    );
+    lines.push(
+      !pulledOff
+        ? L("No deal was struck.", "No se cerró ningún trato.")
+        : caught
+          ? L("DEAL EXPOSED", "TRATO AL DESCUBIERTO")
+          : L("DEAL PULLED OFF", "TRATO CONSUMADO"),
+    );
+  }
+
+  if (round.kind === "movement") {
+    const tally = new Map<string, string[]>();
+    for (const a of roundAnswers) {
+      const arr = tally.get(a.optionId) ?? [];
+      arr.push(a.playerId);
+      tally.set(a.optionId, arr);
+    }
+    let alone: string | null = null;
+    for (const [, g] of tally) if (g.length === 1) alone = g[0]!;
+    const switched: string[] = []; // re-vote tracking is v2
+    if (alone) {
+      add(alone, POINTS.contrarianBonus + 25);
+      rep(alone, "influence", 10);
+    }
+    recordPairAlignment(roundAnswers, (x, y, matched) => {
+      group = recordAlignment(group, x, y, matched);
+    });
+    const statement = round.body ?? L("", "");
+    const moveCounts = { left: (tally.get("A") ?? []).length, right: (tally.get("B") ?? []).length };
+    aiMsgs.push(
+      aiMessage(s, "movement", movementText(statement, alone, switched, s.players, moveCounts), round.index),
+    );
+    if (alone) {
+      lines.push(
+        L(`${nameOf(alone)} stood alone.`, `${nameOf(alone)} se quedó solo.`),
+      );
+    }
+  }
+
+  // apply score + reputation deltas to players
+  const players = s.players.map((p) => {
+    const r = repDelta[p.id];
+    const clamp = (n: number) => Math.max(0, Math.min(100, n));
+    return {
+      ...p,
+      score: p.score + (scoreDelta[p.id] ?? 0),
+      trust: r ? clamp(p.trust + r.trust) : p.trust,
+      suspicion: r ? clamp(p.suspicion + r.suspicion) : p.suspicion,
+      influence: r ? clamp(p.influence + r.influence) : p.influence,
+    };
+  });
 
   const outcome: RoundOutcome = {
     roundId: round.id,
@@ -847,23 +1049,26 @@ function recordPairAlignment(
 // ---------- round advancement ----------
 
 function nextRound(s: GameState): GameState {
-  const nextSlotIndex = s.rounds.length;
-  if (nextSlotIndex >= s.plan.length) {
+  const nextIndex = s.rounds.length;
+  if (nextIndex >= totalRounds(s)) {
     const missions = evaluateMissions(s);
     const withMissions = { ...s, missions };
     const report = buildFinalReport(withMissions);
     const msgs: AiMessage[] = [];
+    if (s.mode === "director" && s.directorLog.length > 0) {
+      msgs.push(aiMessage(s, "confession", confessionText(withMissions), nextIndex));
+    }
     if (missions.length > 0) {
       msgs.push(
         aiMessage(
           s,
           "missions",
           missionsRevealText(missions.length, missions.filter((m) => m.completed).length),
-          s.plan.length,
+          nextIndex,
         ),
       );
     }
-    msgs.push(aiMessage(s, "final", report.finalTheory, s.plan.length + 1));
+    msgs.push(aiMessage(s, "final", report.finalTheory, nextIndex + 1));
     return bump({
       ...withMissions,
       phase: "FINAL_RESULTS",
@@ -874,11 +1079,28 @@ function nextRound(s: GameState): GameState {
   }
 
   let next: GameState = { ...s };
-  const build = buildRoundForSlot(next, nextSlotIndex);
+
+  if (s.mode === "director") {
+    const { round, move } = buildDirectorRound(next);
+    next = noteSpotlight(next, move);
+    next = {
+      ...next,
+      rounds: [...next.rounds, round],
+      currentRoundIndex: nextIndex,
+      phase: "ROUND_INTRO",
+      phaseDeadline: now() + MIN_DISPLAY_MS.ROUND_INTRO!,
+      usedQuestionIds: round.questionId
+        ? [...new Set([...next.usedQuestionIds, round.questionId])]
+        : next.usedQuestionIds,
+    };
+    return bump(next);
+  }
+
+  const build = buildRoundForSlot(next, nextIndex);
   next = {
     ...next,
     rounds: [...next.rounds, build.round],
-    currentRoundIndex: nextSlotIndex,
+    currentRoundIndex: nextIndex,
     phase: "ROUND_INTRO",
     phaseDeadline: now() + MIN_DISPLAY_MS.ROUND_INTRO!,
     theories: build.theoryPatch
@@ -889,6 +1111,26 @@ function nextRound(s: GameState): GameState {
       : next.usedQuestionIds,
   };
   return bump(next);
+}
+
+/** The AI shows its hand: every move it made and why. */
+function confessionText(s: GameState): Localized {
+  const nameOf = (id: string) => s.players.find((p) => p.id === id)?.nickname ?? "?";
+  const beats = s.directorLog.filter((m) => m.signal !== "warmup" && m.signal !== "cadence");
+  const linesEn: string[] = ["Here's what I did to you tonight."];
+  const linesEs: string[] = ["Esto es lo que os hice esta noche."];
+  const seen = new Set<string>();
+  const unique = beats.filter((m) => (seen.has(m.reason.en) ? false : (seen.add(m.reason.en), true)));
+  for (const m of unique.slice(0, 5)) {
+    linesEn.push(m.reason.en);
+    linesEs.push(m.reason.es);
+  }
+  const winner = [...s.players].sort((a, b) => b.score - a.score)[0];
+  if (winner) {
+    linesEn.push(`${nameOf(winner.id)} played me better than the rest.`);
+    linesEs.push(`${nameOf(winner.id)} me jugó mejor que el resto.`);
+  }
+  return { en: linesEn.join(" "), es: linesEs.join(" ") };
 }
 
 function mergeTheories(existing: Theory[], patch: Theory[]): Theory[] {

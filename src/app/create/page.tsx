@@ -5,11 +5,13 @@ import { useState } from "react";
 import { useI18n } from "@/i18n";
 import { Button, Field, Screen, TextInput, TopBar } from "@/components/ui";
 import { getLastNickname, rememberNickname, storePlayer } from "@/lib/player";
+import type { GameMode } from "@/game/types";
 
 export default function CreatePage() {
   const { t, lang } = useI18n();
   const router = useRouter();
   const [nickname, setNickname] = useState(getLastNickname());
+  const [mode, setMode] = useState<GameMode>("director");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +26,7 @@ export default function CreatePage() {
       const res = await fetch("/api/rooms", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ nickname: nn, lang }),
+        body: JSON.stringify({ nickname: nn, lang, mode }),
       }).then((r) => r.json());
       if (res.ok && res.code && res.playerId) {
         rememberNickname(nn);
@@ -60,6 +62,23 @@ export default function CreatePage() {
             />
           </Field>
 
+          <Field label={t("create.modeLabel")}>
+            <div className="space-y-2.5">
+              <ModeOption
+                selected={mode === "director"}
+                onClick={() => setMode("director")}
+                title={t("create.modeDirectorTitle")}
+                desc={t("create.modeDirectorDesc")}
+              />
+              <ModeOption
+                selected={mode === "classic"}
+                onClick={() => setMode("classic")}
+                title={t("create.modeClassicTitle")}
+                desc={t("create.modeClassicDesc")}
+              />
+            </div>
+          </Field>
+
           {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
 
           <Button type="submit" disabled={busy || nickname.trim().length < 1}>
@@ -68,5 +87,42 @@ export default function CreatePage() {
         </form>
       </Screen>
     </>
+  );
+}
+
+function ModeOption({
+  selected,
+  onClick,
+  title,
+  desc,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`w-full rounded-2xl border p-4 text-left transition ${
+        selected
+          ? "border-[var(--accent)] bg-[var(--accent)]/5"
+          : "border-[var(--border)] bg-[var(--surface)] hover:border-[var(--muted)]"
+      }`}
+    >
+      <div className="flex items-center gap-2.5">
+        <span
+          className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border ${
+            selected ? "border-[var(--accent)]" : "border-[var(--muted)]"
+          }`}
+        >
+          {selected ? <span className="h-2 w-2 rounded-full bg-[var(--accent)]" /> : null}
+        </span>
+        <span className="text-sm font-semibold">{title}</span>
+      </div>
+      <p className="mt-1.5 pl-6 text-xs leading-relaxed text-[var(--muted)]">{desc}</p>
+    </button>
   );
 }

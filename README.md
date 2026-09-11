@@ -2,14 +2,25 @@
 
 **The AI is watching your room. — La IA está observando vuestra sala.**
 
-A multiplayer browser party game for **3–10 friends**. Everyone joins from their
-own phone with a code or QR. You make choices; an AI silently builds a model of
-how your group behaves; then it **changes the game** to test what it thinks it
-knows. ~5–10 minutes. No app, no account, no login, free.
+A multiplayer party game for **3–10 friends in the same room**, run by an
+**AI director**. Everyone joins from their phone with a code or QR — but the
+phone is a spy tool, not a buzzer. The game happens **out loud**: the AI puts
+someone in the hot seat and makes them defend themselves, hands two players a
+secret deal, calls its shot on who's about to betray whom — in front of
+everyone — and ends by **showing you its whole manipulation log**: what it
+did to your group, and why. ~15–20 minutes. No app, no account, no login, free.
 
-> ROOM is **not** "ChatGPT asks your friends questions." The AI is a language
-> layer on top of a **deterministic game engine** that does the actual learning
-> from **structured behavioral data**.
+> ROOM is **not** "ChatGPT asks your friends questions." The AI is a **live
+> social director** running on a **deterministic game engine** — every move it
+> makes is scored from real behavioral data, never invented, and it admits it
+> when it's wrong.
+
+Two modes, picked at room creation:
+- **EN DIRECTO (director, default)** — interrogations, secret deals,
+  prophecies announced out loud, everyone on their feet. Built for a room full
+  of people talking to each other, with an optional shared screen.
+- **Clásico** — the quieter, phone-only round system (the original MVP):
+  individual decisions, votes, dilemmas, theories. Good for remote/quiet groups.
 
 ---
 
@@ -17,7 +28,13 @@ knows. ~5–10 minutes. No app, no account, no login, free.
 
 | Area | Status |
 | --- | --- |
-| Landing page (ES/EN), create/join flow, QR join | ✅ |
+| **AI director mode** — interrogations, secret deals, prophecies, physical "everyone move" rounds | ✅ |
+| Talk phases (`DISCUSSION`) — a timed, out-loud window before every director round | ✅ |
+| Reputation economy (trust / suspicion / influence) that the director manipulates | ✅ |
+| Shared "stage" screen (`/stage/CODE`) — cast it, no player identity needed | ✅ |
+| End-of-game **AI confession** — the director's full move log with reasons | ✅ |
+| Classic mode preserved as a selectable, fully working alternative | ✅ |
+| Landing page (ES/EN), create/join flow (mode picker), QR join | ✅ |
 | Server-authoritative game state machine (`LOBBY → … → FINAL_RESULTS`) | ✅ |
 | Realtime multiplayer — polling (always) + Supabase Realtime (when configured) | ✅ |
 | Disconnect / refresh / host-transfer / late-join handling | ✅ |
@@ -36,11 +53,89 @@ knows. ~5–10 minutes. No app, no account, no login, free.
 | AI provider abstraction (OpenAI-compatible) + deterministic fallback | ✅ |
 | Analytics abstraction (anonymous, disable-able) | ✅ |
 | Supabase migrations + RLS | ✅ |
-| 60 unit/integration tests + headless simulation (`npm run simulate`) | ✅ |
+| 68 unit/integration tests + headless simulation (`npm run simulate`) | ✅ |
 
 **Priority order followed:** multiplayer → fast gameplay → great first minute →
 behavioral learning → AI interventions → theory/salseo → results → shareability →
 polish.
+
+---
+
+## The AI director — how "EN DIRECTO" mode works
+
+Classic mode's rounds all resolve on the phone. Director mode moves the game
+**into the room**: the phone becomes a tool for secret information and private
+votes; the actual game is people talking to, judging, and reading each other.
+
+```
+src/game/director.ts        the director's brain — reads signals, picks a move
+src/game/directorContent.ts bilingual content for each mechanic
+src/game/engine.ts           DISCUSSION phase + reveal logic for each mechanic
+src/app/stage/[code]/        the shared screen
+```
+
+### The four mechanics
+
+- **🔥 Interrogation** — the director names a target from real behavioral data
+  ("the room thinks you'd burn everyone here to win") and gives them 45 seconds
+  to defend themselves **out loud**. Everyone else privately rates 1–5; the
+  average verdict pays or costs the target real points and moves their
+  reputation.
+- **🤝 The deal** — two players get a private message with a secret task
+  ("both of you must secretly pick the same option — without making it
+  obvious") and a points reward if they pull it off uncaught. Everyone else
+  then points at who they think had a deal; get it right and you score, get it
+  wrong and the dealmakers walk away with the reward.
+- **🔮 The prophecy** — the director picks a player and a prediction from their
+  data, and announces it **to the whole room** before they choose
+  ("I predict Ana keeps the safe 200 — she plays it safe when it counts").
+  The subject can prove it right (small reward, more "readable") or defy it in
+  front of everyone (bigger reward, "I was wrong. Fine.").
+- **🧍 On your feet** — a statement is read out; everyone physically stands and
+  moves to a side (the phone tap just records where they moved). Whoever
+  stands **alone** is flagged and rewarded for it. Used both mid-game (to
+  break up a room that's agreeing on everything) and as the finale.
+
+### The director's brain (`director.ts`)
+
+Every non-warm-up round it reads deterministic signals — a bored player who
+hasn't been in the spotlight, a runaway leader, a suspiciously cozy pair, a
+room that's agreeing on everything, a theory that just failed — and picks
+whichever mechanic addresses the strongest signal, weighted against a target
+mix so **no mechanic dominates and nothing repeats back-to-back**
+(`tests/director.test.ts` asserts both). The first 3 rounds are quiet
+data-gathering; the last 2 are the built-up finale (a face-off interrogation,
+then everyone on their feet).
+
+### Reputation economy
+
+Alongside points, every player has **trust / suspicion / influence** (0–100,
+start at 50), shown live and in the final results. The director's mechanics
+move them — winning an interrogation raises trust and influence; getting
+caught in a deal spikes suspicion — and the director's targeting reads them
+back in, the same way it reads score and behavior.
+
+### The confession
+
+At `FINAL_RESULTS` the director dumps its **move log**: every mechanic it ran,
+who it targeted, and — in its own words — why ("Fernando had gone quiet, so I
+put him in the middle of the room. Carlos and Lucía were getting too
+comfortable, so I offered one of them a reason to turn."). This is the
+"holy shit, it was directing us" moment the whole mode is built around.
+
+### Privacy, still enforced
+
+The projection layer (`src/game/view.ts`) keeps the same guarantees as
+classic mode: a secret deal's task is visible **only** to the two dealmakers,
+the hot-seat player never sees their own rating options, and the shared stage
+view (`stage: true`, no player id) never receives a secret deal or mission —
+enforced by `tests/director.test.ts`, not just by convention.
+
+### Try it
+
+```bash
+npx tsx scripts/ejemplo-directo.ts        # narrated example game, in Spanish
+```
 
 ---
 
@@ -67,13 +162,15 @@ a multi-instance serverless deploy — see §4.)
 Scripts:
 
 ```bash
-npm run dev          # dev server
-npm run build        # production build
-npm run typecheck    # tsc --noEmit
-npm run lint         # eslint
-npm test             # vitest (60 tests)
-npm run simulate     # headless: 10 bots, 100+ games, prints learning metrics
-bash scripts/e2e.sh  # HTTP end-to-end playthrough (needs dev server on :3111)
+npm run dev                        # dev server
+npm run build                      # production build
+npm run typecheck                  # tsc --noEmit
+npm run lint                       # eslint
+npm test                           # vitest (68 tests)
+npm run simulate                   # headless: 10 bots, 100+ games, prints learning metrics
+npx tsx scripts/ejemplo.ts         # narrated classic-mode example game (Spanish)
+npx tsx scripts/ejemplo-directo.ts # narrated director-mode example game (Spanish)
+bash scripts/e2e.sh                # HTTP end-to-end playthrough (needs dev server on :3111)
 ```
 
 ---
@@ -268,9 +365,19 @@ Core gameplay is complete and playable end-to-end. Deferred:
   versioned `jsonb` doc — deliberate for a 5–10 min ephemeral game).
 - **Server-driven display-phase timers** (currently the host client nudges
   display phases; `ANSWERING` already auto-advances server-side on timeout/all-in).
+- **Movement re-vote** — right now "on your feet" is a single tap; a second
+  "switch sides after talking" tap (tracked in the model as `switched: []`,
+  already stubbed) would close the loop the pitch described.
+- Two more director mechanics from the original pitch weren't built in this
+  pass: **the whisper network** (asymmetric private intel + open negotiation)
+  and **the throne** (a challengeable seat of power). The director + content
+  architecture (`director.ts` / `directorContent.ts`) is built to take more
+  mechanics as additional signal → move mappings.
 - Richer round types (multi-party dilemmas beyond pairs, live prediction markets).
 - Persisted cross-session player identity / rematch with memory of past games.
-- Spectator big-screen mode for the host device.
+- LLM polish for director moments (verdict, prophecy result, confession) — the
+  abstraction (`ai/narrator.ts`) supports it; only the classic-mode moments are
+  wired to it today.
 - Rendered OG image per result (currently a static branded `og.svg`).
 - More AI-provider adapters (Anthropic, local) — the abstraction is ready.
 - Sound design and haptics.
@@ -282,15 +389,18 @@ Core gameplay is complete and playable end-to-end. Deferred:
 ```
 src/
   app/                 Next.js App Router — pages + /api route handlers
+                       room/[code]  the player's phone view
+                       stage/[code] the shared screen (director mode)
   game/                deterministic engine (types, questions, behavior, group,
-                       theories, selector, scoring, engine, report, commentary, sim)
+                       theories, selector, scoring, engine, report, commentary,
+                       sim, director, directorContent, compat, missions)
   ai/                  provider abstraction + narrator (language layer only)
   store/               RoomStore: memory (default) | supabase
   server/              server actions + thin HTTP helpers
   i18n/                en.json / es.json / provider
-  components/          UI + room screens
-  lib/                 rng, ids, player identity, analytics, useRoom hook
+  components/          UI + room screens (incl. DiscussionScreen)
+  lib/                 rng, ids, player identity, analytics, useRoom / useStage hooks
 supabase/migrations/   0001_init.sql
-tests/                 vitest
-scripts/               simulate.ts, e2e.sh
+tests/                 vitest (incl. director.test.ts, salseo.test.ts)
+scripts/               simulate.ts, ejemplo.ts, ejemplo-directo.ts, e2e.sh
 ```

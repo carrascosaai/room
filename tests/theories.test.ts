@@ -2,18 +2,12 @@ import { describe, expect, it } from "vitest";
 import { emptyGroupModel, recordAlignment, recordDilemma, recordSelection } from "@/game/group";
 import { candidateToTheory, detectTheories, resolveTheory } from "@/game/theories";
 import { emptyProfile } from "@/game/behavior";
+import { freshPlayer } from "@/game/engine";
 import type { Player } from "@/game/types";
 
-const players: Player[] = ["p1", "p2", "p3"].map((id, i) => ({
-  id,
-  nickname: id.toUpperCase(),
-  lang: "en",
-  isHost: i === 0,
-  connected: true,
-  joinedAt: 0,
-  lastSeen: 0,
-  score: 0,
-}));
+const players: Player[] = ["p1", "p2", "p3"].map((id, i) =>
+  freshPlayer({ id, nickname: id.toUpperCase(), lang: "en" }, i === 0, 0),
+);
 
 const behavior = Object.fromEntries(players.map((p) => [p.id, emptyProfile()]));
 

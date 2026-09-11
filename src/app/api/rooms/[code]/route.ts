@@ -10,6 +10,7 @@ export async function GET(
   const { code } = await params;
   const url = new URL(req.url);
   const playerId = url.searchParams.get("pid");
-  const result = await getRoomView(clean(code), playerId);
+  const stage = url.searchParams.get("stage") === "1";
+  const result = await getRoomView(clean(code), playerId, stage);
   return json(result, result.ok ? 200 : 404);
 }

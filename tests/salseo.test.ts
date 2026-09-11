@@ -17,7 +17,7 @@ import { runSimulatedGame, standardCast } from "@/game/sim";
 import type { GameState } from "@/game/types";
 
 function room(n: number): GameState {
-  let s = createGame("SALSA", { id: "h", nickname: "Host", lang: "es" });
+  let s = createGame("SALSA", { id: "h", nickname: "Host", lang: "es" }, "classic");
   for (let i = 1; i < n; i++) s = addPlayer(s, { id: `p${i}`, nickname: `P${i}`, lang: "es" }).state;
   return s;
 }

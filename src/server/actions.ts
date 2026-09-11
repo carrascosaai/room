@@ -13,15 +13,15 @@ import {
   submitAnswer,
 } from "@/game/engine";
 import { projectView, type PlayerView } from "@/game/view";
-import type { GameState, Lang } from "@/game/types";
+import type { GameMode, GameState, Lang } from "@/game/types";
 import { getStore } from "@/store";
 import { makeRoomCode, uuid } from "@/lib/id";
 import { track } from "@/lib/analytics";
 
 const AI_POLISH_KINDS = new Set(["AI_OBSERVATION", "AI_THEORY"]);
 
-function meta() {
-  return { storeKind: getStore().kind, aiEnabled: getAiProvider().available };
+function meta(stage = false) {
+  return { storeKind: getStore().kind, aiEnabled: getAiProvider().available, stage };
 }
 
 export interface ActionResult {
@@ -35,18 +35,19 @@ export interface ActionResult {
 export async function createRoom(input: {
   nickname: string;
   lang: Lang;
+  mode?: GameMode;
 }): Promise<ActionResult> {
   const store = getStore();
   let code = makeRoomCode();
   for (let i = 0; i < 5 && (await store.exists(code)); i++) code = makeRoomCode();
   const playerId = uuid();
-  const state = createGame(code, {
-    id: playerId,
-    nickname: input.nickname,
-    lang: input.lang,
-  });
+  const state = createGame(
+    code,
+    { id: playerId, nickname: input.nickname, lang: input.lang },
+    input.mode ?? "director",
+  );
   await store.create(state);
-  await track("room_created", code, { players: 1 });
+  await track("room_created", code, { players: 1, mode: state.mode });
   return { ok: true, code, playerId, view: projectView(state, playerId, meta()) };
 }
 
@@ -76,6 +77,7 @@ export async function joinRoom(input: {
 export async function getRoomView(
   code: string,
   playerId: string | null,
+  stage = false,
 ): Promise<ActionResult> {
   const store = getStore();
   const base = await store.get(code);
@@ -97,11 +99,11 @@ export async function getRoomView(
       await store.update(code, (s) =>
         s.version <= polished.version ? { ...s, aiMessages: polished.aiMessages, version: polished.version } : s,
       );
-      return { ok: true, view: projectView(polished, playerId, meta()) };
+      return { ok: true, view: projectView(polished, playerId, meta(stage)) };
     }
   }
 
-  return { ok: true, view: projectView(state, playerId, meta()) };
+  return { ok: true, view: projectView(state, playerId, meta(stage)) };
 }
 
 export async function startRoom(code: string, playerId: string): Promise<ActionResult> {

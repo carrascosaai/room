@@ -40,6 +40,17 @@ function PairCard({
   );
 }
 
+function RepBar({ value, color }: { value: number; color: string }) {
+  return (
+    <span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--border)]">
+      <span
+        className="absolute inset-y-0 left-0 rounded-full"
+        style={{ width: `${Math.round(value)}%`, background: color }}
+      />
+    </span>
+  );
+}
+
 export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
   const { t, loc } = useI18n();
   const [copied, copy] = useCopy();
@@ -161,6 +172,44 @@ export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
           </span>
           <span className="font-semibold">{nameOf(view, report.nemesis[view.me.id]!)}</span>
         </p>
+      ) : null}
+
+      {/* the AI's confession — director mode only */}
+      {view.mode === "director" && report.directorLog.length > 0 ? (
+        <div className="mt-4">
+          <AiCard title={t("director.confessionTitle")} tone="danger">
+            <p className="mb-3 text-xs text-[var(--muted)]">{t("director.confessionSubtitle")}</p>
+            <ul className="space-y-2.5">
+              {report.directorLog.slice(0, 7).map((entry, i) => (
+                <li key={i} className="text-sm leading-snug">
+                  <span className="mr-1.5 font-mono text-xs text-[var(--danger)]">→</span>
+                  {loc(entry.reason)}
+                </li>
+              ))}
+            </ul>
+          </AiCard>
+        </div>
+      ) : null}
+
+      {/* reputation — director mode only */}
+      {view.mode === "director" && report.reputation.length > 0 ? (
+        <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+          <p className="mb-3 text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">
+            {t("director.reputationTrust")} / {t("director.reputationSuspicion")} / {t("director.reputationInfluence")}
+          </p>
+          <ul className="space-y-3">
+            {report.reputation.map((r) => (
+              <li key={r.playerId}>
+                <p className="mb-1 text-sm font-semibold">{nameOf(view, r.playerId)}</p>
+                <div className="flex gap-1.5">
+                  <RepBar value={r.trust} color="var(--trust)" />
+                  <RepBar value={r.suspicion} color="var(--danger)" />
+                  <RepBar value={r.influence} color="var(--accent)" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
 
       {/* secret missions revealed */}

@@ -1,15 +1,18 @@
 /* eslint-disable no-console */
+// Narrates a full DIRECTOR-MODE game (the "EN DIRECTO" experience):
+// interrogations, secret deals, prophecies, everyone on their feet,
+// and the AI's final confession. Run: npx tsx scripts/ejemplo-directo.ts [seed]
 import {
   advance,
   createGame,
   currentRound,
+  freshPlayer,
   optionsForPlayer,
   respondents,
   startGame,
   submitAnswer,
 } from "../src/game/engine";
 import { botChoose, type BotSpec } from "../src/game/sim";
-import { freshPlayer } from "../src/game/engine";
 import { QUESTIONS_BY_ID } from "../src/game/questions";
 import { missionText } from "../src/game/missions";
 import { mulberry32 } from "../src/lib/rng";
@@ -24,12 +27,13 @@ const CAST: BotSpec[] = [
   { id: "p_pab", nickname: "Pablo", lang: "es", traits: { ...base, loyalty: 0.9, cooperation: 0.85, individualism: 0.2 }, favourite: "p_fer" },
   { id: "p_car", nickname: "Carlos", lang: "es", traits: { ...base, cooperation: 0.1, greed: 0.9, individualism: 0.9, loyalty: 0.15 } },
   { id: "p_mar", nickname: "María", lang: "es", traits: { ...base, patience: 0.9, consistency: 0.85, risk: 0.15, contrarianism: 0.6, cooperation: 0.75 } },
+  { id: "p_luc", nickname: "Lucía", lang: "es", traits: { ...base, competitiveness: 0.7, risk: 0.6, contrarianism: 0.4 } },
 ];
 
 const NAME: Record<string, string> = Object.fromEntries(CAST.map((b) => [b.id, b.nickname]));
 
 function seedGame(seed: number): GameState {
-  let s = createGame("K7XQ", { id: CAST[0]!.id, nickname: CAST[0]!.nickname, lang: "es" }, "classic");
+  let s = createGame("K7XQ", { id: CAST[0]!.id, nickname: CAST[0]!.nickname, lang: "es" }, "director");
   s = { ...s, seed };
   for (const b of CAST.slice(1)) {
     s = { ...s, players: [...s.players, freshPlayer({ id: b.id, nickname: b.nickname, lang: "es" }, false)] };
@@ -44,6 +48,24 @@ function optLabel(state: GameState, round: NonNullable<ReturnType<typeof current
   const asPlayer = state.players.find((p) => p.id === o.id);
   return asPlayer ? asPlayer.nickname : o.label.es;
 }
+
+const AI_TAGS: Record<string, string> = {
+  observation: "👁  LA IA OBSERVA",
+  theory: "🧠  LA IA: «TENGO UNA TEORÍA»",
+  affinity: "💥  AFINIDAD",
+  accusation: "🎯  ACUSACIÓN",
+  theory_result: "⚖   VEREDICTO DE LA IA",
+  intervention: "♟   LA IA CAMBIA EL JUEGO",
+  missions: "🕵   MISIONES SECRETAS",
+  final: "🏁  TEORÍA FINAL DE LA IA",
+  hot_seat: "🔥  INTERROGATORIO",
+  verdict: "⚖   VEREDICTO DE LA SALA",
+  prophecy: "🔮  LA IA PREDICE",
+  prophecy_result: "🔮  RESULTADO DE LA PROFECÍA",
+  deal_reveal: "🤝  REVELACIÓN DEL TRATO",
+  movement: "🧍  EN PIE",
+  confession: "🕯   CONFESIÓN DE LA IA",
+};
 
 function run(seed: number) {
   const rand = mulberry32(seed + 1);
@@ -62,21 +84,12 @@ function run(seed: number) {
     for (const m of state.aiMessages) {
       if (printedMsgs.has(m.id)) continue;
       printedMsgs.add(m.id);
-      const tag =
-        m.kind === "observation" ? "👁  LA IA OBSERVA" :
-        m.kind === "theory" ? "🧠  LA IA: «TENGO UNA TEORÍA»" :
-        m.kind === "affinity" ? "💥  AFINIDAD" :
-        m.kind === "accusation" ? "🎯  ACUSACIÓN" :
-        m.kind === "theory_result" ? "⚖   VEREDICTO DE LA IA" :
-        m.kind === "intervention" ? "♟   LA IA CAMBIA EL JUEGO" :
-        m.kind === "missions" ? "🕵   MISIONES SECRETAS" :
-        m.kind === "final" ? "🏁  TEORÍA FINAL DE LA IA" : "IA";
-      console.log(`\n    ${tag}`);
+      console.log(`\n    ${AI_TAGS[m.kind] ?? "IA"}`);
       console.log(`    "${m.text.es}"`);
     }
   };
 
-  while (state.phase !== "FINAL_RESULTS" && guard++ < 300) {
+  while (state.phase !== "FINAL_RESULTS" && guard++ < 400) {
     const round = currentRound(state);
 
     if (state.phase === "ROUND_INTRO" && round) {
@@ -84,12 +97,20 @@ function run(seed: number) {
       const q = round.questionId ? QUESTIONS_BY_ID[round.questionId] : undefined;
       const title = round.title?.es;
       const prompt = round.body?.es ?? q?.prompt.es;
-      if (!round.kind.startsWith("ai_") || round.kind === "ai_theory_test") {
-        console.log(`\n━━━ RONDA ${roundNo} ${title ? `· ${title}` : ""} ━━━`);
-        if (prompt) console.log(`  ${prompt}`);
-      } else if (title) {
-        console.log(`\n━━━ RONDA ${roundNo} · ${title} ━━━`);
+      console.log(`\n━━━ RONDA ${roundNo} · ${round.kind.toUpperCase()} ${title ? `· ${title}` : ""} ━━━`);
+      if (prompt) console.log(`  ${prompt}`);
+      if (round.secretDeal) {
+        console.log(
+          `  [secreto — solo ${NAME[round.secretDeal.players[0]]} y ${NAME[round.secretDeal.players[1]]} lo ven]: ${round.secretDeal.task.es} (+${round.secretDeal.reward} a repartir)`,
+        );
       }
+    }
+
+    if (state.phase === "DISCUSSION" && round) {
+      console.log(`    🗣  ${round.talkPrompt?.es ?? ""}`);
+      if (round.stageInstruction) console.log(`    📺 ${round.stageInstruction.es}`);
+      state = advance(state);
+      continue;
     }
 
     if (state.phase === "ANSWERING" && round) {
@@ -131,20 +152,23 @@ function run(seed: number) {
   }
   if (r.mostCompatible) console.log(`  ${"La pareja más compatible".padEnd(24)} → ${NAME[r.mostCompatible.a]} + ${NAME[r.mostCompatible.b]}  (${r.mostCompatible.percent}%)`);
   if (r.biggestClash) console.log(`  ${"Polos opuestos".padEnd(24)} → ${NAME[r.biggestClash.a]} vs ${NAME[r.biggestClash.b]}`);
-  if (r.wildcardId) console.log(`  ${"El comodín (imprevisible)".padEnd(24)} → ${NAME[r.wildcardId]}`);
+  if (r.wildcardId) console.log(`  ${"El comodín".padEnd(24)} → ${NAME[r.wildcardId]}`);
   if (r.salseoMvpId) console.log(`  ${"MVP del salseo".padEnd(24)} → ${NAME[r.salseoMvpId]}`);
-  if (r.biggestAlliance) console.log(`  ${"La mayor alianza".padEnd(24)} → ${NAME[r.biggestAlliance.a]} + ${NAME[r.biggestAlliance.b]}`);
-  if (r.biggestBetrayal) console.log(`  ${"La mayor traición".padEnd(24)} → ${NAME[r.biggestBetrayal.from]} → ${NAME[r.biggestBetrayal.to]}`);
-  console.log(`  ${"Precisión de la IA".padEnd(24)} → ${Math.round(r.aiAccuracy * 100)}%  (teorías: ${r.theoriesHeld}/${r.theoriesTested})`);
+  console.log(`  ${"Precisión de la IA".padEnd(24)} → ${Math.round(r.aiAccuracy * 100)}%`);
 
-  if (Object.keys(r.nemesis).length) {
-    console.log(`\n  Némesis:`);
-    for (const [a, b] of Object.entries(r.nemesis)) console.log(`    ${NAME[a]} ↔ ${NAME[b]}`);
+  console.log(`\n  Reputación final (confianza / sospecha / influencia):`);
+  for (const rep of r.reputation) {
+    console.log(`    ${NAME[rep.playerId]?.padEnd(10)} ${rep.trust.toFixed(0)} / ${rep.suspicion.toFixed(0)} / ${rep.influence.toFixed(0)}`);
   }
 
   console.log(`\n  Misiones secretas (reveladas):`);
   for (const m of r.missions) {
     console.log(`    ${m.completed ? "✅" : "❌"} ${NAME[m.playerId]}: "${m.text.es}"`);
+  }
+
+  console.log(`\n  🕯  LO QUE HIZO LA IA (${r.directorLog.length} jugadas):`);
+  for (const entry of r.directorLog.slice(0, 8)) {
+    console.log(`    → ${entry.reason.es}`);
   }
 
   console.log(`\n  Patrón más sorprendente:\n    "${r.surprisingPattern.es}"`);

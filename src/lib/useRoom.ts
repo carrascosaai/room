@@ -89,6 +89,7 @@ export function useRoom(code: string): UseRoom {
         v?.phase === "ANSWERING" ||
         v?.phase === "LOBBY" ||
         v?.phase === "ROUND_INTRO" ||
+        v?.phase === "DISCUSSION" ||
         v?.phase?.startsWith("AI_");
       timer = setTimeout(loop, fast ? FAST_MS : SLOW_MS);
     };
@@ -138,7 +139,15 @@ export function useRoom(code: string): UseRoom {
     const deadline = view.phaseDeadline ?? 0;
     const now = Date.now();
 
-    const displayPhases = ["ROUND_INTRO", "REVEAL", "ROUND_RESULT", "AI_OBSERVATION", "AI_THEORY", "AI_INTERVENTION"];
+    const displayPhases = [
+      "ROUND_INTRO",
+      "DISCUSSION",
+      "REVEAL",
+      "ROUND_RESULT",
+      "AI_OBSERVATION",
+      "AI_THEORY",
+      "AI_INTERVENTION",
+    ];
     const shouldNudge =
       (view.phase === "ANSWERING" && deadline && now >= deadline) ||
       (displayPhases.includes(view.phase) && deadline && now >= deadline && isHost);

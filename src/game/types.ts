@@ -73,11 +73,18 @@ export type RoundKind =
   | "accusation" // point at a player — "who here is the most ___?"
   | "compat_probe" // private taste/values answer; the engine pairs the matches
   | "revenge" // a wronged player docks points from someone
+  // ── AI-director mechanics (talk-heavy, played in the room) ──
+  | "interrogation" // one player defends themselves out loud; the room rates + judges
+  | "deal" // the AI privately offers two players a secret pact; the room hunts the tell
+  | "prophecy" // the AI predicts one player's next move, out loud, in front of everyone
+  | "movement" // everyone physically moves to a side; then convince someone to switch
   // engine-generated special rounds:
   | "ai_observation"
   | "ai_theory"
   | "ai_theory_test"
   | "ai_intervention";
+
+export type GameMode = "director" | "classic";
 
 export interface QuestionOption {
   id: string; // "A" | "B" | "C" ...
@@ -191,6 +198,37 @@ export interface Round {
   /** seconds allowed to answer */
   timeLimit: number;
   createdAt: number;
+
+  // ── talk / stage layer ──
+  /** if > 0, an out-loud DISCUSSION phase runs before ANSWERING */
+  talkSeconds?: number;
+  /** what the room should be doing during the discussion (shown on the stage) */
+  talkPrompt?: Localized;
+  /** a physical instruction shown big on the stage ("stand up and move…") */
+  stageInstruction?: Localized;
+  /** everyone can see the running tally during ANSWERING (physical rounds) */
+  liveTally?: boolean;
+  /** the player on the spot this round (interrogation / prophecy subject) */
+  hotSeatId?: string;
+  /** interrogation: options for the consequence the room votes on */
+  consequenceOptions?: QuestionOption[];
+  /** deal: the secret pact offered to exactly two players */
+  secretDeal?: {
+    players: [string, string];
+    /** points split between them if they pull it off uncaught */
+    reward: number;
+    /** localized description of what they must secretly do */
+    task: Localized;
+  };
+  /** prophecy: the AI's public call about `hotSeatId`, resolved next round */
+  prophecy?: {
+    subjectId: string;
+    /** "A" = will do the bold/risky thing, "B" = won't */
+    predictedOptionId: string;
+    label: Localized;
+  };
+  /** which director move produced this round (for the manipulation log) */
+  directorMoveId?: string;
 }
 
 export interface Answer {
@@ -213,6 +251,12 @@ export interface Player {
   joinedAt: number;
   lastSeen: number;
   score: number;
+  /** reputation economy — 0..100, start 50. The director manipulates these. */
+  trust: number;
+  suspicion: number;
+  influence: number;
+  /** rounds where this player was the centre of attention (director spreads it around) */
+  spotlightCount: number;
 }
 
 // ---------- Game state machine ----------
@@ -220,6 +264,7 @@ export interface Player {
 export type GamePhase =
   | "LOBBY"
   | "ROUND_INTRO"
+  | "DISCUSSION" // open floor — talk out loud (stage-driven)
   | "ANSWERING"
   | "REVEAL"
   | "AI_OBSERVATION"
@@ -241,7 +286,14 @@ export interface AiMessage {
     | "final"
     | "affinity" // "AFINIDAD DETECTADA" — two players keep matching
     | "accusation" // the room pointed at someone
-    | "missions"; // secret missions revealed
+    | "missions" // secret missions revealed
+    | "hot_seat" // "X, defiéndete" — interrogation framing
+    | "verdict" // the room's judgement on the hot seat
+    | "prophecy" // "predigo que X…"
+    | "prophecy_result" // whether the prophecy held
+    | "deal_reveal" // whether a secret deal existed / was caught
+    | "movement" // "levantaos y moveos"
+    | "confession"; // the director's manipulation log at the end
   /** localized text; both langs always present so mixed-language rooms work */
   text: Localized;
   roundIndex: number;
@@ -283,17 +335,52 @@ export interface RoundOutcome {
   contrarians?: string[];
 }
 
+// ---------- The director (AI game master) ----------
+
+export type DirectorSignal =
+  | "warmup"
+  | "bored_player"
+  | "runaway_leader"
+  | "cozy_pair"
+  | "too_much_harmony"
+  | "theory_failed"
+  | "grudge"
+  | "cadence"
+  | "finale";
+
+export interface DirectorMove {
+  id: string;
+  roundIndex: number;
+  kind: RoundKind;
+  signal: DirectorSignal;
+  targets: string[];
+  /** shown in the end-of-game confession ("what the AI did and why") */
+  reason: Localized;
+}
+
+export interface DirectorState {
+  /** rounds since a given player was in the spotlight */
+  lastSpotlightRound: Record<string, number>;
+  /** how many prophecy / movement / deal beats have run */
+  beats: Record<string, number>;
+  /** the id of an unresolved prophecy round, if any */
+  pendingProphecyRoundId?: string;
+}
+
 export interface GameState {
   code: string;
   phase: GamePhase;
+  mode: GameMode;
   createdAt: number;
   startedAt?: number;
   endedAt?: number;
   players: Player[];
   hostId: string;
 
-  /** planned arc: ordered round "slots" the selector fills */
+  /** classic mode: ordered round "slots" the selector fills */
   plan: RoundSlot[];
+  /** director mode: how many rounds the session runs */
+  targetRounds: number;
   rounds: Round[];
   currentRoundIndex: number; // index into `rounds`
   answers: Answer[];
@@ -302,6 +389,9 @@ export interface GameState {
   group: GroupModel;
   theories: Theory[];
   missions: MissionAssignment[];
+
+  director: DirectorState;
+  directorLog: DirectorMove[];
 
   outcomes: RoundOutcome[];
   aiMessages: AiMessage[];
