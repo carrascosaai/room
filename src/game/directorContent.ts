@@ -164,6 +164,30 @@ export const PROPHECIES: {
         ? L(`I predict ${n} cuts their ally out. When it pays, ${n} does it.`, `Predigo que ${n} deja fuera a su aliado. Cuando compensa, ${n} lo hace.`)
         : L(`I predict ${n} stays loyal. ${n} won't break it.`, `Predigo que ${n} sigue leal. ${n} no la rompe.`),
   },
+  {
+    id: "make_a_move",
+    prompt: L("Someone here catches your eye tonight. Do you say something, or keep it to yourself?", "Alguien de aquí te llama la atención esta noche. ¿Se lo dices, o te lo callas?"),
+    options: [
+      { id: "A", label: L("Keep it to myself", "Me lo callo"), tags: { risk: -0.6, impulsivity: -0.5 } },
+      { id: "B", label: L("Say something", "Se lo digo"), tags: { risk: 0.7, impulsivity: 0.6 } },
+    ],
+    call: (n, bold) =>
+      bold
+        ? L(`I predict ${n} says something. ${n} doesn't sit on it.`, `Predigo que ${n} dice algo. ${n} no se lo guarda.`)
+        : L(`I predict ${n} keeps it to themselves. ${n} plays it close.`, `Predigo que ${n} se lo calla. ${n} lo lleva por dentro.`),
+  },
+  {
+    id: "public_or_private",
+    prompt: L("You can win +150 quietly, or +350 if you announce it to the whole room first.", "Puedes ganar +150 en silencio, o +350 si lo anuncias antes a toda la sala."),
+    options: [
+      { id: "A", label: L("Quietly (+150)", "En silencio (+150)"), tags: { individualism: 0.3, risk: -0.4 } },
+      { id: "B", label: L("Announce it (+350)", "Anunciarlo (+350)"), tags: { risk: 0.7, impulsivity: 0.5, socialAlignment: 0.3 } },
+    ],
+    call: (n, bold) =>
+      bold
+        ? L(`I predict ${n} announces it. ${n} wants the room watching.`, `Predigo que ${n} lo anuncia. ${n} quiere que la sala mire.`)
+        : L(`I predict ${n} keeps it quiet. ${n} doesn't need an audience.`, `Predigo que ${n} lo hace en silencio. ${n} no necesita público.`),
+  },
 ];
 
 export function prophecyBetOptions(): QuestionOption[] {
@@ -184,6 +208,14 @@ export const MOVEMENT_STATEMENTS: Localized[] = [
   L("You'd play with this exact group again.", "Volverías a jugar con este grupo exacto."),
   L("You've already picked who you want to lose.", "Ya has decidido a quién quieres que pierda."),
   L("You care more about winning than about being liked.", "Te importa más ganar que caer bien."),
+  L("You've had a crush on someone in this exact room.", "Has tenido un crush con alguien de esta sala exacta."),
+  L("You'd rather be right than be liked.", "Prefieres tener razón antes que caer bien."),
+  L("You've stalked someone's social media tonight.", "Has cotilleado las redes de alguien esta noche."),
+  L("Someone here could talk you into almost anything.", "Alguien de aquí te podría convencer de casi cualquier cosa."),
+  L("You've pretended to like a gift more than you did.", "Has fingido que un regalo te gustaba más de lo que te gustaba."),
+  L("You'd rather know an uncomfortable truth than a comfortable lie.", "Prefieres saber una verdad incómoda antes que una mentira cómoda."),
+  L("There's someone in this room you'd trust with a secret nobody else knows.", "Hay alguien en esta sala a quien confiarías un secreto que nadie más sabe."),
+  L("You've flirted with someone just to see if it would work.", "Has ligado con alguien solo para ver si funcionaba."),
 ];
 
 export function movementOptions(): QuestionOption[] {
@@ -337,6 +369,30 @@ export const FACEOFF_PROMPTS: FaceoffPrompt[] = [
     id: "loudest",
     prompt: (n1, n2) => L(`${n1} or ${n2} — who's been playing everyone else this whole time?`, `${n1} o ${n2} — ¿quién ha estado jugando con el resto toda la noche?`),
     talk: (n1, n2) => L(`${n1}, ${n2} — face each other. Talk it out.`, `${n1}, ${n2} — encaraos. Habladlo.`),
+    stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
+  },
+  {
+    id: "better_flirt",
+    prompt: (n1, n2) => L(`${n1} or ${n2} — who's the better flirt?`, `${n1} o ${n2} — ¿quién liga mejor?`),
+    talk: (n1, n2) => L(`${n1}, ${n2} — prove it, right now, out loud.`, `${n1}, ${n2} — demostradlo, ahora mismo, en voz alta.`),
+    stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
+  },
+  {
+    id: "would_you_rather_date",
+    prompt: (n1, n2) => L(`${n1} or ${n2} — if you had to date one of them, who?`, `${n1} o ${n2} — si tuvieras que salir con uno de los dos, ¿con quién?`),
+    talk: (n1, n2) => L(`${n1}, ${n2} — sell yourselves. 15 seconds each.`, `${n1}, ${n2} — vendeos. 15 segundos cada uno.`),
+    stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
+  },
+  {
+    id: "worst_ex",
+    prompt: (n1, n2) => L(`${n1} or ${n2} — who'd make the worse ex?`, `${n1} o ${n2} — ¿quién sería peor ex?`),
+    talk: (n1, n2) => L(`${n1}, ${n2} — defend your honor.`, `${n1}, ${n2} — defended vuestro honor.`),
+    stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
+  },
+  {
+    id: "most_likely_secret",
+    prompt: (n1, n2) => L(`${n1} or ${n2} — who's hiding the bigger secret tonight?`, `${n1} o ${n2} — ¿quién esconde el secreto más gordo esta noche?`),
+    talk: (n1, n2) => L(`${n1}, ${n2} — 20 seconds to convince the room it's not you.`, `${n1}, ${n2} — 20 segundos para convencer a la sala de que no sois vosotros.`),
     stage: (n1, n2) => L(`Vote: ${n1} or ${n2}?`, `Votad: ¿${n1} o ${n2}?`),
   },
 ];

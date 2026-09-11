@@ -44,7 +44,7 @@ Two modes, picked at room creation:
 | Server-authoritative game state machine (`LOBBY → … → FINAL_RESULTS`) | ✅ |
 | Realtime multiplayer — polling (always) + Supabase Realtime (when configured) | ✅ |
 | Disconnect / refresh / host-transfer / late-join handling | ✅ |
-| ~175-question curated bilingual bank with hidden behavioral metadata | ✅ |
+| ~220-question curated bilingual bank with hidden behavioral metadata | ✅ |
 | Deterministic behavior model (13 dimensions, value/confidence/evidence/trend) | ✅ |
 | Group model (alliances, reciprocal trust, betrayals, alignment, predictions) | ✅ |
 | Theory engine — forms falsifiable theories, schedules a test, resolves it | ✅ |
