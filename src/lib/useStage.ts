@@ -49,7 +49,7 @@ export function useStage(code: string): UseStage {
     const loop = async () => {
       await refresh();
       const v = viewRef.current;
-      const fast = v?.phase !== "LOBBY" && v?.phase !== "FINAL_RESULTS";
+      const fast = v?.phase !== "LOBBY" && v?.phase !== "FINAL_REPORT";
       timer = setTimeout(loop, fast ? FAST_MS : SLOW_MS);
     };
     loop();

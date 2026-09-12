@@ -1,25 +1,22 @@
 import { QUESTIONS_BY_ID } from "./questions";
 import { currentRound, optionsForPlayer, respondents, totalRounds } from "./engine";
-import { evidenceLocalized } from "./commentary";
-import { missionText } from "./missions";
-import type { AiMessage, GamePhase, GameState, Localized, Theory } from "./types";
+import type { GamePhase, GameState, Hypothesis, HypothesisCategory, Localized } from "./types";
 import type { FinalReport } from "./report";
 
 // ─────────────────────────────────────────────────────────────
 // Projection: GameState -> what a specific player is allowed to
-// see. Hidden data (behavior tags, other players' un-revealed
-// answers, "forming" theories) never crosses this boundary.
+// see. Hidden data (an anonymous hypothesis's creator, a live
+// counter-theory before reveal, another player's private decision)
+// never crosses this boundary.
 // ─────────────────────────────────────────────────────────────
 
 export interface PlayerViewPlayer {
   id: string;
   nickname: string;
   score: number;
+  theoryScore: number;
   isHost: boolean;
   connected: boolean;
-  trust: number;
-  suspicion: number;
-  influence: number;
 }
 
 export interface RevealAnswerRow {
@@ -28,10 +25,37 @@ export interface RevealAnswerRow {
   label: Localized | null;
 }
 
+export interface PublicHypothesis {
+  id: string;
+  /** null while anonymous and unrevealed */
+  creatorId: string | null;
+  targetId: string;
+  category: HypothesisCategory;
+  templateId: string;
+  statement: Localized;
+  confidence: number;
+  status: Hypothesis["status"];
+  counterOf?: string;
+}
+
+function publicHypothesis(h: Hypothesis, viewerId: string | null): PublicHypothesis {
+  const showCreator = h.revealed || !h.anonymous || h.creatorId === viewerId;
+  return {
+    id: h.id,
+    creatorId: showCreator ? h.creatorId : null,
+    targetId: h.targetId,
+    category: h.category,
+    templateId: h.templateId,
+    statement: h.statement,
+    confidence: h.confidence,
+    status: h.status,
+    counterOf: h.counterOf,
+  };
+}
+
 export interface PlayerView {
   code: string;
   phase: GamePhase;
-  mode: "director" | "classic";
   version: number;
   phaseDeadline?: number;
   storeKind: "memory" | "supabase";
@@ -46,8 +70,6 @@ export interface PlayerView {
 
   totalSlots: number;
   slotIndex: number;
-  /** director mode: who currently holds the throne (public — everyone sees this) */
-  throneHolderId?: string;
 
   round?: {
     id: string;
@@ -60,70 +82,41 @@ export interface PlayerView {
     myOptions: { id: string; label: Localized }[];
     iRespond: boolean;
     iAmParticipant: boolean;
-    iAmPredictor: boolean;
     iAnswered: boolean;
     answeredCount: number;
     respondentCount: number;
-    theory?: PublicTheory;
     participants: string[];
-    // ── talk / stage ──
-    talkSeconds?: number;
-    talkPrompt?: Localized;
-    stageInstruction?: Localized;
-    hotSeatId?: string;
-    iAmHotSeat: boolean;
-    liveTally?: Record<string, number>;
-    /** the viewer's own secret pact (only the two dealmakers get this) */
-    mySecretDeal?: { task: Localized; reward: number };
-    /** the viewer's own private whisper — only the mole or an intel recipient gets this */
-    myWhisper?: { kind: "mole" | "intel"; text: Localized };
-    prophecyCall?: Localized;
+    // ── hypothesis cycle ──
+    authorId?: string;
+    iAmAuthor: boolean;
+    hypothesis?: PublicHypothesis;
+    counterHypothesis?: PublicHypothesis;
+    /** RELATIONSHIPS/SPICY test: the two named players to pick between */
+    comparisonOptions?: string[];
   };
 
   reveal?: {
     lines: Localized[];
     answers: RevealAnswerRow[];
     scoreDelta: Record<string, number>;
+    theoryScoreDelta: Record<string, number>;
     majorityOptionId?: string;
     contrarians: string[];
   };
 
-  aiMessages: AiMessage[];
-  theories: PublicTheory[];
+  aiMessages: import("./types").AiMessage[];
+  hypotheses: PublicHypothesis[];
   report?: FinalReport;
-
-  /** the viewer's own secret mission (only ever their own, until the end) */
-  myMission?: { text: Localized; completed?: boolean };
 }
 
-export interface PublicTheory {
-  id: string;
-  type: Theory["type"];
-  players: string[];
-  evidence: Localized;
-  confidence: number;
-  status: Theory["status"];
-}
-
-function publicTheory(t: Theory): PublicTheory {
-  return {
-    id: t.id,
-    type: t.type,
-    players: t.players,
-    evidence: evidenceLocalized(t),
-    confidence: t.confidence,
-    status: t.status,
-  };
-}
-
-const REVEAL_PHASES: GamePhase[] = ["REVEAL", "ROUND_RESULT"];
+const REVEAL_PHASES: GamePhase[] = ["REVEAL", "CONFIDENCE_UPDATE"];
 
 export function projectView(
   state: GameState,
   viewerId: string | null,
   meta: { storeKind?: "memory" | "supabase"; aiEnabled?: boolean; stage?: boolean } = {},
 ): PlayerView {
-  const me = viewerId ? state.players.find((p) => p.id === viewerId) ?? null : null;
+  const me = viewerId ? (state.players.find((p) => p.id === viewerId) ?? null) : null;
   const round = currentRound(state);
   const roundAnswers = round ? state.answers.filter((a) => a.roundId === round.id) : [];
   const isStage = meta.stage === true;
@@ -131,7 +124,6 @@ export function projectView(
   const view: PlayerView = {
     code: state.code,
     phase: state.phase,
-    mode: state.mode,
     version: state.version,
     phaseDeadline: state.phaseDeadline,
     storeKind: meta.storeKind ?? "memory",
@@ -142,62 +134,28 @@ export function projectView(
       id: p.id,
       nickname: p.nickname,
       score: p.score,
+      theoryScore: p.theoryScore,
       isHost: p.isHost,
       connected: p.connected,
-      trust: p.trust,
-      suspicion: p.suspicion,
-      influence: p.influence,
     })),
     minPlayers: 3,
     maxPlayers: 10,
     totalSlots: totalRounds(state),
     slotIndex: state.currentRoundIndex,
-    throneHolderId: state.throneHolderId,
     aiMessages: state.aiMessages,
-    theories: state.theories
-      .filter((t) => t.status !== "forming")
-      .map(publicTheory),
-    report: state.phase === "FINAL_RESULTS" ? state.report : undefined,
+    hypotheses: state.hypotheses.map((h) => publicHypothesis(h, viewerId)),
+    report: state.phase === "FINAL_REPORT" ? state.report : undefined,
   };
 
-  if (viewerId) {
-    const mine = state.missions.find((m) => m.playerId === viewerId);
-    if (mine) {
-      view.myMission = {
-        text: missionText(mine, state.players),
-        completed: state.phase === "FINAL_RESULTS" ? mine.completed : undefined,
-      };
-    }
-  }
-
-  if (round && state.phase !== "LOBBY" && state.phase !== "FINAL_RESULTS") {
+  if (round && state.phase !== "LOBBY" && state.phase !== "FINAL_REPORT") {
     const allowed = respondents(round);
     const iAmParticipant = viewerId ? round.participants.includes(viewerId) : false;
-    const iAmPredictor = viewerId ? (round.predictors ?? []).includes(viewerId) : false;
     const iRespond = viewerId ? allowed.includes(viewerId) : false;
-    const iAmHotSeat = !!viewerId && !!round.hotSeatId && viewerId === round.hotSeatId;
+    const iAmAuthor = !!viewerId && !!round.authorId && viewerId === round.authorId;
     const q = round.questionId ? QUESTIONS_BY_ID[round.questionId] : undefined;
 
-    let liveTally: Record<string, number> | undefined;
-    if (round.liveTally && (isStage || round.kind === "movement" || round.kind === "movement_switch")) {
-      liveTally = {};
-      for (const a of roundAnswers) liveTally[a.optionId] = (liveTally[a.optionId] ?? 0) + 1;
-    }
-
-    let mySecretDeal: { task: Localized; reward: number } | undefined;
-    if (round.secretDeal && viewerId && round.secretDeal.players.includes(viewerId)) {
-      mySecretDeal = { task: round.secretDeal.task, reward: round.secretDeal.reward };
-    }
-
-    let myWhisper: { kind: "mole" | "intel"; text: Localized } | undefined;
-    if (round.whisper && viewerId) {
-      if (viewerId === round.whisper.moleId) {
-        myWhisper = { kind: "mole", text: round.whisper.moleBriefing };
-      } else {
-        const intel = round.whisper.intel.find((i) => i.playerId === viewerId);
-        if (intel) myWhisper = { kind: "intel", text: intel.text };
-      }
-    }
+    const hypothesis = round.hypothesisId ? state.hypotheses.find((h) => h.id === round.hypothesisId) : undefined;
+    const counterHypothesis = round.counterHypothesisId ? state.hypotheses.find((h) => h.id === round.counterHypothesisId) : undefined;
 
     view.round = {
       id: round.id,
@@ -207,47 +165,34 @@ export function projectView(
       body: round.body,
       prompt: q?.prompt,
       timeLimit: round.timeLimit,
-      myOptions: viewerId && (iRespond || iAmHotSeat) ? optionsForPlayer(round, viewerId) : [],
+      myOptions: viewerId && iRespond ? optionsForPlayer(round, viewerId) : [],
       iRespond,
       iAmParticipant,
-      iAmPredictor,
       iAnswered: viewerId ? roundAnswers.some((a) => a.playerId === viewerId) : false,
       answeredCount: roundAnswers.length,
-      respondentCount: allowed.filter((id) => {
-        const pl = state.players.find((p) => p.id === id);
-        return pl?.connected;
-      }).length,
+      respondentCount: allowed.filter((id) => state.players.find((p) => p.id === id)?.connected).length,
       participants: round.participants,
-      theory: round.theoryId
-        ? state.theories.filter((t) => t.id === round.theoryId).map(publicTheory)[0]
-        : undefined,
-      talkSeconds: round.talkSeconds,
-      talkPrompt: round.talkPrompt,
-      stageInstruction: round.stageInstruction,
-      hotSeatId: round.hotSeatId,
-      iAmHotSeat,
-      liveTally,
-      mySecretDeal,
-      myWhisper,
-      prophecyCall: round.prophecy?.label,
+      authorId: round.authorId,
+      iAmAuthor,
+      hypothesis: hypothesis ? publicHypothesis(hypothesis, viewerId) : undefined,
+      counterHypothesis: counterHypothesis ? publicHypothesis(counterHypothesis, viewerId) : undefined,
+      comparisonOptions: round.test?.comparisonOptions,
     };
   }
 
-  if (round && (REVEAL_PHASES.includes(state.phase) || state.phase.startsWith("AI_"))) {
+  if (round && (REVEAL_PHASES.includes(state.phase))) {
     const outcome = state.outcomes.find((o) => o.roundId === round.id);
     if (outcome) {
       view.reveal = {
         lines: outcome.lines,
         scoreDelta: outcome.scoreDelta,
+        theoryScoreDelta: outcome.theoryScoreDelta ?? {},
         majorityOptionId: outcome.majorityOptionId,
         contrarians: outcome.contrarians ?? [],
         answers: roundAnswers.map((a) => {
           const opts = optionsForPlayer(round, a.playerId);
-          return {
-            playerId: a.playerId,
-            optionId: a.optionId,
-            label: opts.find((o) => o.id === a.optionId)?.label ?? null,
-          };
+          const label = opts.find((o) => o.id === a.optionId)?.label ?? null;
+          return { playerId: a.playerId, optionId: a.optionId, label };
         }),
       };
     }

@@ -16,7 +16,6 @@ export async function POST(
     code: clean(code),
     playerId: body.playerId,
     optionId: body.optionId,
-    targetId: typeof body.targetId === "string" ? body.targetId : undefined,
   });
   return json(result);
 }

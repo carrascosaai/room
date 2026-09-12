@@ -14,40 +14,14 @@ function nameOf(view: PlayerView, id: string | null): string {
   return view.players.find((p) => p.id === id)?.nickname ?? "—";
 }
 
-function PairCard({
-  label,
-  names,
-  note,
-  tone = "default",
-}: {
-  label: string;
-  names: string;
-  note?: string;
-  tone?: "default" | "danger";
-}) {
+function StatementCard({ label, statement, confidence, tone = "default" }: { label: string; statement: string; confidence?: number; tone?: "default" | "danger" | "accent" }) {
+  const border = tone === "danger" ? "border-[var(--danger)]/40 bg-[var(--danger)]/5" : tone === "accent" ? "border-[var(--accent)]/40 bg-[var(--accent)]/5" : "border-[var(--border)] bg-[var(--surface)]";
   return (
-    <div
-      className={`rounded-2xl border p-3 ${
-        tone === "danger"
-          ? "border-[var(--danger)]/40 bg-[var(--danger)]/5"
-          : "border-[var(--border)] bg-[var(--surface)]"
-      }`}
-    >
+    <div className={`rounded-2xl border p-3 ${border}`}>
       <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">{label}</p>
-      <p className="mt-1.5 text-sm font-semibold leading-tight">{names}</p>
-      {note ? <p className="mt-0.5 text-xs text-[var(--accent)]">{note}</p> : null}
+      <p className="mt-1.5 text-sm font-semibold leading-tight">&quot;{statement}&quot;</p>
+      {confidence !== undefined ? <p className="mt-0.5 text-xs text-[var(--accent)]">{confidence}%</p> : null}
     </div>
-  );
-}
-
-function RepBar({ value, color }: { value: number; color: string }) {
-  return (
-    <span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--border)]">
-      <span
-        className="absolute inset-y-0 left-0 rounded-full"
-        style={{ width: `${Math.round(value)}%`, background: color }}
-      />
-    </span>
   );
 }
 
@@ -63,12 +37,9 @@ export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
 
   if (!report) return null;
 
-  const accuracyPct = Math.round(report.aiAccuracy * 100);
-  const missionsMsg = view.aiMessages.find((m) => m.kind === "missions");
-
   async function share() {
-    trackClient("share_clicked", { accuracy: accuracyPct });
-    const text = t("share.resultText", { accuracy: accuracyPct });
+    trackClient("share_clicked", {});
+    const text = t("share.resultText");
     try {
       if (navigator.share) {
         await navigator.share({ title: t("share.resultTitle"), text, url: shareUrl });
@@ -81,10 +52,10 @@ export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
   }
 
   const superlativeKey: Record<string, string> = {
-    most_competitive: "results.mostCompetitive",
-    most_cooperative: "results.mostCooperative",
+    most_accurate: "results.mostAccurate",
+    best_observer: "results.bestObserver",
+    most_tested: "results.mostTested",
     most_unpredictable: "results.mostUnpredictable",
-    most_trusted: "results.mostTrusted",
   };
 
   return (
@@ -92,46 +63,20 @@ export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
       <p className="font-mono text-sm uppercase tracking-[0.3em] text-[var(--muted)]">ROOM</p>
       <h1 className="mt-2 text-2xl font-bold leading-tight">{t("results.title")}</h1>
 
-      {/* shareable card */}
       <div className="mt-5 overflow-hidden rounded-3xl border border-[var(--accent)]/40 bg-[var(--surface)] p-5">
         <div className="flex items-baseline justify-between">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--muted)]">
-            {t("results.aiAccuracy")}
-          </span>
-          <span className="tabnums text-4xl font-bold text-[var(--accent)]">{accuracyPct}%</span>
+          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--muted)]">{t("results.hypothesesTested")}</span>
+          <span className="tabnums text-4xl font-bold text-[var(--accent)]">{report.hypothesesTested}</span>
         </div>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          {report.timesGroupFooledAi > 0
-            ? t("results.youFooledIt", { count: report.timesGroupFooledAi })
-            : t("results.itFooledYou")}
-        </p>
-        {report.biggestBetrayal ? (
-          <p className="mt-3 border-t border-[var(--border)] pt-3 text-sm">
-            <span className="text-[var(--muted)]">{t("results.biggestBetrayal")}: </span>
-            <span className="font-semibold">
-              {nameOf(view, report.biggestBetrayal.from)} → {nameOf(view, report.biggestBetrayal.to)}
-            </span>
-          </p>
-        ) : null}
-        {report.biggestAlliance ? (
-          <p className="mt-1.5 text-sm">
-            <span className="text-[var(--muted)]">{t("results.biggestAlliance")}: </span>
-            <span className="font-semibold">
-              {nameOf(view, report.biggestAlliance.a)} + {nameOf(view, report.biggestAlliance.b)}
-            </span>
-          </p>
-        ) : null}
+        <p className="mt-2 text-sm text-[var(--muted)]">{t("results.hypothesesConfirmed", { count: report.hypothesesConfirmed })}</p>
       </div>
 
-      {/* superlatives */}
       <div className="mt-5 grid grid-cols-2 gap-2.5">
         {report.superlatives.map((s) => {
           const p = s.playerId ? view.players.find((x) => x.id === s.playerId) : null;
           return (
             <div key={s.key} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">
-                {t(superlativeKey[s.key] ?? s.key)}
-              </p>
+              <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">{t(superlativeKey[s.key] ?? s.key)}</p>
               <div className="mt-1.5 flex items-center gap-2">
                 {p ? <Avatar player={p} size={22} /> : null}
                 <span className="truncate text-sm font-semibold">{p?.nickname ?? "—"}</span>
@@ -141,140 +86,49 @@ export function Results({ view, room }: { view: PlayerView; room: UseRoom }) {
         })}
       </div>
 
-      {/* salseo */}
-      <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-        {report.mostCompatible ? (
-          <PairCard
-            label={t("results.mostCompatible")}
-            names={`${nameOf(view, report.mostCompatible.a)} + ${nameOf(view, report.mostCompatible.b)}`}
-            note={`${report.mostCompatible.percent}%`}
-          />
+      <div className="mt-2.5 space-y-2.5">
+        {report.biggestTheory ? (
+          <StatementCard label={t("results.biggestTheory")} statement={loc(report.biggestTheory.statement)} confidence={report.biggestTheory.confidence} tone="accent" />
         ) : null}
-        {report.biggestClash ? (
-          <PairCard
-            label={t("results.biggestClash")}
-            names={`${nameOf(view, report.biggestClash.a)} vs ${nameOf(view, report.biggestClash.b)}`}
-          />
+        {report.biggestPlotTwist ? (
+          <StatementCard label={t("results.biggestPlotTwist")} statement={loc(report.biggestPlotTwist.statement)} confidence={report.biggestPlotTwist.confidence} tone="danger" />
         ) : null}
-        {report.wildcardId ? (
-          <PairCard label={t("results.wildcard")} names={nameOf(view, report.wildcardId)} />
-        ) : null}
-        {report.salseoMvpId ? (
-          <PairCard label={t("results.salseoMvp")} names={nameOf(view, report.salseoMvpId)} tone="danger" />
+        {report.mostControversial ? (
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">{t("results.mostControversial")}</p>
+            <p className="mt-1.5 text-sm">&quot;{loc(report.mostControversial.a)}&quot;</p>
+            <p className="mt-1 text-sm text-[var(--muted)]">{t("results.vs")} &quot;{loc(report.mostControversial.b)}&quot;</p>
+          </div>
         ) : null}
       </div>
 
-      {/* your nemesis */}
-      {view.me && report.nemesis[view.me.id] ? (
-        <p className="mt-3 rounded-2xl border border-[var(--danger)]/40 bg-[var(--danger)]/5 p-3 text-sm">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--danger)]">
-            {t("results.yourNemesis")}:{" "}
-          </span>
-          <span className="font-semibold">{nameOf(view, report.nemesis[view.me.id]!)}</span>
-        </p>
-      ) : null}
-
-      {/* the AI's confession — director mode only */}
-      {view.mode === "director" && report.directorLog.length > 0 ? (
-        <div className="mt-4">
-          <AiCard title={t("director.confessionTitle")} tone="danger">
-            <p className="mb-3 text-xs text-[var(--muted)]">{t("director.confessionSubtitle")}</p>
-            <ul className="space-y-2.5">
-              {report.directorLog.slice(0, 7).map((entry, i) => (
-                <li key={i} className="text-sm leading-snug">
-                  <span className="mr-1.5 font-mono text-xs text-[var(--danger)]">→</span>
-                  {loc(entry.reason)}
-                </li>
-              ))}
-            </ul>
-          </AiCard>
-        </div>
-      ) : null}
-
-      {/* reputation — director mode only */}
-      {view.mode === "director" && report.reputation.length > 0 ? (
-        <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-          <p className="mb-3 text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">
-            {t("director.reputationTrust")} / {t("director.reputationSuspicion")} / {t("director.reputationInfluence")}
-          </p>
-          <ul className="space-y-3">
-            {report.reputation.map((r) => (
-              <li key={r.playerId}>
-                <p className="mb-1 text-sm font-semibold">{nameOf(view, r.playerId)}</p>
-                <div className="flex gap-1.5">
-                  <RepBar value={r.trust} color="var(--trust)" />
-                  <RepBar value={r.suspicion} color="var(--danger)" />
-                  <RepBar value={r.influence} color="var(--accent)" />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {/* secret missions revealed */}
-      {report.missions.length > 0 ? (
-        <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">
-            {t("results.secretMissions")}
-          </p>
-          {missionsMsg ? (
-            <p className="mt-1.5 text-sm text-[var(--muted)]">{loc(missionsMsg.text)}</p>
-          ) : null}
-          <ul className="mt-2 space-y-2">
-            {report.missions.map((m, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm">
-                <span>{m.completed ? "✅" : "❌"}</span>
-                <span>
-                  <span className="font-semibold">{nameOf(view, m.playerId)}</span>
-                  <span className="text-[var(--muted)]"> — {loc(m.text)}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {/* surprising pattern */}
-      <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">
-          {t("results.mostSurprising")}
-        </p>
-        <p className="mt-1.5 text-sm">{loc(report.surprisingPattern)}</p>
-      </div>
-
-      {/* final theory */}
       <div className="mt-4">
-        <AiCard title={t("results.finalTheoryTitle")} tone="accent">
-          <p className="text-[15px] leading-relaxed">{loc(report.finalTheory)}</p>
+        <AiCard title={t("results.finalAnalysisTitle")} tone="accent">
+          <p className="text-[15px] leading-relaxed">{loc(report.finalAnalysis)}</p>
         </AiCard>
       </div>
 
-      {/* standings */}
       <div className="mt-5">
-        <p className="mb-2 text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">
-          {t("common.leaderboard")}
-        </p>
+        <p className="mb-2 text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">{t("common.leaderboard")}</p>
         <Leaderboard view={view} />
+        {report.theoryWinnerId && report.theoryWinnerId !== report.gameWinnerId ? (
+          <p className="mt-3 text-sm text-[var(--muted)]">
+            {t("results.theoryWinner")}: <span className="font-semibold text-[var(--text)]">{nameOf(view, report.theoryWinnerId)}</span>
+          </p>
+        ) : null}
       </div>
 
       <p className="mt-5 text-center text-lg font-bold">{t("results.viralHook")}</p>
 
       <div className="mt-4 space-y-3">
-        <Button onClick={share}>
-          {copied ? t("share.linkCopied") : t("common.share").toUpperCase()}
-        </Button>
+        <Button onClick={share}>{copied ? t("share.linkCopied") : t("common.share").toUpperCase()}</Button>
         <Button variant="surface" onClick={() => { trackClient("play_again"); room.leave(); location.href = "/create"; }}>
           {t("common.playAgain").toUpperCase()}
         </Button>
-        <LinkButton href="/" variant="ghost">
-          {t("common.createNewRoom")}
-        </LinkButton>
+        <LinkButton href="/" variant="ghost">{t("common.createNewRoom")}</LinkButton>
       </div>
 
-      <p className="mt-6 text-center text-[11px] leading-relaxed text-[var(--muted)]">
-        {t("results.disclaimer")}
-      </p>
+      <p className="mt-6 text-center text-[11px] leading-relaxed text-[var(--muted)]">{t("results.disclaimer")}</p>
     </div>
   );
 }

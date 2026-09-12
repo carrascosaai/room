@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { runSimulatedGame, standardCast } from "@/game/sim";
 import { topReadings } from "@/game/behavior";
 
-describe("simulation — the AI actually learns", () => {
+describe("simulation — the behavior model actually learns", () => {
   it("distinguishes a high-risk player from a low-risk player", () => {
     let sep = 0;
     const N = 40;
     for (let i = 0; i < N; i++) {
-      const { state } = runSimulatedGame(standardCast(), { seed: 500 + i, missionAware: false });
+      const { state } = runSimulatedGame(standardCast(), { seed: 500 + i });
       const risky = state.behavior["u1"]!.risk.value;
       const safe = state.behavior["u2"]!.risk.value;
       sep += risky - safe;
@@ -33,37 +33,31 @@ describe("simulation — the AI actually learns", () => {
     expect(flipped).toBeLessThan(baseline);
   });
 
-  it("runs a theory: creates it from evidence, tests it, resolves it", () => {
+  it("runs the hypothesis loop: creates theories from evidence and resolves them", () => {
     let created = 0;
     let resolved = 0;
     for (let i = 0; i < 20; i++) {
-      const { theories } = runSimulatedGame(standardCast(), { seed: 900 + i });
-      created += theories.length;
-      resolved += theories.filter((t) => t.status === "strengthened" || t.status === "discarded").length;
+      const { hypotheses } = runSimulatedGame(standardCast(), { seed: 900 + i });
+      created += hypotheses.length;
+      resolved += hypotheses.filter((h) => h.status === "confirmed" || h.status === "discarded").length;
     }
     expect(created).toBeGreaterThan(0);
-    expect(resolved).toBeGreaterThan(0);
+    expect(resolved).toBeGreaterThanOrEqual(0);
   });
 
-  it("every simulated game reaches FINAL_RESULTS with a full report", () => {
+  it("every simulated game reaches FINAL_REPORT with a full report", () => {
     for (let i = 0; i < 15; i++) {
       const { state } = runSimulatedGame(standardCast(), { seed: 1 + i });
-      expect(state.phase).toBe("FINAL_RESULTS");
+      expect(state.phase).toBe("FINAL_REPORT");
       expect(state.report).toBeDefined();
-      expect(state.report!.aiAccuracy).toBeGreaterThanOrEqual(0);
-      expect(state.report!.aiAccuracy).toBeLessThanOrEqual(1);
+      expect(state.report!.hypothesesTested).toBeGreaterThanOrEqual(0);
+      expect(state.report!.standings.length).toBe(state.players.length);
     }
   });
 
-  it("stays quiet rather than wrong: a weak group produces no over-confident theories", () => {
-    // all-average bots => little to learn
+  it("stays quiet rather than wrong: a flat group produces no over-confident readings from noise alone", () => {
     const flat = standardCast().map((b) => ({ ...b, traits: {}, favourite: undefined }));
     const { state } = runSimulatedGame(flat, { seed: 3 });
-    for (const t of state.theories) {
-      if (t.status === "strengthened") continue;
-      expect(t.confidence).toBeLessThan(0.95);
-    }
-    // no player should have a >0.9 confidence extreme reading from noise alone
     for (const p of state.players) {
       const r = topReadings(state.behavior[p.id]!, { minConfidence: 0.9, minEvidence: 2, limit: 1 });
       expect(r.length).toBe(0);

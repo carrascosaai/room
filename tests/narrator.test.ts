@@ -15,7 +15,7 @@ import { addPlayer, createGame, startGame } from "@/game/engine";
 import type { GameState } from "@/game/types";
 
 function baseGame(): GameState {
-  let s = createGame("NAR1", { id: "p0", nickname: "P0", lang: "en" }, "classic");
+  let s = createGame("NAR1", { id: "p0", nickname: "P0", lang: "en" });
   for (let i = 1; i < 4; i++) s = addPlayer(s, { id: `p${i}`, nickname: `P${i}`, lang: "en" }).state;
   return startGame(s).state;
 }
@@ -37,7 +37,7 @@ describe("polishLatestAiMessage — cost-safety guard", () => {
   });
 
   it("polishes an unpolished message and marks it polished", async () => {
-    const s = withMessage("observation");
+    const s = withMessage("hypothesis");
     const next = await polishLatestAiMessage(s);
     const last = next.aiMessages[next.aiMessages.length - 1]!;
     expect(complete).toHaveBeenCalledTimes(1);
@@ -46,15 +46,15 @@ describe("polishLatestAiMessage — cost-safety guard", () => {
   });
 
   it("never calls the provider again once a message is polished", async () => {
-    const s = withMessage("throne_result");
+    const s = withMessage("confidence_update");
     const once = await polishLatestAiMessage(s);
     const twice = await polishLatestAiMessage(once);
     expect(complete).toHaveBeenCalledTimes(1);
     expect(twice).toBe(once);
   });
 
-  it("works for a director-only message kind, not just the original four", async () => {
-    const s = withMessage("whisper_result");
+  it("works for every AI message kind, not just a subset", async () => {
+    const s = withMessage("test_result");
     const next = await polishLatestAiMessage(s);
     expect(complete).toHaveBeenCalledTimes(1);
     expect(next.aiMessages[next.aiMessages.length - 1]!.polished).toBe(true);

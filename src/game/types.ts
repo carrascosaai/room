@@ -2,6 +2,9 @@
 // ROOM — core domain types
 // The deterministic game engine owns all of this. The LLM layer
 // may READ these structures but must never mutate them.
+//
+// Core loop: OBSERVATION -> HYPOTHESIS -> TEST -> DECISION ->
+// REVEAL -> CONFIDENCE_UPDATE. See ROOM_REDESIGN.md.
 // ─────────────────────────────────────────────────────────────
 
 export type Lang = "es" | "en";
@@ -44,7 +47,7 @@ export interface DimensionState {
 
 export type BehaviorProfile = Record<Dimension, DimensionState>;
 
-// ---------- Questions ----------
+// ---------- Questions (observation rounds) ----------
 
 export type QuestionCategory =
   | "strategy"
@@ -63,33 +66,19 @@ export type QuestionCategory =
   | "uncertainty"
   | "contrarian";
 
-export type RoundKind =
-  | "individual" // Round type A — private individual decision
-  | "group_vote" // Round type B — pick a player
-  | "social_dilemma" // Round type C — cooperate / betray between players
-  | "majority_minority" // Round type D — safe vs risky, conformity signal
-  | "prediction" // predict what the room / a player will do
-  | "trust" // choose who to rely on
-  | "accusation" // point at a player — "who here is the most ___?"
-  | "compat_probe" // private taste/values answer; the engine pairs the matches
-  | "revenge" // a wronged player docks points from someone
-  // ── AI-director mechanics (talk-heavy, played in the room) ──
-  | "interrogation" // one player defends themselves out loud; the room rates + judges
-  | "deal" // the AI privately offers two players a secret pact; the room hunts the tell
-  | "prophecy" // the AI predicts one player's next move, out loud, in front of everyone
-  | "movement" // everyone physically moves to a side
-  | "movement_switch" // the room gets one more chance to convince someone to switch
-  | "throne" // one seat, real power; the room can vote to overthrow whoever holds it
-  | "whisper" // a private mole + private intel, out loud negotiation, then the room votes
-  | "chemistry" // the AI tests a compatible pair's chemistry live, the room bets on the match
-  | "faceoff" // the AI puts two players head-to-head, the room votes who wins
-  // engine-generated special rounds:
-  | "ai_observation"
-  | "ai_theory"
-  | "ai_theory_test"
-  | "ai_intervention";
+/** Observation round kinds — these generate the behavioral signal the
+ *  hypothesis system reads. Plain decisions, no theories attached. */
+export type ObservationKind =
+  | "individual" // private individual decision
+  | "group_vote" // pick a player
+  | "social_dilemma" // cooperate / betray between players
+  | "majority_minority" // safe vs risky, conformity signal
+  | "trust"; // choose who to rely on
 
-export type GameMode = "director" | "classic";
+export type RoundKind =
+  | ObservationKind
+  | "hypothesis" // a player authors a theory about another player (+ optional counter-theory)
+  | "theory_test"; // the target's private decision that resolves the hypothesis (+ counter)
 
 export interface QuestionOption {
   id: string; // "A" | "B" | "C" ...
@@ -101,15 +90,13 @@ export interface Question {
   id: string;
   category: QuestionCategory;
   /** round kinds this question can be used for */
-  kinds: RoundKind[];
+  kinds: ObservationKind[];
   prompt: Localized;
   options: QuestionOption[];
   /** 1 (easy / warm-up) .. 3 (heavy dilemma) */
   difficulty: 1 | 2 | 3;
   /** 0 (safe) .. 3 (spicy). Keeps salseo bounded. */
   socialSensitivity: 0 | 1 | 2 | 3;
-  /** can this question be repurposed to test a theory? */
-  theoryTestable: boolean;
 }
 
 // ---------- Relationships / group model ----------
@@ -125,8 +112,8 @@ export interface RelationEdge {
   comparableCount: number;
   predictedCorrect: number;
   predictedTotal: number;
-  accusedCount: number; // times `from` pointed at `to` in accusation rounds
-  matchedTasteCount: number; // times `from` and `to` gave the same compat_probe answer
+  accusedCount: number; // legacy counter, kept for schema stability; unused by new content
+  matchedTasteCount: number; // legacy counter, kept for schema stability; unused by new content
 }
 
 export interface GroupModel {
@@ -135,67 +122,86 @@ export interface GroupModel {
   voteConcentration: Record<string, number>;
 }
 
-// ---------- Theories ----------
+// ---------- Hypotheses ----------
 
-export type TheoryType =
-  | "repeated_selection"
-  | "alliance"
-  | "mutual_bond"
-  | "one_way_loyalty"
-  | "conformist"
-  | "contrarian"
-  | "rivalry"
-  | "prediction_link"
-  | "risk_seeker"
-  | "risk_averse"
-  | "high_compatibility" // two players keep thinking alike — salseo
-  | "clashing_values" // two players are opposites on values — salseo
-  | "wildcard"; // one player nobody can predict
+export type HypothesisCategory =
+  | "loyalty"
+  | "trust"
+  | "money"
+  | "social"
+  | "competition"
+  | "relationships"
+  | "spicy";
 
-export type TheoryStatus =
-  | "forming"
-  | "announced"
-  | "testing"
-  | "strengthened"
-  | "discarded";
+export type HypothesisStatus = "active" | "confirmed" | "discarded";
 
-export interface Theory {
+export interface Hypothesis {
   id: string;
-  type: TheoryType;
-  players: string[];
+  creatorId: string;
+  targetId: string;
+  category: HypothesisCategory;
+  dimension: Dimension;
+  /** which polarity of the dimension this hypothesis claims */
+  direction: "high" | "low";
+  /** RELATIONSHIPS / SPICY: "target prefers X over comparisonTargetId" */
+  comparisonTargetId?: string;
+  templateId: string;
+  statement: Localized;
+  /** true until the creator's identity is shown (default) */
+  anonymous: boolean;
+  revealed: boolean;
+  confidence: number; // 0..100
+  initialConfidence: number;
   evidenceCount: number;
-  evidence: string; // deterministic factual summary (never a claim about feelings)
-  confidence: number; // 0..1
-  priorConfidence?: number;
-  status: TheoryStatus;
-  testRoundId?: string;
-  /** what the engine predicts will happen in the test */
-  prediction?: string;
+  supportingEvidence: number;
+  contradictingEvidence: number;
+  status: HypothesisStatus;
+  /** id of the hypothesis this one opposes (same target+dimension, opposite direction) */
+  counterOf?: string;
+  /** was this hypothesis authored by a player, or auto-filled because nobody acted in time? */
+  autoFilled: boolean;
   createdRound: number;
+  testRoundId?: string;
+}
+
+export interface HypothesisChallenge {
+  id: string;
+  hypothesisId: string;
+  challengerId: string;
+  stake: number;
+  /** filled once the linked test resolves */
+  won?: boolean;
+}
+
+export interface TheoryTest {
+  id: string;
+  hypothesisIds: string[]; // 1 (solo) or 2 (hypothesis + counter-theory)
+  targetId: string;
+  dimension: Dimension;
+  stakes: "low" | "medium" | "high";
+  templateId: string;
+  scenario: Localized;
+  /** RELATIONSHIPS/SPICY tests offer a player choice instead of A/B */
+  comparisonOptions?: [string, string];
+  optionA: { label: Localized; confirmsHigh: boolean };
+  optionB: { label: Localized; confirmsHigh: boolean };
+  decision?: string; // "A" | "B" (or a player id for comparison tests)
 }
 
 // ---------- Rounds & answers ----------
-
-export interface RoundParticipantPrompt {
-  /** player id -> option ids visible to that player (for asymmetric rounds) */
-  [playerId: string]: string[];
-}
 
 export interface Round {
   id: string;
   index: number; // 0-based position in the game
   kind: RoundKind;
   questionId?: string;
-  /** players who must answer this round (subset for dilemmas) */
+  /** players who must answer this round */
   participants: string[];
-  /** engine-generated title/body for special rounds */
   title?: Localized;
   body?: Localized;
   /** option overrides for special / asymmetric rounds, keyed by player id.
    *  "*" applies to everyone. */
   optionsByPlayer?: Record<string, QuestionOption[]>;
-  /** which theory this round tests, if any */
-  theoryId?: string;
   /** pairings for dilemma rounds (each entry [a, b] resolves pairwise) */
   pairs?: [string, string][];
   /** players who answer a prediction instead of the main choice (targeted rounds) */
@@ -204,54 +210,21 @@ export interface Round {
   timeLimit: number;
   createdAt: number;
 
-  // ── talk / stage layer ──
-  /** if > 0, an out-loud DISCUSSION phase runs before ANSWERING */
-  talkSeconds?: number;
-  /** what the room should be doing during the discussion (shown on the stage) */
-  talkPrompt?: Localized;
-  /** a physical instruction shown big on the stage ("stand up and move…") */
-  stageInstruction?: Localized;
-  /** everyone can see the running tally during ANSWERING (physical rounds) */
-  liveTally?: boolean;
-  /** the player on the spot this round (interrogation / prophecy subject) */
-  hotSeatId?: string;
-  /** interrogation: options for the consequence the room votes on */
-  consequenceOptions?: QuestionOption[];
-  /** deal: the secret pact offered to exactly two players */
-  secretDeal?: {
-    players: [string, string];
-    /** points split between them if they pull it off uncaught */
-    reward: number;
-    /** localized description of what they must secretly do */
-    task: Localized;
-  };
-  /** prophecy: the AI's public call about `hotSeatId`, resolved next round */
-  prophecy?: {
-    subjectId: string;
-    /** "A" = will do the bold/risky thing, "B" = won't */
-    predictedOptionId: string;
-    label: Localized;
-  };
-  /** whisper: a private mole + private facts, only ever seen by their recipient */
-  whisper?: {
-    moleId: string;
-    moleBriefing: Localized;
-    intel: { playerId: string; text: Localized }[];
-  };
-  /** movement_switch: the movement round this one gives a second chance on */
-  followsRoundId?: string;
-  /** faceoff: the two contestants the room votes between (they don't vote themselves) */
-  faceoffPair?: [string, string];
-  /** which director move produced this round (for the manipulation log) */
-  directorMoveId?: string;
+  // ── hypothesis-cycle fields ──
+  /** hypothesis kind: who gets to author this cycle */
+  authorId?: string;
+  /** the hypothesis this round announced (once created) */
+  hypothesisId?: string;
+  /** a counter-theory filed against `hypothesisId`, if any */
+  counterHypothesisId?: string;
+  /** theory_test kind: the built test */
+  test?: TheoryTest;
 }
 
 export interface Answer {
   roundId: string;
   playerId: string;
   optionId: string;
-  /** for prediction rounds: the player id being predicted about */
-  targetId?: string;
   at: number;
 }
 
@@ -265,13 +238,12 @@ export interface Player {
   connected: boolean;
   joinedAt: number;
   lastSeen: number;
+  /** Game Score — participation + observation-round outcomes */
   score: number;
-  /** reputation economy — 0..100, start 50. The director manipulates these. */
-  trust: number;
-  suspicion: number;
-  influence: number;
-  /** rounds where this player was the centre of attention (director spreads it around) */
-  spotlightCount: number;
+  /** Theory Score — how good this player's hypotheses about others turned out to be */
+  theoryScore: number;
+  /** rounds where this player was the hypothesis author (fairness rotation) */
+  authorCount: number;
 }
 
 // ---------- Game state machine ----------
@@ -279,40 +251,24 @@ export interface Player {
 export type GamePhase =
   | "LOBBY"
   | "ROUND_INTRO"
-  | "DISCUSSION" // open floor — talk out loud (stage-driven)
-  | "ANSWERING"
+  | "PRIVATE_DECISION"
   | "REVEAL"
-  | "AI_OBSERVATION"
-  | "AI_THEORY"
-  | "AI_THEORY_TEST"
-  | "AI_INTERVENTION"
-  | "ROUND_RESULT"
-  | "FINAL_RESULTS";
+  | "HYPOTHESIS"
+  | "TEST_SETUP"
+  | "CONFIDENCE_UPDATE"
+  | "FINAL_REPORT";
 
 export interface AiMessage {
   id: string;
   /** kind drives the icon / styling on the client */
   kind:
-    | "observation"
-    | "theory"
-    | "theory_result"
-    | "intervention"
-    | "quip"
-    | "final"
-    | "affinity" // "AFINIDAD DETECTADA" — two players keep matching
-    | "accusation" // the room pointed at someone
-    | "missions" // secret missions revealed
-    | "hot_seat" // "X, defiéndete" — interrogation framing
-    | "verdict" // the room's judgement on the hot seat
-    | "prophecy" // "predigo que X…"
-    | "prophecy_result" // whether the prophecy held
-    | "deal_reveal" // whether a secret deal existed / was caught
-    | "movement" // "levantaos y moveos"
-    | "throne_result" // who holds the throne now, and why
-    | "whisper_result" // whether the room caught the mole
-    | "chemistry_result" // whether the tested pair actually matched
-    | "faceoff_result" // who won the head-to-head
-    | "confession"; // the director's manipulation log at the end
+    | "observation" // flavor line after an observation round
+    | "hypothesis" // "I HAVE A THEORY" framing
+    | "counter_theory" // "someone disagrees"
+    | "test_result" // the target's decision, stated plainly
+    | "confidence_update" // confidence moved, with reasoning
+    | "salseo" // ambient commentary ("3 people have theories about Carlos")
+    | "final"; // closing analysis
   /** localized text; both langs always present so mixed-language rooms work */
   text: Localized;
   /** true once an LLM has rephrased this message — never re-polished after */
@@ -321,92 +277,52 @@ export interface AiMessage {
   at: number;
 }
 
-// ---------- Secret missions ----------
-
-export type MissionId =
-  | "betray_twice"
-  | "never_cooperate"
-  | "win_trust_votes"
-  | "mirror_target"
-  | "oppose_target"
-  | "finish_bottom"
-  | "stay_risky"
-  | "get_protected"
-  | "fixate_on_one"
-  | "go_unnoticed";
-
-export interface MissionAssignment {
-  playerId: string;
-  missionId: MissionId;
-  /** for missions that reference another player */
-  targetId?: string;
-  /** filled at FINAL_RESULTS */
-  completed?: boolean;
-}
-
 export interface RoundOutcome {
   roundId: string;
   /** localized human-readable summary lines shown on the reveal screen */
   lines: Localized[];
   /** score deltas applied this round, keyed by player id */
   scoreDelta: Record<string, number>;
+  theoryScoreDelta?: Record<string, number>;
   /** majority option id for majority_minority rounds */
   majorityOptionId?: string;
   /** players who went against the room */
   contrarians?: string[];
 }
 
-// ---------- The director (AI game master) ----------
-
-export type DirectorSignal =
-  | "warmup"
-  | "bored_player"
-  | "runaway_leader"
-  | "cozy_pair"
-  | "too_much_harmony"
-  | "theory_failed"
-  | "grudge"
-  | "cadence"
-  | "finale"
-  | "throne_empty"
-  | "throne_challenge"
-  | "whisper_mole"
-  | "movement_switch"
-  | "chemistry"
-  | "clash";
-
-export interface DirectorMove {
-  id: string;
+/** In-progress hypothesis cycle — lives on GameState only while phase is
+ *  HYPOTHESIS or TEST_SETUP, before it's turned into a real Round + Hypothesis. */
+export interface PendingCycle {
   roundIndex: number;
-  kind: RoundKind;
-  signal: DirectorSignal;
-  targets: string[];
-  /** shown in the end-of-game confession ("what the AI did and why") */
-  reason: Localized;
-}
-
-export interface DirectorState {
-  /** rounds since a given player was in the spotlight */
-  lastSpotlightRound: Record<string, number>;
-  /** how many prophecy / movement / deal beats have run */
-  beats: Record<string, number>;
-  /** the id of an unresolved prophecy round, if any */
-  pendingProphecyRoundId?: string;
+  authorId: string;
+  /** the author's submission, once made */
+  submitted?: {
+    targetId: string;
+    category: HypothesisCategory;
+    templateId: string;
+    anonymous: boolean;
+    counterOf?: string; // filing a counter-theory against an earlier active hypothesis instead
+  };
+  /** counter-theory filed by someone other than the author, if any */
+  counter?: {
+    creatorId: string;
+    templateId: string;
+    anonymous: boolean;
+  };
+  /** points challenges filed against the (about-to-exist) hypothesis */
+  challenges: { challengerId: string; stake: number }[];
+  stakes?: "low" | "medium" | "high";
 }
 
 export interface GameState {
   code: string;
   phase: GamePhase;
-  mode: GameMode;
   createdAt: number;
   startedAt?: number;
   endedAt?: number;
   players: Player[];
   hostId: string;
 
-  /** classic mode: ordered round "slots" the selector fills */
-  plan: RoundSlot[];
-  /** director mode: how many rounds the session runs */
   targetRounds: number;
   rounds: Round[];
   currentRoundIndex: number; // index into `rounds`
@@ -414,13 +330,9 @@ export interface GameState {
 
   behavior: Record<string, BehaviorProfile>; // playerId -> profile
   group: GroupModel;
-  theories: Theory[];
-  missions: MissionAssignment[];
-
-  director: DirectorState;
-  directorLog: DirectorMove[];
-  /** director mode: who currently holds the throne, if it's been claimed */
-  throneHolderId?: string;
+  hypotheses: Hypothesis[];
+  challenges: HypothesisChallenge[];
+  pendingCycle?: PendingCycle;
 
   outcomes: RoundOutcome[];
   aiMessages: AiMessage[];
@@ -432,22 +344,7 @@ export interface GameState {
   /** rng seed for deterministic selection within a game */
   seed: number;
   usedQuestionIds: string[];
-  /** populated once phase === FINAL_RESULTS */
+  usedTestTemplateIds: string[];
+  /** populated once phase === FINAL_REPORT */
   report?: import("./report").FinalReport;
-}
-
-export type RoundSlotType =
-  | RoundKind
-  | "warmup"
-  | "observation_slot"
-  | "theory_slot"
-  | "intervention_slot"
-  | "accusation_slot"
-  | "affinity_slot"
-  | "final_slot";
-
-export interface RoundSlot {
-  type: RoundSlotType;
-  /** dimensions this slot ideally gathers evidence on */
-  focus?: Dimension[];
 }

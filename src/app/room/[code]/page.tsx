@@ -9,12 +9,13 @@ import { useRoom } from "@/lib/useRoom";
 import { LanguageToggle, LinkButton, Logo } from "@/components/ui";
 import { JoinForm } from "@/components/room/JoinForm";
 import {
-  AiMoment,
   AnswerScreen,
-  DiscussionScreen,
+  ConfidenceUpdateScreen,
+  HypothesisScreen,
   Lobby,
   RevealScreen,
   RoundIntro,
+  TestSetupScreen,
 } from "@/components/room/screens";
 import { Results } from "@/components/room/Results";
 
@@ -87,18 +88,17 @@ function PhaseView({ view, room }: { view: NonNullable<ReturnType<typeof useRoom
       return <Lobby view={view} room={room} />;
     case "ROUND_INTRO":
       return <RoundIntro view={view} />;
-    case "DISCUSSION":
-      return <DiscussionScreen view={view} />;
-    case "ANSWERING":
+    case "HYPOTHESIS":
+      return <HypothesisScreen view={view} room={room} />;
+    case "TEST_SETUP":
+      return <TestSetupScreen view={view} room={room} />;
+    case "PRIVATE_DECISION":
       return <AnswerScreen view={view} room={room} />;
     case "REVEAL":
-    case "ROUND_RESULT":
       return <RevealScreen view={view} room={room} />;
-    case "AI_OBSERVATION":
-    case "AI_THEORY":
-    case "AI_INTERVENTION":
-      return <AiMoment view={view} room={room} />;
-    case "FINAL_RESULTS":
+    case "CONFIDENCE_UPDATE":
+      return <ConfidenceUpdateScreen view={view} room={room} />;
+    case "FINAL_REPORT":
       return <Results view={view} room={room} />;
     default:
       return null;

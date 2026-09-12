@@ -1,20 +1,24 @@
 /* eslint-disable no-console */
 import {
   advance,
-  createGame,
   currentRound,
+  freshPlayer,
   optionsForPlayer,
   respondents,
   startGame,
   submitAnswer,
+  createGame,
 } from "../src/game/engine";
 import { botChoose, type BotSpec } from "../src/game/sim";
-import { freshPlayer } from "../src/game/engine";
 import { QUESTIONS_BY_ID } from "../src/game/questions";
-import { missionText } from "../src/game/missions";
 import { mulberry32 } from "../src/lib/rng";
 import type { GameState, Dimension } from "../src/game/types";
 import { DIMENSIONS } from "../src/game/types";
+
+// Narrates a full ROOM game: observation rounds building a behavior
+// profile, then the hypothesis loop (someone has a theory, ROOM builds
+// a test, the target decides in private, confidence moves). Run:
+// npx tsx scripts/ejemplo.ts [seed]
 
 const base = Object.fromEntries(DIMENSIONS.map((d) => [d, 0.5])) as Record<Dimension, number>;
 
@@ -29,7 +33,7 @@ const CAST: BotSpec[] = [
 const NAME: Record<string, string> = Object.fromEntries(CAST.map((b) => [b.id, b.nickname]));
 
 function seedGame(seed: number): GameState {
-  let s = createGame("K7XQ", { id: CAST[0]!.id, nickname: CAST[0]!.nickname, lang: "es" }, "classic");
+  let s = createGame("K7XQ", { id: CAST[0]!.id, nickname: CAST[0]!.nickname, lang: "es" });
   s = { ...s, seed };
   for (const b of CAST.slice(1)) {
     s = { ...s, players: [...s.players, freshPlayer({ id: b.id, nickname: b.nickname, lang: "es" }, false)] };
@@ -45,14 +49,17 @@ function optLabel(state: GameState, round: NonNullable<ReturnType<typeof current
   return asPlayer ? asPlayer.nickname : o.label.es;
 }
 
+const AI_TAGS: Record<string, string> = {
+  hypothesis: "🧠  TENGO UNA TEORÍA",
+  counter_theory: "🤨  CONTRATEORÍA",
+  test_result: "📋  DECISIÓN",
+  confidence_update: "📈  CONFIANZA",
+  final: "🏁  ANÁLISIS FINAL",
+};
+
 function run(seed: number) {
   const rand = mulberry32(seed + 1);
   let state = seedGame(seed);
-
-  console.log("═══════ MISIONES SECRETAS (solo las ve quien la tiene) ═══════");
-  for (const m of state.missions) {
-    console.log(`  🎯 ${NAME[m.playerId]}: "${missionText(m, state.players).es}"`);
-  }
 
   let roundNo = 0;
   let guard = 0;
@@ -62,21 +69,12 @@ function run(seed: number) {
     for (const m of state.aiMessages) {
       if (printedMsgs.has(m.id)) continue;
       printedMsgs.add(m.id);
-      const tag =
-        m.kind === "observation" ? "👁  LA IA OBSERVA" :
-        m.kind === "theory" ? "🧠  LA IA: «TENGO UNA TEORÍA»" :
-        m.kind === "affinity" ? "💥  AFINIDAD" :
-        m.kind === "accusation" ? "🎯  ACUSACIÓN" :
-        m.kind === "theory_result" ? "⚖   VEREDICTO DE LA IA" :
-        m.kind === "intervention" ? "♟   LA IA CAMBIA EL JUEGO" :
-        m.kind === "missions" ? "🕵   MISIONES SECRETAS" :
-        m.kind === "final" ? "🏁  TEORÍA FINAL DE LA IA" : "IA";
-      console.log(`\n    ${tag}`);
+      console.log(`\n    ${AI_TAGS[m.kind] ?? "IA"}`);
       console.log(`    "${m.text.es}"`);
     }
   };
 
-  while (state.phase !== "FINAL_RESULTS" && guard++ < 300) {
+  while (state.phase !== "FINAL_REPORT" && guard++ < 300) {
     const round = currentRound(state);
 
     if (state.phase === "ROUND_INTRO" && round) {
@@ -84,15 +82,11 @@ function run(seed: number) {
       const q = round.questionId ? QUESTIONS_BY_ID[round.questionId] : undefined;
       const title = round.title?.es;
       const prompt = round.body?.es ?? q?.prompt.es;
-      if (!round.kind.startsWith("ai_") || round.kind === "ai_theory_test") {
-        console.log(`\n━━━ RONDA ${roundNo} ${title ? `· ${title}` : ""} ━━━`);
-        if (prompt) console.log(`  ${prompt}`);
-      } else if (title) {
-        console.log(`\n━━━ RONDA ${roundNo} · ${title} ━━━`);
-      }
+      console.log(`\n━━━ RONDA ${roundNo} · ${round.kind.toUpperCase()} ${title ? `· ${title}` : ""} ━━━`);
+      if (prompt) console.log(`  ${prompt}`);
     }
 
-    if (state.phase === "ANSWERING" && round) {
+    if (state.phase === "PRIVATE_DECISION" && round) {
       for (const id of respondents(round)) {
         const bot = CAST.find((b) => b.id === id);
         if (!bot) continue;
@@ -102,10 +96,8 @@ function run(seed: number) {
       state = advance(state);
 
       const rAnswers = state.answers.filter((a) => a.roundId === round.id);
-      const parts = round.participants;
       for (const a of rAnswers) {
-        const isPred = (round.predictors ?? []).includes(a.playerId) && !parts.includes(a.playerId);
-        console.log(`    ${isPred ? "🔮 " : "   "}${NAME[a.playerId]}: ${optLabel(state, round, a.playerId, a.optionId)}`);
+        console.log(`       ${NAME[a.playerId]}: ${optLabel(state, round, a.playerId, a.optionId)}`);
       }
       const outcome = state.outcomes.find((o) => o.roundId === round.id);
       if (outcome) for (const l of outcome.lines) console.log(`      → ${l.es}`);
@@ -118,39 +110,18 @@ function run(seed: number) {
   }
 
   const r = state.report!;
-  console.log(`\n\n═══════════ RESULTADO FINAL ═══════════`);
-  console.log(`LA IA HA DESCIFRADO A VUESTRO GRUPO.\n`);
-  const label: Record<string, string> = {
-    most_competitive: "Quien más compite",
-    most_cooperative: "Quien más coopera",
-    most_unpredictable: "Quien más sorprende",
-    most_trusted: "Quien más confianza genera",
-  };
+  console.log(`\n\n═══════════ RESULTADO FINAL ═══════════\n`);
   for (const s of r.superlatives) {
-    console.log(`  ${label[s.key]?.padEnd(24)} → ${s.playerId ? NAME[s.playerId] : "—"}`);
+    console.log(`  ${s.label.es.padEnd(24)} → ${s.playerId ? NAME[s.playerId] : "—"}`);
   }
-  if (r.mostCompatible) console.log(`  ${"La pareja más compatible".padEnd(24)} → ${NAME[r.mostCompatible.a]} + ${NAME[r.mostCompatible.b]}  (${r.mostCompatible.percent}%)`);
-  if (r.biggestClash) console.log(`  ${"Polos opuestos".padEnd(24)} → ${NAME[r.biggestClash.a]} vs ${NAME[r.biggestClash.b]}`);
-  if (r.wildcardId) console.log(`  ${"El comodín (imprevisible)".padEnd(24)} → ${NAME[r.wildcardId]}`);
-  if (r.salseoMvpId) console.log(`  ${"MVP del salseo".padEnd(24)} → ${NAME[r.salseoMvpId]}`);
-  if (r.biggestAlliance) console.log(`  ${"La mayor alianza".padEnd(24)} → ${NAME[r.biggestAlliance.a]} + ${NAME[r.biggestAlliance.b]}`);
-  if (r.biggestBetrayal) console.log(`  ${"La mayor traición".padEnd(24)} → ${NAME[r.biggestBetrayal.from]} → ${NAME[r.biggestBetrayal.to]}`);
-  console.log(`  ${"Precisión de la IA".padEnd(24)} → ${Math.round(r.aiAccuracy * 100)}%  (teorías: ${r.theoriesHeld}/${r.theoriesTested})`);
+  if (r.biggestTheory) console.log(`  ${"Teoría más fuerte".padEnd(24)} → "${r.biggestTheory.statement.es}" (${r.biggestTheory.confidence}%)`);
+  if (r.biggestPlotTwist) console.log(`  ${"Mayor giro de guion".padEnd(24)} → "${r.biggestPlotTwist.statement.es}" (${r.biggestPlotTwist.confidence}%)`);
+  if (r.mostControversial) console.log(`  ${"Más controvertido".padEnd(24)} → "${r.mostControversial.a.es}" vs "${r.mostControversial.b.es}"`);
+  console.log(`  ${"Teorías puestas a prueba".padEnd(24)} → ${r.hypothesesTested} (confirmadas: ${r.hypothesesConfirmed})`);
 
-  if (Object.keys(r.nemesis).length) {
-    console.log(`\n  Némesis:`);
-    for (const [a, b] of Object.entries(r.nemesis)) console.log(`    ${NAME[a]} ↔ ${NAME[b]}`);
-  }
-
-  console.log(`\n  Misiones secretas (reveladas):`);
-  for (const m of r.missions) {
-    console.log(`    ${m.completed ? "✅" : "❌"} ${NAME[m.playerId]}: "${m.text.es}"`);
-  }
-
-  console.log(`\n  Patrón más sorprendente:\n    "${r.surprisingPattern.es}"`);
-  console.log(`\n  🏁 Teoría final de la IA:\n    "${r.finalTheory.es}"`);
-  console.log(`\n  Clasificación:`);
-  r.standings.forEach((s, i) => console.log(`    ${i + 1}. ${NAME[s.playerId]?.padEnd(10)} ${s.score} pts`));
+  console.log(`\n  🏁 Análisis final:\n    "${r.finalAnalysis.es}"`);
+  console.log(`\n  Clasificación (puntos de partida):`);
+  r.standings.forEach((s, i) => console.log(`    ${i + 1}. ${NAME[s.playerId]?.padEnd(10)} ${s.score} pts (teoría: ${s.theoryScore})`));
 }
 
 const seed = Number(process.argv[2] ?? 20260910);

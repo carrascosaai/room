@@ -101,12 +101,13 @@ export class SupabaseStore implements RoomStore {
   }
 
   async archive(state: GameState): Promise<void> {
+    const confirmed = state.hypotheses.filter((h) => h.status === "confirmed").length;
     await this.client.from("game_archives").insert({
       room_code: state.code,
       player_count: state.players.length,
       rounds: state.rounds.length,
-      ai_accuracy: state.report?.aiAccuracy ?? null,
-      theories: state.theories,
+      ai_accuracy: state.hypotheses.length > 0 ? confirmed / state.hypotheses.length : null,
+      theories: state.hypotheses,
       behavior: state.behavior,
       group_model: state.group,
       report: state.report ?? null,

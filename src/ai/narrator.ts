@@ -80,17 +80,17 @@ export async function polishLatestAiMessage(state: GameState): Promise<GameState
   if (!last || last.polished) return state;
 
   const round = state.rounds.find((r) => r.index === last.roundIndex);
-  const theory = round?.theoryId
-    ? state.theories.find((t) => t.id === round.theoryId)
-    : state.theories.find((t) => t.status === "testing" || t.status === "announced");
+  const hypothesis = round?.hypothesisId
+    ? state.hypotheses.find((h) => h.id === round.hypothesisId)
+    : state.hypotheses.find((h) => h.status === "active");
 
   const polished = await narrate({
     kind: last.kind,
-    evidence: theory?.evidence ?? last.text.en,
+    evidence: hypothesis?.statement.en ?? last.text.en,
     fallback: last.text,
     context: {
-      confidence: theory?.confidence,
-      theoryType: theory?.type,
+      confidence: hypothesis?.confidence,
+      category: hypothesis?.category,
       players: state.players.map((p) => p.nickname),
     },
   });
@@ -99,4 +99,27 @@ export async function polishLatestAiMessage(state: GameState): Promise<GameState
     m.id === last.id ? { ...m, text: polished, polished: true } : m,
   );
   return { ...state, aiMessages, version: state.version + 1 };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Named entry points matching the four AI touchpoints in the design
+// doc. Each is a thin wrapper over `narrate()` — same fallback-safe
+// contract, same single implementation. The engine always computes
+// the deterministic `fallback` first; these only ever rephrase it.
+// ─────────────────────────────────────────────────────────────
+
+export async function generateHypothesis(fallback: Localized, context: Record<string, unknown>): Promise<Localized> {
+  return narrate({ kind: "hypothesis", evidence: fallback.en, fallback, context });
+}
+
+export async function generateTest(fallback: Localized, context: Record<string, unknown>): Promise<Localized> {
+  return narrate({ kind: "hypothesis", evidence: fallback.en, fallback, context });
+}
+
+export async function explainResult(fallback: Localized, context: Record<string, unknown>): Promise<Localized> {
+  return narrate({ kind: "confidence_update", evidence: fallback.en, fallback, context });
+}
+
+export async function generateFinalAnalysis(fallback: Localized, context: Record<string, unknown>): Promise<Localized> {
+  return narrate({ kind: "final", evidence: fallback.en, fallback, context });
 }

@@ -14,11 +14,11 @@ function main() {
   console.log("ROOM — simulation\n");
 
   const cast = standardCast();
-  const { state, rounds, aiMessages, theories } = runSimulatedGame(cast, { seed: 7 });
+  const { state, rounds, aiMessages, hypotheses } = runSimulatedGame(cast, { seed: 7 });
 
   console.log(`Rounds played: ${rounds}`);
   console.log(`AI messages:   ${aiMessages}`);
-  console.log(`Theories:      ${theories.length} (${theories.map((t) => `${t.type}:${t.status}`).join(", ")})`);
+  console.log(`Hypotheses:    ${hypotheses.length} (${hypotheses.map((h) => `${h.category}:${h.status}@${h.confidence}%`).join(", ")})`);
   console.log(`Final phase:   ${state.phase}\n`);
 
   console.log("Behavior readings per bot (top dimension):");
@@ -55,8 +55,8 @@ function main() {
   // report
   const rep = flip.state.report;
   if (rep) {
-    console.log(`\nAI accuracy: ${(rep.aiAccuracy * 100).toFixed(0)}%  (tested ${rep.theoriesTested}, held ${rep.theoriesHeld})`);
-    console.log(`Final theory (EN): ${rep.finalTheory.en}`);
+    console.log(`\nHypotheses tested: ${rep.hypothesesTested}, confirmed: ${rep.hypothesesConfirmed}`);
+    console.log(`Final analysis (EN): ${rep.finalAnalysis.en}`);
   }
 
   // aggregate over many seeds

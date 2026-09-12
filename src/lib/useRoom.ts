@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PlayerView } from "@/game/view";
+import type { HypothesisCategory } from "@/game/types";
+import type { Stakes } from "@/game/testContent";
 import { getStoredPlayer } from "./player";
 
 // ─────────────────────────────────────────────────────────────
@@ -32,7 +34,10 @@ export interface UseRoom {
   status: Status;
   error: string | null;
   playerId: string | null;
-  answer: (optionId: string, targetId?: string) => Promise<void>;
+  answer: (optionId: string) => Promise<void>;
+  submitHypothesis: (input: { targetId: string; category: HypothesisCategory; templateId: string; anonymous: boolean; counterOf?: string }) => Promise<void>;
+  challengeHypothesis: () => Promise<void>;
+  submitStakes: (stakes: Stakes) => Promise<void>;
   start: () => Promise<void>;
   advance: () => Promise<void>;
   leave: () => Promise<void>;
@@ -49,6 +54,9 @@ async function post(path: string, body: unknown) {
   });
   return res.json().catch(() => ({ ok: false, error: "generic" }));
 }
+
+const FAST_PHASES = ["LOBBY", "ROUND_INTRO", "PRIVATE_DECISION", "HYPOTHESIS", "TEST_SETUP"];
+const HOST_NUDGE_PHASES = ["ROUND_INTRO", "REVEAL", "CONFIDENCE_UPDATE", "HYPOTHESIS", "TEST_SETUP"];
 
 export function useRoom(code: string): UseRoom {
   const [view, setView] = useState<PlayerView | null>(null);
@@ -67,10 +75,7 @@ export function useRoom(code: string): UseRoom {
   const refresh = useCallback(async () => {
     const pid = playerIdRef.current;
     try {
-      const res = await fetch(
-        `/api/rooms/${code}${pid ? `?pid=${encodeURIComponent(pid)}` : ""}`,
-        { cache: "no-store" },
-      );
+      const res = await fetch(`/api/rooms/${code}${pid ? `?pid=${encodeURIComponent(pid)}` : ""}`, { cache: "no-store" });
       if (res.status === 404) {
         if (mounted.current) setStatus("gone");
         return;
@@ -101,12 +106,7 @@ export function useRoom(code: string): UseRoom {
         return;
       }
       const v = viewRef.current;
-      const fast =
-        v?.phase === "ANSWERING" ||
-        v?.phase === "LOBBY" ||
-        v?.phase === "ROUND_INTRO" ||
-        v?.phase === "DISCUSSION" ||
-        v?.phase?.startsWith("AI_");
+      const fast = v ? FAST_PHASES.includes(v.phase) : true;
       timer = setTimeout(loop, fast ? FAST_MS : SLOW_MS);
     };
     loop();
@@ -131,13 +131,7 @@ export function useRoom(code: string): UseRoom {
         if (cancelled) return;
         channel = client
           .channel(`room:${code}`)
-          .on(
-            "postgres_changes",
-            { event: "*", schema: "public", table: "rooms", filter: `code=eq.${code}` },
-            () => {
-              void refresh();
-            },
-          )
+          .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: `code=eq.${code}` }, () => void refresh())
           .subscribe((subStatus) => {
             realtimeLive.current = subStatus === "SUBSCRIBED";
           });
@@ -152,21 +146,10 @@ export function useRoom(code: string): UseRoom {
     };
   }, [code, refresh]);
 
-  // host / timer-driven auto-advance for display + answering phases.
-  // Runs on its own local 1s clock (no network cost) so it keeps noticing
-  // a deadline has passed even while the network poll itself has backed
-  // off to REALTIME_BACKOFF_MS — "time is up" is a client-side fact, it
-  // doesn't need a round trip to detect.
+  // host / timer-driven auto-advance for display phases. Runs on its own
+  // local 1s clock (no network cost) so it keeps noticing a deadline has
+  // passed even while the network poll itself has backed off.
   useEffect(() => {
-    const displayPhases = [
-      "ROUND_INTRO",
-      "DISCUSSION",
-      "REVEAL",
-      "ROUND_RESULT",
-      "AI_OBSERVATION",
-      "AI_THEORY",
-      "AI_INTERVENTION",
-    ];
     const tick = () => {
       const v = viewRef.current;
       if (!v) return;
@@ -174,8 +157,8 @@ export function useRoom(code: string): UseRoom {
       const deadline = v.phaseDeadline ?? 0;
       const now = Date.now();
       const shouldNudge =
-        (v.phase === "ANSWERING" && deadline && now >= deadline) ||
-        (displayPhases.includes(v.phase) && deadline && now >= deadline && isHost);
+        (v.phase === "PRIVATE_DECISION" && deadline && now >= deadline) ||
+        (HOST_NUDGE_PHASES.includes(v.phase) && deadline && now >= deadline && isHost);
       if (!shouldNudge || busyAdvance.current) return;
       busyAdvance.current = true;
       const pid = playerIdRef.current;
@@ -191,16 +174,52 @@ export function useRoom(code: string): UseRoom {
   }, [code, refresh]);
 
   const answer = useCallback(
-    async (optionId: string, targetId?: string) => {
+    async (optionId: string) => {
       const pid = playerIdRef.current;
       if (!pid) return;
-      const res = await post(`/api/rooms/${code}/answer`, { playerId: pid, optionId, targetId });
+      const res = await post(`/api/rooms/${code}/answer`, { playerId: pid, optionId });
       if (res.ok && res.view) {
         viewRef.current = res.view;
         setView(res.view);
       } else if (res.error && res.error !== "already_answered") {
         setError(res.error);
       }
+    },
+    [code],
+  );
+
+  const submitHypothesis = useCallback(
+    async (input: { targetId: string; category: HypothesisCategory; templateId: string; anonymous: boolean; counterOf?: string }) => {
+      const pid = playerIdRef.current;
+      if (!pid) return;
+      const res = await post(`/api/rooms/${code}/hypothesis`, { playerId: pid, ...input });
+      if (res.ok && res.view) {
+        viewRef.current = res.view;
+        setView(res.view);
+      } else if (res.error) setError(res.error);
+    },
+    [code],
+  );
+
+  const challengeHypothesis = useCallback(async () => {
+    const pid = playerIdRef.current;
+    if (!pid) return;
+    const res = await post(`/api/rooms/${code}/challenge`, { playerId: pid });
+    if (res.ok && res.view) {
+      viewRef.current = res.view;
+      setView(res.view);
+    } else if (res.error) setError(res.error);
+  }, [code]);
+
+  const submitStakes = useCallback(
+    async (stakes: Stakes) => {
+      const pid = playerIdRef.current;
+      if (!pid) return;
+      const res = await post(`/api/rooms/${code}/stakes`, { playerId: pid, stakes });
+      if (res.ok && res.view) {
+        viewRef.current = res.view;
+        setView(res.view);
+      } else if (res.error) setError(res.error);
     },
     [code],
   );
@@ -246,6 +265,9 @@ export function useRoom(code: string): UseRoom {
     error,
     playerId: playerIdRef.current,
     answer,
+    submitHypothesis,
+    challengeHypothesis,
+    submitStakes,
     start,
     advance,
     leave,

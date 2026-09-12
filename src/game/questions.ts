@@ -1,8 +1,11 @@
-import type { Question, QuestionOption, BehaviorTags, RoundKind } from "./types";
+import type { ObservationKind, Question, QuestionOption, BehaviorTags } from "./types";
 
 // ─────────────────────────────────────────────────────────────
-// ROOM — curated question bank (~175 items: decisions, dilemmas, votes,
-// taste/values "compat probes" and accusation prompts)
+// ROOM — curated observation-round question bank: decisions,
+// dilemmas, and votes that generate the behavioral signal the
+// hypothesis system reads. Every kind here is an OBSERVATION round
+// (individual / majority_minority / social_dilemma / trust /
+// group_vote) — no theory-specific content, no director mechanics.
 //
 // These are hand-written party-game prompts, NOT AI-generated.
 // Every option carries behavioral metadata (tags, [-1..1]) that
@@ -17,13 +20,12 @@ function o(id: string, en: string, es: string, tags: BehaviorTags = {}): Questio
 interface QDef {
   id: string;
   category: Question["category"];
-  kinds: RoundKind[];
+  kinds: ObservationKind[];
   en: string;
   es: string;
   options: QuestionOption[];
   difficulty?: 1 | 2 | 3;
   socialSensitivity?: 0 | 1 | 2 | 3;
-  theoryTestable?: boolean;
 }
 
 function q(d: QDef): Question {
@@ -35,7 +37,6 @@ function q(d: QDef): Question {
     options: d.options,
     difficulty: d.difficulty ?? 2,
     socialSensitivity: d.socialSensitivity ?? 0,
-    theoryTestable: d.theoryTestable ?? false,
   };
 }
 
@@ -460,7 +461,6 @@ export const QUESTIONS: Question[] = [
     en: "Who would you trust to make an important decision for the whole group?",
     es: "¿En quién confiarías para tomar una decisión importante por todo el grupo?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "trust_hold_money",
@@ -469,7 +469,6 @@ export const QUESTIONS: Question[] = [
     en: "You have to hand your winnings to one person until the end. Who?",
     es: "Tienes que dejar tus ganancias a una persona hasta el final. ¿A quién?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "trust_secret_keeper",
@@ -478,7 +477,6 @@ export const QUESTIONS: Question[] = [
     en: "Who in this room actually keeps a secret?",
     es: "¿Quién de esta sala guarda de verdad un secreto?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "trust_back_you_up",
@@ -487,7 +485,6 @@ export const QUESTIONS: Question[] = [
     en: "Things go wrong. Who has your back without asking questions?",
     es: "Las cosas se tuercen. ¿Quién te cubre sin hacer preguntas?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "trust_lie_detector",
@@ -496,7 +493,6 @@ export const QUESTIONS: Question[] = [
     en: "Who is the hardest person here to read?",
     es: "¿Quién es la persona más difícil de leer de aquí?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "trust_borrow_car",
@@ -505,7 +501,6 @@ export const QUESTIONS: Question[] = [
     en: "Who could borrow something valuable of yours and you wouldn't worry?",
     es: "¿A quién le dejarías algo valioso tuyo sin preocuparte?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "trust_advice",
@@ -514,7 +509,6 @@ export const QUESTIONS: Question[] = [
     en: "Big life decision tomorrow. Whose advice do you actually take?",
     es: "Decisión importante de vida mañana. ¿El consejo de quién te tomas en serio?",
     options: [],
-    theoryTestable: true,
   }),
 
   // ---------------- COOPERATION ----------------
@@ -529,7 +523,6 @@ export const QUESTIONS: Question[] = [
       o("B", "Betray", "Traicionar", { cooperation: -0.7, individualism: 0.6, greed: 0.6 }),
     ],
     difficulty: 3,
-    theoryTestable: true,
   }),
   q({
     id: "coop_carry_team",
@@ -553,7 +546,6 @@ export const QUESTIONS: Question[] = [
       o("B", "Grab", "Coger", { greed: 0.7, individualism: 0.6, cooperation: -0.6 }),
     ],
     difficulty: 3,
-    theoryTestable: true,
   }),
   q({
     id: "coop_volunteer",
@@ -600,7 +592,6 @@ export const QUESTIONS: Question[] = [
       o("A", "Help the partner", "Ayudar al compañero", { cooperation: 0.8, loyalty: 0.5, competitiveness: -0.3 }),
       o("B", "Pull ahead alone", "Despegarme solo", { competitiveness: 0.7, individualism: 0.6 }),
     ],
-    theoryTestable: true,
   }),
 
   // ---------------- GROUP BEHAVIOR ----------------
@@ -755,7 +746,6 @@ export const QUESTIONS: Question[] = [
     en: "The group is stranded on an island. Who's in charge by tomorrow morning?",
     es: "El grupo está atrapado en una isla. ¿Quién manda mañana por la mañana?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "fun_worst_roommate",
@@ -776,7 +766,6 @@ export const QUESTIONS: Question[] = [
     es: "Una entrada gratis para la mejor noche del año. ¿A quién te llevas?",
     options: [],
     socialSensitivity: 1,
-    theoryTestable: true,
   }),
   q({
     id: "soc_road_trip",
@@ -786,7 +775,6 @@ export const QUESTIONS: Question[] = [
     es: "Viaje de 12 horas en coche, un asiento de copiloto. ¿Quién va delante?",
     options: [],
     socialSensitivity: 1,
-    theoryTestable: true,
   }),
   q({
     id: "soc_phone_call",
@@ -796,7 +784,6 @@ export const QUESTIONS: Question[] = [
     es: "Día horrible. ¿A quién llamas de verdad?",
     options: [],
     socialSensitivity: 1,
-    theoryTestable: true,
   }),
   q({
     id: "soc_business_partner",
@@ -805,7 +792,6 @@ export const QUESTIONS: Question[] = [
     en: "You're starting a company. Who from this room is your co-founder?",
     es: "Vas a montar una empresa. ¿Quién de esta sala es tu cofundador?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "soc_tell_first",
@@ -815,7 +801,6 @@ export const QUESTIONS: Question[] = [
     es: "Noticia enorme, buena o mala. ¿Quién se entera primero?",
     options: [],
     socialSensitivity: 1,
-    theoryTestable: true,
   }),
   q({
     id: "soc_survive_zombie",
@@ -824,7 +809,6 @@ export const QUESTIONS: Question[] = [
     en: "Zombie outbreak. Who do you want next to you?",
     es: "Brote zombi. ¿A quién quieres a tu lado?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "soc_least_predictable",
@@ -845,7 +829,6 @@ export const QUESTIONS: Question[] = [
     es: "¿Quién de aquí miente mejor?",
     options: [],
     socialSensitivity: 2,
-    theoryTestable: true,
   }),
   q({
     id: "spicy_secret_crush_generic",
@@ -855,7 +838,6 @@ export const QUESTIONS: Question[] = [
     es: "¿Quién de esta sala está intentando impresionar a alguien esta noche de forma más evidente?",
     options: [],
     socialSensitivity: 3,
-    theoryTestable: true,
   }),
   q({
     id: "spicy_drama",
@@ -865,7 +847,6 @@ export const QUESTIONS: Question[] = [
     es: "Si el mes que viene hay salseo en el grupo, ¿quién está en el centro?",
     options: [],
     socialSensitivity: 3,
-    theoryTestable: true,
   }),
   q({
     id: "spicy_ex_friends",
@@ -925,7 +906,6 @@ export const QUESTIONS: Question[] = [
       o("B", "Betray to win", "Traicionar para ganar", { competitiveness: 0.8, individualism: 0.7, loyalty: -0.7 }),
     ],
     difficulty: 3,
-    theoryTestable: true,
   }),
   q({
     id: "betray_warn",
@@ -937,7 +917,6 @@ export const QUESTIONS: Question[] = [
       o("A", "Warn them", "Avisarle", { loyalty: 0.7, cooperation: 0.5, individualism: -0.3 }),
       o("B", "Stay out of it", "No meterme", { individualism: 0.5, consistency: 0.3 }),
     ],
-    theoryTestable: true,
   }),
   q({
     id: "betray_forgive",
@@ -949,7 +928,6 @@ export const QUESTIONS: Question[] = [
       o("A", "Accept", "Aceptar", { cooperation: 0.5, patience: 0.4, trust: 0.4 }),
       o("B", "Refuse", "Rechazar", { consistency: 0.5, contrarianism: 0.3, trust: -0.4 }),
     ],
-    theoryTestable: true,
   }),
   q({
     id: "betray_pre_emptive",
@@ -962,7 +940,6 @@ export const QUESTIONS: Question[] = [
       o("B", "Strike first", "Golpear primero", { impulsivity: 0.6, competitiveness: 0.5, trust: -0.5 }),
     ],
     difficulty: 3,
-    theoryTestable: true,
   }),
   q({
     id: "betray_public",
@@ -987,7 +964,6 @@ export const QUESTIONS: Question[] = [
       o("B", "Worth it", "Merece la pena", { greed: 0.7, individualism: 0.6, competitiveness: 0.5 }),
     ],
     difficulty: 3,
-    theoryTestable: true,
   }),
   q({
     id: "betray_who",
@@ -997,7 +973,6 @@ export const QUESTIONS: Question[] = [
     es: "¿Quién de esta sala traicionaría al grupo para ganar?",
     options: [],
     socialSensitivity: 2,
-    theoryTestable: true,
   }),
 
   // ---------------- ALLIANCE ----------------
@@ -1008,7 +983,6 @@ export const QUESTIONS: Question[] = [
     en: "Pick one player to tie your score to for the next three rounds.",
     es: "Elige a un jugador para atar tu puntuación a la suya durante las próximas tres rondas.",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "ally_protect",
@@ -1017,7 +991,6 @@ export const QUESTIONS: Question[] = [
     en: "Choose one player to protect you from losing 200 points this round.",
     es: "Elige a un jugador para que te proteja de perder 200 puntos esta ronda.",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "ally_share_reward",
@@ -1026,7 +999,6 @@ export const QUESTIONS: Question[] = [
     en: "You just won 300 points. Choose one player to split it with.",
     es: "Acabas de ganar 300 puntos. Elige a un jugador con quien repartirlos.",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "ally_break_it",
@@ -1039,7 +1011,6 @@ export const QUESTIONS: Question[] = [
       o("B", "Break it", "Romperla", { competitiveness: 0.7, greed: 0.6, loyalty: -0.7 }),
     ],
     difficulty: 3,
-    theoryTestable: true,
   }),
   q({
     id: "ally_who_carries",
@@ -1062,7 +1033,6 @@ export const QUESTIONS: Question[] = [
       o("A", "Pick one and commit", "Elegir uno y comprometerme", { loyalty: 0.6, consistency: 0.5 }),
       o("B", "Say yes to both", "Decir sí a los dos", { individualism: 0.5, competitiveness: 0.4, loyalty: -0.4 }),
     ],
-    theoryTestable: true,
   }),
   q({
     id: "ally_public_declare",
@@ -1179,7 +1149,6 @@ export const QUESTIONS: Question[] = [
       o("A", "A, with the room", "A, con la sala", { conformity: 0.8, socialAlignment: 0.6, risk: -0.2 }),
       o("B", "B, against the room", "B, contra la sala", { contrarianism: 0.8, individualism: 0.5, risk: 0.4 }),
     ],
-    theoryTestable: true,
   }),
   q({
     id: "con_hype",
@@ -1240,42 +1209,6 @@ export const QUESTIONS: Question[] = [
     ],
   }),
 
-  // ---------------- PREDICTION ROUNDS ----------------
-  q({
-    id: "pred_room_risky",
-    category: "group_behavior",
-    kinds: ["prediction"],
-    en: "Will the majority of the room pick the risky option this round?",
-    es: "¿La mayoría de la sala elegirá la opción arriesgada esta ronda?",
-    options: [
-      o("A", "Yes", "Sí", {}),
-      o("B", "No", "No", {}),
-    ],
-    difficulty: 1,
-  }),
-  q({
-    id: "pred_unanimous",
-    category: "group_behavior",
-    kinds: ["prediction"],
-    en: "Will the room be unanimous on the next question?",
-    es: "¿La sala será unánime en la próxima pregunta?",
-    options: [
-      o("A", "Yes", "Sí", {}),
-      o("B", "No", "No", {}),
-    ],
-    difficulty: 1,
-  }),
-  q({
-    id: "pred_someone_betrays",
-    category: "betrayal",
-    kinds: ["prediction"],
-    en: "In the next dilemma, will at least one player betray?",
-    es: "En el próximo dilema, ¿al menos un jugador traicionará?",
-    options: [
-      o("A", "Yes", "Sí", {}),
-      o("B", "No", "No", {}),
-    ],
-  }),
 
   // ---------------- EXTRA INDIVIDUAL / MIXED ----------------
   q({
@@ -1449,7 +1382,6 @@ export const QUESTIONS: Question[] = [
     en: "Who here would you trust to count the votes fairly?",
     es: "¿En quién de aquí confiarías para contar los votos de forma justa?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "mix_who_competitive",
@@ -1459,7 +1391,6 @@ export const QUESTIONS: Question[] = [
     es: "¿Quién de aquí es el peor perdedor?",
     options: [],
     socialSensitivity: 1,
-    theoryTestable: true,
   }),
   q({
     id: "mix_who_generous",
@@ -1468,7 +1399,6 @@ export const QUESTIONS: Question[] = [
     en: "Who here is the most generous with money?",
     es: "¿Quién de aquí es el más generoso con el dinero?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "mix_who_follows",
@@ -1478,7 +1408,6 @@ export const QUESTIONS: Question[] = [
     es: "¿Quién de aquí sigue más a menudo la corriente del grupo?",
     options: [],
     socialSensitivity: 1,
-    theoryTestable: true,
   }),
   q({
     id: "mix_who_contrarian",
@@ -1488,7 +1417,6 @@ export const QUESTIONS: Question[] = [
     es: "¿Quién de aquí lleva la contraria solo por llevarla?",
     options: [],
     socialSensitivity: 1,
-    theoryTestable: true,
   }),
   q({
     id: "mix_who_planner",
@@ -1497,7 +1425,6 @@ export const QUESTIONS: Question[] = [
     en: "Who here is always three moves ahead?",
     es: "¿Quién de aquí va siempre tres jugadas por delante?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "mix_who_impulsive",
@@ -1529,7 +1456,6 @@ export const QUESTIONS: Question[] = [
       o("A", "Cooperate quietly", "Cooperar en silencio", { cooperation: 0.7, loyalty: 0.4, socialAlignment: 0.4 }),
       o("B", "Keep the gain hidden", "Guardarme la ventaja", { individualism: 0.6, greed: 0.5, cooperation: -0.4 }),
     ],
-    theoryTestable: true,
   }),
   q({
     id: "mix_endurance",
@@ -1561,7 +1487,6 @@ export const QUESTIONS: Question[] = [
     en: "Teams are being picked. Who do you want as your first pick?",
     es: "Se están eligiendo equipos. ¿A quién quieres como primera elección?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "mix_call_out",
@@ -1616,7 +1541,6 @@ export const QUESTIONS: Question[] = [
     en: "If this group had to pick a leader right now, who?",
     es: "Si este grupo tuviera que elegir un líder ahora mismo, ¿quién?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "mix_who_wildcard",
@@ -1638,7 +1562,6 @@ export const QUESTIONS: Question[] = [
       o("B", "Steal", "Robar", { greed: 0.8, competitiveness: 0.6, cooperation: -0.7 }),
     ],
     difficulty: 3,
-    theoryTestable: true,
   }),
   q({
     id: "mix_defend_choice",
@@ -1662,7 +1585,6 @@ export const QUESTIONS: Question[] = [
       o("B", "Hold most of it back", "Guardarme casi todo", { individualism: 0.6, greed: 0.6, trust: -0.4 }),
     ],
     difficulty: 3,
-    theoryTestable: true,
   }),
   q({
     id: "mix_patience_test",
@@ -1683,7 +1605,6 @@ export const QUESTIONS: Question[] = [
     en: "Who here tells you the truth even when you don't want to hear it?",
     es: "¿Quién de aquí te dice la verdad aunque no quieras oírla?",
     options: [],
-    theoryTestable: true,
   }),
   q({
     id: "mix_take_blame",
@@ -1695,7 +1616,6 @@ export const QUESTIONS: Question[] = [
       o("A", "Take it alone", "Llevármelo solo", { loyalty: 0.9, cooperation: 0.6, individualism: -0.5 }),
       o("B", "Split the hit", "Repartir el golpe", { consistency: 0.4, individualism: 0.4 }),
     ],
-    theoryTestable: true,
   }),
   q({
     id: "mix_early_leave",
@@ -1706,18 +1626,6 @@ export const QUESTIONS: Question[] = [
     options: [
       o("A", "Announce it", "Anunciarlo", { socialAlignment: 0.4, consistency: 0.4, loyalty: 0.3 }),
       o("B", "Slip out", "Escabullirme", { individualism: 0.5, contrarianism: 0.3, impulsivity: 0.3 }),
-    ],
-    difficulty: 1,
-  }),
-  q({
-    id: "mix_bet_on_friend",
-    category: "trust",
-    kinds: ["prediction"],
-    en: "Will the player to your left pick the same option as you this round?",
-    es: "¿El jugador a tu izquierda elegirá la misma opción que tú esta ronda?",
-    options: [
-      o("A", "Yes", "Sí", {}),
-      o("B", "No", "No", {}),
     ],
     difficulty: 1,
   }),
@@ -1752,7 +1660,6 @@ export const QUESTIONS: Question[] = [
     en: "One player will decide how your final points are split. Who do you hand that power to?",
     es: "Un jugador decidirá cómo se reparten tus puntos finales. ¿A quién le das ese poder?",
     options: [],
-    theoryTestable: true,
   }),
 
   // ═══════════ COMPAT_PROBE — same answer = chemistry ═══════════
@@ -1761,7 +1668,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_night_out",
     category: "social_choice",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "The perfect night:",
     es: "La noche perfecta:",
     options: [
@@ -1774,7 +1681,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_argue",
     category: "social_choice",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "In an argument you'd rather be:",
     es: "En una discusión prefieres:",
     options: [
@@ -1787,7 +1694,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_money_love",
     category: "social_choice",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Bigger red flag in someone:",
     es: "Peor red flag en alguien:",
     options: [
@@ -1801,7 +1708,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_plans",
     category: "social_choice",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Someone cancels plans last minute. You feel:",
     es: "Alguien te cancela un plan a última hora. Sientes:",
     options: [
@@ -1814,7 +1721,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_trip",
     category: "social_choice",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Dream trip:",
     es: "Viaje soñado:",
     options: [
@@ -1827,7 +1734,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_love_language",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "You show you like someone by:",
     es: "Demuestras que alguien te gusta:",
     options: [
@@ -1841,7 +1748,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_ick",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Instant turn-off:",
     es: "Corta el rollo al instante:",
     options: [
@@ -1855,7 +1762,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_first_move",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Making the first move is:",
     es: "Dar el primer paso es:",
     options: [
@@ -1869,7 +1776,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_texting",
     category: "social_choice",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Your texting style:",
     es: "Tu estilo escribiendo:",
     options: [
@@ -1882,7 +1789,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_secret",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "A secret is safe with you:",
     es: "Un secreto está a salvo contigo:",
     options: [
@@ -1896,7 +1803,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_conflict_style",
     category: "social_choice",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "When you're upset with someone:",
     es: "Cuando te enfadas con alguien:",
     options: [
@@ -1910,7 +1817,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp_group_role",
     category: "group_behavior",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "In a group you're the one who:",
     es: "En un grupo eres quien:",
     options: [
@@ -1925,7 +1832,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc_liar",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who here is lying the most tonight?",
     es: "¿Quién de aquí está mintiendo más esta noche?",
     options: [],
@@ -1934,7 +1841,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc_flirt",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who's trying hardest to impress someone in this room?",
     es: "¿Quién se está esforzando más por impresionar a alguien de esta sala?",
     options: [],
@@ -1943,7 +1850,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc_drama",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who would start the drama if this group fell apart?",
     es: "¿Quién montaría el pollo si este grupo se rompiera?",
     options: [],
@@ -1952,7 +1859,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc_snake",
     category: "betrayal",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who here would sell the rest of you out to win?",
     es: "¿Quién de aquí os vendería a los demás por ganar?",
     options: [],
@@ -1961,7 +1868,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc_secret_mission",
     category: "betrayal",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who is playing their own game right now?",
     es: "¿Quién está jugando a su propio juego ahora mismo?",
     options: [],
@@ -1970,7 +1877,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc_faker",
     category: "group_behavior",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who's just agreeing with everything to stay safe?",
     es: "¿Quién dice que sí a todo solo para no mojarse?",
     options: [],
@@ -1979,7 +1886,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc_wildcard",
     category: "uncertainty",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who has no idea what they're doing but it's working?",
     es: "¿Quién no tiene ni idea de lo que hace pero le está saliendo bien?",
     options: [],
@@ -1988,7 +1895,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc_softest",
     category: "trust",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who would crack first under real pressure?",
     es: "¿Quién se rompería primero bajo presión de verdad?",
     options: [],
@@ -2038,7 +1945,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "spicy_who_first_kiss_story",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Whose dating life would make the best TV show?",
     es: "¿La vida amorosa de quién sería la mejor serie?",
     options: [],
@@ -2047,7 +1954,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "spicy_overshare",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who overshares the second they get comfortable?",
     es: "¿Quién cuenta demasiado en cuanto coge confianza?",
     options: [],
@@ -2058,7 +1965,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_flirt_style",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Your flirting style is more:",
     es: "Tu forma de ligar es más bien:",
     options: [
@@ -2071,7 +1978,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_green_flag",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "The best green flag in someone:",
     es: "La mejor green flag en alguien:",
     options: [
@@ -2084,7 +1991,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_worst_date",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "The worst first date is one where they:",
     es: "La peor primera cita es una donde:",
     options: [
@@ -2097,7 +2004,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_jealousy",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "You get jealous when:",
     es: "Sientes celos cuando:",
     options: [
@@ -2110,7 +2017,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_late_text",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "A 2am text from someone you like:",
     es: "Un mensaje a las 2am de alguien que te gusta:",
     options: [
@@ -2123,7 +2030,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_pda",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "A couple all over each other in front of everyone:",
     es: "Una pareja dándose el lote delante de todos:",
     options: [
@@ -2136,7 +2043,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_type",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Your type is more:",
     es: "Tu tipo es más bien:",
     options: [
@@ -2149,7 +2056,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_confess",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Telling someone you like them:",
     es: "Confesarle a alguien que te gusta:",
     options: [
@@ -2162,7 +2069,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_ex_friend",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Staying friends with an ex:",
     es: "¿Se puede ser amigo de un ex?",
     options: [
@@ -2175,7 +2082,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_group_crush",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "If you liked someone in this exact group right now, you'd:",
     es: "Si te gustara alguien de este grupo ahora mismo:",
     options: [
@@ -2188,7 +2095,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_compliment",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "The compliment that melts you:",
     es: "Un cumplido que te derrite:",
     options: [
@@ -2201,7 +2108,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_soulmate",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Do you believe in 'the one'?",
     es: "¿Crees en la media naranja?",
     options: [
@@ -2214,7 +2121,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_double_text",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Texting twice in a row with no reply:",
     es: "Escribir dos veces seguidas sin respuesta:",
     options: [
@@ -2227,7 +2134,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_flirt_signal",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "You know someone's flirting with you when:",
     es: "Sabes que alguien te está tirando los tejos cuando:",
     options: [
@@ -2240,7 +2147,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_love_bomb",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Someone showers you with affection on day two:",
     es: "Alguien te llena de mensajes cariñosos al segundo día:",
     options: [
@@ -2253,7 +2160,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_getting_over",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Getting over someone:",
     es: "Superar a alguien:",
     options: [
@@ -2266,7 +2173,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_worst_habit",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Your worst habit in a relationship:",
     es: "Tu peor manía en una relación:",
     options: [
@@ -2279,7 +2186,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_white_lie",
     category: "social_choice",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Your go-to white lie:",
     es: "La mentira piadosa que más sueltas:",
     options: [
@@ -2292,7 +2199,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_group_chat_role",
     category: "group_behavior",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "In the group chat you're the one who:",
     es: "En el chat del grupo eres quien:",
     options: [
@@ -2305,7 +2212,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_revenge",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "When someone hurts you, you:",
     es: "Si alguien te hace daño:",
     options: [
@@ -2318,7 +2225,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_brutal_honesty",
     category: "trust",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "A friend asks if their new partner is a good match. You're not sure. You:",
     es: "Un amigo te pregunta si su nueva pareja le pega, y tú no lo ves claro. Tú:",
     options: [
@@ -2331,7 +2238,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_awkward_silence",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "An awkward silence with someone you like:",
     es: "Un silencio incómodo con alguien que te gusta:",
     options: [
@@ -2344,7 +2251,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_third_wheel",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Being the third wheel:",
     es: "Hacer de sujetavelas:",
     options: [
@@ -2357,7 +2264,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_secret_admirer",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "An anonymous note says someone here likes you. You:",
     es: "Una nota anónima dice que a alguien de aquí le gustas. Tú:",
     options: [
@@ -2370,7 +2277,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_apology",
     category: "trust",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "After a fight with someone you care about:",
     es: "Después de una bronca con alguien que te importa:",
     options: [
@@ -2383,7 +2290,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_breakup_style",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Ending things with someone:",
     es: "Cortar con alguien:",
     options: [
@@ -2396,7 +2303,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_ick",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Instant ick:",
     es: "Un ick instantáneo:",
     options: [
@@ -2409,7 +2316,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_rebound",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Dating right after a breakup:",
     es: "Salir con alguien justo después de una ruptura:",
     options: [
@@ -2422,7 +2329,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "cp2_pda_couple",
     category: "light_spicy",
-    kinds: ["compat_probe"],
+    kinds: ["individual"],
     en: "Being the clingy couple of the group:",
     es: "Ser la pareja empalagosa del grupo:",
     options: [
@@ -2437,7 +2344,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_crush",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who here has the biggest crush on someone in this room and thinks nobody's noticed?",
     es: "¿Quién de aquí tiene un crush en esta sala y cree que nadie se ha dado cuenta?",
     options: [],
@@ -2446,7 +2353,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_playing_hard",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who's playing hard to get right now?",
     es: "¿Quién se está haciendo de rogar ahora mismo?",
     options: [],
@@ -2455,7 +2362,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_texts_first",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who would text first after a fight, no matter what?",
     es: "¿Quién escribiría primero después de una bronca, pase lo que pase?",
     options: [],
@@ -2464,7 +2371,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_charm",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who could charm their way out of anything?",
     es: "¿Quién podría librarse de cualquier cosa a base de encanto?",
     options: [],
@@ -2473,7 +2380,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_hardest_to_read",
     category: "uncertainty",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who is genuinely impossible to read?",
     es: "¿A quién es imposible leer de verdad?",
     options: [],
@@ -2482,7 +2389,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_first_to_fall",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who falls hardest and fastest when they like someone?",
     es: "¿Quién se enamora más fuerte y más rápido cuando le gusta alguien?",
     options: [],
@@ -2491,7 +2398,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_most_texts",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who has the messiest group chat with an ex right now?",
     es: "¿Quién tiene el chat más lioso con un ex ahora mismo?",
     options: [],
@@ -2500,7 +2407,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_dramatic_breakup",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Whose breakup would be the messiest?",
     es: "¿De quién sería la ruptura más dramática?",
     options: [],
@@ -2509,7 +2416,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_best_flirt",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who's the best flirt in this room?",
     es: "¿Quién liga mejor en esta sala?",
     options: [],
@@ -2518,7 +2425,7 @@ export const QUESTIONS: Question[] = [
   q({
     id: "acc2_worst_flirt",
     category: "light_spicy",
-    kinds: ["accusation"],
+    kinds: ["group_vote"],
     en: "Who has the worst pick-up lines?",
     es: "¿Quién tiene los peores intentos de ligar?",
     options: [],
@@ -2628,13 +2535,13 @@ export const QUESTIONS_BY_ID: Record<string, Question> = Object.fromEntries(
   QUESTIONS.map((q) => [q.id, q]),
 );
 
-export function questionsForKind(kind: RoundKind): Question[] {
+export function questionsForKind(kind: ObservationKind): Question[] {
   return QUESTIONS.filter((q) => q.kinds.includes(kind));
 }
 
 /** Player-target rounds have their options built at runtime from the roster. */
-export function isPlayerTargetKind(kind: RoundKind): boolean {
-  return kind === "group_vote" || kind === "trust" || kind === "accusation";
+export function isPlayerTargetKind(kind: ObservationKind): boolean {
+  return kind === "group_vote" || kind === "trust";
 }
 
 export const QUESTION_COUNT = QUESTIONS.length;
