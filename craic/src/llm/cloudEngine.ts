@@ -8,11 +8,11 @@ const endpoint = () => `${import.meta.env.BASE_URL}api/chat`;
 let availability: Promise<boolean> | null = null;
 
 /** ¿Está configurada la IA en la nube en este despliegue? */
-export function cloudAvailable(): Promise<boolean> {
-  availability ??= (async () => {
+export function cloudAvailable(recheck = false): Promise<boolean> {
+  const check = async (ms: number) => {
     try {
       const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 6000);
+      const t = setTimeout(() => ctrl.abort(), ms);
       const res = await fetch(endpoint(), { cache: "no-store", signal: ctrl.signal });
       clearTimeout(t);
       if (!res.ok) return false;
@@ -21,7 +21,12 @@ export function cloudAvailable(): Promise<boolean> {
     } catch {
       return false;
     }
-  })();
+  };
+  // Un «no» puede ser una red lenta: se reintenta una vez con más margen.
+  availability ??= check(6000).then((ok) => ok || check(12000));
+  if (recheck) {
+    availability = availability.then((ok) => ok || check(12000));
+  }
   return availability;
 }
 

@@ -51,6 +51,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,svg,png,webmanifest}"],
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         navigateFallback: "index.html",
+        navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
         // El runtime ONNX (voz y Whisper, ~21 MB) se guarda la primera vez que se usa.
         runtimeCaching: [
