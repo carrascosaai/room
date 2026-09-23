@@ -720,6 +720,31 @@ section > .section-title:first-child {
   margin-top: 6px;
 }
 
+.tiny {
+  font-size: 0.72rem;
+}
+
+.raw-progress {
+  margin: 8px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.stall {
+  text-align: left;
+  margin-top: 14px;
+}
+
+.stall p {
+  margin: 4px 0 0;
+}
+
+.skip-btn {
+  margin-top: 14px;
+}
+
 /* ---------- Llamada (chat) ---------- */
 .call {
   height: 100dvh;

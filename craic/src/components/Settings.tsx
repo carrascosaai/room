@@ -230,7 +230,7 @@ export function Settings({ prefs, onChange }: { prefs: Prefs; onChange: (p: Part
       </section>
 
       <p className="foot muted">
-        Craic · IA local con WebLLM, Moonshine, Silero y Kokoro · Built with Llama · Código abierto (MIT)
+        Craic · IA local con WebLLM, Moonshine, Silero y Kokoro · Built with Llama · Código abierto (MIT) · versión {__APP_VERSION__}
       </p>
     </div>
   );
