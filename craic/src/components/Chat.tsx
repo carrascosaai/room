@@ -19,7 +19,7 @@ interface Props {
 
 export function Chat({ llm, character, level, rate, onRateChange, onEnd, demo }: Props) {
   const { messages, thinking, send, say } = useConversation(llm, character, level, rate);
-  const mic = useSpeechRecognition("en-GB");
+  const mic = useSpeechRecognition(character.voiceLangs[0] === "en-US" ? "en-US" : "en-GB");
   const [typing, setTyping] = useState(!mic.supported);
   const [draft, setDraft] = useState("");
   const listRef = useRef<HTMLDivElement>(null);

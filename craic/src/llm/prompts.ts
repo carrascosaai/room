@@ -12,7 +12,7 @@ export function buildReplyMessages(
 ): ChatMessage[] {
   const system = [
     character.persona,
-    "You are chatting face to face with a Spanish engineering student who is practising English with you.",
+    "You are talking with a Spanish engineering student who is practising English with you.",
     "",
     "RULES:",
     `- ${LEVEL_STYLE[level]}`,

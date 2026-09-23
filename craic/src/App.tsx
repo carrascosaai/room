@@ -9,12 +9,17 @@ import { toAppError, type AppError } from "./llm/errors";
 import { createMockEngine } from "./llm/mockEngine";
 import { MODEL_OPTIONS, modelIdFor } from "./llm/models";
 import { loadPrefs, savePrefs, type Prefs } from "./lib/prefs";
+import { useInstallPrompt } from "./lib/install";
 import { checkWebGPU, type WebGPUStatus } from "./lib/webgpu";
 import { unlockTTS } from "./speech/tts";
 
 type Screen = "check" | "setup" | "loading" | "chat";
 
 const demo = new URLSearchParams(location.search).has("demo");
+
+const THEME_NEXT = { auto: "light", light: "dark", dark: "auto" } as const;
+const THEME_LABEL = { auto: "Tema: automático", light: "Tema: claro", dark: "Tema: oscuro" } as const;
+const THEME_ICON = { auto: "◐", light: "☀", dark: "☾" } as const;
 
 export default function App() {
   const [prefs, setPrefs] = useState<Prefs>(loadPrefs);
@@ -25,6 +30,13 @@ export default function App() {
   const [firstDownload, setFirstDownload] = useState(false);
   const [chatKey, setChatKey] = useState(0);
   const llmRef = useRef<{ id: string; llm: LLM } | null>(null);
+  const install = useInstallPrompt();
+  const [iosHint, setIosHint] = useState(false);
+
+  useEffect(() => {
+    if (prefs.theme === "auto") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = prefs.theme;
+  }, [prefs.theme]);
 
   useEffect(() => {
     void checkWebGPU().then((s) => {
@@ -91,13 +103,41 @@ export default function App() {
   );
 
   return (
-    <div className="app" data-theme={prefs.theme}>
+    <div className="app">
       {screen !== "chat" && (
         <header className="top">
-          <h1>
-            <span className="logo" aria-hidden="true">☘</span> Craic
-          </h1>
+          <div className="top-row">
+            <h1>
+              <span className="logo" aria-hidden="true">☘</span> Craic
+            </h1>
+            <div className="top-actions">
+              {install.canPrompt && (
+                <button className="btn-ghost btn-small" onClick={() => void install.install()}>
+                  Instalar app
+                </button>
+              )}
+              {!install.canPrompt && install.showIOSHint && (
+                <button className="btn-ghost btn-small" onClick={() => setIosHint((v) => !v)}>
+                  Instalar app
+                </button>
+              )}
+              <button
+                className="icon-btn icon-small"
+                aria-label={THEME_LABEL[prefs.theme]}
+                title={THEME_LABEL[prefs.theme]}
+                onClick={() => updatePrefs({ theme: THEME_NEXT[prefs.theme] })}
+              >
+                {THEME_ICON[prefs.theme]}
+              </button>
+            </div>
+          </div>
           <p className="muted">Practica inglés hablando con una IA. Gratis y en tu dispositivo.</p>
+          {iosHint && (
+            <p className="note">
+              En iPhone/iPad: pulsa el botón <strong>Compartir</strong> de Safari y luego{" "}
+              <strong>«Añadir a pantalla de inicio»</strong>.
+            </p>
+          )}
         </header>
       )}
 
