@@ -4,11 +4,11 @@ import { clearAll, downloadBlob, exportAll, exportVocabCSV } from "../lib/db";
 import type { Prefs } from "../lib/prefs";
 import { deleteCachedModel } from "../llm/engine";
 import { MODEL_OPTIONS } from "../llm/models";
-import { PAUSE_MS } from "../lib/prefs";
+import { pauseMs } from "../lib/prefs";
 import { ASR_MODELS, TTS_SIZE_MB, useAudioModels } from "../speech/audioModels";
 import { recognitionSupported } from "../speech/recognition";
 import { speak, unlockTTS } from "../speech/tts";
-import { Toggle } from "./Chat";
+import { PauseSlider, Toggle } from "./Chat";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -23,6 +23,7 @@ export function Settings({ prefs, onChange }: { prefs: Prefs; onChange: (p: Part
       rate: prefs.rate,
       langs: c.voiceLangs,
       gender: c.voiceGender,
+      hint: c.voiceHint,
       neuralVoice: prefs.voiceOverrides[c.id] ?? c.neuralVoice,
       engine: prefs.voiceEngine,
     });
@@ -130,18 +131,7 @@ export function Settings({ prefs, onChange }: { prefs: Prefs; onChange: (p: Part
           checked={prefs.handsFree}
           onChange={(v) => onChange({ handsFree: v })}
         />
-        <label className="field">
-          <span>Pausa para enviar</span>
-          <div className="seg seg-wide" role="group" aria-label="Pausa para enviar">
-            {(["short", "normal", "long"] as const).map((p) => (
-              <button key={p} type="button" className={prefs.pause === p ? "on" : ""} onClick={() => onChange({ pause: p })}>
-                <strong>{p === "short" ? "Corta" : p === "normal" ? "Normal" : "Larga"}</strong>
-                <small>{PAUSE_MS[p] / 1000} s</small>
-              </button>
-            ))}
-          </div>
-          <small className="muted">Si te corta mientras piensas, usa «Larga».</small>
-        </label>
+        <PauseSlider value={pauseMs(prefs)} onChange={(ms) => onChange({ pause: ms })} />
         <label className="field">
           <span>Reconocimiento de tu voz</span>
           <div className="seg seg-wide" role="group" aria-label="Motor de reconocimiento">

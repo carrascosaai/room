@@ -18,6 +18,8 @@ export interface SpeakOptions {
   rate: SpeechRate;
   langs: string[];
   gender?: "male" | "female";
+  /** Nombres de voces del sistema con el acento del personaje (regex), p. ej. "fiona" */
+  hint?: string;
   /** Voz Kokoro, p. ej. "af_heart" */
   neuralVoice?: string;
   engine?: VoiceEngine;
@@ -76,6 +78,17 @@ function langRank(v: SpeechSynthesisVoice, langs: string[]) {
   return i < 0 ? langs.length : i;
 }
 
+function hintScore(v: SpeechSynthesisVoice, hint?: string) {
+  if (!hint) return 0;
+  try {
+    const byName = new RegExp(`\\b(${hint})\\b`, "i").test(v.name);
+    const scottish = /scot/i.test(hint) && /scot/i.test(`${v.lang} ${v.name}`);
+    return byName || scottish ? 30 : 0;
+  } catch {
+    return 0;
+  }
+}
+
 function genderScore(v: SpeechSynthesisVoice, gender?: "male" | "female") {
   if (gender === "female" && FEMALE.test(v.name)) return 15;
   if (gender === "male" && MALE.test(v.name) && !FEMALE.test(v.name)) return 15;
@@ -87,11 +100,12 @@ export function pickVoice(
   voices: SpeechSynthesisVoice[],
   langs: string[],
   gender?: "male" | "female",
+  hint?: string,
 ): SpeechSynthesisVoice | undefined {
   const english = voices.filter((v) => /^en([-_]|$)/i.test(v.lang) && !NOVELTY.test(v.name));
   if (!english.length) return undefined;
   const score = (v: SpeechSynthesisVoice) =>
-    (langs.length - langRank(v, langs)) * 100 + (PREMIUM.test(v.name) ? 60 : 0) + (/google/i.test(v.name) ? 10 : 0) + genderScore(v, gender);
+    (langs.length - langRank(v, langs)) * 100 + (PREMIUM.test(v.name) ? 60 : 0) + (/google/i.test(v.name) ? 10 : 0) + genderScore(v, gender) + hintScore(v, hint);
   return [...english].sort((a, b) => score(b) - score(a))[0];
 }
 
@@ -100,10 +114,15 @@ export function premiumSystemVoice(
   voices: SpeechSynthesisVoice[],
   langs: string[],
   gender?: "male" | "female",
+  hint?: string,
 ): SpeechSynthesisVoice | undefined {
-  const good = voices.filter((v) => /^en([-_]|$)/i.test(v.lang) && PREMIUM.test(v.name) && !NOVELTY.test(v.name));
+  // Solo voces con el acento del personaje (una voz «natural» americana no sirve para alguien de Sídney).
+  const accents = langs.filter((l) => l.length > 2).slice(0, 2);
+  const good = voices.filter(
+    (v) => PREMIUM.test(v.name) && !NOVELTY.test(v.name) && (accents.length ? langRank(v, accents) < accents.length : /^en([-_]|$)/i.test(v.lang)),
+  );
   if (!good.length) return undefined;
-  const score = (v: SpeechSynthesisVoice) => (langs.length - langRank(v, langs)) * 10 + genderScore(v, gender);
+  const score = (v: SpeechSynthesisVoice) => (langs.length - langRank(v, langs)) * 10 + genderScore(v, gender) + hintScore(v, hint);
   return [...good].sort((a, b) => score(b) - score(a))[0];
 }
 
@@ -114,12 +133,12 @@ export function resolveMode(opts: SpeakOptions): Mode {
   const neuralOk = !!opts.neuralVoice && getAudioStatus().tts === "ready";
   if (engine !== "system") {
     if (engine === "auto") {
-      const premium = premiumSystemVoice(voicesCache, opts.langs, opts.gender);
+      const premium = premiumSystemVoice(voicesCache, opts.langs, opts.gender, opts.hint);
       if (premium) return { kind: "system", voice: premium };
     }
     if (neuralOk) return { kind: "neural", voice: opts.neuralVoice! };
   }
-  return { kind: "system", voice: pickVoice(voicesCache, opts.langs, opts.gender) };
+  return { kind: "system", voice: pickVoice(voicesCache, opts.langs, opts.gender, opts.hint) };
 }
 
 /** ¿Hace falta cargar la voz neuronal o ya hay una voz natural del sistema? */
@@ -258,7 +277,7 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
         const c = await clip;
         if (myToken !== token) return;
         if (c) await playClip(c, myToken);
-        else await speakSystemSentence(s, pickVoice(voicesCache, opts.langs, opts.gender), opts);
+        else await speakSystemSentence(s, pickVoice(voicesCache, opts.langs, opts.gender, opts.hint), opts);
       });
     } else {
       chain = chain.then(() => (myToken === token ? speakSystemSentence(s, mode.voice, opts) : undefined));

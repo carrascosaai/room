@@ -115,6 +115,8 @@ function listenBrowser(opts: ListenOptions): ListenHandle {
   const SR = getSR()!;
   let done = false;
   let text = "";
+  /** Texto de sesiones anteriores: Chrome en Android corta la escucha en cada pausa. */
+  let committed = "";
   let finishing = false;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let rec: ReturnType<typeof make> | null = null;
@@ -147,7 +149,7 @@ function listenBrowser(opts: ListenOptions): ListenHandle {
     r.onresult = (e) => {
       const t = joinResults(e);
       if (!t) return;
-      text = t;
+      text = `${committed} ${t}`.trim();
       opts.onPhase("hearing");
       opts.onPartial?.(text);
       clear();
@@ -168,14 +170,15 @@ function listenBrowser(opts: ListenOptions): ListenHandle {
     };
     r.onend = () => {
       if (done || finishing) return;
-      if (text) return end(true);
-      // Se cortó sin oír nada: seguimos escuchando.
-      if (restarts++ > 30) return end(false);
+      // El navegador cortó por su cuenta (pasa en Android en cada pausa): se
+      // sigue escuchando y se conserva lo dicho; el envío lo decide tu pausa.
+      committed = text;
+      if (restarts++ > 60) return end(!!text);
       try {
         rec = make();
         rec.start();
       } catch {
-        end(false);
+        end(!!text);
       }
     };
     return r;

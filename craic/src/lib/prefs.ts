@@ -24,8 +24,10 @@ export interface Prefs {
   asrModel: AsrModelId;
   /** Modo llamada: escucha sola y envía cuando dejas de hablar */
   handsFree: boolean;
-  /** Pausa que marca el final de tu frase */
-  pause: "short" | "normal" | "long";
+  /** Silencio (ms, de 1 a 10 s) que marca el final de tu turno */
+  pause: number;
+  /** Quién empieza la llamada: el personaje o tú */
+  userStarts: boolean;
   /** Acento con el que el navegador interpreta tu voz (solo motor del navegador) */
   recognitionLang: "auto" | "en-GB" | "en-US";
   /** Leer en voz alta las respuestas automáticamente */
@@ -51,14 +53,18 @@ export const DEFAULT_PREFS: Prefs = {
   asrEngine: "local",
   asrModel: "moonshine",
   handsFree: true,
-  pause: "normal",
+  pause: 3000,
+  userStarts: false,
   recognitionLang: "auto",
   autoSpeak: true,
   subtitles: true,
   reviewTranscript: false,
 };
 
-export const PAUSE_MS: Record<Prefs["pause"], number> = { short: 650, normal: 1000, long: 1600 };
+export const PAUSE_MIN = 1000;
+export const PAUSE_MAX = 10000;
+/** Silencio que marca el final de tu turno (entre 1 y 10 s). */
+export const pauseMs = (p: Prefs) => Math.min(PAUSE_MAX, Math.max(PAUSE_MIN, Number(p.pause) || 3000));
 
 export function loadPrefs(): Prefs {
   try {
@@ -70,10 +76,10 @@ export function loadPrefs(): Prefs {
     // v2: la IA en la nube pasa a ser la opción por defecto para todos
     // (la del dispositivo solo si se elige a propósito después de esto).
     const raw = saved as Record<string, unknown>;
-    if (raw.mig !== 2) {
-      saved.aiEngine = "auto";
-      raw.mig = 2;
-    }
+    if (typeof raw.mig !== "number" || raw.mig < 2) saved.aiEngine = "auto";
+    // v3: pausas más largas (3 s por defecto) para poder pensar sin que se envíe.
+    if (typeof raw.mig !== "number" || raw.mig < 3 || typeof saved.pause !== "number") saved.pause = 3000;
+    raw.mig = 3;
     return { ...DEFAULT_PREFS, ...saved };
   } catch {
     return DEFAULT_PREFS;
