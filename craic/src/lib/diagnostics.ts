@@ -1,5 +1,6 @@
 import { getAudioStatus } from "../speech/audioModels";
 import { loadDiagnostics } from "../llm/engine";
+import { cloudDiag } from "../llm/cloudEngine";
 
 // Detección de otras pestañas de Craic abiertas (pueden competir por la GPU).
 let otherTabs = 0;
@@ -52,6 +53,7 @@ export async function collectDiagnostics(): Promise<string> {
   } catch {
     /* nada */
   }
+  add("nube", cloudDiag);
   add("modelo", loadDiagnostics.modelId);
   add("último paso", loadDiagnostics.lastProgressText);
   add("error", loadDiagnostics.error);

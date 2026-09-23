@@ -67,6 +67,13 @@ export function loadPrefs(): Prefs {
     if ((saved.asrEngine as string) === "whisper") saved.asrEngine = "local";
     if (saved.voiceEngine === "neural" && saved.voiceQuality === undefined) saved.voiceEngine = "auto";
     delete saved.whisperSize;
+    // v2: la IA en la nube pasa a ser la opción por defecto para todos
+    // (la del dispositivo solo si se elige a propósito después de esto).
+    const raw = saved as Record<string, unknown>;
+    if (raw.mig !== 2) {
+      saved.aiEngine = "auto";
+      raw.mig = 2;
+    }
     return { ...DEFAULT_PREFS, ...saved };
   } catch {
     return DEFAULT_PREFS;

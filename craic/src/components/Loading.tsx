@@ -156,6 +156,7 @@ export function Loading({
         <div className="actions">
           <DiagnosticsButton />
         </div>
+        <p className="muted tiny">versión {__APP_VERSION__}</p>
       </div>
     );
   }
