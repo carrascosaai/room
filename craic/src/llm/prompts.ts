@@ -21,6 +21,24 @@ function mergeTurns(turns: Turn[]): Turn[] {
   return out;
 }
 
+const SLANG: Record<Level, string> = {
+  B1: "Use your local accent's words only now and then, and keep them easy to guess.",
+  B2: "Use your local expressions naturally, a couple per reply at most.",
+  C1: "Speak like you do at home, with your local slang and expressions.",
+};
+
+/** Cada pocas intervenciones propone un tema nuevo, como en una charla real. */
+export function topicHint(history: Turn[], topics?: string[]): string {
+  if (!topics?.length) return "";
+  const turns = history.filter((t) => t.role === "user").length;
+  const every = 3;
+  if (turns === 0 || turns % every !== 0) return "";
+  // Tema distinto en cada conversación (semilla: el primer mensaje) y en cada cambio.
+  const seed = [...(history[0]?.text ?? "")].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const topic = topics[(seed + turns / every) % topics.length];
+  return `Now, after reacting briefly, change the subject naturally to a new topic: ${topic}.`;
+}
+
 /**
  * Prompt corto a propósito: cada token del prompt se procesa en cada turno,
  * así que menos texto = respuesta antes.
@@ -31,11 +49,14 @@ export function buildReplyMessages(
   history: Turn[],
   opts: { scenario?: Scenario } = {},
 ): ChatMessage[] {
+  const casual = character.kind === "casual";
   const system = [
     character.persona,
-    "You're on a voice call with a Spanish engineering student practising English.",
+    "You're on a voice call with a Spanish student practising English.",
     opts.scenario?.setting ? `Situation: ${opts.scenario.setting}` : "",
-    `Talk like a real person on a call: 1 or 2 short sentences, max ${MAX_WORDS[level]} words. ${LEVEL_STYLE[level]} React to what they said, then ask ONE short question. Never correct them. If they use a Spanish word, say it in English and carry on. Never say you're an AI. No emojis or lists.`,
+    topicHint(history, opts.scenario?.topics),
+    `Talk like a real person on a call: 1 or 2 short sentences, max ${MAX_WORDS[level]} words. ${LEVEL_STYLE[level]} React to what they said (if they asked you something, answer it with your own opinion or experience first), then ask ONE short question. Never correct them. If they use a Spanish word, say it in English and carry on. Never say you're an AI. No emojis or lists.`,
+    casual ? SLANG[level] : "",
   ]
     .filter(Boolean)
     .join("\n");

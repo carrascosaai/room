@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { deleteVocab, listVocab, updateVocab, type VocabItem } from "../lib/db";
 import type { Prefs } from "../lib/prefs";
 import { dueQueue, masteryLabel, review } from "../lib/srs";
-import { PAUSE_MS } from "../lib/prefs";
+import { pauseMs } from "../lib/prefs";
 import type { MicError } from "../speech/recognition";
 import { speak, unlockTTS } from "../speech/tts";
 import { listenOnce, type ListenHandle } from "../speech/voiceInput";
@@ -26,7 +26,7 @@ export function Review({ prefs }: { prefs: Prefs }) {
     const { result, handle: h } = listenOnce({
       engine: prefs.asrEngine,
       lang: prefs.recognitionLang === "auto" ? "en-GB" : prefs.recognitionLang,
-      silenceMs: PAUSE_MS[prefs.pause],
+      silenceMs: pauseMs(prefs),
       onPhase: () => {},
       onError: setMicError,
     });

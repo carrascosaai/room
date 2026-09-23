@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CHARACTERS, getCharacter, type Level } from "../characters";
+import { CHARACTERS, REGIONS, type Region, getCharacter, type Level } from "../characters";
 import type { Draft } from "../lib/draft";
 import type { Prefs } from "../lib/prefs";
 import { freeStorageMB, isModelCached } from "../llm/engine";
@@ -37,6 +37,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
   const [sizes, setSizes] = useState<Record<ModelTier, number | null>>({ light: null, quality: null });
   const [free, setFree] = useState<number | null>(null);
   const [showModels, setShowModels] = useState(false);
+  const [region, setRegion] = useState<Region | "all">(() => getCharacter(prefs.characterId).region);
 
   useEffect(() => {
     if (demo) return;
@@ -94,8 +95,15 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
 
       <section>
         <h2 className="section-title">¿Con quién quieres hablar?</h2>
+        <div className="region-chips" role="group" aria-label="Filtrar por acento">
+          {REGIONS.map((r) => (
+            <button key={r.id} type="button" className={region === r.id ? "on" : ""} onClick={() => setRegion(r.id)} aria-pressed={region === r.id}>
+              {r.label}
+            </button>
+          ))}
+        </div>
         <div className="char-grid">
-          {CHARACTERS.map((c) => (
+          {CHARACTERS.filter((c) => region === "all" || c.region === region).map((c) => (
             <button
               key={c.id}
               className={`char-card${prefs.characterId === c.id ? " on" : ""}`}
@@ -110,6 +118,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
             >
               <Flag code={c.flag} size={44} />
               <strong>{c.name}</strong>
+              <span className="char-accent">{c.accent}</span>
               <small>{c.tagline}</small>
             </button>
           ))}
@@ -137,6 +146,22 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
           ))}
         </div>
       </section>
+
+      {character.kind === "casual" && (
+        <section>
+          <h2 className="section-title">¿Quién empieza?</h2>
+          <div className="seg seg-wide" role="group" aria-label="Quién empieza la llamada">
+            <button className={!prefs.userStarts ? "on" : ""} onClick={() => onChange({ userStarts: false })}>
+              <strong>{character.name.split(" ")[0]}</strong>
+              <small>Te saluda y pregunta</small>
+            </button>
+            <button className={prefs.userStarts ? "on" : ""} onClick={() => onChange({ userStarts: true })}>
+              <strong>Yo</strong>
+              <small>Tú sacas el tema</small>
+            </button>
+          </div>
+        </section>
+      )}
 
       <section>
         <h2 className="section-title">Tu nivel</h2>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NEURAL_VOICES, type Character, type Level } from "../characters";
 import { useConversation, type Msg } from "../conversation";
-import { PAUSE_MS, type Prefs } from "../lib/prefs";
+import { PAUSE_MAX, PAUSE_MIN, pauseMs, type Prefs } from "../lib/prefs";
 import type { LLM } from "../llm/engine";
 import type { Suggestion } from "../llm/parse";
 import type { Scenario } from "../scenarios";
@@ -44,7 +44,9 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
     voice: { rate: prefs.rate, engine: prefs.voiceEngine, neuralVoice, autoSpeak: prefs.autoSpeak },
     initialMessages,
     onChange,
+    userStarts: prefs.userStarts,
   });
+  const waitsForYou = prefs.userStarts && character.kind === "casual" && !initialMessages?.length;
   const { messages, thinking, engineError, say } = convo;
   const audio = useAudioModels();
   const speaking = useSpeaking();
@@ -78,7 +80,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
     () => ({
       engine: prefsRef.current.asrEngine,
       lang: recognitionLangFor(prefsRef.current, character),
-      silenceMs: PAUSE_MS[prefsRef.current.pause],
+      silenceMs: pauseMs(prefsRef.current),
     }),
     [character],
   );
@@ -144,7 +146,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
 
   // Arranque: el personaje saluda y después empieza a escucharte.
   useEffect(() => {
-    if (!messages.length) return; // aún no hay saludo
+    if (!messages.length && !waitsForYou) return; // aún no hay saludo
     aliveRef.current = true;
     let cancelled = false;
     const opener = initialMessages?.length ? null : messages[0]?.text;
@@ -162,7 +164,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       handleRef.current?.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length > 0]);
+  }, [messages.length > 0 || waitsForYou]);
 
   // Si la app pasa a segundo plano, se deja de escuchar.
   useEffect(() => {
@@ -324,6 +326,12 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
 
       <div className="messages" ref={listRef} aria-live="polite">
         <div className="messages-spacer" />
+        {!messages.length && (
+          <p className="muted start-hint">
+            {character.name.split(" ")[0]} ha descolgado y te escucha. Empieza tú: salúdale, pregúntale algo o cuéntale
+            cualquier cosa.
+          </p>
+        )}
         {messages.map((m) => {
           const hidden = m.role === "assistant" && !prefs.subtitles && !revealed.has(m.id) && !m.streaming;
           const isLast = m.id === lastAssistant?.id;
@@ -529,17 +537,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
               checked={prefs.handsFree}
               onChange={(v) => onPrefs({ handsFree: v })}
             />
-            <label className="field">
-              <span>Pausa para enviar</span>
-              <div className="seg seg-wide" role="group" aria-label="Pausa para enviar">
-                {(["short", "normal", "long"] as const).map((p) => (
-                  <button key={p} className={prefs.pause === p ? "on" : ""} onClick={() => onPrefs({ pause: p })} type="button">
-                    <strong>{p === "short" ? "Corta" : p === "normal" ? "Normal" : "Larga"}</strong>
-                    <small>{PAUSE_MS[p] / 1000} s</small>
-                  </button>
-                ))}
-              </div>
-            </label>
+            <PauseSlider value={pauseMs(prefs)} onChange={(ms) => onPrefs({ pause: ms })} />
             <Toggle label="Voz lenta" hint="El personaje habla más despacio" checked={prefs.rate === "slow"} onChange={(v) => onPrefs({ rate: v ? "slow" : "normal" })} />
             <Toggle label="Modo escucha" hint="Oculta el texto: entrena el oído" checked={!prefs.subtitles} onChange={(v) => onPrefs({ subtitles: !v })} />
             <Toggle
@@ -600,6 +598,30 @@ export function Toggle({
         {hint && <small>{hint}</small>}
       </span>
       <input type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    </label>
+  );
+}
+
+/** Cuánto silencio espera antes de enviar lo que has dicho (1–10 s). */
+export function PauseSlider({ value, onChange }: { value: number; onChange: (ms: number) => void }) {
+  const s = value / 1000;
+  return (
+    <label className="field pause-field">
+      <span>
+        Espera antes de enviar: <strong>{s % 1 ? s.toFixed(1) : s} s</strong>
+      </span>
+      <input
+        type="range"
+        min={PAUSE_MIN}
+        max={PAUSE_MAX}
+        step={500}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        aria-label="Segundos de silencio antes de enviar"
+      />
+      <small className="muted">
+        {s <= 2 ? "Rápido: para frases cortas." : s <= 5 ? "Te da tiempo a pensar a mitad de frase." : "Mucho margen: piensa con calma, no se enviará hasta que calles del todo."}
+      </small>
     </label>
   );
 }

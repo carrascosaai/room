@@ -48,7 +48,21 @@ export class CloudError extends Error {
 }
 
 export class CloudLLM implements LLM {
+  /** Si la nube está saturada un momento (muchos usuarios a la vez), se reintenta. */
   async complete(messages: ChatMessage[], opts: CompleteOptions = {}): Promise<string> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await this.once(messages, opts);
+      } catch (err) {
+        const status = (err as CloudError).status;
+        const retriable = status === 429 || status === 502 || status === 503;
+        if (!retriable || attempt >= 2) throw err;
+        await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)));
+      }
+    }
+  }
+
+  private async once(messages: ChatMessage[], opts: CompleteOptions): Promise<string> {
     const stream = !!opts.onText && !opts.jsonSchema;
     const smart = opts.tag === "correct" || opts.tag === "expressions" || opts.tag === "suggest";
     const ctrl = new AbortController();

@@ -1753,3 +1753,45 @@ select {
     transition: none !important;
   }
 }
+
+/* ---------- Pausa (1–10 s) ---------- */
+.pause-field input[type="range"] {
+  width: 100%;
+  accent-color: var(--text);
+  height: 28px;
+}
+
+/* ---------- Filtro de acentos ---------- */
+.region-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 12px;
+  scrollbar-width: none;
+}
+.region-chips::-webkit-scrollbar {
+  display: none;
+}
+.region-chips button {
+  flex: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.88rem;
+}
+.region-chips button.on {
+  background: var(--dark-btn);
+  color: var(--dark-btn-text);
+  border-color: transparent;
+}
+.char-card .char-accent {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.start-hint {
+  text-align: center;
+  margin: 24px 16px;
+}

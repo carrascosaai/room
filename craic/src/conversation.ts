@@ -59,9 +59,11 @@ interface Options {
   voice: VoiceSettings;
   initialMessages?: Msg[];
   onChange?: (messages: Msg[]) => void;
+  /** Empiezas tú: el personaje no saluda, espera a que hables. */
+  userStarts?: boolean;
 }
 
-export function useConversation({ llm, character, level, scenario, voice, initialMessages, onChange }: Options) {
+export function useConversation({ llm, character, level, scenario, voice, initialMessages, onChange, userStarts }: Options) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [thinking, setThinking] = useState(false);
   const [engineError, setEngineError] = useState<AppError | null>(null);
@@ -90,6 +92,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
         rate: rate ?? v.rate,
         langs: character.voiceLangs,
         gender: character.voiceGender,
+        hint: character.voiceHint,
         neuralVoice: v.neuralVoice,
         engine: v.engine,
       };
@@ -104,6 +107,10 @@ export function useConversation({ llm, character, level, scenario, voice, initia
   useEffect(() => {
     if (initialMessages?.length) {
       update(() => initialMessages);
+      return () => stopSpeaking();
+    }
+    if (userStarts && character.kind === "casual") {
+      update(() => []);
       return () => stopSpeaking();
     }
     const pool = scenario.openers.length ? scenario.openers : character.openers;

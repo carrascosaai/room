@@ -180,6 +180,23 @@ peticiones por usuario, y si Groq retira un modelo pasa al siguiente de la lista
 Opcional: `LLM_API_URL` para usar otro proveedor compatible con OpenAI (Cerebras,
 Gemini…), y `LLM_MODELS_FAST` / `LLM_MODELS_SMART` para elegir modelos.
 
+### Muchos usuarios a la vez
+
+El plan gratuito de Groq tiene un cupo por modelo (peticiones y tokens por minuto
+y por día). Para aguantar mucha gente:
+
+- La función reparte la carga: si un modelo llega a su límite (error 429), pasa al
+  siguiente de la lista y deja descansar al saturado un rato. El navegador además
+  reintenta solo un par de veces.
+- Añade más cupo gratuito con variables opcionales (cada proveedor suma el suyo):
+  `GEMINI_API_KEY` ([aistudio.google.com/apikey](https://aistudio.google.com/apikey)),
+  `CEREBRAS_API_KEY` ([cloud.cerebras.ai](https://cloud.cerebras.ai)),
+  `OPENROUTER_API_KEY` ([openrouter.ai/keys](https://openrouter.ai/keys)).
+  Se usan cuando Groq está saturado. Modelos configurables con `GEMINI_MODELS`,
+  `CEREBRAS_MODELS` y `OPENROUTER_MODELS`.
+- `GET /api/chat?models=1` lista los modelos que tu cuenta de Groq tiene disponibles.
+- Cada persona con WebGPU puede elegir «En tu dispositivo»: no gasta cupo de nadie.
+
 Privacidad: en modo nube, las frases de la conversación se envían a Groq para
 generar la respuesta. La app no las guarda en ningún servidor.
 

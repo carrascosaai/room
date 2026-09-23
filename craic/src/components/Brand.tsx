@@ -1,4 +1,5 @@
 import "@fontsource/rubik/latin-900.css";
+import type { FlagCode } from "../characters";
 
 export function Wordmark({ small = false }: { small?: boolean }) {
   return (
@@ -9,7 +10,29 @@ export function Wordmark({ small = false }: { small?: boolean }) {
 }
 
 /** Banderas dibujadas en SVG (los emojis de bandera no se ven en Windows). */
-export function Flag({ code, size = 52 }: { code: "ie" | "gb" | "us"; size?: number }) {
+/** Union Jack en un cuadrado de 60×60 (se reutiliza a escala en Australia y NZ). */
+function UnionJack() {
+  return (
+    <>
+      <rect width="60" height="60" fill="#012169" />
+      <path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="12" />
+      <path d="M0 0l60 60M60 0L0 60" stroke="#c8102e" strokeWidth="4" />
+      <path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="18" />
+      <path d="M30 0v60M0 30h60" stroke="#c8102e" strokeWidth="10" />
+    </>
+  );
+}
+
+function Star({ x, y, r, fill, stroke }: { x: number; y: number; r: number; fill: string; stroke?: string }) {
+  const pts = Array.from({ length: 10 }, (_, i) => {
+    const a = (Math.PI / 5) * i - Math.PI / 2;
+    const rr = i % 2 ? r * 0.45 : r;
+    return `${(x + rr * Math.cos(a)).toFixed(2)},${(y + rr * Math.sin(a)).toFixed(2)}`;
+  }).join(" ");
+  return <polygon points={pts} fill={fill} stroke={stroke} strokeWidth={stroke ? 1 : 0} />;
+}
+
+export function Flag({ code, size = 52 }: { code: FlagCode; size?: number }) {
   return (
     <span className="flag" style={{ width: size, height: size }} aria-hidden="true">
       <svg viewBox="0 0 60 60" width={size} height={size}>
@@ -26,13 +49,62 @@ export function Flag({ code, size = 52 }: { code: "ie" | "gb" | "us"; size?: num
               <rect x="40" width="20" height="60" fill="#ff883e" />
             </>
           )}
-          {code === "gb" && (
+          {code === "gb" && <UnionJack />}
+          {code === "eng" && (
+            <>
+              <rect width="60" height="60" fill="#fff" />
+              <path d="M30 0v60M0 30h60" stroke="#ce1124" strokeWidth="12" />
+            </>
+          )}
+          {code === "sco" && (
+            <>
+              <rect width="60" height="60" fill="#005eb8" />
+              <path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="10" />
+            </>
+          )}
+          {code === "wal" && (
+            <>
+              <rect width="60" height="30" fill="#fff" />
+              <rect y="30" width="60" height="30" fill="#00b140" />
+              <path
+                d="M14 38c4-6 10-8 16-7l6-7 3 4 6-3-2 6 5 2-6 3c1 5-2 9-7 10l3 6-6-2-4 5-2-6c-5 0-9-3-12-7z"
+                fill="#d30731"
+              />
+            </>
+          )}
+          {(code === "au" || code === "nz") && (
             <>
               <rect width="60" height="60" fill="#012169" />
-              <path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="12" />
-              <path d="M0 0l60 60M60 0L0 60" stroke="#c8102e" strokeWidth="4" />
-              <path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="18" />
-              <path d="M30 0v60M0 30h60" stroke="#c8102e" strokeWidth="10" />
+              <g transform="scale(0.5)">
+                <UnionJack />
+              </g>
+              {code === "au" ? (
+                <>
+                  <Star x={15} y={46} r={6} fill="#fff" />
+                  <Star x={45} y={14} r={3} fill="#fff" />
+                  <Star x={38} y={28} r={3} fill="#fff" />
+                  <Star x={52} y={26} r={3} fill="#fff" />
+                  <Star x={45} y={48} r={3.5} fill="#fff" />
+                </>
+              ) : (
+                <>
+                  <Star x={45} y={14} r={3.5} fill="#c8102e" stroke="#fff" />
+                  <Star x={37} y={29} r={3.5} fill="#c8102e" stroke="#fff" />
+                  <Star x={52} y={27} r={3} fill="#c8102e" stroke="#fff" />
+                  <Star x={45} y={47} r={4} fill="#c8102e" stroke="#fff" />
+                </>
+              )}
+            </>
+          )}
+          {code === "ca" && (
+            <>
+              <rect width="60" height="60" fill="#fff" />
+              <rect width="15" height="60" fill="#d52b1e" />
+              <rect x="45" width="15" height="60" fill="#d52b1e" />
+              <path
+                d="M30 14l3 6 4-2-1 9 5-5 1 3 5-1-2 6 2 1-9 7 1 3-8-1v8h-2v-8l-8 1 1-3-9-7 2-1-2-6 5 1 1-3 5 5-1-9 4 2z"
+                fill="#d52b1e"
+              />
             </>
           )}
           {code === "us" && (

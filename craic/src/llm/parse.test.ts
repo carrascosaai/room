@@ -96,3 +96,17 @@ describe("parseCorrections", () => {
     expect(r.errors[0]?.corrected).toBe("I went to the cinema");
   });
 });
+
+import { topicHint } from "./prompts";
+describe("topicHint", () => {
+  const t = (n: number) =>
+    Array.from({ length: n }, (_, i) => [
+      { role: "assistant" as const, text: `q${i}` },
+      { role: "user" as const, text: `a${i}` },
+    ]).flat();
+  it("changes topic every three answers", () => {
+    expect(topicHint(t(1), ["a", "b"])).toBe("");
+    expect(topicHint(t(3), ["a", "b"])).toMatch(/new topic: [ab]/);
+    expect(topicHint(t(3), undefined)).toBe("");
+  });
+});

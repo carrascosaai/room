@@ -7,21 +7,89 @@
 //   LLM_API_URL       opcional, otro proveedor compatible con OpenAI
 //   LLM_MODELS_FAST   opcional, modelos para responder (separados por comas)
 //   LLM_MODELS_SMART  opcional, modelos para correcciones y resúmenes
+//
+// Más capacidad gratis para muchos usuarios (opcionales; se usan cuando Groq
+// llega a su límite, cada una con su propio cupo gratuito):
+//   GROQ_API_KEYS       varias claves de Groq de cuentas distintas, separadas por comas
+//   GEMINI_API_KEY      https://aistudio.google.com/apikey
+//   CEREBRAS_API_KEY    https://cloud.cerebras.ai
+//   OPENROUTER_API_KEY  https://openrouter.ai/keys (modelos «:free»)
 
 export const config = { runtime: "edge" };
 
 const env = (k: string): string | undefined =>
   (globalThis as unknown as { process?: { env: Record<string, string | undefined> } }).process?.env?.[k];
 
-const DEFAULT_FAST = "llama-3.1-8b-instant,openai/gpt-oss-20b,meta-llama/llama-4-scout-17b-16e-instruct,llama-3.3-70b-versatile";
-const DEFAULT_SMART = "llama-3.3-70b-versatile,openai/gpt-oss-20b,llama-3.1-8b-instant";
+const DEFAULT_FAST =
+  "llama-3.1-8b-instant,openai/gpt-oss-20b,meta-llama/llama-4-scout-17b-16e-instruct,qwen/qwen3-32b,llama-3.3-70b-versatile,openai/gpt-oss-120b";
+const DEFAULT_SMART =
+  "llama-3.3-70b-versatile,openai/gpt-oss-120b,meta-llama/llama-4-scout-17b-16e-instruct,openai/gpt-oss-20b,llama-3.1-8b-instant";
+
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+/** Proveedores extra compatibles con OpenAI (se usan cuando Groq está saturado). */
+const EXTRA: { keyEnv: string; url: string; modelsEnv: string; fast: string; smart: string }[] = [
+  {
+    keyEnv: "CEREBRAS_API_KEY",
+    url: "https://api.cerebras.ai/v1/chat/completions",
+    modelsEnv: "CEREBRAS_MODELS",
+    fast: "llama3.1-8b,gpt-oss-120b,llama-3.3-70b",
+    smart: "gpt-oss-120b,llama-3.3-70b,llama3.1-8b",
+  },
+  {
+    keyEnv: "GEMINI_API_KEY",
+    url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    modelsEnv: "GEMINI_MODELS",
+    fast: "gemini-2.5-flash-lite,gemini-2.0-flash-lite,gemini-2.0-flash",
+    smart: "gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash",
+  },
+  {
+    keyEnv: "OPENROUTER_API_KEY",
+    url: "https://openrouter.ai/api/v1/chat/completions",
+    modelsEnv: "OPENROUTER_MODELS",
+    fast: "meta-llama/llama-3.3-70b-instruct:free,openai/gpt-oss-20b:free",
+    smart: "meta-llama/llama-3.3-70b-instruct:free,openai/gpt-oss-20b:free",
+  },
+];
+
+type Candidate = { url: string; key: string; model: string; id: string };
+
+const list = (v: string | undefined, fallback: string) =>
+  (v ?? fallback)
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+function groqKeys(): string[] {
+  const keys = [env("GROQ_API_KEY") ?? env("LLM_API_KEY"), ...list(env("GROQ_API_KEYS"), "")].filter(Boolean) as string[];
+  return [...new Set(keys)];
+}
+
+/** Todas las combinaciones proveedor/clave/modelo, en orden de preferencia. */
+function candidates(tier: "fast" | "smart"): Candidate[] {
+  const out: Candidate[] = [];
+  const models = list(env(tier === "smart" ? "LLM_MODELS_SMART" : "LLM_MODELS_FAST"), tier === "smart" ? DEFAULT_SMART : DEFAULT_FAST);
+  const url = env("LLM_API_URL") ?? GROQ_URL;
+  const keys = groqKeys();
+  // Primero cada modelo con cada clave (en Groq el cupo va por modelo y por cuenta).
+  for (const model of models) keys.forEach((key, i) => out.push({ url, key, model, id: `g${i}:${model}` }));
+  for (const p of EXTRA) {
+    const key = env(p.keyEnv);
+    if (!key) continue;
+    for (const model of list(env(p.modelsEnv), tier === "smart" ? p.smart : p.fast)) out.push({ url: p.url, key, model, id: `${p.keyEnv}:${model}` });
+  }
+  return out;
+}
+
+/** Combinaciones saturadas (429) o retiradas: se saltan durante un rato. */
+const cooldown = new Map<string, number>();
 
 const MAX_MESSAGES = 40;
 const MAX_CHARS = 20000;
 const MAX_TOKENS = 700;
-const RATE_PER_MIN = 40;
+const RATE_PER_MIN = 60;
 
-// Modelo que ha funcionado (se recuerda mientras la instancia siga viva).
+// Combinación que ha funcionado (se recuerda mientras la instancia siga viva).
 const working: Record<string, string | undefined> = {};
 const hits = new Map<string, { n: number; t: number }>();
 
@@ -77,8 +145,21 @@ function validate(b: unknown): Body | string {
 }
 
 export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Promise<Response> {
-  const key = env("GROQ_API_KEY") ?? env("LLM_API_KEY");
-  if (req.method === "GET") return json(200, { enabled: !!key }, { "cache-control": "no-store" });
+  const key = groqKeys()[0] ?? EXTRA.map((p) => env(p.keyEnv)).find(Boolean);
+  if (req.method === "GET") {
+    // ?models=1 → modelos disponibles en Groq (solo nombres; para diagnóstico).
+    const k = groqKeys()[0];
+    if (k && new URL(req.url).searchParams.has("models")) {
+      try {
+        const r = await fetchImpl("https://api.groq.com/openai/v1/models", { headers: { authorization: `Bearer ${k}` } });
+        const d = (await r.json()) as { data?: { id: string }[] };
+        return json(200, { models: (d.data ?? []).map((m) => m.id).sort() }, { "cache-control": "no-store" });
+      } catch (e) {
+        return json(502, { error: String(e) });
+      }
+    }
+    return json(200, { enabled: !!key }, { "cache-control": "no-store" });
+  }
   if (req.method !== "POST") return json(405, { error: "method not allowed" });
   if (!key) return json(503, { error: "cloud disabled" });
   if (!allowedOrigin(req)) return json(403, { error: "forbidden" });
@@ -94,35 +175,36 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
   if (typeof body === "string") return json(400, { error: body });
 
   const tier = body.tier === "smart" ? "smart" : "fast";
-  const list = (env(tier === "smart" ? "LLM_MODELS_SMART" : "LLM_MODELS_FAST") ?? (tier === "smart" ? DEFAULT_SMART : DEFAULT_FAST))
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const models = working[tier] ? [working[tier]!, ...list.filter((m) => m !== working[tier])] : list;
-  const url = env("LLM_API_URL") ?? "https://api.groq.com/openai/v1/chat/completions";
+  const now = Date.now();
+  const all = candidates(tier);
+  const fresh = all.filter((c) => (cooldown.get(c.id) ?? 0) <= now);
+  // Si todo está en pausa, se prueba igualmente (quizá ya se liberó el cupo).
+  const pool = fresh.length ? fresh : all;
+  const first = pool.find((c) => c.id === working[tier]);
+  const order = first ? [first, ...pool.filter((c) => c !== first)] : pool;
 
   let lastStatus = 502;
   let lastError = "sin modelos disponibles";
-  for (const model of models) {
+  for (const c of order.slice(0, 8)) {
     const payload: Record<string, unknown> = {
-      model,
+      model: c.model,
       messages: body.messages,
       temperature: Math.min(Math.max(body.temperature ?? 0.7, 0), 1.5),
       max_tokens: Math.min(body.max_tokens ?? 256, MAX_TOKENS),
       stream: !!body.stream,
     };
     if (body.json) payload.response_format = { type: "json_object" };
-    if (model.startsWith("openai/gpt-oss")) {
+    if (/gpt-oss/.test(c.model)) {
       // Modelos con razonamiento: el mínimo, para responder rápido.
       payload.reasoning_effort = "low";
-      payload.include_reasoning = false;
+      if (c.url === GROQ_URL) payload.include_reasoning = false;
       payload.max_tokens = Math.min((payload.max_tokens as number) + 400, 1200);
     }
     let res: Response;
     try {
-      res = await fetchImpl(url, {
+      res = await fetchImpl(c.url, {
         method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+        headers: { "content-type": "application/json", authorization: `Bearer ${c.key}` },
         body: JSON.stringify(payload),
       });
     } catch (e) {
@@ -131,27 +213,40 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
       continue;
     }
     if (res.ok) {
-      working[tier] = model;
+      working[tier] = c.id;
       return new Response(res.body, {
         status: 200,
         headers: {
           "content-type": res.headers.get("content-type") ?? (body.stream ? "text/event-stream" : "application/json"),
           "cache-control": "no-store",
-          "x-model": model,
+          "x-model": c.model,
         },
       });
     }
     const text = await res.text().catch(() => "");
     lastStatus = res.status;
     lastError = text.slice(0, 300);
-    // Modelo retirado o no disponible → probar el siguiente. Otros errores se devuelven.
+    if (working[tier] === c.id) working[tier] = undefined;
+    // Cupo agotado: esta combinación descansa (lo que diga el proveedor, 20 s–10 min) y se prueba otra.
+    if (res.status === 429) {
+      const retry = Number(res.headers.get("retry-after"));
+      const ms = Math.min(Math.max(Number.isFinite(retry) && retry > 0 ? retry * 1000 : 20000, 20000), 600000);
+      cooldown.set(c.id, Date.now() + ms);
+      continue;
+    }
+    // Modelo retirado o no disponible → siguiente (y no se vuelve a intentar en un buen rato).
     const modelProblem =
       res.status === 404 ||
       ((res.status === 400 || res.status === 422) && /model|decommission|not found|does not exist/i.test(text)) ||
       (body.json && res.status === 400 && /json|response_format/i.test(text));
-    if (!modelProblem && res.status !== 503) break;
-    if (working[tier] === model) working[tier] = undefined;
+    if (modelProblem) {
+      cooldown.set(c.id, Date.now() + 3600000);
+      continue;
+    }
+    if (res.status >= 500 || res.status === 401 || res.status === 403) continue;
+    break;
   }
+  if (cooldown.size > 500) cooldown.clear();
   return json(lastStatus === 429 ? 429 : lastStatus >= 500 ? 502 : lastStatus, { error: lastError });
 }
 
