@@ -64,8 +64,6 @@ export default function App() {
   const audio = useAudioModels();
   const [iosHint, setIosHint] = useState(false);
   const [needTTS, setNeedTTS] = useState(true);
-  /** ¿Hay IA en la nube configurada en este despliegue? (null = comprobando) */
-  const [cloudOk, setCloudOk] = useState<boolean | null>(demo ? false : null);
   /** Llamada lista para abrir en cuanto la voz y el oído estén preparados */
   const [pendingOpen, setPendingOpen] = useState<{ messages?: Msg[]; startedAt?: number } | null>(null);
 
@@ -77,9 +75,10 @@ export default function App() {
   }, [prefs.theme]);
 
   useEffect(() => {
-    void Promise.all([checkWebGPU(), demo ? Promise.resolve(false) : cloudAvailable()]).then(([s, cloud]) => {
+    // La comprobación de la nube solo sirve para el diagnóstico (y para despertar la función).
+    if (!demo) void cloudAvailable();
+    void checkWebGPU().then((s) => {
       setGpu(s);
-      setCloudOk(cloud);
       setScreen("home");
     });
   }, []);
@@ -108,8 +107,10 @@ export default function App() {
 
   const f16 = gpu?.ok ? gpu.f16 : false;
   /** IA en la nube: si la eliges, o en «auto» cuando está disponible, o si no hay WebGPU. */
-  const useCloud = !demo && !!cloudOk && (prefs.aiEngine !== "local" || !gpu?.ok);
-  const canRun = demo || !!gpu?.ok || !!cloudOk;
+  // La nube se usa salvo que elijas la IA del dispositivo a propósito (y tengas WebGPU).
+  // No depende de la comprobación inicial: una red lenta no debe mandarte a la IA local.
+  const useCloud = !demo && (prefs.aiEngine !== "local" || !gpu?.ok);
+  const canRun = true;
 
   /** Carga (o reutiliza) el modelo de lenguaje. Se comparte entre precarga y «Llamar». */
   const ensureEngine = useCallback(
@@ -230,8 +231,7 @@ export default function App() {
         setPendingOpen({ messages: resume?.messages, startedAt: resume?.startedAt });
       };
       // Sin WebGPU (o si la comprobación inicial falló por red lenta) se vuelve a mirar la nube.
-      if (useCloud || (!demo && !gpu?.ok && (await cloudAvailable(true)))) {
-        setCloudOk(true);
+      if (useCloud) {
         goCloud();
         return;
       }
@@ -253,14 +253,9 @@ export default function App() {
       } catch (err) {
         console.error(err);
         // La IA del dispositivo ha fallado: si hay nube, se sigue con ella sin preguntar.
-        if (await cloudAvailable(true)) {
-          console.warn("IA local falló; se usa la nube", err);
-          setCloudOk(true);
-          updatePrefs({ aiEngine: "cloud" });
-          goCloud();
-          return;
-        }
-        setLoadError(toAppError(err));
+        console.warn("IA local falló; se usa la nube", err);
+        updatePrefs({ aiEngine: "cloud" });
+        goCloud();
       }
     },
     [prefs.tier, f16, ensureEngine, openChat, loadAudio, useCloud, audioCached, gpu, updatePrefs],
@@ -386,7 +381,7 @@ export default function App() {
           draft={draft}
           audioCached={audioCached}
           needTTS={needTTS}
-          cloudOk={!!cloudOk}
+          cloudOk={!demo}
           cloud={useCloud}
           onChange={updatePrefs}
           onStart={(info) => void start(info)}
@@ -419,7 +414,7 @@ export default function App() {
             await Promise.allSettled([deleteCachedModel(opt.idF16), deleteCachedModel(opt.idF32)]);
             void start({ cached: false });
           }}
-          cloudOk={!!cloudOk}
+          cloudOk={!demo}
           cloud={useCloud}
           onUseCloud={() => {
             updatePrefs({ aiEngine: "cloud" });

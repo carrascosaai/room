@@ -6,6 +6,8 @@ import type { ChatMessage, CompleteOptions, LLM } from "./engine";
 const endpoint = () => `${import.meta.env.BASE_URL}api/chat`;
 
 let availability: Promise<boolean> | null = null;
+/** Resultado de la última comprobación (para el diagnóstico). */
+export const cloudDiag = { check: "sin comprobar", lastError: "" };
 
 /** ¿Está configurada la IA en la nube en este despliegue? */
 export function cloudAvailable(recheck = false): Promise<boolean> {
@@ -15,10 +17,15 @@ export function cloudAvailable(recheck = false): Promise<boolean> {
       const t = setTimeout(() => ctrl.abort(), ms);
       const res = await fetch(endpoint(), { cache: "no-store", signal: ctrl.signal });
       clearTimeout(t);
-      if (!res.ok) return false;
+      if (!res.ok) {
+        cloudDiag.check = `HTTP ${res.status}`;
+        return false;
+      }
       const data = (await res.json()) as { enabled?: boolean };
+      cloudDiag.check = data.enabled ? "ok" : "sin clave configurada";
       return !!data.enabled;
-    } catch {
+    } catch (e) {
+      cloudDiag.check = `error: ${String(e)}`;
       return false;
     }
   };
@@ -62,6 +69,7 @@ export class CloudLLM implements LLM {
       });
       if (!res.ok) {
         const msg = await res.text().catch(() => "");
+        cloudDiag.lastError = `${res.status} ${msg.slice(0, 200)}`;
         throw new CloudError(`Cloud ${res.status}: ${msg.slice(0, 200)}`, res.status);
       }
       if (!stream) {
