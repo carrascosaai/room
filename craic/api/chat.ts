@@ -20,10 +20,10 @@ export const config = { runtime: "edge" };
 const env = (k: string): string | undefined =>
   (globalThis as unknown as { process?: { env: Record<string, string | undefined> } }).process?.env?.[k];
 
-const DEFAULT_FAST =
-  "llama-3.1-8b-instant,openai/gpt-oss-20b,meta-llama/llama-4-scout-17b-16e-instruct,qwen/qwen3-32b,llama-3.3-70b-versatile,openai/gpt-oss-120b";
-const DEFAULT_SMART =
-  "llama-3.3-70b-versatile,openai/gpt-oss-120b,meta-llama/llama-4-scout-17b-16e-instruct,openai/gpt-oss-20b,llama-3.1-8b-instant";
+// Modelos de Groq disponibles (septiembre 2026; ver GET /api/chat?models=1).
+// Los que ya no existan se saltan solos durante una hora.
+const DEFAULT_FAST = "openai/gpt-oss-20b,openai/gpt-oss-120b,qwen/qwen3.8-27b,llama-3.1-8b-instant";
+const DEFAULT_SMART = "openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.8-27b,llama-3.3-70b-versatile";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -199,6 +199,10 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
       payload.reasoning_effort = "low";
       if (c.url === GROQ_URL) payload.include_reasoning = false;
       payload.max_tokens = Math.min((payload.max_tokens as number) + 400, 1200);
+    } else if (/qwen3/.test(c.model) && c.url === GROQ_URL) {
+      // Qwen3 piensa antes de responder: se oculta el razonamiento.
+      payload.reasoning_format = "hidden";
+      payload.max_tokens = Math.min((payload.max_tokens as number) + 400, 1200);
     }
     let res: Response;
     try {
@@ -237,7 +241,7 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
     // Modelo retirado o no disponible → siguiente (y no se vuelve a intentar en un buen rato).
     const modelProblem =
       res.status === 404 ||
-      ((res.status === 400 || res.status === 422) && /model|decommission|not found|does not exist/i.test(text)) ||
+      ((res.status === 400 || res.status === 422) && /model|decommission|not found|does not exist|reasoning|not supported|unsupported/i.test(text)) ||
       (body.json && res.status === 400 && /json|response_format/i.test(text));
     if (modelProblem) {
       cooldown.set(c.id, Date.now() + 3600000);
