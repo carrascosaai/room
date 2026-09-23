@@ -174,8 +174,7 @@ craic/
 
 ## Licencias
 
-El código de la app aún no tiene licencia: si la publicas, añade un archivo
-`LICENSE` (por ejemplo MIT). Dependencias de código abierto:
+Código de la app: licencia MIT (ver `LICENSE`). Dependencias de código abierto:
 WebLLM (Apache-2.0), React (MIT), Vite (MIT), idb (ISC), vite-plugin-pwa (MIT).
 Los modelos Llama 3.2 se distribuyen bajo la *Llama 3.2 Community License* de
 Meta (uso gratuito; exige mostrar «Built with Llama», que aparece en el pie de la app).
