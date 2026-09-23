@@ -1,4 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import type { Character } from "../characters";
+import { checkModelHost, NET_TEXT, type NetStatus } from "../lib/netcheck";
 import type { AppError } from "../llm/errors";
 import type { LoadProgress } from "../llm/engine";
 import type { Prefs } from "../lib/prefs";
@@ -11,6 +13,7 @@ function describe(text: string): string {
     return mb ? `Descargando… ${mb} MB` : "Descargando…";
   }
   if (/from cache/i.test(text)) return "Cargando desde tu dispositivo…";
+  if (/start to fetch|param/i.test(text)) return "Abriendo el modelo…";
   if (/shader|gpu/i.test(text)) return "Preparando la GPU…";
   if (/finish/i.test(text)) return "Lista";
   return "Preparando…";
@@ -45,8 +48,29 @@ interface Props {
   onBack: () => void;
 }
 
+const STALL_MS = 20000;
+
 export function Loading({ character, prefs, progress, error, firstDownload, needTTS, llmReady, onSkip, onRetry, onBack }: Props) {
   const audio = useAudioModels();
+  // Vigilante: si nada avanza en 20 s, se diagnostica la conexión.
+  const lastChange = useRef(Date.now());
+  const [stalled, setStalled] = useState(false);
+  const [net, setNet] = useState<NetStatus | "checking" | null>(null);
+  const signature = `${progress?.progress}|${progress?.text}|${audio.ttsProgress}|${audio.asrProgress}|${audio.tts}|${audio.asr}|${llmReady}`;
+  useEffect(() => {
+    lastChange.current = Date.now();
+    setStalled(false);
+  }, [signature]);
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!stalled && Date.now() - lastChange.current > STALL_MS) {
+        setStalled(true);
+        setNet("checking");
+        void checkModelHost().then(setNet);
+      }
+    }, 2000);
+    return () => clearInterval(id);
+  }, [stalled]);
   if (error) {
     return (
       <div className="card warn-card">
@@ -88,6 +112,33 @@ export function Loading({ character, prefs, progress, error, firstDownload, need
       )}
       {prefs.asrEngine === "local" && (
         <Row label="Oído" value={audio.asrProgress} state={audio.asr} text={`${Math.round(audio.asrProgress * 100)}%`} />
+      )}
+      {progress?.text && (
+        <p className="muted tiny raw-progress" title={progress.text}>
+          {progress.text.slice(0, 120)}
+        </p>
+      )}
+      {stalled && (
+        <div className="note note-warn stall">
+          <strong>Esto está tardando más de lo normal.</strong>
+          <p>
+            {net === "checking" || net === null
+              ? "Comprobando la conexión…"
+              : net === "ok"
+                ? "La conexión funciona, así que puede ser que el navegador se haya quedado bloqueado. Recarga la página; lo ya descargado se conserva."
+                : NET_TEXT[net]}
+          </p>
+          <div className="actions">
+            <button className="btn-dark btn-small" onClick={() => location.reload()}>
+              Recargar
+            </button>
+            {llmReady && (
+              <button className="btn-ghost btn-small" onClick={onSkip}>
+                Empezar sin voz natural
+              </button>
+            )}
+          </div>
+        </div>
       )}
       {llmReady && (
         <button className="btn-ghost skip-btn" onClick={onSkip}>

@@ -12,15 +12,19 @@ const isolation = {
   "Cross-Origin-Embedder-Policy": "require-corp",
 };
 
+const version = new Date().toISOString().slice(0, 16).replace("T", " ");
+
 export default defineConfig({
   base,
+  define: { __APP_VERSION__: JSON.stringify(version) },
   server: { headers: isolation },
   preview: { headers: isolation },
   plugins: [
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "auto",
+      // Se registra desde main.tsx para recargar sola al publicar una versión nueva.
+      injectRegister: false,
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
         name: "Craic · Practica inglés hablando",
