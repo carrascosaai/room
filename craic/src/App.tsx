@@ -234,6 +234,13 @@ export default function App() {
 
       {screen === "history" && <History />}
       {screen === "vocab" && <Vocab rate={prefs.rate} />}
+
+      {showTabs && (
+        <footer className="foot muted">
+          IA local con <a href="https://github.com/mlc-ai/web-llm" target="_blank" rel="noreferrer">WebLLM</a> · Built
+          with Llama · Código abierto y gratis
+        </footer>
+      )}
     </div>
   );
 }
