@@ -16,7 +16,7 @@ import { useInstallPrompt } from "./lib/install";
 import { loadPrefs, savePrefs, type Prefs } from "./lib/prefs";
 import { useWakeLock } from "./lib/wakeLock";
 import { checkWebGPU, type WebGPUStatus } from "./lib/webgpu";
-import { isModelCached, loadWebLLM, requestPersistentStorage, type LLM, type LoadProgress } from "./llm/engine";
+import { deleteCachedModel, isModelCached, loadWebLLM, requestPersistentStorage, type LLM, type LoadProgress } from "./llm/engine";
 import { toAppError, type AppError } from "./llm/errors";
 import { createMockEngine } from "./llm/mockEngine";
 import { MODEL_OPTIONS, modelIdFor } from "./llm/models";
@@ -119,13 +119,24 @@ export default function App() {
         llmRef.current = null;
         await old?.llm.unload().catch(() => undefined);
         await requestPersistentStorage();
+        const load = async (modelId: string) => {
+          try {
+            return await loadWebLLM(modelId, setProgress);
+          } catch (err) {
+            // Atascado: se cierra el motor y se reintenta una vez desde cero.
+            if (toAppError(err).kind !== "stall") throw err;
+            console.warn("Carga atascada, reintentando", err);
+            setProgress({ progress: 0, text: "Reintentando…" });
+            return await loadWebLLM(modelId, setProgress);
+          }
+        };
         let llm: LLM;
         try {
-          llm = await loadWebLLM(id, setProgress);
+          llm = await load(id);
         } catch (err) {
           // Sin shader-f16: usamos la variante q4f32 automáticamente.
           if (toAppError(err).kind !== "f16") throw err;
-          llm = await loadWebLLM(MODEL_OPTIONS[prefs.tier].idF32, setProgress);
+          llm = await load(MODEL_OPTIONS[prefs.tier].idF32);
         }
         llmRef.current = { id, llm };
         return llm;
@@ -366,6 +377,15 @@ export default function App() {
             }
           }}
           onRetry={() => void start({ cached: !firstDownload })}
+          onRedownload={async () => {
+            const opt = MODEL_OPTIONS[prefs.tier];
+            await Promise.allSettled([deleteCachedModel(opt.idF16), deleteCachedModel(opt.idF32)]);
+            void start({ cached: false });
+          }}
+          onSwitchModel={() => {
+            updatePrefs({ tier: prefs.tier === "light" ? "quality" : "light" });
+            setScreen("home");
+          }}
           onBack={() => {
             setPendingOpen(null);
             setScreen("home");

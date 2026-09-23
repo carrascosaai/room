@@ -82,16 +82,56 @@ class WebLLMEngine implements LLM {
   }
 }
 
+/** Último estado de la carga, para el diagnóstico. */
+export const loadDiagnostics = { modelId: "", lastProgressText: "", error: "" };
+
+/**
+ * Carga el modelo en un worker. Nunca se queda colgada en silencio: si el
+ * worker falla se rechaza con el error, y si no hay progreso en `stallMs`
+ * se rechaza con un StallError (el llamante puede reintentar).
+ */
 export async function loadWebLLM(
   modelId: string,
   onProgress: (p: LoadProgress) => void,
+  stallMs = 45000,
 ): Promise<LLM> {
   const { CreateWebWorkerMLCEngine } = await import("@mlc-ai/web-llm");
   const worker = new Worker(new URL("./llm.worker.ts", import.meta.url), { type: "module" });
+  loadDiagnostics.modelId = modelId;
+  loadDiagnostics.lastProgressText = "";
+  loadDiagnostics.error = "";
+  let lastProgress = Date.now();
+  let timer: ReturnType<typeof setInterval> | undefined;
+  const guard = new Promise<never>((_, reject) => {
+    worker.onerror = (e) => {
+      e.preventDefault?.();
+      reject(new Error(`Error en el motor de IA: ${e.message || "desconocido"} (${e.filename ?? ""}:${e.lineno ?? ""})`));
+    };
+    worker.onmessageerror = () => reject(new Error("Error de comunicación con el motor de IA"));
+    timer = setInterval(() => {
+      if (Date.now() - lastProgress > stallMs) {
+        reject(
+          Object.assign(
+            new Error(
+              `Sin progreso durante ${Math.round(stallMs / 1000)} s (último paso: ${loadDiagnostics.lastProgressText || "ninguno"})`,
+            ),
+            { name: "StallError" },
+          ),
+        );
+      }
+    }, 1000);
+  });
   try {
-    const engine = await CreateWebWorkerMLCEngine(worker, modelId, {
-      initProgressCallback: (r) => onProgress({ progress: r.progress, text: r.text }),
-    });
+    const engine = await Promise.race([
+      CreateWebWorkerMLCEngine(worker, modelId, {
+        initProgressCallback: (r) => {
+          lastProgress = Date.now();
+          loadDiagnostics.lastProgressText = r.text;
+          onProgress({ progress: r.progress, text: r.text });
+        },
+      }),
+      guard,
+    ]);
     const llm = new WebLLMEngine(engine, worker);
     // Calentamiento: compila los shaders de la GPU ya, para que la primera
     // respuesta de verdad no tarde de más.
@@ -100,8 +140,11 @@ export async function loadWebLLM(
       .catch(() => undefined);
     return llm;
   } catch (err) {
+    loadDiagnostics.error = `${(err as Error)?.name ?? ""}: ${(err as Error)?.message ?? String(err)}`;
     worker.terminate();
     throw err;
+  } finally {
+    clearInterval(timer);
   }
 }
 
