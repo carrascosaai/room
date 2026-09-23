@@ -25,8 +25,10 @@ describe("api/chat", () => {
   });
 
   it("proxies to the provider with the secret key and a capped token limit", async () => {
+    setEnv("LLM_MODELS_FAST", "plain-model");
     const f = vi.fn(async () => new Response('{"choices":[{"message":{"content":"Hey!"}}]}', { status: 200 }));
     const r = await handle(post({ messages: msgs, max_tokens: 99999 }), f as unknown as typeof fetch);
+    setEnv("LLM_MODELS_FAST");
     expect(r.status).toBe(200);
     const [, init] = f.mock.calls[0] as unknown as [string, RequestInit];
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer test-key");
