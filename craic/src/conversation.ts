@@ -20,6 +20,7 @@ export function useConversation(llm: LLM, character: Character, level: Level, ra
   const [messages, setMessages] = useState<Msg[]>([]);
   const [thinking, setThinking] = useState(false);
   const messagesRef = useRef<Msg[]>([]);
+  const pendingRef = useRef<Promise<void>>(Promise.resolve());
   const rateRef = useRef(rate);
   rateRef.current = rate;
 
@@ -76,23 +77,34 @@ export function useConversation(llm: LLM, character: Character, level: Level, ra
       void say(reply);
 
       // 2) Correcciones (llamada aparte, más fiable en modelos pequeños)
-      try {
-        const raw = await llm.complete(buildCorrectionMessages(level, previousQuestion, text), {
-          temperature: 0.1,
-          maxTokens: 320,
-          jsonSchema: CORRECTION_SCHEMA,
-        });
-        const corrections = parseCorrections(raw, text);
-        update((p) => p.map((m) => (m.id === userMsg.id ? { ...m, corrections, correctionState: "done" } : m)));
-      } catch (err) {
-        console.error(err);
-        update((p) => p.map((m) => (m.id === userMsg.id ? { ...m, correctionState: "error" } : m)));
-      }
+      const job = (async () => {
+        try {
+          const raw = await llm.complete(buildCorrectionMessages(level, previousQuestion, text), {
+            temperature: 0.1,
+            maxTokens: 320,
+            jsonSchema: CORRECTION_SCHEMA,
+          });
+          const corrections = parseCorrections(raw, text);
+          update((p) => p.map((m) => (m.id === userMsg.id ? { ...m, corrections, correctionState: "done" } : m)));
+        } catch (err) {
+          console.error(err);
+          update((p) => p.map((m) => (m.id === userMsg.id ? { ...m, correctionState: "error" } : m)));
+        }
+      })();
+      pendingRef.current = Promise.all([pendingRef.current, job]).then(() => undefined);
+      await job;
     },
     [llm, character, level, thinking, update, say],
   );
 
-  return { messages, thinking, send, say };
+  /** Espera a que terminen las correcciones pendientes y devuelve la conversación. */
+  const finish = useCallback(async () => {
+    stopSpeaking();
+    await pendingRef.current;
+    return messagesRef.current;
+  }, []);
+
+  return { messages, thinking, send, say, finish };
 }
 
 function cleanPartial(partial: string, name: string): string {

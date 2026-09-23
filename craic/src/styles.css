@@ -367,6 +367,157 @@ code {
   background: var(--surface-2);
 }
 
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs button {
+  border: 0;
+  background: transparent;
+  padding: 8px 12px;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-weight: 600;
+}
+
+.tabs button.on {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.danger {
+  color: var(--fix-text);
+  border-color: var(--fix-border);
+}
+
+.back {
+  margin-bottom: 8px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.stats > div {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 10px 4px;
+}
+
+.stats strong {
+  display: block;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.stats small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.err-list,
+.expr-list,
+.session-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.err-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.expr-list li {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.expr-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.expr-list em {
+  font-size: 0.88rem;
+}
+
+.vocab-item {
+  flex-direction: row !important;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vocab-item > div:first-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.vocab-actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+  align-items: flex-start;
+}
+
+.session-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.session-item small {
+  display: block;
+  color: var(--muted);
+}
+
+.transcript {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+  font-size: 0.93rem;
+}
+
+.t-fix {
+  font-size: 0.85rem;
+  margin-left: 12px;
+}
+
+.progress-indeterminate {
+  width: 40% !important;
+  animation: slide 1.2s ease-in-out infinite;
+}
+
+@keyframes slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
 /* Carga */
 .progress {
   height: 12px;

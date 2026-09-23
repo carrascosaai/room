@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCharacter } from "./characters";
 import { Chat } from "./components/Chat";
+import { History } from "./components/History";
 import { Loading } from "./components/Loading";
 import { NoWebGPU } from "./components/NoWebGPU";
 import { Setup } from "./components/Setup";
+import { EndOfSession } from "./components/Summary";
+import { Vocab } from "./components/Vocab";
+import type { Msg } from "./conversation";
 import { loadWebLLM, requestPersistentStorage, type LLM, type LoadProgress } from "./llm/engine";
 import { toAppError, type AppError } from "./llm/errors";
 import { createMockEngine } from "./llm/mockEngine";
@@ -13,7 +17,13 @@ import { useInstallPrompt } from "./lib/install";
 import { checkWebGPU, type WebGPUStatus } from "./lib/webgpu";
 import { unlockTTS } from "./speech/tts";
 
-type Screen = "check" | "setup" | "loading" | "chat";
+type Screen = "check" | "setup" | "loading" | "chat" | "summary" | "history" | "vocab";
+
+const TABS: { id: Screen; label: string }[] = [
+  { id: "setup", label: "Practicar" },
+  { id: "history", label: "Historial" },
+  { id: "vocab", label: "Vocabulario" },
+];
 
 const demo = new URLSearchParams(location.search).has("demo");
 
@@ -32,6 +42,8 @@ export default function App() {
   const llmRef = useRef<{ id: string; llm: LLM } | null>(null);
   const install = useInstallPrompt();
   const [iosHint, setIosHint] = useState(false);
+  const [ended, setEnded] = useState<{ messages: Msg[]; startedAt: number } | null>(null);
+  const startedAtRef = useRef(Date.now());
 
   useEffect(() => {
     if (prefs.theme === "auto") delete document.documentElement.dataset.theme;
@@ -55,19 +67,32 @@ export default function App() {
 
   const f16 = gpu?.ok ? gpu.f16 : false;
 
+  const openChat = useCallback(() => {
+    startedAtRef.current = Date.now();
+    setChatKey((k) => k + 1);
+    setScreen("chat");
+  }, []);
+
+  const endChat = useCallback((messages: Msg[]) => {
+    if (!messages.some((m) => m.role === "user")) {
+      setScreen("setup");
+      return;
+    }
+    setEnded({ messages, startedAt: startedAtRef.current });
+    setScreen("summary");
+  }, []);
+
   const start = useCallback(
     async ({ cached }: { cached: boolean }) => {
       unlockTTS();
       if (demo) {
         llmRef.current = { id: "demo", llm: createMockEngine() };
-        setChatKey((k) => k + 1);
-        setScreen("chat");
+        openChat();
         return;
       }
       let id = modelIdFor(prefs.tier, f16);
       if (llmRef.current?.id === id) {
-        setChatKey((k) => k + 1);
-        setScreen("chat");
+        openChat();
         return;
       }
       setFirstDownload(!cached);
@@ -92,15 +117,17 @@ export default function App() {
           llm = await loadWebLLM(id, setProgress);
         }
         llmRef.current = { id, llm };
-        setChatKey((k) => k + 1);
-        setScreen("chat");
+        openChat();
       } catch (err) {
         console.error(err);
         setLoadError(toAppError(err));
       }
     },
-    [prefs.tier, f16],
+    [prefs.tier, f16, openChat],
   );
+
+  const character = getCharacter(prefs.characterId);
+  const showTabs = screen === "setup" || screen === "history" || screen === "vocab";
 
   return (
     <div className="app">
@@ -138,6 +165,20 @@ export default function App() {
               <strong>«Añadir a pantalla de inicio»</strong>.
             </p>
           )}
+          {showTabs && (
+            <nav className="tabs" aria-label="Secciones">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  className={screen === t.id ? "on" : ""}
+                  aria-current={screen === t.id ? "page" : undefined}
+                  onClick={() => setScreen(t.id)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+          )}
         </header>
       )}
 
@@ -170,14 +211,29 @@ export default function App() {
         <Chat
           key={chatKey}
           llm={llmRef.current.llm}
-          character={getCharacter(prefs.characterId)}
+          character={character}
           level={prefs.level}
           rate={prefs.rate}
           onRateChange={(rate) => updatePrefs({ rate })}
-          onEnd={() => setScreen("setup")}
+          onEnd={endChat}
           demo={demo}
         />
       )}
+
+      {screen === "summary" && ended && llmRef.current && (
+        <EndOfSession
+          llm={llmRef.current.llm}
+          character={character}
+          level={prefs.level}
+          messages={ended.messages}
+          startedAt={ended.startedAt}
+          onNew={openChat}
+          onHistory={() => setScreen("history")}
+        />
+      )}
+
+      {screen === "history" && <History />}
+      {screen === "vocab" && <Vocab rate={prefs.rate} />}
     </div>
   );
 }

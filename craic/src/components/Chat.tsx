@@ -18,7 +18,8 @@ interface Props {
 }
 
 export function Chat({ llm, character, level, rate, onRateChange, onEnd, demo }: Props) {
-  const { messages, thinking, send, say } = useConversation(llm, character, level, rate);
+  const { messages, thinking, send, say, finish } = useConversation(llm, character, level, rate);
+  const [ending, setEnding] = useState(false);
   const mic = useSpeechRecognition(character.voiceLangs[0] === "en-US" ? "en-US" : "en-GB");
   const [typing, setTyping] = useState(!mic.supported);
   const [draft, setDraft] = useState("");
@@ -69,8 +70,16 @@ export function Chat({ llm, character, level, rate, onRateChange, onEnd, demo }:
               Normal
             </button>
           </div>
-          <button className="btn-ghost" onClick={() => onEnd(messages)}>
-            Terminar
+          <button
+            className="btn-ghost"
+            disabled={ending || thinking}
+            onClick={async () => {
+              mic.cancel();
+              setEnding(true);
+              onEnd(await finish());
+            }}
+          >
+            {ending ? "Terminando…" : "Terminar"}
           </button>
         </div>
       </header>
