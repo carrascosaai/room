@@ -41,6 +41,7 @@ export function effectiveEngine(engine: AsrEngine): AsrEngine | null {
 export function listen(opts: ListenOptions): ListenHandle {
   active?.cancel();
   const engine = effectiveEngine(opts.engine);
+  console.info(`[craic] escuchando con: ${engine ?? "ninguno"} (oído local: ${getAudioStatus().asr})`);
   let handle: ListenHandle;
   if (!engine) {
     opts.onError("loading");

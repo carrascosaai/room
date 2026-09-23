@@ -5,6 +5,8 @@ import type { SpeechRate, VoiceEngine } from "../speech/tts";
 import type { AsrEngine } from "../speech/voiceInput";
 
 export interface Prefs {
+  /** Dónde corre la IA: auto = en la nube si está disponible (rápida), si no en el dispositivo */
+  aiEngine: "auto" | "cloud" | "local";
   tier: ModelTier;
   rate: SpeechRate;
   level: Level;
@@ -36,6 +38,7 @@ export interface Prefs {
 
 const KEY = "craic:prefs";
 export const DEFAULT_PREFS: Prefs = {
+  aiEngine: "auto",
   tier: "light",
   rate: "normal",
   level: "B1",

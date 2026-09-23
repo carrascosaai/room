@@ -116,7 +116,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
   const handleEngineError = (err: unknown) => {
     console.error(err);
     const e = toAppError(err);
-    if (e.kind === "memory" || e.kind === "webgpu") setEngineError(e);
+    if (e.kind === "memory" || e.kind === "webgpu" || e.kind === "cloud") setEngineError(e);
   };
 
   /**
