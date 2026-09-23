@@ -17,6 +17,9 @@ interface Props {
   draft: Draft | null;
   audioCached: boolean;
   needTTS: boolean;
+  /** Hay IA en la nube disponible / se está usando */
+  cloudOk: boolean;
+  cloud: boolean;
   onChange: (p: Partial<Prefs>) => void;
   onStart: (info: { cached: boolean }) => void;
   onResume: () => void;
@@ -29,7 +32,7 @@ const LEVELS: { id: Level; label: string }[] = [
   { id: "C1", label: "Avanzado" },
 ];
 
-export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, onChange, onStart, onResume, onDiscardDraft }: Props) {
+export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, cloudOk, cloud, onChange, onStart, onResume, onDiscardDraft }: Props) {
   const [cached, setCached] = useState<Record<ModelTier, boolean | null>>({ light: null, quality: null });
   const [sizes, setSizes] = useState<Record<ModelTier, number | null>>({ light: null, quality: null });
   const [free, setFree] = useState<number | null>(null);
@@ -62,7 +65,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, o
   const audioMB = needTTS ? TTS_SIZE_MB[prefs.voiceQuality === "high" ? "webgpu" : "wasm"] : 0;
   const asrMB = prefs.asrEngine === "local" ? ASR_MODELS[prefs.asrModel].sizeMB : 0;
   const extraMB = demo || audioCached ? 0 : audioMB + asrMB;
-  const llmMB = isCached ? 0 : (sizes[tier] ?? approxSizeMB(tier, f16));
+  const llmMB = cloud || isCached ? 0 : (sizes[tier] ?? approxSizeMB(tier, f16));
   const totalMB = llmMB + extraMB;
   const lowSpace = totalMB > 0 && free !== null && free < totalMB * 1.2;
   const draftChar = draft ? getCharacter(draft.characterId) : null;
@@ -148,6 +151,25 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, o
       </section>
 
       <section className="card model-card">
+        {cloudOk && (
+          <div className="seg seg-wide engine-seg" role="group" aria-label="Dónde funciona la IA">
+            <button className={cloud ? "on" : ""} onClick={() => onChange({ aiEngine: "cloud" })}>
+              <strong>☁️ En la nube</strong>
+              <small>Rápida · sin descargas</small>
+            </button>
+            <button className={!cloud ? "on" : ""} onClick={() => onChange({ aiEngine: "local" })}>
+              <strong>🔒 En tu dispositivo</strong>
+              <small>Privada · sin internet</small>
+            </button>
+          </div>
+        )}
+        {cloud ? (
+          <p className="muted small">
+            Responde al instante. Tus frases se envían a la IA (Groq) para contestarte; no se guardan en ningún sitio de la
+            app. La voz y el reconocimiento siguen funcionando en tu dispositivo.
+          </p>
+        ) : (
+          <>
         <button className="model-summary" onClick={() => setShowModels((v) => !v)} aria-expanded={showModels}>
           <span>
             <strong>IA: {MODEL_OPTIONS[tier].label}</strong>
@@ -182,14 +204,20 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, o
             })}
           </div>
         )}
-        {mobile && tier === "quality" && (
+          </>
+        )}
+        {!cloud && mobile && tier === "quality" && (
           <p className="note">En móvil el modelo «Mejor calidad» puede quedarse sin memoria. Si falla, vuelve al ligero.</p>
         )}
         {totalMB > 0 && (
           <p className="note">
             Primera vez: se descargarán <strong>≈ {formatMB(totalMB)}</strong>
-            {extraMB > 0 && <> (IA {formatMB(llmMB)} + voz natural y oído {formatMB(extraMB)})</>}. Mejor con Wi-Fi. Después
-            funciona sin conexión.
+            {cloud ? (
+              <> para la voz natural y el oído, una sola vez.</>
+            ) : (
+              extraMB > 0 && <> (IA {formatMB(llmMB)} + voz natural y oído {formatMB(extraMB)})</>
+            )}{" "}
+            Mejor con Wi-Fi.{!cloud && " Después funciona sin conexión."}
           </p>
         )}
         {lowSpace && (
@@ -200,7 +228,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, o
       </section>
 
       <button className="cta" onClick={() => onStart({ cached: isCached })}>
-        <Icon name="call" /> {isCached ? `Llamar a ${character.name.split(" ")[0]}` : `Descargar y llamar a ${character.name.split(" ")[0]}`}
+        <Icon name="call" /> {isCached || cloud ? `Llamar a ${character.name.split(" ")[0]}` : `Descargar y llamar a ${character.name.split(" ")[0]}`}
       </button>
     </div>
   );

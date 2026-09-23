@@ -18,6 +18,7 @@ import { useWakeLock } from "./lib/wakeLock";
 import { checkWebGPU, type WebGPUStatus } from "./lib/webgpu";
 import { deleteCachedModel, isModelCached, loadWebLLM, requestPersistentStorage, type LLM, type LoadProgress } from "./llm/engine";
 import { toAppError, type AppError } from "./llm/errors";
+import { CloudLLM, cloudAvailable } from "./llm/cloudEngine";
 import { createMockEngine } from "./llm/mockEngine";
 import { MODEL_OPTIONS, modelIdFor } from "./llm/models";
 import { getScenario } from "./scenarios";
@@ -63,6 +64,8 @@ export default function App() {
   const audio = useAudioModels();
   const [iosHint, setIosHint] = useState(false);
   const [needTTS, setNeedTTS] = useState(true);
+  /** ¿Hay IA en la nube configurada en este despliegue? (null = comprobando) */
+  const [cloudOk, setCloudOk] = useState<boolean | null>(demo ? false : null);
   /** Llamada lista para abrir en cuanto la voz y el oído estén preparados */
   const [pendingOpen, setPendingOpen] = useState<{ messages?: Msg[]; startedAt?: number } | null>(null);
 
@@ -74,8 +77,9 @@ export default function App() {
   }, [prefs.theme]);
 
   useEffect(() => {
-    void checkWebGPU().then((s) => {
+    void Promise.all([checkWebGPU(), demo ? Promise.resolve(false) : cloudAvailable()]).then(([s, cloud]) => {
       setGpu(s);
+      setCloudOk(cloud);
       setScreen("home");
     });
   }, []);
@@ -103,7 +107,9 @@ export default function App() {
   }, []);
 
   const f16 = gpu?.ok ? gpu.f16 : false;
-  const canRun = demo || !!gpu?.ok;
+  /** IA en la nube: si la eliges, o en «auto» cuando está disponible, o si no hay WebGPU. */
+  const useCloud = !demo && !!cloudOk && (prefs.aiEngine !== "local" || !gpu?.ok);
+  const canRun = demo || !!gpu?.ok || !!cloudOk;
 
   /** Carga (o reutiliza) el modelo de lenguaje. Se comparte entre precarga y «Llamar». */
   const ensureEngine = useCallback(
@@ -175,6 +181,10 @@ export default function App() {
   // mientras eliges personaje, así «Llamar» es casi instantáneo.
   useEffect(() => {
     if (screen !== "home" || demo || !gpu?.ok) return;
+    if (useCloud) {
+      if (audioCached) loadAudio();
+      return;
+    }
     const id = modelIdFor(prefs.tier, f16);
     let alive = true;
     void isModelCached(id).then((cached) => {
@@ -185,7 +195,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [screen, prefs.tier, f16, gpu, ensureEngine, audioCached, loadAudio]);
+  }, [screen, prefs.tier, f16, gpu, ensureEngine, audioCached, loadAudio, useCloud]);
 
   // Si cambias los ajustes de voz durante la conversación, se cargan los modelos necesarios.
   useEffect(() => {
@@ -207,8 +217,20 @@ export default function App() {
         openChat(resume?.messages, resume?.startedAt);
         return;
       }
-      const id = modelIdFor(prefs.tier, f16);
       loadAudio();
+      if (useCloud) {
+        // IA en la nube: nada que descargar; solo se espera a la voz y el oído.
+        if (llmRef.current?.id !== "cloud") {
+          void llmRef.current?.llm.unload().catch(() => undefined);
+          llmRef.current = { id: "cloud", llm: new CloudLLM() };
+        }
+        setFirstDownload(!audioCached);
+        setLoadError(null);
+        setScreen("loading");
+        setPendingOpen({ messages: resume?.messages, startedAt: resume?.startedAt });
+        return;
+      }
+      const id = modelIdFor(prefs.tier, f16);
       if (llmRef.current?.id === id) {
         // IA ya cargada: se abre en cuanto la voz y el oído estén listos (normalmente ya).
         setFirstDownload(false);
@@ -228,7 +250,7 @@ export default function App() {
         setLoadError(toAppError(err));
       }
     },
-    [prefs.tier, f16, ensureEngine, openChat, loadAudio],
+    [prefs.tier, f16, ensureEngine, openChat, loadAudio, useCloud, audioCached],
   );
 
   // Se abre la llamada cuando la voz natural y el oído están listos (o fallaron).
@@ -351,6 +373,8 @@ export default function App() {
           draft={draft}
           audioCached={audioCached}
           needTTS={needTTS}
+          cloudOk={!!cloudOk}
+          cloud={useCloud}
           onChange={updatePrefs}
           onStart={(info) => void start(info)}
           onResume={resume}
@@ -381,6 +405,12 @@ export default function App() {
             const opt = MODEL_OPTIONS[prefs.tier];
             await Promise.allSettled([deleteCachedModel(opt.idF16), deleteCachedModel(opt.idF32)]);
             void start({ cached: false });
+          }}
+          cloudOk={!!cloudOk}
+          cloud={useCloud}
+          onUseCloud={() => {
+            updatePrefs({ aiEngine: "cloud" });
+            setScreen("home");
           }}
           onSwitchModel={() => {
             updatePrefs({ tier: prefs.tier === "light" ? "quality" : "light" });

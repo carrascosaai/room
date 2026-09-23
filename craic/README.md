@@ -4,9 +4,17 @@ App web (PWA) para practicar **conversación en inglés** con un personaje nativ
 al estilo ISSEN. Hablas con el micrófono (o escribes), el personaje te responde
 en voz alta y, debajo de cada frase tuya, ves las **correcciones en español**.
 
-**Coste cero para todos:** el modelo de lenguaje se ejecuta **dentro del navegador**
-con WebGPU gracias a [WebLLM](https://github.com/mlc-ai/web-llm). No hay servidor,
-no hay API keys, no hay cuentas. Se aloja gratis en GitHub Pages o Vercel.
+**Coste cero para todos.** Dos modos de IA, a elegir en la pantalla de inicio:
+
+- **☁️ En la nube (por defecto si está configurada):** respuestas instantáneas con
+  Groq (plan gratuito) a través de una función de Vercel (plan Hobby, gratis). La
+  clave la pone el desarrollador una vez; los usuarios no necesitan cuenta ni clave
+  y funciona en cualquier navegador, incluso sin WebGPU.
+- **🔒 En tu dispositivo:** el modelo corre dentro del navegador con WebGPU
+  ([WebLLM](https://github.com/mlc-ai/web-llm)): privado y sin internet tras la
+  primera descarga, pero depende de la potencia del equipo.
+
+La voz natural y el reconocimiento de voz funcionan siempre en el dispositivo.
 
 ---
 
@@ -156,6 +164,24 @@ El móvil necesita HTTPS, así que lo más fácil es **desplegar** (siguiente se
 cada push crea una URL nueva). Alternativa en Android con cable USB: en el
 ordenador abre `chrome://inspect/#devices` → *Port forwarding* → `5173` →
 `localhost:5173`, y en el móvil abre `http://localhost:5173`.
+
+## Activar la IA en la nube (Groq, gratis)
+
+1. Crea una cuenta gratuita en [console.groq.com](https://console.groq.com) (no
+   pide tarjeta) y genera una clave en **API Keys**.
+2. En Vercel: proyecto `craic` → **Settings → Environment Variables** → añade
+   `GROQ_API_KEY` con la clave (entornos Production y Preview) → **Save**.
+3. **Deployments → ⋯ → Redeploy**. La app detecta sola que la nube está
+   disponible (`GET /api/chat` → `{"enabled":true}`).
+
+La clave solo vive en el servidor (`api/chat.ts`); nunca llega al navegador. La
+función solo acepta peticiones de la propia web, limita tamaño y número de
+peticiones por usuario, y si Groq retira un modelo pasa al siguiente de la lista.
+Opcional: `LLM_API_URL` para usar otro proveedor compatible con OpenAI (Cerebras,
+Gemini…), y `LLM_MODELS_FAST` / `LLM_MODELS_SMART` para elegir modelos.
+
+Privacidad: en modo nube, las frases de la conversación se envían a Groq para
+generar la respuesta. La app no las guarda en ningún servidor.
 
 ## Desplegar gratis
 

@@ -1,4 +1,4 @@
-export type AppErrorKind = "webgpu" | "f16" | "memory" | "network" | "storage" | "stall" | "unknown";
+export type AppErrorKind = "webgpu" | "f16" | "memory" | "network" | "storage" | "stall" | "cloud" | "unknown";
 
 export interface AppError {
   kind: AppErrorKind;
@@ -12,6 +12,18 @@ export function toAppError(err: unknown): AppError {
   const msg = err instanceof Error ? err.message : String(err ?? "");
   const text = `${name} ${msg}`;
 
+  if (/CloudError/.test(name) || /^Cloud \d+/.test(msg)) {
+    const status = (err as { status?: number }).status ?? 0;
+    return {
+      kind: "cloud",
+      title: status === 429 ? "La IA en la nube está saturada" : "La IA en la nube no responde",
+      detail:
+        status === 429
+          ? "Se ha alcanzado el límite gratuito por ahora. Espera un minuto o cambia a «IA en tu dispositivo» en la pantalla de inicio."
+          : "Comprueba tu conexión e inténtalo de nuevo, o cambia a «IA en tu dispositivo» en la pantalla de inicio.",
+      raw: msg,
+    };
+  }
   if (/StallError|Sin progreso/i.test(text)) {
     return {
       kind: "stall",

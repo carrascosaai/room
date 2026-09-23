@@ -49,6 +49,9 @@ interface Props {
   onRedownload: () => void;
   onSwitchModel: () => void;
   onBack: () => void;
+  cloudOk: boolean;
+  cloud: boolean;
+  onUseCloud: () => void;
 }
 
 function DiagnosticsButton() {
@@ -91,6 +94,9 @@ export function Loading({
   onRedownload,
   onSwitchModel,
   onBack,
+  cloudOk,
+  cloud,
+  onUseCloud,
 }: Props) {
   const audio = useAudioModels();
   // Vigilante: si nada avanza en 20 s, se diagnostica la conexión.
@@ -132,6 +138,11 @@ export function Loading({
               Borrar el modelo y descargarlo de nuevo
             </button>
           )}
+          {cloudOk && !cloud && (
+            <button className="btn-dark" onClick={onUseCloud}>
+              Usar la IA en la nube (rápida)
+            </button>
+          )}
           {(error.kind === "stall" || error.kind === "memory") && (
             <button className="btn-ghost" onClick={onSwitchModel}>
               Probar el otro modelo
@@ -157,9 +168,9 @@ export function Loading({
       <h2>Llamando a {character.name.split(" ")[0]}…</h2>
       <p className="muted small">{firstDownload ? "Primera vez: preparando todo en tu dispositivo" : "Cargando desde tu dispositivo"}</p>
       <Row
-        label="Cerebro (IA)"
-        value={llmReady ? 1 : (progress?.progress ?? 0)}
-        state={llmReady ? "ready" : "llm"}
+        label={cloud ? "Cerebro (IA en la nube)" : "Cerebro (IA)"}
+        value={llmReady || cloud ? 1 : (progress?.progress ?? 0)}
+        state={llmReady || cloud ? "ready" : "llm"}
         text={describe(progress?.text ?? "")}
       />
       {needTTS && (
@@ -168,7 +179,7 @@ export function Loading({
       {prefs.asrEngine === "local" && (
         <Row label="Oído" value={audio.asrProgress} state={audio.asr} text={`${Math.round(audio.asrProgress * 100)}%`} />
       )}
-      {progress?.text && (
+      {progress?.text && !cloud && (
         <p className="muted tiny raw-progress" title={progress.text}>
           {progress.text.slice(0, 120)}
         </p>
@@ -192,6 +203,11 @@ export function Loading({
             {llmReady && (
               <button className="btn-ghost btn-small" onClick={onSkip}>
                 Empezar sin voz natural
+              </button>
+            )}
+            {cloudOk && !cloud && (
+              <button className="btn-ghost btn-small" onClick={onUseCloud}>
+                Usar la IA en la nube
               </button>
             )}
           </div>
