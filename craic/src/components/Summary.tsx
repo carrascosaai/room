@@ -13,10 +13,11 @@ interface Props {
   startedAt: number;
   onNew: () => void;
   onHistory: () => void;
+  onSaved?: () => void;
 }
 
 /** Al terminar: calcula errores repetidos, pide expresiones nuevas al modelo y lo guarda todo. */
-export function EndOfSession({ llm, character, level, messages, startedAt, onNew, onHistory }: Props) {
+export function EndOfSession({ llm, character, level, messages, startedAt, onNew, onHistory, onSaved }: Props) {
   const [session, setSession] = useState<SessionRecord | null>(null);
   const [added, setAdded] = useState<number | null>(null);
   const [saveError, setSaveError] = useState(false);
@@ -36,6 +37,7 @@ export function EndOfSession({ llm, character, level, messages, startedAt, onNew
       let expressions = parseExpressions("", stored);
       try {
         const raw = await llm.complete(buildExpressionMessages(character, level, stored), {
+          tag: "expressions",
           temperature: 0.3,
           maxTokens: 500,
           jsonSchema: EXPRESSION_SCHEMA,
@@ -59,6 +61,7 @@ export function EndOfSession({ llm, character, level, messages, startedAt, onNew
       try {
         await saveSession(record);
         setAdded(await addVocab(expressions, record.id));
+        onSaved?.();
       } catch (err) {
         console.error(err);
         setSaveError(true);
@@ -94,11 +97,11 @@ export function EndOfSession({ llm, character, level, messages, startedAt, onNew
         )
       )}
       <div className="actions">
-        <button className="btn" onClick={onNew}>
-          Nueva conversación
+        <button className="btn-dark" onClick={onNew}>
+          Llamar otra vez
         </button>
         <button className="btn-ghost" onClick={onHistory}>
-          Ver historial
+          Ver progreso
         </button>
       </div>
     </div>

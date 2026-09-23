@@ -10,6 +10,8 @@ export interface CompleteOptions {
   maxTokens?: number;
   /** JSON Schema (como string) para forzar salida JSON con gramática. */
   jsonSchema?: string;
+  /** Etiqueta de la tarea (solo para depurar y para el modo demo). */
+  tag?: "reply" | "correct" | "expressions" | "suggest" | "translate" | "rephrase";
   /** Recibe el texto acumulado; si devuelve true se corta la generación. */
   onText?: (text: string) => boolean | void;
 }

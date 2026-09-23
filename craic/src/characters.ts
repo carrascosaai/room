@@ -1,3 +1,5 @@
+import type { ScenarioKind } from "./scenarios";
+
 export type Level = "B1" | "B2" | "C1";
 
 export interface Character {
@@ -14,6 +16,14 @@ export interface Character {
   voiceLangs: string[];
   /** Voz masculina/femenina preferida si el sistema permite elegir */
   voiceGender: "male" | "female";
+  /** Bandera para la tarjeta de conversación */
+  flag: "ie" | "gb" | "us";
+  /** Subtítulo tipo ISSEN: acento · ciudad */
+  accent: string;
+  /** Voz neuronal Kokoro por defecto */
+  neuralVoice: string;
+  /** Tipo de conversación: charla o entrevista */
+  kind: ScenarioKind;
   /** Frases de apertura: el personaje siempre empieza la conversación */
   openers: string[];
 }
@@ -21,6 +31,10 @@ export interface Character {
 export const CHARACTERS: Character[] = [
   {
     id: "liam",
+    flag: "ie",
+    accent: "Inglés irlandés · Dublín",
+    neuralVoice: "bm_george",
+    kind: "casual",
     name: "Liam",
     emoji: "☘️",
     tagline: "Irlandés de Dublín, de visita en Córdoba",
@@ -39,6 +53,10 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "emily",
+    flag: "gb",
+    accent: "Inglés británico · Londres",
+    neuralVoice: "bf_emma",
+    kind: "casual",
     name: "Emily",
     emoji: "☂️",
     tagline: "Londinense, diseñadora gráfica, de vacaciones",
@@ -57,6 +75,10 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "jake",
+    flag: "us",
+    accent: "Inglés americano · Austin",
+    neuralVoice: "am_michael",
+    kind: "casual",
     name: "Jake",
     emoji: "🏈",
     tagline: "Estadounidense de Austin, Erasmus en Córdoba",
@@ -75,6 +97,10 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "interviewer",
+    flag: "gb",
+    accent: "Inglés británico · Entrevista",
+    neuralVoice: "bf_isabella",
+    kind: "interview",
     name: "Sarah Mitchell",
     emoji: "💼",
     tagline: "Entrevista de prácticas de ingeniería",
@@ -92,6 +118,24 @@ export const CHARACTERS: Character[] = [
       "Hello, nice to meet you. I'm Sarah from Brightwell Engineering. To begin, why are you interested in this internship?",
     ],
   },
+];
+
+/** Voces neuronales (Kokoro) que se pueden elegir en Ajustes. */
+export const NEURAL_VOICES: { id: string; label: string; accent: "GB" | "US"; gender: "male" | "female" }[] = [
+  { id: "bm_george", label: "George (UK)", accent: "GB", gender: "male" },
+  { id: "bm_fable", label: "Fable (UK)", accent: "GB", gender: "male" },
+  { id: "bm_lewis", label: "Lewis (UK)", accent: "GB", gender: "male" },
+  { id: "bm_daniel", label: "Daniel (UK)", accent: "GB", gender: "male" },
+  { id: "bf_emma", label: "Emma (UK)", accent: "GB", gender: "female" },
+  { id: "bf_isabella", label: "Isabella (UK)", accent: "GB", gender: "female" },
+  { id: "bf_alice", label: "Alice (UK)", accent: "GB", gender: "female" },
+  { id: "bf_lily", label: "Lily (UK)", accent: "GB", gender: "female" },
+  { id: "am_michael", label: "Michael (US)", accent: "US", gender: "male" },
+  { id: "am_puck", label: "Puck (US)", accent: "US", gender: "male" },
+  { id: "am_fenrir", label: "Fenrir (US)", accent: "US", gender: "male" },
+  { id: "af_heart", label: "Heart (US)", accent: "US", gender: "female" },
+  { id: "af_bella", label: "Bella (US)", accent: "US", gender: "female" },
+  { id: "af_nicole", label: "Nicole (US)", accent: "US", gender: "female" },
 ];
 
 export function getCharacter(id: string): Character {

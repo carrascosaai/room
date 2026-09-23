@@ -5,7 +5,9 @@
   "description": "Craic — practica inglés hablando con una IA que se ejecuta en tu navegador. Gratis, sin claves, sin cuentas.",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/copy-ort.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/copy-ort.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
@@ -15,8 +17,11 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@fontsource/rubik": "^5.3.0",
+    "@huggingface/transformers": "3.8.1",
     "@mlc-ai/web-llm": "0.2.85",
     "idb": "^8.0.3",
+    "kokoro-js": "1.2.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

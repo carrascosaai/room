@@ -27,6 +27,9 @@ export interface VocabItem extends Expression {
   id: string;
   sessionId: string;
   addedAt: number;
+  /** Repetición espaciada (Leitner) */
+  box?: number;
+  due?: number;
 }
 
 interface CraicDB extends DBSchema {
@@ -85,6 +88,15 @@ export async function addVocab(items: Expression[], sessionId: string): Promise<
 export async function listVocab(): Promise<VocabItem[]> {
   const all = await (await db()).getAllFromIndex("vocab", "byAdded");
   return all.reverse();
+}
+
+export async function updateVocab(item: VocabItem): Promise<void> {
+  await (await db()).put("vocab", item);
+}
+
+/** Añade una sola expresión (p. ej. una corrección) al vocabulario. */
+export async function addOneVocab(it: Expression): Promise<boolean> {
+  return (await addVocab([it], "manual")) > 0;
 }
 
 export async function deleteVocab(id: string): Promise<void> {

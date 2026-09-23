@@ -221,3 +221,94 @@ function extractPairsFromText(raw: string): Record<string, string>[] {
   }
   return out;
 }
+
+// ---------- Utilidades para las ayudas de la conversación ----------
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Aplica las correcciones a la frase del usuario para mostrar la versión completa. */
+export function applyCorrections(text: string, errors: Correction[]): string | null {
+  let out = text;
+  let changed = false;
+  for (const e of errors) {
+    const re = new RegExp(escapeRe(e.original.trim()).replace(/\s+/g, "\\s+"), "i");
+    if (re.test(out)) {
+      out = out.replace(re, e.corrected.trim());
+      changed = true;
+    }
+  }
+  if (!changed) return null;
+  out = out.replace(/\s+/g, " ").trim();
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
+/** La pregunta de una respuesta del personaje (la última frase con «?»). */
+export function questionOf(reply: string): string | null {
+  const q = splitSentences(reply).filter((s) => s.includes("?"));
+  return q.length ? q[q.length - 1] : null;
+}
+
+const qWords = (s: string) =>
+  new Set(
+    norm(s)
+      .split(" ")
+      .filter((w) => w.length > 2 && !["you", "the", "and", "are", "what", "your", "have", "did", "for", "any"].includes(w)),
+  );
+
+/** ¿Dos preguntas son prácticamente la misma? (para no repetir) */
+export function similarQuestion(a: string, b: string): boolean {
+  const na = norm(a);
+  const nb = norm(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  const wa = qWords(a);
+  const wb = qWords(b);
+  if (!wa.size || !wb.size) return false;
+  let inter = 0;
+  wa.forEach((w) => wb.has(w) && inter++);
+  return inter / Math.min(wa.size, wb.size) >= 0.75 && inter >= 2;
+}
+
+export interface Suggestion {
+  en: string;
+  es: string;
+}
+
+/** Sugerencias de respuesta: JSON {"suggestions":[{en,es}]} o, si falla, líneas sueltas. */
+export function parseSuggestions(raw: string): Suggestion[] {
+  const data = parseJsonLoose(raw) as { suggestions?: unknown } | null;
+  let list: unknown[] = Array.isArray(data?.suggestions) ? (data!.suggestions as unknown[]) : [];
+  if (!list.length) {
+    list = (raw ?? "")
+      .split("\n")
+      .map((l) => l.replace(/^\s*(\d+[.)]|[-*•])\s*/, "").trim())
+      .filter((l) => /[a-z]/i.test(l) && !l.startsWith("{"))
+      .map((l) => {
+        const [en, es] = l.split(/\s+[—–-]\s+|\s*\|\s*/);
+        return { en, es: es ?? "" };
+      });
+  }
+  const out: Suggestion[] = [];
+  const seen = new Set<string>();
+  for (const item of list) {
+    if (!item || typeof item !== "object") continue;
+    const r = item as Record<string, unknown>;
+    const en = asString(r.en, 160).replace(/^["“]|["”]$/g, "");
+    const es = asString(r.es, 200).replace(/^["“(]|["”)]$/g, "");
+    if (!en || en.split(" ").length > 30 || seen.has(norm(en))) continue;
+    seen.add(norm(en));
+    out.push({ en, es });
+    if (out.length >= 3) break;
+  }
+  return out;
+}
+
+/** Limpia una traducción: sin etiquetas, comillas ni explicaciones de más. */
+export function cleanTranslation(raw: string): string {
+  let t = (raw ?? "").replace(/<think>[\s\S]*?(<\/think>|$)/gi, "").trim();
+  t = t.replace(/^(traducci[oó]n|translation|spanish|español)\s*:\s*/i, "");
+  t = t.split(/\n\s*\n/)[0].replace(/\s+/g, " ").trim();
+  const m = t.match(/^["“«](.*)["”»]$/);
+  if (m) t = m[1].trim();
+  return t.slice(0, 500);
+}

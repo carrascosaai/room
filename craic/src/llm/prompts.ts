@@ -1,39 +1,126 @@
 import { type Character, type Level, LEVEL_STYLE } from "../characters";
+import type { Scenario } from "../scenarios";
 import type { ChatMessage } from "./engine";
 import { CORRECTION_TYPES } from "./parse";
 
 /** Máximo de mensajes (usuario + personaje) que se envían al modelo. */
 export const HISTORY_MESSAGES = 6;
 
+type Turn = { role: "user" | "assistant"; text: string };
+
+const MAX_WORDS: Record<Level, number> = { B1: 35, B2: 40, C1: 50 };
+
+/** Une mensajes seguidos del mismo rol (p. ej. tras «No entiendo»). */
+function mergeTurns(turns: Turn[]): Turn[] {
+  const out: Turn[] = [];
+  for (const t of turns) {
+    const last = out[out.length - 1];
+    if (last && last.role === t.role) last.text = `${last.text} ${t.text}`;
+    else out.push({ ...t });
+  }
+  return out;
+}
+
 export function buildReplyMessages(
   character: Character,
   level: Level,
-  history: { role: "user" | "assistant"; text: string }[],
+  history: Turn[],
+  opts: { scenario?: Scenario; avoidQuestions?: string[] } = {},
 ): ChatMessage[] {
+  const avoid = (opts.avoidQuestions ?? []).slice(-6);
   const system = [
     character.persona,
     "You are talking with a Spanish engineering student who is practising English with you.",
+    opts.scenario?.setting ? `SITUATION: ${opts.scenario.setting}` : "",
     "",
     "RULES:",
     `- ${LEVEL_STYLE[level]}`,
-    "- Reply in 1 to 3 short sentences (maximum 40 words in total).",
+    `- Reply in 1 to 3 short sentences (maximum ${MAX_WORDS[level]} words in total), like in a real spoken conversation.`,
     "- React to what they said, maybe add a small detail about yourself, then ask exactly ONE question at the end.",
     "- Never ask two questions. Only one question mark in your reply.",
     "- Do not correct their English and do not explain grammar. Just chat naturally.",
     "- If they use a Spanish word, tell them the English word in a natural way (for example: \"Ah, a 'carpeta' is a folder in English!\") and continue the conversation.",
+    "- If they say they don't understand, say it again with simpler words.",
     "- Stay in character. Never say you are an AI. No emojis, no lists, no actions between asterisks.",
-  ].join("\n");
+    avoid.length ? `- Do not repeat these questions you already asked: ${avoid.map((q) => `"${q}"`).join("; ")}` : "",
+    "",
+    'EXAMPLE of a good reply: "Oh, that sounds amazing! I went to Seville last year and loved it. What did you like most about the trip?"',
+  ]
+    .filter((l, i, a) => l !== "" || a[i - 1] !== "")
+    .join("\n");
 
-  const recent = history.slice(-HISTORY_MESSAGES);
+  const recent = mergeTurns(history.slice(-HISTORY_MESSAGES));
   const messages: ChatMessage[] = [{ role: "system", content: system }];
-  for (const m of recent) {
-    messages.push({ role: m.role, content: m.text });
-  }
+  for (const m of recent) messages.push({ role: m.role, content: m.text });
   // Llama necesita que el primer turno tras el sistema sea del usuario.
-  if (messages[1]?.role === "assistant") {
-    messages.splice(1, 0, { role: "user", content: "Hi!" });
-  }
+  if (messages[1]?.role === "assistant") messages.splice(1, 0, { role: "user", content: "Hi!" });
   return messages;
+}
+
+/** «No entiendo»: repetir lo último más fácil y más despacio. */
+export function buildRephraseMessages(character: Character, lastReply: string): ChatMessage[] {
+  return [
+    {
+      role: "system",
+      content: [
+        `TASK: REPHRASE. You are ${character.name}. The learner did not understand your last message.`,
+        "Say the same thing again using very simple English (A2 level): short sentences, very common words.",
+        "Keep the same question at the end. Maximum 30 words. Answer only with the new message.",
+      ].join("\n"),
+    },
+    { role: "user", content: `Your last message: "${lastReply}"` },
+  ];
+}
+
+/** «¿Qué digo?»: tres respuestas posibles con su traducción. */
+export function buildSuggestionMessages(level: Level, lastReply: string, context: Turn[]): ChatMessage[] {
+  const ctx = context
+    .slice(-4)
+    .map((t) => `${t.role === "user" ? "Learner" : "Partner"}: ${t.text}`)
+    .join("\n");
+  return [
+    {
+      role: "system",
+      content: [
+        `TASK: SUGGEST. You help a Spanish ${level} learner of English who doesn't know what to answer.`,
+        "Write 3 different natural answers the learner could say to the partner's last message.",
+        "Each answer: 1 or 2 short sentences, first person, at the learner's level. Make them different (positive, negative, detailed).",
+        "Add a Spanish translation to each one.",
+        'Answer ONLY with JSON: {"suggestions":[{"en":"English answer","es":"traducción al español"}]}',
+      ].join("\n"),
+    },
+    { role: "user", content: `${ctx ? ctx + "\n" : ""}Partner's last message: "${lastReply}"` },
+  ];
+}
+
+export const SUGGESTION_SCHEMA = JSON.stringify({
+  type: "object",
+  properties: {
+    suggestions: {
+      type: "array",
+      maxItems: 3,
+      items: {
+        type: "object",
+        properties: { en: { type: "string" }, es: { type: "string" } },
+        required: ["en", "es"],
+      },
+    },
+  },
+  required: ["suggestions"],
+});
+
+/** Traducir un mensaje del personaje al español. */
+export function buildTranslateMessages(text: string): ChatMessage[] {
+  return [
+    {
+      role: "system",
+      content:
+        "TASK: TRANSLATE. Translate the English text into natural Spanish from Spain. Answer ONLY with the translation, nothing else.",
+    },
+    { role: "user", content: "Do you fancy grabbing a coffee later?" },
+    { role: "assistant", content: "¿Te apetece tomar un café luego?" },
+    { role: "user", content: text },
+  ];
 }
 
 const CORRECTION_SYSTEM = (level: Level) =>

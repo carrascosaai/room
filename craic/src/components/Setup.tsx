@@ -1,16 +1,25 @@
 import { useEffect, useState } from "react";
-import { CHARACTERS, type Level } from "../characters";
+import { CHARACTERS, getCharacter, type Level } from "../characters";
+import type { Draft } from "../lib/draft";
+import type { Prefs } from "../lib/prefs";
 import { freeStorageMB, isModelCached } from "../llm/engine";
 import { approxSizeMB, fetchDownloadSizeMB, formatMB, MODEL_OPTIONS, modelIdFor, type ModelTier } from "../llm/models";
-import type { Prefs } from "../lib/prefs";
+import { getScenario, scenariosFor } from "../scenarios";
+import { TTS_SIZE_MB, WHISPER_MODELS } from "../speech/audioModels";
+import { Flag } from "./Brand";
+import { Icon } from "./Icon";
 
 interface Props {
   prefs: Prefs;
   f16: boolean;
   mobile: boolean;
   demo: boolean;
+  draft: Draft | null;
+  audioCached: boolean;
   onChange: (p: Partial<Prefs>) => void;
   onStart: (info: { cached: boolean }) => void;
+  onResume: () => void;
+  onDiscardDraft: () => void;
 }
 
 const LEVELS: { id: Level; label: string }[] = [
@@ -19,10 +28,11 @@ const LEVELS: { id: Level; label: string }[] = [
   { id: "C1", label: "Avanzado" },
 ];
 
-export function Setup({ prefs, f16, mobile, demo, onChange, onStart }: Props) {
+export function Setup({ prefs, f16, mobile, demo, draft, audioCached, onChange, onStart, onResume, onDiscardDraft }: Props) {
   const [cached, setCached] = useState<Record<ModelTier, boolean | null>>({ light: null, quality: null });
   const [sizes, setSizes] = useState<Record<ModelTier, number | null>>({ light: null, quality: null });
   const [free, setFree] = useState<number | null>(null);
+  const [showModels, setShowModels] = useState(false);
 
   useEffect(() => {
     if (demo) return;
@@ -43,33 +53,89 @@ export function Setup({ prefs, f16, mobile, demo, onChange, onStart }: Props) {
     };
   }, [f16, demo]);
 
+  const character = getCharacter(prefs.characterId);
+  const scenarios = scenariosFor(character.kind);
+  const scenario = getScenario(prefs.scenarioId, character.kind);
   const tier = prefs.tier;
   const isCached = demo || cached[tier] === true;
-  const size = sizes[tier] ?? approxSizeMB(tier, f16);
-  const lowSpace = !isCached && free !== null && free < size * 1.2;
+  const audioMB = prefs.voiceEngine === "neural" ? TTS_SIZE_MB : 0;
+  const asrMB = prefs.asrEngine === "whisper" ? WHISPER_MODELS[prefs.whisperSize].sizeMB : 0;
+  const extraMB = demo || audioCached ? 0 : audioMB + asrMB;
+  const llmMB = isCached ? 0 : (sizes[tier] ?? approxSizeMB(tier, f16));
+  const totalMB = llmMB + extraMB;
+  const lowSpace = totalMB > 0 && free !== null && free < totalMB * 1.2;
+  const draftChar = draft ? getCharacter(draft.characterId) : null;
 
   return (
-    <div className="setup">
-      <section className="card">
-        <h2>¿Con quién quieres hablar?</h2>
-        <div className="char-list">
+    <div className="home">
+      {draft && draftChar && (
+        <div className="card resume-card">
+          <Flag code={draftChar.flag} size={44} />
+          <div className="resume-text">
+            <strong>Continúa con {draftChar.name.split(" ")[0]}</strong>
+            <small>
+              {draft.messages.filter((m) => m.role === "user").length} intervenciones · la dejaste a medias
+            </small>
+          </div>
+          <div className="resume-actions">
+            <button className="btn-dark btn-small" onClick={onResume}>
+              Seguir
+            </button>
+            <button className="icon-plain" onClick={onDiscardDraft} aria-label="Descartar conversación guardada">
+              <Icon name="close" size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <section>
+        <h2 className="section-title">¿Con quién quieres hablar?</h2>
+        <div className="char-grid">
           {CHARACTERS.map((c) => (
             <button
               key={c.id}
-              className={`char${prefs.characterId === c.id ? " on" : ""}`}
-              onClick={() => onChange({ characterId: c.id })}
+              className={`char-card${prefs.characterId === c.id ? " on" : ""}`}
+              onClick={() => {
+                const kind = c.kind;
+                onChange({
+                  characterId: c.id,
+                  scenarioId: kind === character.kind ? prefs.scenarioId : scenariosFor(kind)[0].id,
+                });
+              }}
               aria-pressed={prefs.characterId === c.id}
             >
-              <span className="avatar" aria-hidden="true">{c.emoji}</span>
+              <Flag code={c.flag} size={44} />
+              <strong>{c.name}</strong>
+              <small>{c.tagline}</small>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="section-title">Situación</h2>
+        <div className="scenario-list">
+          {scenarios.map((s) => (
+            <button
+              key={s.id}
+              className={`scenario${scenario.id === s.id ? " on" : ""}`}
+              onClick={() => onChange({ scenarioId: s.id })}
+              aria-pressed={scenario.id === s.id}
+            >
+              <span className="scenario-emoji" aria-hidden="true">
+                {s.emoji}
+              </span>
               <span>
-                <strong>{c.name}</strong>
-                <small>{c.tagline}</small>
+                <strong>{s.title}</strong>
+                <small>{s.goal}</small>
               </span>
             </button>
           ))}
         </div>
+      </section>
 
-        <h3>Tu nivel</h3>
+      <section>
+        <h2 className="section-title">Tu nivel</h2>
         <div className="seg seg-wide" role="group" aria-label="Nivel">
           {LEVELS.map((l) => (
             <button key={l.id} className={prefs.level === l.id ? "on" : ""} onClick={() => onChange({ level: l.id })}>
@@ -80,46 +146,49 @@ export function Setup({ prefs, f16, mobile, demo, onChange, onStart }: Props) {
         </div>
       </section>
 
-      <section className="card">
-        <h2>Modelo de IA</h2>
-        <p className="muted">
-          Se ejecuta en tu dispositivo: gratis, privado y sin cuentas. Tus conversaciones no salen de aquí.
-        </p>
-        <div className="model-list">
-          {(Object.values(MODEL_OPTIONS)).map((m) => {
-            const c = cached[m.tier];
-            const s = sizes[m.tier] ?? approxSizeMB(m.tier, f16);
-            return (
-              <label key={m.tier} className={`model${tier === m.tier ? " on" : ""}`}>
-                <input
-                  type="radio"
-                  name="tier"
-                  checked={tier === m.tier}
-                  onChange={() => onChange({ tier: m.tier })}
-                />
-                <span>
-                  <strong>
-                    {m.label}
-                    {m.tier === "light" && <em className="pill">Recomendado</em>}
-                  </strong>
-                  <small>{m.description}</small>
-                  <small className="size">
-                    {demo ? "Modo demo" : c ? "✓ Ya descargado" : `Descarga: ${sizes[m.tier] ? "" : "≈ "}${formatMB(s)}`}
-                  </small>
-                </span>
-              </label>
-            );
-          })}
-        </div>
-        {mobile && tier === "quality" && (
-          <p className="note">
-            En móvil el modelo «Mejor calidad» puede quedarse sin memoria. Si falla, vuelve al ligero.
-          </p>
+      <section className="card model-card">
+        <button className="model-summary" onClick={() => setShowModels((v) => !v)} aria-expanded={showModels}>
+          <span>
+            <strong>IA: {MODEL_OPTIONS[tier].label}</strong>
+            <small>
+              {demo
+                ? "Modo demo"
+                : isCached
+                  ? "✓ Descargada · funciona sin conexión"
+                  : `Descarga única de ${sizes[tier] ? "" : "≈ "}${formatMB(llmMB)}`}
+            </small>
+          </span>
+          <span className="muted small">Cambiar</span>
+        </button>
+        {showModels && (
+          <div className="model-list">
+            {Object.values(MODEL_OPTIONS).map((m) => {
+              const c = cached[m.tier];
+              const s = sizes[m.tier] ?? approxSizeMB(m.tier, f16);
+              return (
+                <label key={m.tier} className={`model${tier === m.tier ? " on" : ""}`}>
+                  <input type="radio" name="tier" checked={tier === m.tier} onChange={() => onChange({ tier: m.tier })} />
+                  <span>
+                    <strong>
+                      {m.label}
+                      {m.tier === "light" && <em className="pill">Recomendado</em>}
+                    </strong>
+                    <small>{m.description}</small>
+                    <small className="size">{demo ? "Modo demo" : c ? "✓ Ya descargado" : `Descarga: ${sizes[m.tier] ? "" : "≈ "}${formatMB(s)}`}</small>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
         )}
-        {!isCached && (
+        {mobile && tier === "quality" && (
+          <p className="note">En móvil el modelo «Mejor calidad» puede quedarse sin memoria. Si falla, vuelve al ligero.</p>
+        )}
+        {totalMB > 0 && (
           <p className="note">
-            Se descargarán <strong>{sizes[tier] ? "" : "≈ "}{formatMB(size)}</strong> una sola vez. Mejor con Wi-Fi.
-            Luego funcionará sin conexión.
+            Primera vez: se descargarán <strong>≈ {formatMB(totalMB)}</strong>
+            {extraMB > 0 && <> (IA {formatMB(llmMB)} + voz realista y reconocimiento de voz {formatMB(extraMB)})</>}. Mejor con Wi-Fi. Después
+            funciona sin conexión.
           </p>
         )}
         {lowSpace && (
@@ -129,8 +198,8 @@ export function Setup({ prefs, f16, mobile, demo, onChange, onStart }: Props) {
         )}
       </section>
 
-      <button className="btn btn-big" onClick={() => onStart({ cached: isCached })}>
-        {isCached ? "Empezar a hablar" : `Descargar (${formatMB(size)}) y empezar`}
+      <button className="cta" onClick={() => onStart({ cached: isCached })}>
+        <Icon name="call" /> {isCached ? `Llamar a ${character.name.split(" ")[0]}` : `Descargar y llamar a ${character.name.split(" ")[0]}`}
       </button>
     </div>
   );

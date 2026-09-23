@@ -5,8 +5,17 @@ import { VitePWA } from "vite-plugin-pwa";
 // BASE_PATH permite publicar en una subcarpeta (p. ej. GitHub Pages: /nombre-repo/).
 const base = process.env.BASE_PATH ?? "/";
 
+// Aislamiento entre orígenes: permite a los modelos de voz usar varios hilos
+// (SharedArrayBuffer). Todo lo externo se pide con CORS, así que no se rompe nada.
+const isolation = {
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Embedder-Policy": "require-corp",
+};
+
 export default defineConfig({
   base,
+  server: { headers: isolation },
+  preview: { headers: isolation },
   plugins: [
     react(),
     VitePWA({
@@ -39,6 +48,14 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         navigateFallback: "index.html",
         cleanupOutdatedCaches: true,
+        // El runtime ONNX (voz y Whisper, ~21 MB) se guarda la primera vez que se usa.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.includes("/ort/"),
+            handler: "CacheFirst",
+            options: { cacheName: "craic-ort", expiration: { maxEntries: 6 } },
+          },
+        ],
       },
     }),
   ],

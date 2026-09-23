@@ -12,39 +12,63 @@ no hay API keys, no hay cuentas. Se aloja gratis en GitHub Pages o Vercel.
 
 ## Qué hace
 
+Diseño inspirado en ISSEN: la conversación es una **llamada** con el personaje
+(tarjeta de conversación arriba, barra «Listening…» con onda y dock con ideas,
+colgar, ajustes y micrófono).
+
 - **Personajes:** Liam (Dublín, de visita en Córdoba), Emily (Londres), Jake
-  (EE. UU., Erasmus en Córdoba) y Sarah Mitchell (entrevista de prácticas de ingeniería).
-- **Niveles:** B1, B2 y C1 (cambia vocabulario y naturalidad del personaje).
-- **Voz:** botón grande de «mantener para hablar» (o un toque para empezar y otro
-  para enviar), respuestas leídas en voz alta con acento irlandés/británico si el
-  dispositivo lo tiene, botón 🔊 para repetir y velocidad lenta/normal.
-- **Correcciones:** tarjeta plegable bajo cada mensaje: tu frase → versión natural
-  + explicación de una línea en español. Si no hay errores, un consejo para sonar
-  más nativo.
-- **Una sola pregunta por turno:** se pide en el prompt y además la app corta la
-  respuesta justo después de la primera pregunta.
-- **Palabras en español:** el personaje te dice cómo se dicen en inglés y sigue.
-- **Resumen al terminar:** errores más repetidos por tipo y 5-10 expresiones nuevas.
-- **Historial y vocabulario** guardados en el dispositivo (IndexedDB), con
-  exportación a JSON o CSV (importable en Anki) y botón para borrarlo todo.
-- **Instalable (PWA)**, modo oscuro, pensada para móvil y **funciona sin conexión**
-  una vez descargado el modelo.
+  (EE. UU., Erasmus en Córdoba) y Sarah Mitchell (entrevistas de prácticas de ingeniería).
+- **Situaciones (role-play):** charla libre, de tapas, dar indicaciones, planes del
+  finde, viajes, tu carrera, resolver un problema; y para Sarah: entrevista
+  general, técnica y de situación (STAR).
+- **Niveles:** B1, B2 y C1.
+- **Voz realista:** Kokoro-82M, un modelo de voz neuronal que se ejecuta en tu
+  dispositivo (voces británicas y americanas, elegibles por personaje). Mientras
+  carga, o si falla, se usa la voz del sistema.
+- **Te entiende bien:** Whisper (de OpenAI) transcribe tu voz en el dispositivo;
+  entiende muy bien el acento español, funciona sin conexión y en cualquier
+  navegador. Opción «Alta precisión» (Whisper small). Si Whisper aún no ha
+  cargado, se usa el reconocimiento del navegador.
+- **Mantener para hablar** o un toque para empezar y otro para enviar; también
+  puedes escribir. Opción de revisar la transcripción antes de enviarla.
+- **Una sola pregunta por turno**, y no repite preguntas que ya hizo.
+- **Ayudas:** 💡 ideas de respuesta (con traducción), 🌐 traducir un mensaje,
+  🤔 «No entiendo» (lo repite más fácil y despacio), 🐢 repetir despacio,
+  👂 modo escucha (oculta el texto para entrenar el oído).
+- **Correcciones en español** bajo cada frase: error → versión natural +
+  explicación, la **frase completa corregida** y **«Dilo tú»**: la repites y la
+  app marca palabra a palabra qué se entendió (puntuación de pronunciación).
+- **Palabras en español:** el personaje te da la palabra en inglés y sigue.
+- **Resumen al colgar:** errores más repetidos y 5-10 expresiones nuevas.
+- **Repasar:** tarjetas con repetición espaciada (ves el español, lo dices en
+  inglés, compruebas).
+- **Progreso:** racha de días, minutos, palabras dichas, gráfico semanal y
+  tendencia de errores.
+- **Retomar conversación** si se cierra la pestaña a medias.
+- Historial y vocabulario en el dispositivo (IndexedDB), exportación JSON / CSV
+  (Anki) y borrado total. **PWA instalable**, modo oscuro, móvil primero,
+  **funciona sin conexión** tras la primera descarga.
 
 ## Cómo funciona por dentro
 
 ```
-Tu voz ──► Web Speech API (SpeechRecognition) ──► texto
-texto ──► WebLLM (Web Worker + WebGPU) ──► 1) respuesta del personaje ──► speechSynthesis
-                                     └──► 2) correcciones en JSON ──► tarjeta en pantalla
+Tu voz ─► micrófono (cancelación de eco y ruido) ─► Whisper (worker, WASM) ─► texto
+texto ─► WebLLM (worker, WebGPU) ─► 1) respuesta del personaje ─► Kokoro (worker, WASM) ─► altavoz
+                               └─► 2) correcciones en JSON ─► tarjeta en pantalla
 ```
 
 - **Dos llamadas por turno.** Los modelos pequeños fallan si les pides muchas
-  cosas a la vez, así que primero se genera la respuesta (se muestra en streaming
-  y se lee en voz alta) y después, en otra llamada, las correcciones.
-- **Correcciones robustas.** Se piden en JSON con gramática forzada
-  (`response_format` de WebLLM) y ejemplos; además el parser tolera JSON roto,
-  cortado o rodeado de texto, descarta «correcciones» que no cambian nada o que
-  no aparecen en lo que dijiste, y nunca rompe la app (`src/llm/parse.ts`, con tests).
+  cosas a la vez: primero la respuesta (en streaming, se corta tras la primera
+  pregunta y empieza a sonar frase a frase) y después, aparte, las correcciones.
+- **Correcciones robustas.** JSON con gramática forzada (`response_format` de
+  WebLLM) y ejemplos; el parser tolera JSON roto o cortado, descarta
+  «correcciones» que no cambian nada o que no aparecen en lo que dijiste, y nunca
+  rompe la app (`src/llm/parse.ts`, con tests).
+- **Audio en CPU, IA en GPU.** Whisper y Kokoro corren con WebAssembly en otro
+  worker para no competir por la GPU con el modelo de lenguaje. Con las
+  cabeceras COOP/COEP (ya en `vercel.json`) usan varios hilos y van mucho más rápido.
+- **Whisper sin alucinaciones:** se descartan grabaciones sin voz (detector de
+  energía) y las frases fantasma típicas («Thank you for watching»…).
 - **Historial corto:** al modelo solo se le envían los últimos 6 mensajes.
 
 ### Modelos
@@ -56,6 +80,14 @@ Elegidos de la lista oficial `prebuiltAppConfig.model_list` de
 |---|---|---|---|---|
 | **Ligero** (por defecto) | `Llama-3.2-1B-Instruct-q4f16_1-MLC` | ~0,7 GB | ~0,9 GB | Móviles y portátiles normales |
 | **Mejor calidad** | `Llama-3.2-3B-Instruct-q4f16_1-MLC` | ~1,8 GB | ~2,3 GB | Ordenadores con buena GPU / móviles potentes |
+
+Voz y oído (Transformers.js, se descargan una vez y quedan en caché):
+
+| Parte | Modelo | Descarga aprox. |
+|---|---|---|
+| Voz realista | `onnx-community/Kokoro-82M-v1.0-ONNX` (q8) | ~90 MB |
+| Reconocimiento (normal) | `Xenova/whisper-base.en` (q8) | ~80 MB |
+| Reconocimiento (alta precisión) | `Xenova/whisper-small.en` (q8) | ~250 MB |
 
 Por qué Llama 3.2: tiene muy buen inglés conversacional para su tamaño, sigue
 bien instrucciones, está marcado como apto para dispositivos con pocos recursos
@@ -80,14 +112,14 @@ lista de WebLLM sirve).
 | iPhone / iPad | Safari con iOS / iPadOS 26 o superior |
 | Firefox | WebGPU todavía parcial según sistema; mejor Chrome |
 
-- **Espacio:** ~1 GB libre para el modelo ligero, ~2,5 GB para el de calidad.
+- **Espacio:** ~1,1 GB libre con el modelo ligero (IA + voz + oído), ~2,5 GB con el de calidad.
 - **Memoria:** si el móvil se queda sin memoria, la app lo explica; usa el modelo
   ligero y cierra otras apps.
 - **HTTPS obligatorio:** WebGPU y el micrófono solo funcionan en `https://` o `localhost`.
-- **Voz:** el reconocimiento de voz lo hace el navegador. En Chrome se procesa en
-  los servidores de Google (necesita conexión); en Safari puede ser en el
-  dispositivo. Si no hay reconocimiento de voz, la app pasa a modo escrito. El
-  modelo de IA y tus datos **nunca** salen del dispositivo.
+- **Voz y privacidad:** con Whisper (opción por defecto) tu voz se transcribe en
+  el dispositivo y no sale de él. Si eliges el reconocimiento «Navegador», en
+  Chrome el audio se procesa en los servidores de Google. El modelo de IA, las
+  voces y tus datos **nunca** salen del dispositivo.
 
 ## Ejecutar en local
 
@@ -114,9 +146,10 @@ ordenador abre `chrome://inspect/#devices` → *Port forwarding* → `5173` →
 
 ## Desplegar gratis
 
-La app es estática (`dist/`), no necesita backend. **No hacen falta cabeceras
-especiales** (WebLLM no usa `SharedArrayBuffer`, así que no se necesita
-COOP/COEP); `vercel.json` solo añade permisos de micrófono y caché.
+La app es estática (`dist/`), no necesita backend. `vercel.json` añade las
+cabeceras **COOP/COEP** (aislamiento entre orígenes: los modelos de voz usan
+varios hilos), permiso de micrófono y caché. En GitHub Pages no se pueden poner
+cabeceras: todo funciona igual, pero la voz y Whisper van en un solo hilo (más lentos).
 
 ### Opción A: Vercel (plan Hobby, recomendado)
 
@@ -155,8 +188,16 @@ craic/
 │   │   ├── parse.ts          limpieza y parseo tolerante (+ tests)
 │   │   ├── errors.ts         errores traducidos a mensajes en español
 │   │   └── mockEngine.ts     motor falso del modo ?demo
-│   ├── speech/               reconocimiento de voz y texto a voz
-│   ├── lib/                  WebGPU, IndexedDB, preferencias, instalación PWA
+│   ├── scenarios.ts          situaciones de role-play
+│   ├── speech/
+│   │   ├── audio.worker.ts   Kokoro (voz) y Whisper (oído) en un worker
+│   │   ├── audioModels.ts    carga y progreso de los modelos de audio
+│   │   ├── recorder.ts       micrófono con pre-grabación de 0,5 s
+│   │   ├── voiceInput.ts     Whisper con respaldo al reconocimiento del navegador
+│   │   ├── asrText.ts        detector de voz y limpieza de alucinaciones (+ tests)
+│   │   └── tts.ts            voz neuronal frase a frase, con respaldo del sistema
+│   ├── lib/                  WebGPU, IndexedDB, repetición espaciada, progreso,
+│   │                         puntuación de pronunciación, borrador, preferencias
 │   └── components/           interfaz
 ├── public/                   iconos
 ├── vite.config.ts            Vite + PWA (BASE_PATH para subcarpetas)

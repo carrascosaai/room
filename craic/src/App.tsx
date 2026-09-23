@@ -1,35 +1,47 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getCharacter } from "./characters";
+import { getCharacter, type Level } from "./characters";
+import { Wordmark } from "./components/Brand";
 import { Chat } from "./components/Chat";
 import { History } from "./components/History";
+import { Icon } from "./components/Icon";
 import { Loading } from "./components/Loading";
 import { NoWebGPU } from "./components/NoWebGPU";
+import { Review } from "./components/Review";
+import { Settings } from "./components/Settings";
 import { Setup } from "./components/Setup";
 import { EndOfSession } from "./components/Summary";
-import { Vocab } from "./components/Vocab";
 import type { Msg } from "./conversation";
-import { loadWebLLM, requestPersistentStorage, type LLM, type LoadProgress } from "./llm/engine";
+import { clearDraft, loadDraft, saveDraft, type Draft } from "./lib/draft";
+import { useInstallPrompt } from "./lib/install";
+import { loadPrefs, savePrefs, type Prefs } from "./lib/prefs";
+import { useWakeLock } from "./lib/wakeLock";
+import { checkWebGPU, type WebGPUStatus } from "./lib/webgpu";
+import { isModelCached, loadWebLLM, requestPersistentStorage, type LLM, type LoadProgress } from "./llm/engine";
 import { toAppError, type AppError } from "./llm/errors";
 import { createMockEngine } from "./llm/mockEngine";
 import { MODEL_OPTIONS, modelIdFor } from "./llm/models";
-import { loadPrefs, savePrefs, type Prefs } from "./lib/prefs";
-import { useInstallPrompt } from "./lib/install";
-import { checkWebGPU, type WebGPUStatus } from "./lib/webgpu";
+import { getScenario } from "./scenarios";
+import { loadASR, loadTTS, useAudioModels } from "./speech/audioModels";
 import { unlockTTS } from "./speech/tts";
 
-type Screen = "check" | "setup" | "loading" | "chat" | "summary" | "history" | "vocab";
+type Screen = "check" | "home" | "loading" | "chat" | "summary" | "review" | "progress" | "settings";
 
-const TABS: { id: Screen; label: string }[] = [
-  { id: "setup", label: "Practicar" },
-  { id: "history", label: "Historial" },
-  { id: "vocab", label: "Vocabulario" },
+const TABS: { id: Screen; label: string; icon: string }[] = [
+  { id: "home", label: "Hablar", icon: "chat" },
+  { id: "review", label: "Repasar", icon: "cards" },
+  { id: "progress", label: "Progreso", icon: "chart" },
 ];
 
 const demo = new URLSearchParams(location.search).has("demo");
 
-const THEME_NEXT = { auto: "light", light: "dark", dark: "auto" } as const;
-const THEME_LABEL = { auto: "Tema: automático", light: "Tema: claro", dark: "Tema: oscuro" } as const;
-const THEME_ICON = { auto: "◐", light: "☀", dark: "☾" } as const;
+const AUDIO_FLAG = "craic:audio-cached";
+const readFlag = () => {
+  try {
+    return localStorage.getItem(AUDIO_FLAG) === "1";
+  } catch {
+    return false;
+  }
+};
 
 export default function App() {
   const [prefs, setPrefs] = useState<Prefs>(loadPrefs);
@@ -39,11 +51,18 @@ export default function App() {
   const [loadError, setLoadError] = useState<AppError | null>(null);
   const [firstDownload, setFirstDownload] = useState(false);
   const [chatKey, setChatKey] = useState(0);
-  const llmRef = useRef<{ id: string; llm: LLM } | null>(null);
-  const install = useInstallPrompt();
-  const [iosHint, setIosHint] = useState(false);
+  const [draft, setDraft] = useState<Draft | null>(() => loadDraft());
+  const [resumeMessages, setResumeMessages] = useState<Msg[] | undefined>(undefined);
   const [ended, setEnded] = useState<{ messages: Msg[]; startedAt: number } | null>(null);
+  const [audioCached, setAudioCached] = useState(readFlag);
+  const llmRef = useRef<{ id: string; llm: LLM } | null>(null);
+  const loadingRef = useRef<{ id: string; promise: Promise<LLM> } | null>(null);
   const startedAtRef = useRef(Date.now());
+  const install = useInstallPrompt();
+  const audio = useAudioModels();
+  const [iosHint, setIosHint] = useState(false);
+
+  useWakeLock(screen === "loading");
 
   useEffect(() => {
     if (prefs.theme === "auto") delete document.documentElement.dataset.theme;
@@ -53,9 +72,23 @@ export default function App() {
   useEffect(() => {
     void checkWebGPU().then((s) => {
       setGpu(s);
-      setScreen("setup");
+      setScreen("home");
     });
   }, []);
+
+  // Cuando voz y oído están listos se recuerda (para no volver a avisar del tamaño).
+  useEffect(() => {
+    const ttsOk = prefs.voiceEngine !== "neural" || audio.tts === "ready";
+    const asrOk = prefs.asrEngine !== "whisper" || audio.asr === "ready";
+    if (ttsOk && asrOk && (audio.tts === "ready" || audio.asr === "ready")) {
+      try {
+        localStorage.setItem(AUDIO_FLAG, "1");
+      } catch {
+        /* nada */
+      }
+      setAudioCached(true);
+    }
+  }, [audio.tts, audio.asr, prefs.voiceEngine, prefs.asrEngine]);
 
   const updatePrefs = useCallback((p: Partial<Prefs>) => {
     setPrefs((prev) => {
@@ -66,157 +99,230 @@ export default function App() {
   }, []);
 
   const f16 = gpu?.ok ? gpu.f16 : false;
+  const canRun = demo || !!gpu?.ok;
 
-  const openChat = useCallback(() => {
-    startedAtRef.current = Date.now();
-    setChatKey((k) => k + 1);
-    setScreen("chat");
-  }, []);
-
-  const endChat = useCallback((messages: Msg[]) => {
-    if (!messages.some((m) => m.role === "user")) {
-      setScreen("setup");
-      return;
-    }
-    setEnded({ messages, startedAt: startedAtRef.current });
-    setScreen("summary");
-  }, []);
-
-  const start = useCallback(
-    async ({ cached }: { cached: boolean }) => {
-      unlockTTS();
-      if (demo) {
-        llmRef.current = { id: "demo", llm: createMockEngine() };
-        openChat();
-        return;
-      }
-      let id = modelIdFor(prefs.tier, f16);
-      if (llmRef.current?.id === id) {
-        openChat();
-        return;
-      }
-      setFirstDownload(!cached);
-      setLoadError(null);
-      setProgress(null);
-      setScreen("loading");
-      try {
-        await llmRef.current?.llm.unload();
-      } catch {
-        /* ignorar */
-      }
-      llmRef.current = null;
-      await requestPersistentStorage();
-      try {
+  /** Carga (o reutiliza) el modelo de lenguaje. Se comparte entre precarga y «Llamar». */
+  const ensureEngine = useCallback(
+    (id: string): Promise<LLM> => {
+      if (llmRef.current?.id === id) return Promise.resolve(llmRef.current.llm);
+      if (loadingRef.current?.id === id) return loadingRef.current.promise;
+      const promise = (async () => {
+        const old = llmRef.current;
+        llmRef.current = null;
+        await old?.llm.unload().catch(() => undefined);
+        await requestPersistentStorage();
         let llm: LLM;
         try {
           llm = await loadWebLLM(id, setProgress);
         } catch (err) {
           // Sin shader-f16: usamos la variante q4f32 automáticamente.
           if (toAppError(err).kind !== "f16") throw err;
-          id = MODEL_OPTIONS[prefs.tier].idF32;
-          llm = await loadWebLLM(id, setProgress);
+          llm = await loadWebLLM(MODEL_OPTIONS[prefs.tier].idF32, setProgress);
         }
         llmRef.current = { id, llm };
-        openChat();
+        return llm;
+      })();
+      loadingRef.current = { id, promise };
+      promise
+        .finally(() => {
+          if (loadingRef.current?.promise === promise) loadingRef.current = null;
+        })
+        .catch(() => undefined);
+      return promise;
+    },
+    [prefs.tier],
+  );
+
+  const loadAudio = useCallback(() => {
+    if (demo) return;
+    if (prefs.voiceEngine === "neural") loadTTS();
+    if (prefs.asrEngine === "whisper") loadASR(prefs.whisperSize);
+  }, [prefs.voiceEngine, prefs.asrEngine, prefs.whisperSize]);
+
+  // Precarga: si el modelo ya está descargado, se carga en segundo plano
+  // mientras eliges personaje, así «Llamar» es casi instantáneo.
+  useEffect(() => {
+    if (screen !== "home" || demo || !gpu?.ok) return;
+    const id = modelIdFor(prefs.tier, f16);
+    let alive = true;
+    void isModelCached(id).then((cached) => {
+      if (!alive || !cached) return;
+      ensureEngine(id).catch(() => undefined);
+      if (audioCached) loadAudio();
+    });
+    return () => {
+      alive = false;
+    };
+  }, [screen, prefs.tier, f16, gpu, ensureEngine, audioCached, loadAudio]);
+
+  // Si cambias los ajustes de voz durante la conversación, se cargan los modelos necesarios.
+  useEffect(() => {
+    if (screen === "chat") loadAudio();
+  }, [screen, loadAudio]);
+
+  const openChat = useCallback((messages?: Msg[], startedAt?: number) => {
+    startedAtRef.current = startedAt ?? Date.now();
+    setResumeMessages(messages);
+    setChatKey((k) => k + 1);
+    setScreen("chat");
+  }, []);
+
+  const start = useCallback(
+    async ({ cached }: { cached: boolean }, resume?: Draft) => {
+      unlockTTS();
+      if (demo) {
+        llmRef.current = { id: "demo", llm: createMockEngine() };
+        openChat(resume?.messages, resume?.startedAt);
+        return;
+      }
+      const id = modelIdFor(prefs.tier, f16);
+      loadAudio();
+      if (llmRef.current?.id === id) {
+        openChat(resume?.messages, resume?.startedAt);
+        return;
+      }
+      setFirstDownload(!cached);
+      setLoadError(null);
+      setScreen("loading");
+      try {
+        await ensureEngine(id);
+        openChat(resume?.messages, resume?.startedAt);
       } catch (err) {
         console.error(err);
         setLoadError(toAppError(err));
       }
     },
-    [prefs.tier, f16, openChat],
+    [prefs.tier, f16, ensureEngine, openChat, loadAudio],
   );
 
+  const resume = useCallback(() => {
+    if (!draft) return;
+    updatePrefs({ characterId: draft.characterId, scenarioId: draft.scenarioId, level: draft.level as Level });
+    void start({ cached: true }, draft);
+  }, [draft, start, updatePrefs]);
+
+  const endChat = useCallback((messages: Msg[]) => {
+    clearDraft();
+    setDraft(null);
+    if (!messages.some((m) => m.role === "user")) {
+      setScreen("home");
+      return;
+    }
+    setEnded({ messages, startedAt: startedAtRef.current });
+    setScreen("summary");
+  }, []);
+
   const character = getCharacter(prefs.characterId);
-  const showTabs = screen === "setup" || screen === "history" || screen === "vocab";
+  const scenario = getScenario(prefs.scenarioId, character.kind);
+  const tabbed = screen === "home" || screen === "review" || screen === "progress";
 
-  return (
-    <div className="app">
-      {screen !== "chat" && (
-        <header className="top">
-          <div className="top-row">
-            <h1>
-              <span className="logo" aria-hidden="true">☘</span> Craic
-            </h1>
-            <div className="top-actions">
-              {install.canPrompt && (
-                <button className="btn-ghost btn-small" onClick={() => void install.install()}>
-                  Instalar app
-                </button>
-              )}
-              {!install.canPrompt && install.showIOSHint && (
-                <button className="btn-ghost btn-small" onClick={() => setIosHint((v) => !v)}>
-                  Instalar app
-                </button>
-              )}
-              <button
-                className="icon-btn icon-small"
-                aria-label={THEME_LABEL[prefs.theme]}
-                title={THEME_LABEL[prefs.theme]}
-                onClick={() => updatePrefs({ theme: THEME_NEXT[prefs.theme] })}
-              >
-                {THEME_ICON[prefs.theme]}
-              </button>
-            </div>
-          </div>
-          <p className="muted">Practica inglés hablando con una IA. Gratis y en tu dispositivo.</p>
-          {iosHint && (
-            <p className="note">
-              En iPhone/iPad: pulsa el botón <strong>Compartir</strong> de Safari y luego{" "}
-              <strong>«Añadir a pantalla de inicio»</strong>.
-            </p>
-          )}
-          {showTabs && (
-            <nav className="tabs" aria-label="Secciones">
-              {TABS.map((t) => (
-                <button
-                  key={t.id}
-                  className={screen === t.id ? "on" : ""}
-                  aria-current={screen === t.id ? "page" : undefined}
-                  onClick={() => setScreen(t.id)}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </nav>
-          )}
-        </header>
-      )}
-
-      {screen === "check" && <p className="muted center">Comprobando tu dispositivo…</p>}
-
-      {screen === "setup" && gpu && !gpu.ok && !demo && <NoWebGPU status={gpu} />}
-
-      {screen === "setup" && gpu && (gpu.ok || demo) && (
-        <Setup
-          prefs={prefs}
-          f16={f16}
-          mobile={gpu.mobile}
-          demo={demo}
-          onChange={updatePrefs}
-          onStart={(info) => void start(info)}
-        />
-      )}
-
-      {screen === "loading" && (
-        <Loading
-          progress={progress}
-          error={loadError}
-          firstDownload={firstDownload}
-          onRetry={() => void start({ cached: !firstDownload })}
-          onBack={() => setScreen("setup")}
-        />
-      )}
-
-      {screen === "chat" && llmRef.current && (
+  if (screen === "chat" && llmRef.current) {
+    return (
+      <div className="app app-chat">
         <Chat
           key={chatKey}
           llm={llmRef.current.llm}
           character={character}
           level={prefs.level}
-          rate={prefs.rate}
-          onRateChange={(rate) => updatePrefs({ rate })}
+          scenario={scenario}
+          prefs={prefs}
+          onPrefs={updatePrefs}
           onEnd={endChat}
+          onChange={(messages) =>
+            saveDraft({
+              characterId: character.id,
+              scenarioId: scenario.id,
+              level: prefs.level,
+              startedAt: startedAtRef.current,
+              updatedAt: Date.now(),
+              messages,
+            })
+          }
+          initialMessages={resumeMessages}
           demo={demo}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      <header className="top">
+        {screen === "settings" || screen === "summary" ? (
+          <button className="round-btn" aria-label="Volver" onClick={() => setScreen("home")}>
+            <Icon name="back" />
+          </button>
+        ) : install.canPrompt || install.showIOSHint ? (
+          <button
+            className="round-btn"
+            aria-label="Instalar app"
+            title="Instalar app"
+            onClick={() => (install.canPrompt ? void install.install() : setIosHint((v) => !v))}
+          >
+            <Icon name="download" />
+          </button>
+        ) : (
+          <span className="top-spacer" />
+        )}
+        <button className="wordmark-btn" onClick={() => setScreen("home")} aria-label="Inicio">
+          <Wordmark />
+        </button>
+        <button className="round-btn" aria-label="Ajustes" onClick={() => setScreen("settings")}>
+          <Icon name="gear" />
+        </button>
+      </header>
+      {iosHint && (
+        <p className="note">
+          En iPhone/iPad: pulsa <strong>Compartir</strong> en Safari y luego <strong>«Añadir a pantalla de inicio»</strong>.
+        </p>
+      )}
+
+      {tabbed && canRun && (
+        <nav className="tabs" aria-label="Secciones">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              className={screen === t.id ? "on" : ""}
+              aria-current={screen === t.id ? "page" : undefined}
+              onClick={() => setScreen(t.id)}
+            >
+              <Icon name={t.icon} size={18} /> {t.label}
+            </button>
+          ))}
+        </nav>
+      )}
+
+      {screen === "check" && <p className="muted center">Comprobando tu dispositivo…</p>}
+
+      {screen === "home" && gpu && !canRun && !gpu.ok && <NoWebGPU status={gpu} />}
+
+      {screen === "home" && gpu && canRun && (
+        <Setup
+          prefs={prefs}
+          f16={f16}
+          mobile={gpu.mobile}
+          demo={demo}
+          draft={draft}
+          audioCached={audioCached}
+          onChange={updatePrefs}
+          onStart={(info) => void start(info)}
+          onResume={resume}
+          onDiscardDraft={() => {
+            clearDraft();
+            setDraft(null);
+          }}
+        />
+      )}
+
+      {screen === "loading" && (
+        <Loading
+          character={character}
+          prefs={prefs}
+          progress={progress}
+          error={loadError}
+          firstDownload={firstDownload}
+          onRetry={() => void start({ cached: !firstDownload })}
+          onBack={() => setScreen("home")}
         />
       )}
 
@@ -227,20 +333,14 @@ export default function App() {
           level={prefs.level}
           messages={ended.messages}
           startedAt={ended.startedAt}
-          onNew={openChat}
-          onHistory={() => setScreen("history")}
+          onNew={() => openChat()}
+          onHistory={() => setScreen("progress")}
         />
       )}
 
-      {screen === "history" && <History />}
-      {screen === "vocab" && <Vocab rate={prefs.rate} />}
-
-      {showTabs && (
-        <footer className="foot muted">
-          IA local con <a href="https://github.com/mlc-ai/web-llm" target="_blank" rel="noreferrer">WebLLM</a> · Built
-          with Llama · Código abierto y gratis
-        </footer>
-      )}
+      {screen === "review" && <Review prefs={prefs} />}
+      {screen === "progress" && <History />}
+      {screen === "settings" && <Settings prefs={prefs} onChange={updatePrefs} />}
     </div>
   );
 }
