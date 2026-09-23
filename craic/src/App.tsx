@@ -218,7 +218,7 @@ export default function App() {
         return;
       }
       loadAudio();
-      if (useCloud) {
+      const goCloud = () => {
         // IA en la nube: nada que descargar; solo se espera a la voz y el oído.
         if (llmRef.current?.id !== "cloud") {
           void llmRef.current?.llm.unload().catch(() => undefined);
@@ -228,6 +228,11 @@ export default function App() {
         setLoadError(null);
         setScreen("loading");
         setPendingOpen({ messages: resume?.messages, startedAt: resume?.startedAt });
+      };
+      // Sin WebGPU (o si la comprobación inicial falló por red lenta) se vuelve a mirar la nube.
+      if (useCloud || (!demo && !gpu?.ok && (await cloudAvailable(true)))) {
+        setCloudOk(true);
+        goCloud();
         return;
       }
       const id = modelIdFor(prefs.tier, f16);
@@ -247,10 +252,18 @@ export default function App() {
         setPendingOpen({ messages: resume?.messages, startedAt: resume?.startedAt });
       } catch (err) {
         console.error(err);
+        // La IA del dispositivo ha fallado: si hay nube, se sigue con ella sin preguntar.
+        if (await cloudAvailable(true)) {
+          console.warn("IA local falló; se usa la nube", err);
+          setCloudOk(true);
+          updatePrefs({ aiEngine: "cloud" });
+          goCloud();
+          return;
+        }
         setLoadError(toAppError(err));
       }
     },
-    [prefs.tier, f16, ensureEngine, openChat, loadAudio, useCloud, audioCached],
+    [prefs.tier, f16, ensureEngine, openChat, loadAudio, useCloud, audioCached, gpu, updatePrefs],
   );
 
   // Se abre la llamada cuando la voz natural y el oído están listos (o fallaron).
