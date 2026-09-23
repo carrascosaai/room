@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Character } from "../characters";
+import { collectDiagnostics, hasOtherTabs } from "../lib/diagnostics";
 import { checkModelHost, NET_TEXT, type NetStatus } from "../lib/netcheck";
 import type { AppError } from "../llm/errors";
 import type { LoadProgress } from "../llm/engine";
@@ -45,12 +46,52 @@ interface Props {
   llmReady: boolean;
   onSkip: () => void;
   onRetry: () => void;
+  onRedownload: () => void;
+  onSwitchModel: () => void;
   onBack: () => void;
+}
+
+function DiagnosticsButton() {
+  const [state, setState] = useState<"idle" | "copied" | "shown">("idle");
+  const [text, setText] = useState("");
+  return (
+    <>
+      <button
+        className="btn-ghost btn-small"
+        onClick={async () => {
+          const d = await collectDiagnostics();
+          setText(d);
+          try {
+            await navigator.clipboard.writeText(d);
+            setState("copied");
+          } catch {
+            setState("shown");
+          }
+        }}
+      >
+        {state === "copied" ? "✓ Diagnóstico copiado" : "Copiar diagnóstico"}
+      </button>
+      {state !== "idle" && <pre className="diag">{text}</pre>}
+    </>
+  );
 }
 
 const STALL_MS = 20000;
 
-export function Loading({ character, prefs, progress, error, firstDownload, needTTS, llmReady, onSkip, onRetry, onBack }: Props) {
+export function Loading({
+  character,
+  prefs,
+  progress,
+  error,
+  firstDownload,
+  needTTS,
+  llmReady,
+  onSkip,
+  onRetry,
+  onRedownload,
+  onSwitchModel,
+  onBack,
+}: Props) {
   const audio = useAudioModels();
   // Vigilante: si nada avanza en 20 s, se diagnostica la conexión.
   const lastChange = useRef(Date.now());
@@ -86,9 +127,23 @@ export function Loading({ character, prefs, progress, error, firstDownload, need
           <button className="btn-dark" onClick={onRetry}>
             Reintentar
           </button>
+          {(error.kind === "stall" || error.kind === "unknown") && (
+            <button className="btn-ghost" onClick={onRedownload}>
+              Borrar el modelo y descargarlo de nuevo
+            </button>
+          )}
+          {(error.kind === "stall" || error.kind === "memory") && (
+            <button className="btn-ghost" onClick={onSwitchModel}>
+              Probar el otro modelo
+            </button>
+          )}
           <button className="btn-ghost" onClick={onBack}>
             Volver
           </button>
+        </div>
+        {hasOtherTabs() && <p className="note note-warn">Tienes Craic abierto en otra pestaña: ciérrala, puede estar bloqueando la GPU.</p>}
+        <div className="actions">
+          <DiagnosticsButton />
         </div>
       </div>
     );
@@ -128,10 +183,12 @@ export function Loading({ character, prefs, progress, error, firstDownload, need
                 ? "La conexión funciona, así que puede ser que el navegador se haya quedado bloqueado. Recarga la página; lo ya descargado se conserva."
                 : NET_TEXT[net]}
           </p>
+          {hasOtherTabs() && <p>Tienes Craic abierto en otra pestaña: ciérrala, puede estar bloqueando la GPU.</p>}
           <div className="actions">
             <button className="btn-dark btn-small" onClick={() => location.reload()}>
               Recargar
             </button>
+            <DiagnosticsButton />
             {llmReady && (
               <button className="btn-ghost btn-small" onClick={onSkip}>
                 Empezar sin voz natural
