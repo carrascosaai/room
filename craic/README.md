@@ -165,7 +165,8 @@ cabeceras: todo funciona igual, pero la voz y Whisper van en un solo hilo (más 
 1. Sube el código a GitHub (el workflow ya está en `.github/workflows/craic-pages.yml`).
 2. En el repositorio: **Settings → Pages → Build and deployment → Source:
    «GitHub Actions»**.
-3. Haz push a `main` (o ve a **Actions → Craic → GitHub Pages → Run workflow**).
+3. Ve a **Actions → Craic → GitHub Pages → Run workflow** (se lanza a mano para
+   no chocar con Vercel; si prefieres que sea automático, añade `push` en `on:`).
 4. La app queda en `https://<tu-usuario>.github.io/<nombre-del-repo>/`.
 
 > Si mueves `craic/` a su propio repositorio, mueve también el workflow a

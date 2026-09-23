@@ -106,7 +106,11 @@ export default function App() {
     (id: string): Promise<LLM> => {
       if (llmRef.current?.id === id) return Promise.resolve(llmRef.current.llm);
       if (loadingRef.current?.id === id) return loadingRef.current.promise;
+      // Si se estaba cargando otro modelo, se espera a que termine para
+      // descargarlo después: nunca dos modelos a la vez en la GPU.
+      const previous = loadingRef.current?.promise;
       const promise = (async () => {
+        await previous?.catch(() => undefined);
         const old = llmRef.current;
         llmRef.current = null;
         await old?.llm.unload().catch(() => undefined);

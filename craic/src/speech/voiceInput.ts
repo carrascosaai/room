@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cleanTranscript, hasSpeech, normalize } from "./asrText";
 import { getAudioStatus, transcribe } from "./audioModels";
-import { micFailure, MicRecorder } from "./recorder";
+import { acquireRecorder, micFailure, releaseRecorder, type MicRecorder } from "./recorder";
 import { recognitionSupported, useSpeechRecognition, type MicError } from "./recognition";
 
 export type AsrEngine = "whisper" | "browser";
@@ -21,7 +21,16 @@ export function useVoiceInput(engine: AsrEngine, lang: string) {
   const [phase, setPhase] = useState<VoicePhase>("idle");
   const [error, setError] = useState<MicError | null>(null);
 
-  useEffect(() => () => recRef.current?.close(), []);
+  useEffect(
+    () => () => {
+      if (recRef.current) {
+        recRef.current.cancel();
+        releaseRecorder();
+        recRef.current = null;
+      }
+    },
+    [],
+  );
 
   const shouldUseWhisper = () => {
     if (!whisperCapable) return false;
@@ -41,7 +50,7 @@ export function useVoiceInput(engine: AsrEngine, lang: string) {
       return;
     }
     try {
-      recRef.current ??= new MicRecorder();
+      recRef.current ??= acquireRecorder();
       await recRef.current.open();
       recRef.current.start();
       setPhase("listening");

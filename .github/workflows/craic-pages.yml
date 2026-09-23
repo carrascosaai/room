@@ -1,11 +1,9 @@
-# Publica la app craic/ en GitHub Pages.
-# Requisito (una vez): Settings → Pages → Build and deployment → Source: «GitHub Actions».
+# Publica la app craic/ en GitHub Pages (alternativa a Vercel, que es el
+# despliegue principal). Solo se ejecuta a mano: Actions → «Craic → GitHub Pages»
+# → Run workflow. Requisito (una vez): Settings → Pages → Source: «GitHub Actions».
 name: Craic → GitHub Pages
 
 on:
-  push:
-    branches: [main]
-    paths: ["craic/**", ".github/workflows/craic-pages.yml"]
   workflow_dispatch:
 
 permissions:

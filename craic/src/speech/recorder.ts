@@ -131,3 +131,22 @@ export function resampleTo16k(input: Float32Array, rate: number): Float32Array {
   }
   return out;
 }
+
+// Un solo micrófono compartido por toda la app: evita abrir varios streams
+// (uno por tarjeta de corrección) y se cierra cuando nadie lo usa.
+let shared: MicRecorder | null = null;
+let users = 0;
+
+export function acquireRecorder(): MicRecorder {
+  users++;
+  shared ??= new MicRecorder();
+  return shared;
+}
+
+export function releaseRecorder() {
+  users = Math.max(0, users - 1);
+  if (users === 0 && shared) {
+    shared.close();
+    shared = null;
+  }
+}
