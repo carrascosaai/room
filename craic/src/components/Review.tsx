@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { deleteVocab, listVocab, updateVocab, type VocabItem } from "../lib/db";
 import type { Prefs } from "../lib/prefs";
 import { dueQueue, masteryLabel, review } from "../lib/srs";
+import { PAUSE_MS } from "../lib/prefs";
+import type { MicError } from "../speech/recognition";
 import { speak, unlockTTS } from "../speech/tts";
+import { listenOnce, type ListenHandle } from "../speech/voiceInput";
 import { Icon } from "./Icon";
 import { PracticeSpeech } from "./PracticeSpeech";
 
-const DEFAULT_VOICE = "bf_emma";
+const DEFAULT_VOICE = "af_heart";
 
 /** Repaso del vocabulario: ves el español, lo dices en inglés y te autoevalúas. */
 export function Review({ prefs }: { prefs: Prefs }) {
@@ -15,6 +18,23 @@ export function Review({ prefs }: { prefs: Prefs }) {
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(0);
   const [showList, setShowList] = useState(false);
+  const [micError, setMicError] = useState<MicError | null>(null);
+  const [handle, setHandle] = useState<ListenHandle | null>(null);
+
+  const practice = async () => {
+    setMicError(null);
+    const { result, handle: h } = listenOnce({
+      engine: prefs.asrEngine,
+      lang: prefs.recognitionLang === "auto" ? "en-GB" : prefs.recognitionLang,
+      silenceMs: PAUSE_MS[prefs.pause],
+      onPhase: () => {},
+      onError: setMicError,
+    });
+    setHandle(h);
+    const text = await result;
+    setHandle(null);
+    return text;
+  };
 
   const reload = async () => {
     const all = await listVocab().catch(() => []);
@@ -102,8 +122,9 @@ export function Review({ prefs }: { prefs: Prefs }) {
               )}
               <PracticeSpeech
                 target={card.en}
-                engine={prefs.asrEngine}
-                lang={prefs.recognitionLang === "auto" ? "en-GB" : prefs.recognitionLang}
+                listenOnce={practice}
+                onStop={() => handle?.finish()}
+                error={micError}
                 onListen={() => void say(card.example || card.en)}
               />
               <div className="flash-actions">

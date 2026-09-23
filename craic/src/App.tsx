@@ -22,7 +22,8 @@ import { createMockEngine } from "./llm/mockEngine";
 import { MODEL_OPTIONS, modelIdFor } from "./llm/models";
 import { getScenario } from "./scenarios";
 import { loadASR, loadTTS, useAudioModels } from "./speech/audioModels";
-import { unlockTTS } from "./speech/tts";
+import { recognitionSupported } from "./speech/recognition";
+import { needsNeuralVoice, unlockTTS } from "./speech/tts";
 
 type Screen = "check" | "home" | "loading" | "chat" | "summary" | "review" | "progress" | "settings";
 
@@ -61,6 +62,9 @@ export default function App() {
   const install = useInstallPrompt();
   const audio = useAudioModels();
   const [iosHint, setIosHint] = useState(false);
+  const [needTTS, setNeedTTS] = useState(true);
+  /** Llamada lista para abrir en cuanto la voz y el oído estén preparados */
+  const [pendingOpen, setPendingOpen] = useState<{ messages?: Msg[]; startedAt?: number } | null>(null);
 
   useWakeLock(screen === "loading");
 
@@ -78,8 +82,8 @@ export default function App() {
 
   // Cuando voz y oído están listos se recuerda (para no volver a avisar del tamaño).
   useEffect(() => {
-    const ttsOk = prefs.voiceEngine !== "neural" || audio.tts === "ready";
-    const asrOk = prefs.asrEngine !== "whisper" || audio.asr === "ready";
+    const ttsOk = !needTTS || audio.tts === "ready";
+    const asrOk = prefs.asrEngine !== "local" || audio.asr === "ready";
     if (ttsOk && asrOk && (audio.tts === "ready" || audio.asr === "ready")) {
       try {
         localStorage.setItem(AUDIO_FLAG, "1");
@@ -88,7 +92,7 @@ export default function App() {
       }
       setAudioCached(true);
     }
-  }, [audio.tts, audio.asr, prefs.voiceEngine, prefs.asrEngine]);
+  }, [audio.tts, audio.asr, needTTS, prefs.asrEngine]);
 
   const updatePrefs = useCallback((p: Partial<Prefs>) => {
     setPrefs((prev) => {
@@ -137,11 +141,24 @@ export default function App() {
     [prefs.tier],
   );
 
+  const character = getCharacter(prefs.characterId);
+
+  // ¿Hace falta la voz neuronal o el navegador ya tiene una voz natural?
+  useEffect(() => {
+    let alive = true;
+    if (prefs.voiceEngine === "system") setNeedTTS(false);
+    else if (prefs.voiceEngine === "neural") setNeedTTS(true);
+    else void needsNeuralVoice(character.voiceLangs, character.voiceGender).then((n) => alive && setNeedTTS(n));
+    return () => {
+      alive = false;
+    };
+  }, [prefs.voiceEngine, character]);
+
   const loadAudio = useCallback(() => {
     if (demo) return;
-    if (prefs.voiceEngine === "neural") loadTTS();
-    if (prefs.asrEngine === "whisper") loadASR(prefs.whisperSize);
-  }, [prefs.voiceEngine, prefs.asrEngine, prefs.whisperSize]);
+    if (needTTS) loadTTS(prefs.voiceQuality === "high" && gpu?.ok ? "webgpu" : "wasm");
+    if (prefs.asrEngine === "local") loadASR(prefs.asrModel);
+  }, [needTTS, prefs.voiceQuality, prefs.asrEngine, prefs.asrModel, gpu]);
 
   // Precarga: si el modelo ya está descargado, se carga en segundo plano
   // mientras eliges personaje, así «Llamar» es casi instantáneo.
@@ -161,8 +178,8 @@ export default function App() {
 
   // Si cambias los ajustes de voz durante la conversación, se cargan los modelos necesarios.
   useEffect(() => {
-    if (screen === "chat") loadAudio();
-  }, [screen, loadAudio]);
+    if (screen === "chat" || (screen === "review" && audioCached)) loadAudio();
+  }, [screen, loadAudio, audioCached]);
 
   const openChat = useCallback((messages?: Msg[], startedAt?: number) => {
     startedAtRef.current = startedAt ?? Date.now();
@@ -182,7 +199,11 @@ export default function App() {
       const id = modelIdFor(prefs.tier, f16);
       loadAudio();
       if (llmRef.current?.id === id) {
-        openChat(resume?.messages, resume?.startedAt);
+        // IA ya cargada: se abre en cuanto la voz y el oído estén listos (normalmente ya).
+        setFirstDownload(false);
+        setLoadError(null);
+        setScreen("loading");
+        setPendingOpen({ messages: resume?.messages, startedAt: resume?.startedAt });
         return;
       }
       setFirstDownload(!cached);
@@ -190,7 +211,7 @@ export default function App() {
       setScreen("loading");
       try {
         await ensureEngine(id);
-        openChat(resume?.messages, resume?.startedAt);
+        setPendingOpen({ messages: resume?.messages, startedAt: resume?.startedAt });
       } catch (err) {
         console.error(err);
         setLoadError(toAppError(err));
@@ -198,6 +219,17 @@ export default function App() {
     },
     [prefs.tier, f16, ensureEngine, openChat, loadAudio],
   );
+
+  // Se abre la llamada cuando la voz natural y el oído están listos (o fallaron).
+  const audioReady =
+    (!needTTS || audio.tts === "ready" || audio.tts === "error") &&
+    (prefs.asrEngine !== "local" || audio.asr === "ready" || audio.asr === "error" || (recognitionSupported && audio.asr === "idle"));
+  useEffect(() => {
+    if (pendingOpen && audioReady && screen === "loading") {
+      openChat(pendingOpen.messages, pendingOpen.startedAt);
+      setPendingOpen(null);
+    }
+  }, [pendingOpen, audioReady, screen, openChat]);
 
   const resume = useCallback(() => {
     if (!draft) return;
@@ -216,7 +248,6 @@ export default function App() {
     setScreen("summary");
   }, []);
 
-  const character = getCharacter(prefs.characterId);
   const scenario = getScenario(prefs.scenarioId, character.kind);
   const tabbed = screen === "home" || screen === "review" || screen === "progress";
 
@@ -308,6 +339,7 @@ export default function App() {
           demo={demo}
           draft={draft}
           audioCached={audioCached}
+          needTTS={needTTS}
           onChange={updatePrefs}
           onStart={(info) => void start(info)}
           onResume={resume}
@@ -325,8 +357,19 @@ export default function App() {
           progress={progress}
           error={loadError}
           firstDownload={firstDownload}
+          needTTS={needTTS}
+          llmReady={!!pendingOpen}
+          onSkip={() => {
+            if (pendingOpen) {
+              openChat(pendingOpen.messages, pendingOpen.startedAt);
+              setPendingOpen(null);
+            }
+          }}
           onRetry={() => void start({ cached: !firstDownload })}
-          onBack={() => setScreen("home")}
+          onBack={() => {
+            setPendingOpen(null);
+            setScreen("home");
+          }}
         />
       )}
 

@@ -4,10 +4,10 @@ import { clearAll, downloadBlob, exportAll, exportVocabCSV } from "../lib/db";
 import type { Prefs } from "../lib/prefs";
 import { deleteCachedModel } from "../llm/engine";
 import { MODEL_OPTIONS } from "../llm/models";
-import { useAudioModels, WHISPER_MODELS, type WhisperSize } from "../speech/audioModels";
+import { PAUSE_MS } from "../lib/prefs";
+import { ASR_MODELS, TTS_SIZE_MB, useAudioModels } from "../speech/audioModels";
 import { recognitionSupported } from "../speech/recognition";
 import { speak, unlockTTS } from "../speech/tts";
-import { Flag } from "./Brand";
 import { Toggle } from "./Chat";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -56,39 +56,57 @@ export function Settings({ prefs, onChange }: { prefs: Prefs; onChange: (p: Part
     <div className="settings">
       <section className="card">
         <h2>Voz de los personajes</h2>
-        <Toggle
-          label="Voz realista (IA neuronal)"
-          hint={
-            audio.tts === "ready"
-              ? "Lista · se ejecuta en tu dispositivo"
-              : audio.tts === "loading"
-                ? `Preparando… ${Math.round(audio.ttsProgress * 100)}%`
-                : audio.tts === "error"
-                  ? "No se pudo cargar; se usa la voz del sistema"
-                  : "Kokoro-82M · ~90 MB, se descarga una vez"
-          }
-          checked={prefs.voiceEngine === "neural"}
-          onChange={(v) => onChange({ voiceEngine: v ? "neural" : "system" })}
-        />
+        <div className="seg seg-wide" role="group" aria-label="Tipo de voz">
+          {(
+            [
+              ["auto", "Automática", "La más natural"],
+              ["neural", "IA neuronal", "Kokoro"],
+              ["system", "Sistema", "Instantánea"],
+            ] as const
+          ).map(([id, t, h]) => (
+            <button key={id} className={prefs.voiceEngine === id ? "on" : ""} onClick={() => onChange({ voiceEngine: id })}>
+              <strong>{t}</strong>
+              <small>{h}</small>
+            </button>
+          ))}
+        </div>
+        <p className="muted small">
+          {prefs.voiceEngine === "auto"
+            ? "Usa las voces «naturales» de tu navegador si las tiene (Edge, Safari con voces mejoradas); si no, la voz IA."
+            : prefs.voiceEngine === "neural"
+              ? "Voz IA en tu dispositivo, suena como una persona."
+              : "La voz del sistema: instantánea, pero en algunos navegadores suena robótica."}{" "}
+          {audio.tts === "loading" && `Preparando voz IA… ${Math.round(audio.ttsProgress * 100)}%`}
+          {audio.tts === "ready" && `Voz IA lista (${audio.ttsDevice === "webgpu" ? "GPU" : "CPU"}).`}
+          {audio.tts === "error" && "La voz IA no pudo cargarse en este dispositivo."}
+        </p>
+        {prefs.voiceEngine !== "system" && (
+          <div className="seg seg-wide" role="group" aria-label="Calidad de la voz IA">
+            <button className={prefs.voiceQuality === "high" ? "on" : ""} onClick={() => onChange({ voiceQuality: "high" })}>
+              <strong>Máxima calidad</strong>
+              <small>GPU · ~{TTS_SIZE_MB.webgpu} MB</small>
+            </button>
+            <button className={prefs.voiceQuality === "light" ? "on" : ""} onClick={() => onChange({ voiceQuality: "light" })}>
+              <strong>Ligera</strong>
+              <small>CPU · ~{TTS_SIZE_MB.wasm} MB</small>
+            </button>
+          </div>
+        )}
         {CHARACTERS.map((c) => (
           <div key={c.id} className="voice-row">
-            <Flag code={c.flag} size={32} />
             <span className="voice-name">{c.name.split(" ")[0]}</span>
-            {prefs.voiceEngine === "neural" ? (
-              <select
-                aria-label={`Voz de ${c.name}`}
-                value={prefs.voiceOverrides[c.id] ?? c.neuralVoice}
-                onChange={(e) => onChange({ voiceOverrides: { ...prefs.voiceOverrides, [c.id]: e.target.value } })}
-              >
-                {NEURAL_VOICES.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span className="muted small grow">Voz del sistema</span>
-            )}
+            <select
+              aria-label={`Voz de ${c.name}`}
+              value={prefs.voiceOverrides[c.id] ?? c.neuralVoice}
+              onChange={(e) => onChange({ voiceOverrides: { ...prefs.voiceOverrides, [c.id]: e.target.value } })}
+              disabled={prefs.voiceEngine === "system"}
+            >
+              {NEURAL_VOICES.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.label}
+                </option>
+              ))}
+            </select>
             <button className="btn-ghost btn-small" onClick={() => test(c.id)}>
               Probar
             </button>
@@ -105,36 +123,57 @@ export function Settings({ prefs, onChange }: { prefs: Prefs; onChange: (p: Part
       </section>
 
       <section className="card">
-        <h2>Reconocimiento de tu voz</h2>
-        <div className="seg seg-wide" role="group" aria-label="Motor de reconocimiento">
-          <button className={prefs.asrEngine === "whisper" ? "on" : ""} onClick={() => onChange({ asrEngine: "whisper" })}>
-            <strong>Whisper</strong>
-            <small>IA en tu dispositivo</small>
-          </button>
-          <button
-            className={prefs.asrEngine === "browser" ? "on" : ""}
-            onClick={() => onChange({ asrEngine: "browser" })}
-            disabled={!recognitionSupported}
-          >
-            <strong>Navegador</strong>
-            <small>{recognitionSupported ? "Más rápido, en vivo" : "No disponible"}</small>
-          </button>
-        </div>
-        {prefs.asrEngine === "whisper" ? (
+        <h2>Conversación por voz</h2>
+        <Toggle
+          label="Modo llamada (manos libres)"
+          hint="Te escucha sola y envía cuando dejas de hablar"
+          checked={prefs.handsFree}
+          onChange={(v) => onChange({ handsFree: v })}
+        />
+        <label className="field">
+          <span>Pausa para enviar</span>
+          <div className="seg seg-wide" role="group" aria-label="Pausa para enviar">
+            {(["short", "normal", "long"] as const).map((p) => (
+              <button key={p} type="button" className={prefs.pause === p ? "on" : ""} onClick={() => onChange({ pause: p })}>
+                <strong>{p === "short" ? "Corta" : p === "normal" ? "Normal" : "Larga"}</strong>
+                <small>{PAUSE_MS[p] / 1000} s</small>
+              </button>
+            ))}
+          </div>
+          <small className="muted">Si te corta mientras piensas, usa «Larga».</small>
+        </label>
+        <label className="field">
+          <span>Reconocimiento de tu voz</span>
+          <div className="seg seg-wide" role="group" aria-label="Motor de reconocimiento">
+            <button className={prefs.asrEngine === "local" ? "on" : ""} onClick={() => onChange({ asrEngine: "local" })}>
+              <strong>En tu móvil</strong>
+              <small>Privado, sin internet</small>
+            </button>
+            <button
+              className={prefs.asrEngine === "browser" ? "on" : ""}
+              onClick={() => onChange({ asrEngine: "browser" })}
+              disabled={!recognitionSupported}
+            >
+              <strong>Navegador</strong>
+              <small>{recognitionSupported ? "Texto en vivo" : "No disponible"}</small>
+            </button>
+          </div>
+        </label>
+        {prefs.asrEngine === "local" ? (
           <>
-            <p className="muted small">
-              Whisper entiende muy bien el acento español, funciona sin conexión y tu voz no sale del dispositivo.{" "}
-              {audio.asr === "loading" && `Preparando… ${Math.round(audio.asrProgress * 100)}%`}
-              {audio.asr === "error" && "No se pudo cargar; se usará el del navegador."}
-            </p>
-            <div className="seg seg-wide" role="group" aria-label="Precisión">
-              {(Object.keys(WHISPER_MODELS) as WhisperSize[]).map((k) => (
-                <button key={k} className={prefs.whisperSize === k ? "on" : ""} onClick={() => onChange({ whisperSize: k })}>
-                  <strong>{WHISPER_MODELS[k].label}</strong>
-                  <small>~{WHISPER_MODELS[k].sizeMB} MB</small>
+            <div className="seg seg-wide" role="group" aria-label="Modelo de reconocimiento">
+              {(Object.keys(ASR_MODELS) as (keyof typeof ASR_MODELS)[]).map((k) => (
+                <button key={k} className={prefs.asrModel === k ? "on" : ""} onClick={() => onChange({ asrModel: k })}>
+                  <strong>{ASR_MODELS[k].label}</strong>
+                  <small>{ASR_MODELS[k].hint}</small>
                 </button>
               ))}
             </div>
+            <p className="muted small">
+              {audio.asr === "loading" && `Preparando… ${Math.round(audio.asrProgress * 100)}%`}
+              {audio.asr === "ready" && "Listo."}
+              {audio.asr === "error" && "No se pudo cargar; se usará el del navegador."}
+            </p>
           </>
         ) : (
           <label className="field">
@@ -191,7 +230,7 @@ export function Settings({ prefs, onChange }: { prefs: Prefs; onChange: (p: Part
       </section>
 
       <p className="foot muted">
-        Craic · IA local con WebLLM, Whisper y Kokoro · Built with Llama · Código abierto (MIT)
+        Craic · IA local con WebLLM, Moonshine, Silero y Kokoro · Built with Llama · Código abierto (MIT)
       </p>
     </div>
   );

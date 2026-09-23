@@ -5,7 +5,7 @@ import type { Prefs } from "../lib/prefs";
 import { freeStorageMB, isModelCached } from "../llm/engine";
 import { approxSizeMB, fetchDownloadSizeMB, formatMB, MODEL_OPTIONS, modelIdFor, type ModelTier } from "../llm/models";
 import { getScenario, scenariosFor } from "../scenarios";
-import { TTS_SIZE_MB, WHISPER_MODELS } from "../speech/audioModels";
+import { ASR_MODELS, TTS_SIZE_MB } from "../speech/audioModels";
 import { Flag } from "./Brand";
 import { Icon } from "./Icon";
 
@@ -16,6 +16,7 @@ interface Props {
   demo: boolean;
   draft: Draft | null;
   audioCached: boolean;
+  needTTS: boolean;
   onChange: (p: Partial<Prefs>) => void;
   onStart: (info: { cached: boolean }) => void;
   onResume: () => void;
@@ -28,7 +29,7 @@ const LEVELS: { id: Level; label: string }[] = [
   { id: "C1", label: "Avanzado" },
 ];
 
-export function Setup({ prefs, f16, mobile, demo, draft, audioCached, onChange, onStart, onResume, onDiscardDraft }: Props) {
+export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, onChange, onStart, onResume, onDiscardDraft }: Props) {
   const [cached, setCached] = useState<Record<ModelTier, boolean | null>>({ light: null, quality: null });
   const [sizes, setSizes] = useState<Record<ModelTier, number | null>>({ light: null, quality: null });
   const [free, setFree] = useState<number | null>(null);
@@ -58,8 +59,8 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, onChange, 
   const scenario = getScenario(prefs.scenarioId, character.kind);
   const tier = prefs.tier;
   const isCached = demo || cached[tier] === true;
-  const audioMB = prefs.voiceEngine === "neural" ? TTS_SIZE_MB : 0;
-  const asrMB = prefs.asrEngine === "whisper" ? WHISPER_MODELS[prefs.whisperSize].sizeMB : 0;
+  const audioMB = needTTS ? TTS_SIZE_MB[prefs.voiceQuality === "high" ? "webgpu" : "wasm"] : 0;
+  const asrMB = prefs.asrEngine === "local" ? ASR_MODELS[prefs.asrModel].sizeMB : 0;
   const extraMB = demo || audioCached ? 0 : audioMB + asrMB;
   const llmMB = isCached ? 0 : (sizes[tier] ?? approxSizeMB(tier, f16));
   const totalMB = llmMB + extraMB;
@@ -187,7 +188,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, onChange, 
         {totalMB > 0 && (
           <p className="note">
             Primera vez: se descargarán <strong>≈ {formatMB(totalMB)}</strong>
-            {extraMB > 0 && <> (IA {formatMB(llmMB)} + voz realista y reconocimiento de voz {formatMB(extraMB)})</>}. Mejor con Wi-Fi. Después
+            {extraMB > 0 && <> (IA {formatMB(llmMB)} + voz natural y oído {formatMB(extraMB)})</>}. Mejor con Wi-Fi. Después
             funciona sin conexión.
           </p>
         )}

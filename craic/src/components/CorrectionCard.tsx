@@ -2,17 +2,16 @@ import { useState } from "react";
 import type { Msg } from "../conversation";
 import { addOneVocab } from "../lib/db";
 import { applyCorrections } from "../llm/parse";
-import type { AsrEngine } from "../speech/voiceInput";
 import { PracticeSpeech } from "./PracticeSpeech";
 
 interface Props {
   msg: Msg;
-  asrEngine: AsrEngine;
-  asrLang: string;
+  listenOnce: () => Promise<string>;
+  onStopListening: () => void;
   onSay: (text: string) => void;
 }
 
-export function CorrectionCard({ msg, asrEngine, asrLang, onSay }: Props) {
+export function CorrectionCard({ msg, listenOnce, onStopListening, onSay }: Props) {
   const [saved, setSaved] = useState<Set<number>>(new Set());
 
   if (msg.correctionState === "pending") {
@@ -66,7 +65,7 @@ export function CorrectionCard({ msg, asrEngine, asrLang, onSay }: Props) {
         <div className="corr-full">
           <small>Versión natural</small>
           <p lang="en">{full}</p>
-          <PracticeSpeech target={full} engine={asrEngine} lang={asrLang} onListen={() => onSay(full)} />
+          <PracticeSpeech target={full} listenOnce={listenOnce} onStop={onStopListening} onListen={() => onSay(full)} />
         </div>
       )}
       {tip && <p className="corr-tip">💡 {tip}</p>}

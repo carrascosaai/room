@@ -8,8 +8,7 @@ import {
   hasCompleteQuestion,
   parseCorrections,
   parseSuggestions,
-  questionOf,
-  similarQuestion,
+  splitSentences,
   type CorrectionResult,
   type Suggestion,
 } from "./llm/parse";
@@ -23,7 +22,7 @@ import {
   SUGGESTION_SCHEMA,
 } from "./llm/prompts";
 import type { Scenario } from "./scenarios";
-import { speak, stopSpeaking, type SpeechRate, type VoiceEngine } from "./speech/tts";
+import { createSpeechStream, speak, stopSpeaking, type SpeakOptions, type SpeechRate, type VoiceEngine } from "./speech/tts";
 
 export interface Msg {
   id: string;
@@ -84,19 +83,21 @@ export function useConversation({ llm, character, level, scenario, voice, initia
     [update],
   );
 
-  const say = useCallback(
-    (text: string, rate?: SpeechRate) => {
+  const speakOpts = useCallback(
+    (rate?: SpeechRate): SpeakOptions => {
       const v = voiceRef.current;
-      return speak(text, {
+      return {
         rate: rate ?? v.rate,
         langs: character.voiceLangs,
         gender: character.voiceGender,
         neuralVoice: v.neuralVoice,
         engine: v.engine,
-      });
+      };
     },
     [character],
   );
+
+  const say = useCallback((text: string, rate?: SpeechRate) => speak(text, speakOpts(rate)), [speakOpts]);
 
   // El personaje abre la conversación con una frase preparada (instantánea),
   // o se retoma una conversación guardada.
@@ -108,7 +109,6 @@ export function useConversation({ llm, character, level, scenario, voice, initia
     const pool = scenario.openers.length ? scenario.openers : character.openers;
     const opener = pool[Math.floor(Math.random() * pool.length)];
     update(() => [{ id: uid(), role: "assistant", text: opener }]);
-    if (voiceRef.current.autoSpeak) void say(opener);
     return () => stopSpeaking();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [character, scenario]);
@@ -119,52 +119,57 @@ export function useConversation({ llm, character, level, scenario, voice, initia
     if (e.kind === "memory" || e.kind === "webgpu") setEngineError(e);
   };
 
+  /**
+   * Envía tu frase. Se resuelve cuando el personaje ha terminado de hablar
+   * (para volver a escucharte). Las correcciones van en segundo plano.
+   */
   const send = useCallback(
-    async (rawText: string) => {
+    async (rawText: string): Promise<void> => {
       const text = rawText.replace(/\s+/g, " ").trim();
       if (!text || thinking) return;
       stopSpeaking();
       const prev = messagesRef.current;
-      const assistantMsgs = prev.filter((m) => m.role === "assistant");
-      const previousQuestion = assistantMsgs[assistantMsgs.length - 1]?.text;
-      const askedBefore = assistantMsgs.map((m) => questionOf(m.text)).filter((q): q is string => !!q);
+      const previousQuestion = [...prev].reverse().find((m) => m.role === "assistant")?.text;
       const userMsg: Msg = { id: uid(), role: "user", text, correctionState: "pending" };
       const botMsg: Msg = { id: uid(), role: "assistant", text: "", streaming: true };
       update((p) => [...p, userMsg, botMsg]);
       setThinking(true);
 
-      // 1) Respuesta del personaje
-      const history = [...prev, userMsg].map((m) => ({ role: m.role, text: m.text }));
-      const generate = async (temperature: number) => {
-        const raw = await llm.complete(
-          buildReplyMessages(character, level, history, { scenario, avoidQuestions: askedBefore }),
-          {
-            tag: "reply",
-            temperature,
-            maxTokens: level === "C1" ? 110 : 90,
-            onText: (partial) => {
-              patch(botMsg.id, { text: cleanPartial(partial, character.name) });
-              return hasCompleteQuestion(partial);
-            },
-          },
-        );
-        return cleanReply(raw, character.name);
+      // La voz empieza con la primera frase completa, mientras se escribe el resto.
+      const speech = voiceRef.current.autoSpeak ? createSpeechStream(speakOpts()) : null;
+      let spoken = 0;
+      const pushComplete = (clean: string, final: boolean) => {
+        if (!speech) return;
+        const sentences = splitSentences(clean);
+        const complete = final ? sentences : sentences.filter((s, i) => i < sentences.length - 1 || /\?["'’”)]*$/.test(s));
+        for (; spoken < complete.length; spoken++) speech.push(complete[spoken]);
       };
+
+      const history = [...prev, userMsg].map((m) => ({ role: m.role, text: m.text }));
       let reply: string;
       try {
-        reply = await generate(0.7);
-        // Si repite una pregunta que ya hizo, se genera otra vez con más variedad.
-        const q = questionOf(reply);
-        if (q && askedBefore.some((old) => similarQuestion(old, q))) reply = await generate(1.0);
+        const raw = await llm.complete(buildReplyMessages(character, level, history, { scenario }), {
+          tag: "reply",
+          priority: "high",
+          temperature: 0.7,
+          maxTokens: level === "C1" ? 75 : 60,
+          onText: (partial) => {
+            const clean = cleanPartial(partial, character.name);
+            patch(botMsg.id, { text: clean });
+            pushComplete(clean, false);
+            return hasCompleteQuestion(partial);
+          },
+        });
+        reply = cleanReply(raw, character.name);
       } catch (err) {
         handleEngineError(err);
         reply = "Sorry, my mind went blank for a second. Can you say that again?";
       }
       patch(botMsg.id, { text: reply, streaming: false });
       setThinking(false);
-      if (voiceRef.current.autoSpeak) void say(reply);
+      pushComplete(reply, true);
 
-      // 2) Correcciones (llamada aparte, más fiable en modelos pequeños)
+      // Correcciones: prioridad baja. Si vuelves a hablar, se pausan y se retoman después.
       const job = (async () => {
         if (words(text) <= 2) {
           patch(userMsg.id, { corrections: { errors: [], tip: SHORT_TIP }, correctionState: "done" });
@@ -173,8 +178,9 @@ export function useConversation({ llm, character, level, scenario, voice, initia
         try {
           const raw = await llm.complete(buildCorrectionMessages(level, previousQuestion, text), {
             tag: "correct",
+            priority: "low",
             temperature: 0.1,
-            maxTokens: 320,
+            maxTokens: 180,
             jsonSchema: CORRECTION_SCHEMA,
           });
           patch(userMsg.id, { corrections: parseCorrections(raw, text), correctionState: "done" });
@@ -184,10 +190,11 @@ export function useConversation({ llm, character, level, scenario, voice, initia
         }
       })();
       pendingRef.current = Promise.all([pendingRef.current, job]).then(() => undefined);
-      await job;
+
+      await speech?.end();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [llm, character, level, scenario, thinking, update, patch, say],
+    [llm, character, level, scenario, thinking, update, patch, speakOpts],
   );
 
   /** «No entiendo»: el personaje lo repite más fácil y más despacio. */
@@ -202,6 +209,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
     try {
       const raw = await llm.complete(buildRephraseMessages(character, last.text), {
         tag: "rephrase",
+        priority: "high",
         temperature: 0.4,
         maxTokens: 70,
       });
@@ -212,7 +220,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
     }
     patch(msg.id, { text, streaming: false });
     setThinking(false);
-    void say(text, "slow");
+    await say(text, "slow");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [llm, character, thinking, update, patch, say]);
 

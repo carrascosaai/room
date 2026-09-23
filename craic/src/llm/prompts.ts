@@ -8,7 +8,7 @@ export const HISTORY_MESSAGES = 6;
 
 type Turn = { role: "user" | "assistant"; text: string };
 
-const MAX_WORDS: Record<Level, number> = { B1: 35, B2: 40, C1: 50 };
+const MAX_WORDS: Record<Level, number> = { B1: 25, B2: 30, C1: 35 };
 
 /** Une mensajes seguidos del mismo rol (p. ej. tras «No entiendo»). */
 function mergeTurns(turns: Turn[]): Turn[] {
@@ -21,32 +21,23 @@ function mergeTurns(turns: Turn[]): Turn[] {
   return out;
 }
 
+/**
+ * Prompt corto a propósito: cada token del prompt se procesa en cada turno,
+ * así que menos texto = respuesta antes.
+ */
 export function buildReplyMessages(
   character: Character,
   level: Level,
   history: Turn[],
-  opts: { scenario?: Scenario; avoidQuestions?: string[] } = {},
+  opts: { scenario?: Scenario } = {},
 ): ChatMessage[] {
-  const avoid = (opts.avoidQuestions ?? []).slice(-6);
   const system = [
     character.persona,
-    "You are talking with a Spanish engineering student who is practising English with you.",
-    opts.scenario?.setting ? `SITUATION: ${opts.scenario.setting}` : "",
-    "",
-    "RULES:",
-    `- ${LEVEL_STYLE[level]}`,
-    `- Reply in 1 to 3 short sentences (maximum ${MAX_WORDS[level]} words in total), like in a real spoken conversation.`,
-    "- React to what they said, maybe add a small detail about yourself, then ask exactly ONE question at the end.",
-    "- Never ask two questions. Only one question mark in your reply.",
-    "- Do not correct their English and do not explain grammar. Just chat naturally.",
-    "- If they use a Spanish word, tell them the English word in a natural way (for example: \"Ah, a 'carpeta' is a folder in English!\") and continue the conversation.",
-    "- If they say they don't understand, say it again with simpler words.",
-    "- Stay in character. Never say you are an AI. No emojis, no lists, no actions between asterisks.",
-    avoid.length ? `- Do not repeat these questions you already asked: ${avoid.map((q) => `"${q}"`).join("; ")}` : "",
-    "",
-    'EXAMPLE of a good reply: "Oh, that sounds amazing! I went to Seville last year and loved it. What did you like most about the trip?"',
+    "You're on a voice call with a Spanish engineering student practising English.",
+    opts.scenario?.setting ? `Situation: ${opts.scenario.setting}` : "",
+    `Talk like a real person on a call: 1 or 2 short sentences, max ${MAX_WORDS[level]} words. ${LEVEL_STYLE[level]} React to what they said, then ask ONE short question. Never correct them. If they use a Spanish word, say it in English and carry on. Never say you're an AI. No emojis or lists.`,
   ]
-    .filter((l, i, a) => l !== "" || a[i - 1] !== "")
+    .filter(Boolean)
     .join("\n");
 
   const recent = mergeTurns(history.slice(-HISTORY_MESSAGES));
@@ -125,33 +116,19 @@ export function buildTranslateMessages(text: string): ChatMessage[] {
 
 const CORRECTION_SYSTEM = (level: Level) =>
   [
-    `You are an English teacher for Spanish speakers. You check what a ${level} learner said in a casual spoken conversation.`,
-    "Find real mistakes only: grammar, verb tenses, prepositions, articles, word order, wrong words, and Spanish words.",
-    "Ignore capital letters, punctuation and contractions: this was spoken aloud and transcribed.",
-    "Write every explanation in SPANISH, in one short sentence.",
-    "Answer ONLY with JSON in this format:",
-    '{"errors":[{"original":"wrong part copied from the learner","corrected":"natural English version","explanation":"una frase corta en español","type":"one of the types"}],"tip":"consejo corto en español"}',
-    `Types: ${CORRECTION_TYPES.join(", ")}.`,
-    'If there are no mistakes, use "errors":[] and give a short "tip" in Spanish with an English example to sound more native.',
-    'If there are mistakes, "tip" can be "".',
+    `You correct a Spanish ${level} learner's spoken English. Only real mistakes (grammar, tense, prepositions, articles, word order, wrong or Spanish words). Ignore punctuation and capitals.`,
+    `JSON only: {"errors":[{"original":"wrong part","corrected":"natural version","explanation":"una frase corta en español","type":"${CORRECTION_TYPES.join("|")}"}],"tip":""}`,
+    'No mistakes: "errors":[] and a short "tip" in Spanish to sound more native.',
   ].join("\n");
 
 const FEW_SHOT: [string, string][] = [
   [
-    'Question: "What did you do last weekend?"\nLearner: "Yesterday I go to the beach with my friends and we eat paella."',
-    '{"errors":[{"original":"Yesterday I go to the beach","corrected":"Yesterday I went to the beach","explanation":"Con \'yesterday\' se usa el pasado simple: go → went.","type":"tiempo verbal"},{"original":"we eat paella","corrected":"we ate paella","explanation":"También en pasado: eat → ate.","type":"tiempo verbal"}],"tip":""}',
+    'Learner: "Yesterday I go to the beach and I like a lot."',
+    '{"errors":[{"original":"I go","corrected":"I went","explanation":"Con \'yesterday\' va pasado: go → went.","type":"tiempo verbal"},{"original":"I like a lot","corrected":"I really liked it","explanation":"\'Like\' necesita objeto (it) y va en pasado.","type":"gramática"}],"tip":""}',
   ],
   [
-    'Question: "Do you like sports?"\nLearner: "Yes, I like a lot the football."',
-    '{"errors":[{"original":"I like a lot the football","corrected":"I really like football","explanation":"\'A lot\' no va entre el verbo y el objeto, y no se pone \'the\' al hablar de algo en general.","type":"orden de palabras"}],"tip":""}',
-  ],
-  [
-    'Question: "What do you study?"\nLearner: "I am studying engineering in Córdoba."',
-    '{"errors":[],"tip":"¡Correcto! Un nativo diría más bien: \\"I\'m doing engineering here in Córdoba.\\" Usa contracciones como I\'m para sonar natural."}',
-  ],
-  [
-    'Question: "What do you need for class?"\nLearner: "I need to buy a carpeta."',
-    '{"errors":[{"original":"a carpeta","corrected":"a folder","explanation":"\'Carpeta\' en inglés es \'folder\'.","type":"español"}],"tip":""}',
+    'Learner: "I am studying engineering here."',
+    '{"errors":[],"tip":"¡Perfecto! Suena más natural con contracción: \\"I\'m studying engineering here.\\""}',
   ],
 ];
 
@@ -165,7 +142,7 @@ export function buildCorrectionMessages(
     messages.push({ role: "user", content: u });
     messages.push({ role: "assistant", content: a });
   }
-  const q = previousQuestion ? `Question: "${previousQuestion}"\n` : "";
+  const q = previousQuestion ? `(Answering: "${previousQuestion}")\n` : "";
   messages.push({ role: "user", content: `${q}Learner: "${userText}"` });
   return messages;
 }
@@ -175,7 +152,7 @@ export const CORRECTION_SCHEMA = JSON.stringify({
   properties: {
     errors: {
       type: "array",
-      maxItems: 4,
+      maxItems: 3,
       items: {
         type: "object",
         properties: {

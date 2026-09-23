@@ -22,15 +22,19 @@ colgar, ajustes y micrófono).
   finde, viajes, tu carrera, resolver un problema; y para Sarah: entrevista
   general, técnica y de situación (STAR).
 - **Niveles:** B1, B2 y C1.
-- **Voz realista:** Kokoro-82M, un modelo de voz neuronal que se ejecuta en tu
-  dispositivo (voces británicas y americanas, elegibles por personaje). Mientras
-  carga, o si falla, se usa la voz del sistema.
-- **Te entiende bien:** Whisper (de OpenAI) transcribe tu voz en el dispositivo;
-  entiende muy bien el acento español, funciona sin conexión y en cualquier
-  navegador. Opción «Alta precisión» (Whisper small). Si Whisper aún no ha
-  cargado, se usa el reconocimiento del navegador.
-- **Mantener para hablar** o un toque para empezar y otro para enviar; también
-  puedes escribir. Opción de revisar la transcripción antes de enviarla.
+- **Como una llamada (manos libres):** te escucha sola; cuando dejas de hablar
+  (pausa configurable: 0,65 / 1 / 1,6 s) se envía automáticamente, el personaje
+  responde con voz y vuelve a escucharte. El micro del dock pausa/reanuda y, si
+  el personaje está hablando, lo interrumpe.
+- **Respuesta rápida:** la voz empieza con la primera frase mientras el modelo
+  escribe el resto; las correcciones se calculan en segundo plano y nunca
+  retrasan tu siguiente turno.
+- **Voz natural:** usa las voces «naturales» del navegador si existen (Edge,
+  Safari con voces mejoradas) y, si no, Kokoro-82M en máxima calidad por GPU
+  (voces elegibles por personaje, ordenadas por calidad).
+- **Te entiende bien:** Silero VAD detecta cuándo hablas y Moonshine transcribe
+  al instante en tu dispositivo (opción «Preciso» con Whisper small, o el
+  reconocimiento del navegador). Sin internet y sin pitidos.
 - **Una sola pregunta por turno**, y no repite preguntas que ya hizo.
 - **Ayudas:** 💡 ideas de respuesta (con traducción), 🌐 traducir un mensaje,
   🤔 «No entiendo» (lo repite más fácil y despacio), 🐢 repetir despacio,
@@ -52,14 +56,19 @@ colgar, ajustes y micrófono).
 ## Cómo funciona por dentro
 
 ```
-Tu voz ─► micrófono (cancelación de eco y ruido) ─► Whisper (worker, WASM) ─► texto
-texto ─► WebLLM (worker, WebGPU) ─► 1) respuesta del personaje ─► Kokoro (worker, WASM) ─► altavoz
-                               └─► 2) correcciones en JSON ─► tarjeta en pantalla
+micro ─► Silero VAD (¿hablas? ¿has parado?) ─► Moonshine ─► texto        [asr.worker, WASM]
+texto ─► WebLLM (prioridad alta) ─► frase 1 ─► Kokoro / voz natural ─► altavoz   [llm.worker + tts.worker, GPU]
+                                  └─► frase 2 … (se genera mientras suena la 1)
+      └► correcciones (prioridad baja, se pausan si vuelves a hablar)
 ```
 
-- **Dos llamadas por turno.** Los modelos pequeños fallan si les pides muchas
-  cosas a la vez: primero la respuesta (en streaming, se corta tras la primera
-  pregunta y empieza a sonar frase a frase) y después, aparte, las correcciones.
+- **Dos llamadas por turno con prioridades.** Primero la respuesta (en
+  streaming, se corta tras la primera pregunta y empieza a sonar frase a frase);
+  después, con prioridad baja, las correcciones. Si vuelves a hablar mientras se
+  calculan, se interrumpen y se retoman cuando el modelo queda libre
+  (`src/llm/scheduler.ts`, con tests).
+- **Prompts cortos** (cada token del prompt cuesta tiempo en cada turno) y
+  calentamiento del modelo al cargar para que la primera respuesta no tarde.
 - **Correcciones robustas.** JSON con gramática forzada (`response_format` de
   WebLLM) y ejemplos; el parser tolera JSON roto o cortado, descarta
   «correcciones» que no cambian nada o que no aparecen en lo que dijiste, y nunca
@@ -85,9 +94,13 @@ Voz y oído (Transformers.js, se descargan una vez y quedan en caché):
 
 | Parte | Modelo | Descarga aprox. |
 |---|---|---|
-| Voz realista | `onnx-community/Kokoro-82M-v1.0-ONNX` (q8) | ~90 MB |
-| Reconocimiento (normal) | `Xenova/whisper-base.en` (q8) | ~80 MB |
-| Reconocimiento (alta precisión) | `Xenova/whisper-small.en` (q8) | ~250 MB |
+| Voz (máxima calidad, GPU) | `onnx-community/Kokoro-82M-v1.0-ONNX` fp32 | ~330 MB |
+| Voz (ligera, CPU) | `onnx-community/Kokoro-82M-v1.0-ONNX` q8 | ~90 MB |
+| Detección de voz | `onnx-community/silero-vad` | ~2 MB |
+| Transcripción (rápida) | `onnx-community/moonshine-base-ONNX` | ~200 MB |
+| Transcripción (precisa) | `Xenova/whisper-small.en` q8 | ~250 MB |
+
+Si el navegador tiene voces naturales (p. ej. Edge), no se descarga Kokoro.
 
 Por qué Llama 3.2: tiene muy buen inglés conversacional para su tamaño, sigue
 bien instrucciones, está marcado como apto para dispositivos con pocos recursos
@@ -112,12 +125,12 @@ lista de WebLLM sirve).
 | iPhone / iPad | Safari con iOS / iPadOS 26 o superior |
 | Firefox | WebGPU todavía parcial según sistema; mejor Chrome |
 
-- **Espacio:** ~1,1 GB libre con el modelo ligero (IA + voz + oído), ~2,5 GB con el de calidad.
+- **Espacio:** ~1,3 GB libres con el modelo ligero (IA + voz + oído), ~2,6 GB con el de calidad.
 - **Memoria:** si el móvil se queda sin memoria, la app lo explica; usa el modelo
   ligero y cierra otras apps.
 - **HTTPS obligatorio:** WebGPU y el micrófono solo funcionan en `https://` o `localhost`.
-- **Voz y privacidad:** con Whisper (opción por defecto) tu voz se transcribe en
-  el dispositivo y no sale de él. Si eliges el reconocimiento «Navegador», en
+- **Voz y privacidad:** con el reconocimiento local (opción por defecto) tu voz
+  se transcribe en el dispositivo y no sale de él. Si eliges el reconocimiento «Navegador», en
   Chrome el audio se procesa en los servidores de Google. El modelo de IA, las
   voces y tus datos **nunca** salen del dispositivo.
 
@@ -184,19 +197,21 @@ craic/
 │   ├── summary.ts            errores repetidos y expresiones del resumen
 │   ├── llm/
 │   │   ├── models.ts         modelos elegidos y tamaño de descarga
-│   │   ├── engine.ts         WebLLM en Web Worker, cola de peticiones, caché
+│   │   ├── engine.ts         WebLLM en Web Worker, calentamiento, caché
+│   │   ├── scheduler.ts      cola con prioridades e interrupción (+ tests)
 │   │   ├── prompts.ts        prompts del personaje y de las correcciones
 │   │   ├── parse.ts          limpieza y parseo tolerante (+ tests)
 │   │   ├── errors.ts         errores traducidos a mensajes en español
 │   │   └── mockEngine.ts     motor falso del modo ?demo
 │   ├── scenarios.ts          situaciones de role-play
 │   ├── speech/
-│   │   ├── audio.worker.ts   Kokoro (voz) y Whisper (oído) en un worker
+│   │   ├── asr.worker.ts     Silero VAD + Moonshine/Whisper (detecta pausas y transcribe)
+│   │   ├── tts.worker.ts     Kokoro en GPU (fp32) o CPU (q8)
 │   │   ├── audioModels.ts    carga y progreso de los modelos de audio
-│   │   ├── recorder.ts       micrófono con pre-grabación de 0,5 s
-│   │   ├── voiceInput.ts     Whisper con respaldo al reconocimiento del navegador
-│   │   ├── asrText.ts        detector de voz y limpieza de alucinaciones (+ tests)
-│   │   └── tts.ts            voz neuronal frase a frase, con respaldo del sistema
+│   │   ├── mic.ts            micrófono compartido → trozos de 512 muestras a 16 kHz
+│   │   ├── voiceInput.ts     escucha con fin de frase automático (local o navegador)
+│   │   ├── asrText.ts        limpieza de transcripciones (+ tests)
+│   │   └── tts.ts            voz frase a frase; elige la voz más natural disponible
 │   ├── lib/                  WebGPU, IndexedDB, repetición espaciada, progreso,
 │   │                         puntuación de pronunciación, borrador, preferencias
 │   └── components/           interfaz
