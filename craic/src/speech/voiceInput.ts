@@ -1,120 +1,220 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { cleanTranscript, hasSpeech, normalize } from "./asrText";
-import { getAudioStatus, transcribe } from "./audioModels";
-import { acquireRecorder, micFailure, releaseRecorder, type MicRecorder } from "./recorder";
-import { recognitionSupported, useSpeechRecognition, type MicError } from "./recognition";
+// Escucha con detección de final de frase: cuando dejas de hablar, se envía solo.
+//  - "local": Silero VAD + Moonshine/Whisper en el dispositivo (sin pitidos, sin internet).
+//  - "browser": reconocimiento del navegador con temporizador de silencio.
+import { cleanTranscript } from "./asrText";
+import { asrSend, getAudioStatus, onAsrMessage } from "./audioModels";
+import { acquireMic, mic, micFailure, releaseMic } from "./mic";
+import { getSR, joinResults, mapSRError, recognitionSupported, type MicError } from "./recognition";
 
-export type AsrEngine = "whisper" | "browser";
-export type VoicePhase = "idle" | "listening" | "transcribing";
+export type AsrEngine = "local" | "browser";
+export type ListenPhase = "idle" | "listening" | "hearing" | "transcribing";
 
-const whisperCapable = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
+export interface ListenOptions {
+  engine: AsrEngine;
+  lang: string;
+  /** Silencio (ms) que marca el final de tu frase */
+  silenceMs: number;
+  onPhase: (p: ListenPhase) => void;
+  onPartial?: (text: string) => void;
+  onFinal: (text: string) => void;
+  onError: (e: MicError) => void;
+}
 
-/**
- * Entrada de voz. Con Whisper se graba el audio y se transcribe en el
- * dispositivo (mejor con acento español). Si Whisper aún no está listo y el
- * navegador tiene reconocimiento propio, se usa ese mientras tanto.
- */
-export function useVoiceInput(engine: AsrEngine, lang: string) {
-  const browser = useSpeechRecognition(lang);
-  const recRef = useRef<MicRecorder | null>(null);
-  const modeRef = useRef<AsrEngine>(engine);
-  const [phase, setPhase] = useState<VoicePhase>("idle");
-  const [error, setError] = useState<MicError | null>(null);
+export interface ListenHandle {
+  /** Termina ya y transcribe lo que haya (p. ej. al tocar el micro). */
+  finish(): void;
+  cancel(): void;
+}
 
-  useEffect(
-    () => () => {
-      if (recRef.current) {
-        recRef.current.cancel();
-        releaseRecorder();
-        recRef.current = null;
+let active: ListenHandle | null = null;
+
+export const voiceInputAvailable =
+  (typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia) || recognitionSupported;
+
+/** Qué motor se usará de verdad ahora mismo. */
+export function effectiveEngine(engine: AsrEngine): AsrEngine | null {
+  const localReady = getAudioStatus().asr === "ready";
+  if (engine === "local") return localReady ? "local" : recognitionSupported ? "browser" : null;
+  return recognitionSupported ? "browser" : localReady ? "local" : null;
+}
+
+export function listen(opts: ListenOptions): ListenHandle {
+  active?.cancel();
+  const engine = effectiveEngine(opts.engine);
+  let handle: ListenHandle;
+  if (!engine) {
+    opts.onError("loading");
+    handle = { finish() {}, cancel() {} };
+  } else handle = engine === "local" ? listenLocal(opts) : listenBrowser(opts);
+  active = handle;
+  return handle;
+}
+
+export function micLevel(): number {
+  return mic.level;
+}
+
+function listenLocal(opts: ListenOptions): ListenHandle {
+  let done = false;
+  let offFrame: (() => void) | null = null;
+  let offMsg: (() => void) | null = null;
+  const cleanup = () => {
+    done = true;
+    offFrame?.();
+    offMsg?.();
+    releaseMic();
+    if (active === handle) active = null;
+  };
+  acquireMic();
+  offMsg = onAsrMessage((m) => {
+    if (done) return;
+    if (m.type === "speech-start") opts.onPhase("hearing");
+    else if (m.type === "transcribing") {
+      offFrame?.();
+      opts.onPhase("transcribing");
+    } else if (m.type === "final") {
+      cleanup();
+      opts.onPhase("idle");
+      opts.onFinal(cleanTranscript(m.text));
+    } else if (m.type === "error") {
+      cleanup();
+      opts.onPhase("idle");
+      opts.onError("other");
+    }
+  });
+  const handle: ListenHandle = {
+    finish() {
+      if (!done) asrSend({ type: "finish" });
+    },
+    cancel() {
+      if (done) return;
+      asrSend({ type: "cancel" });
+      cleanup();
+      opts.onPhase("idle");
+    },
+  };
+  mic
+    .open()
+    .then(() => {
+      if (done) return;
+      asrSend({ type: "listen", silenceMs: opts.silenceMs });
+      offFrame = mic.onFrame((frame) => asrSend({ type: "frame", frame }, [frame.buffer]));
+      opts.onPhase("listening");
+    })
+    .catch((err) => {
+      cleanup();
+      opts.onPhase("idle");
+      const f = micFailure(err);
+      opts.onError(f === "denied" ? "denied" : f === "no-mic" ? "no-mic" : "other");
+    });
+  return handle;
+}
+
+function listenBrowser(opts: ListenOptions): ListenHandle {
+  const SR = getSR()!;
+  let done = false;
+  let text = "";
+  let finishing = false;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let rec: ReturnType<typeof make> | null = null;
+  let restarts = 0;
+
+  const clear = () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+  };
+  const end = (final: boolean) => {
+    if (done) return;
+    done = true;
+    clear();
+    try {
+      rec?.abort();
+    } catch {
+      /* nada */
+    }
+    if (active === handle) active = null;
+    opts.onPhase("idle");
+    if (final) opts.onFinal(cleanTranscript(text));
+  };
+
+  function make() {
+    const r = new SR();
+    r.lang = opts.lang;
+    r.continuous = true;
+    r.interimResults = true;
+    r.maxAlternatives = 1;
+    r.onresult = (e) => {
+      const t = joinResults(e);
+      if (!t) return;
+      text = t;
+      opts.onPhase("hearing");
+      opts.onPartial?.(text);
+      clear();
+      // El navegador tarda un poco en dar resultados: se añade margen.
+      timer = setTimeout(() => {
+        finishing = true;
+        end(true);
+      }, opts.silenceMs + 250);
+    };
+    r.onerror = (e) => {
+      const err = mapSRError(e.error);
+      if (!err || err === "no-speech") return; // se reinicia en onend
+      done = true;
+      clear();
+      if (active === handle) active = null;
+      opts.onPhase("idle");
+      opts.onError(err);
+    };
+    r.onend = () => {
+      if (done || finishing) return;
+      if (text) return end(true);
+      // Se cortó sin oír nada: seguimos escuchando.
+      if (restarts++ > 30) return end(false);
+      try {
+        rec = make();
+        rec.start();
+      } catch {
+        end(false);
       }
+    };
+    return r;
+  }
+
+  const handle: ListenHandle = {
+    finish() {
+      finishing = true;
+      end(!!text);
+      if (!text) opts.onFinal("");
     },
-    [],
-  );
-
-  const shouldUseWhisper = () => {
-    if (!whisperCapable) return false;
-    if (engine === "browser" && recognitionSupported) return false;
-    // Whisper elegido: si aún está cargando, usamos el del navegador mientras tanto.
-    return getAudioStatus().asr === "ready" || !recognitionSupported;
-  };
-
-  const start = useCallback(async () => {
-    setError(null);
-    browser.clearError();
-    const whisper = shouldUseWhisper();
-    modeRef.current = whisper ? "whisper" : "browser";
-    if (!whisper) {
-      browser.start();
-      setPhase("listening");
-      return;
-    }
-    try {
-      recRef.current ??= acquireRecorder();
-      await recRef.current.open();
-      recRef.current.start();
-      setPhase("listening");
-    } catch (err) {
-      setError(micFailure(err) === "denied" ? "denied" : micFailure(err) === "no-mic" ? "no-mic" : "other");
-      setPhase("idle");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engine, browser.start, browser.clearError]);
-
-  const stop = useCallback(async (): Promise<string> => {
-    if (modeRef.current === "browser") {
-      const text = await browser.stop();
-      setPhase("idle");
-      return text;
-    }
-    const rec = recRef.current;
-    if (!rec) return "";
-    const audio = await rec.stop();
-    if (audio.length < 16000 * 0.3 || !hasSpeech(audio)) {
-      setPhase("idle");
-      setError("no-speech");
-      return "";
-    }
-    setPhase("transcribing");
-    try {
-      const text = cleanTranscript(await transcribe(normalize(audio)));
-      if (!text) setError("no-speech");
-      return text;
-    } catch (err) {
-      console.error(err);
-      setError("other");
-      return "";
-    } finally {
-      setPhase("idle");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [browser.stop]);
-
-  const cancel = useCallback(() => {
-    browser.cancel();
-    recRef.current?.cancel();
-    setPhase("idle");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [browser.cancel]);
-
-  const level = useCallback(() => (modeRef.current === "whisper" ? recRef.current?.level ?? 0 : 0.35), []);
-
-  const listening = modeRef.current === "browser" ? browser.listening : phase === "listening";
-
-  return {
-    available: whisperCapable || recognitionSupported,
-    phase: (modeRef.current === "browser" ? (browser.listening ? "listening" : "idle") : phase) as VoicePhase,
-    listening,
-    /** Texto en vivo (solo con el reconocimiento del navegador) */
-    transcript: modeRef.current === "browser" ? browser.transcript : "",
-    error: error ?? browser.error,
-    clearError: () => {
-      setError(null);
-      browser.clearError();
+    cancel() {
+      end(false);
     },
-    level,
-    start,
-    stop,
-    cancel,
   };
+  try {
+    rec = make();
+    rec.start();
+    opts.onPhase("listening");
+  } catch {
+    done = true;
+    opts.onError("other");
+  }
+  return handle;
+}
+
+/** Escucha una sola frase (p. ej. «Dilo tú») y devuelve el texto. */
+export function listenOnce(
+  opts: Omit<ListenOptions, "onFinal" | "onError"> & { onError?: (e: MicError) => void },
+): { result: Promise<string>; handle: ListenHandle } {
+  let handle!: ListenHandle;
+  const result = new Promise<string>((resolve) => {
+    handle = listen({
+      ...opts,
+      onFinal: resolve,
+      onError: (e) => {
+        opts.onError?.(e);
+        resolve("");
+      },
+    });
+  });
+  return { result, handle };
 }

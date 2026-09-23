@@ -1,18 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NEURAL_VOICES, type Character, type Level } from "../characters";
 import { useConversation, type Msg } from "../conversation";
-import type { Prefs } from "../lib/prefs";
+import { PAUSE_MS, type Prefs } from "../lib/prefs";
 import type { LLM } from "../llm/engine";
 import type { Suggestion } from "../llm/parse";
 import type { Scenario } from "../scenarios";
-import { useAudioModels } from "../speech/audioModels";
-import { MIC_ERROR_TEXT } from "../speech/recognition";
+import { getAudioStatus, useAudioModels } from "../speech/audioModels";
+import { MIC_ERROR_TEXT, type MicError } from "../speech/recognition";
 import { stopSpeaking, unlockTTS, useSpeaking } from "../speech/tts";
-import { useVoiceInput } from "../speech/voiceInput";
+import { listen, listenOnce, micLevel, voiceInputAvailable, type ListenHandle, type ListenPhase } from "../speech/voiceInput";
 import { Flag, Wordmark } from "./Brand";
 import { CorrectionCard } from "./CorrectionCard";
 import { Icon } from "./Icon";
-import { TalkButton } from "./TalkButton";
 import { Waveform } from "./Waveform";
 
 interface Props {
@@ -33,6 +32,8 @@ export function recognitionLangFor(prefs: Prefs, character: Character) {
   return character.voiceLangs[0] === "en-US" ? "en-US" : "en-GB";
 }
 
+const firstName = (c: Character) => c.name.split(" ")[0];
+
 export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, onChange, initialMessages, demo }: Props) {
   const neuralVoice = prefs.voiceOverrides[character.id] ?? character.neuralVoice;
   const convo = useConversation({
@@ -44,11 +45,13 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
     initialMessages,
     onChange,
   });
-  const { messages, thinking, engineError, send, say } = convo;
-  const asrLang = recognitionLangFor(prefs, character);
-  const mic = useVoiceInput(prefs.asrEngine, asrLang);
+  const { messages, thinking, engineError, say } = convo;
   const audio = useAudioModels();
   const speaking = useSpeaking();
+  const [phase, setPhase] = useState<ListenPhase>("idle");
+  const [partial, setPartial] = useState("");
+  const [micError, setMicError] = useState<MicError | null>(null);
+  const [paused, setPaused] = useState(!prefs.handsFree);
   const [draft, setDraft] = useState("");
   const [ending, setEnding] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
@@ -57,39 +60,158 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
   const [suggestions, setSuggestions] = useState<Suggestion[] | "loading" | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const handleRef = useRef<ListenHandle | null>(null);
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+  const busyRef = useRef(false); // el personaje piensa o habla
+  const aliveRef = useRef(true);
+  const prefsRef = useRef(prefs);
+  prefsRef.current = prefs;
+  const sendRef = useRef(convo.send);
+  sendRef.current = convo.send;
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, mic.transcript, mic.phase, suggestions]);
+  }, [messages, partial, phase, suggestions]);
 
-  const submit = (text: string) => {
-    setSuggestions(null);
-    void send(text);
-  };
+  const listenOpts = useCallback(
+    () => ({
+      engine: prefsRef.current.asrEngine,
+      lang: recognitionLangFor(prefsRef.current, character),
+      silenceMs: PAUSE_MS[prefsRef.current.pause],
+    }),
+    [character],
+  );
 
-  const startTalking = () => {
+  const stopListening = useCallback(() => {
+    handleRef.current?.cancel();
+    handleRef.current = null;
+    setPartial("");
+  }, []);
+
+  /** Ciclo de la llamada: escuchar → (pausa) enviar → el personaje habla → escuchar. */
+  const startListening = useCallback(() => {
+    if (!aliveRef.current || pausedRef.current || busyRef.current || !voiceInputAvailable) return;
+    setMicError(null);
+    handleRef.current?.cancel();
+    handleRef.current = listen({
+      ...listenOpts(),
+      onPhase: setPhase,
+      onPartial: setPartial,
+      onError: (e) => {
+        setMicError(e);
+        if (e === "loading" && getAudioStatus().asr === "loading") setTimeout(() => startListening(), 1200);
+        else if (e === "denied" || e === "no-mic" || e === "loading") {
+          setPaused(true);
+          pausedRef.current = true;
+        }
+      },
+      onFinal: (text) => {
+        handleRef.current = null;
+        setPartial("");
+        if (!text) {
+          // No se entendió nada: se sigue escuchando.
+          setTimeout(() => startListening(), 150);
+          return;
+        }
+        if (prefsRef.current.reviewTranscript) {
+          setDraft(text);
+          setPaused(true);
+          setTimeout(() => inputRef.current?.focus(), 50);
+          return;
+        }
+        void respondRef.current(text);
+      },
+    });
+  }, [listenOpts]);
+
+  const respondRef = useRef<(text: string) => Promise<void>>(async () => {});
+  const respond = useCallback(
+    async (text: string) => {
+      stopListening();
+      setSuggestions(null);
+      busyRef.current = true;
+      try {
+        await sendRef.current(text);
+      } finally {
+        busyRef.current = false;
+      }
+      startListening();
+    },
+    [startListening, stopListening],
+  );
+  respondRef.current = respond;
+
+  // Arranque: el personaje saluda y después empieza a escucharte.
+  useEffect(() => {
+    if (!messages.length) return; // aún no hay saludo
+    aliveRef.current = true;
+    let cancelled = false;
+    const opener = initialMessages?.length ? null : messages[0]?.text;
+    (async () => {
+      if (opener && prefs.autoSpeak) {
+        busyRef.current = true;
+        await say(opener);
+        busyRef.current = false;
+      }
+      if (!cancelled) startListening();
+    })();
+    return () => {
+      cancelled = true;
+      aliveRef.current = false;
+      handleRef.current?.cancel();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length > 0]);
+
+  // Si la app pasa a segundo plano, se deja de escuchar.
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === "hidden") stopListening();
+      else startListening();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [startListening, stopListening]);
+
+  const onMic = () => {
     unlockTTS();
-    stopSpeaking();
-    mic.clearError();
-    setSuggestions(null);
-    void mic.start();
-  };
-
-  const finishTalking = async () => {
-    const text = await mic.stop();
-    if (!text) return;
-    if (prefs.reviewTranscript) {
-      setDraft(text);
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else submit(text);
+    if (speaking) {
+      // Interrumpir al personaje y hablar tú
+      stopSpeaking();
+      setPaused(false);
+      pausedRef.current = false;
+      busyRef.current = false;
+      startListening();
+      return;
+    }
+    if (phase === "hearing") {
+      handleRef.current?.finish(); // enviar ya
+      return;
+    }
+    if (phase === "listening") {
+      setPaused(true);
+      pausedRef.current = true;
+      stopListening();
+      setPhase("idle");
+      return;
+    }
+    setPaused(false);
+    pausedRef.current = false;
+    startListening();
   };
 
   const submitDraft = (e: React.FormEvent) => {
     e.preventDefault();
     unlockTTS();
     if (!draft.trim() || thinking) return;
-    submit(draft);
+    const text = draft;
     setDraft("");
+    if (prefs.handsFree) {
+      setPaused(false);
+      pausedRef.current = false;
+    }
+    void respond(text);
   };
 
   const toggleSuggestions = async () => {
@@ -100,21 +222,61 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
     setSuggestions(s);
   };
 
+  const rephrase = async () => {
+    stopListening();
+    busyRef.current = true;
+    try {
+      await convo.rephrase();
+    } finally {
+      busyRef.current = false;
+    }
+    startListening();
+  };
+
+  /** «Dilo tú» en una corrección: pausa la llamada, escucha una frase y la devuelve. */
+  const practiceHandle = useRef<ListenHandle | null>(null);
+  const practiceListen = useCallback(async () => {
+    stopListening();
+    stopSpeaking();
+    busyRef.current = true;
+    const { result, handle } = listenOnce({ ...listenOpts(), onPhase: () => {}, onError: setMicError });
+    practiceHandle.current = handle;
+    const text = await result;
+    practiceHandle.current = null;
+    busyRef.current = false;
+    startListening();
+    return text;
+  }, [listenOpts, startListening, stopListening]);
+
   const end = async () => {
-    mic.cancel();
+    aliveRef.current = false;
+    stopListening();
     setEnding(true);
     onEnd(await convo.finish());
   };
 
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-  const busy = thinking || mic.phase !== "idle";
+  const name = firstName(character);
 
   const loadingAudio =
-    audio.tts === "loading" && prefs.voiceEngine === "neural"
-      ? `Preparando la voz realista… ${Math.round(audio.ttsProgress * 100)}%`
-      : audio.asr === "loading" && prefs.asrEngine === "whisper"
-        ? `Preparando el reconocimiento de voz… ${Math.round(audio.asrProgress * 100)}%`
+    audio.tts === "loading"
+      ? `Preparando la voz… ${Math.round(audio.ttsProgress * 100)}%`
+      : audio.asr === "loading" && prefs.asrEngine === "local"
+        ? `Preparando el oído… ${Math.round(audio.asrProgress * 100)}%`
         : null;
+
+  const status: { tone: "rec" | "speak" | "idle"; text: string } | null =
+    phase === "hearing"
+      ? { tone: "rec", text: "Te escucho…" }
+      : phase === "listening"
+        ? { tone: "rec", text: "Listening…" }
+        : phase === "transcribing"
+          ? { tone: "idle", text: "Un momento…" }
+          : thinking
+            ? { tone: "idle", text: `${name} está pensando…` }
+            : speaking
+              ? { tone: "speak", text: `${name} habla · toca 🎤 para interrumpir` }
+              : null;
 
   return (
     <div className="call">
@@ -129,7 +291,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       <button className={`convo-card${cardOpen ? " open" : ""}`} onClick={() => setCardOpen((v) => !v)} aria-expanded={cardOpen}>
         <Flag code={character.flag} />
         <span className="convo-card-text">
-          <strong>Conversation with {character.name.split(" ")[0]}</strong>
+          <strong>Conversation with {name}</strong>
           <small>
             {character.accent} · {level}
           </small>
@@ -141,7 +303,11 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
           <p>
             {scenario.emoji} <strong>{scenario.title}</strong> — {scenario.goal}
           </p>
-          <p className="muted small">{character.tagline}</p>
+          <p className="muted small">
+            {prefs.handsFree
+              ? "Modo llamada: habla cuando quieras; al hacer una pausa se envía solo."
+              : "Toca el micro para hablar; al hacer una pausa se envía solo."}
+          </p>
         </div>
       )}
 
@@ -154,7 +320,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
           </button>
         </div>
       )}
-      {loadingAudio && <div className="banner banner-soft">{loadingAudio} · mientras tanto se usa la del sistema</div>}
+      {loadingAudio && <div className="banner banner-soft">{loadingAudio}</div>}
 
       <div className="messages" ref={listRef} aria-live="polite">
         <div className="messages-spacer" />
@@ -170,7 +336,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                 tabIndex={hidden ? 0 : undefined}
               >
                 <span className="bubble-who">
-                  {m.role === "user" ? "You" : character.name.split(" ")[0]}
+                  {m.role === "user" ? "You" : name}
                   {m.rephrase && <em> · más fácil</em>}
                 </span>
                 {hidden ? (
@@ -183,10 +349,24 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                 {m.translation && <span className="translation">{m.translation}</span>}
                 {m.role === "assistant" && !m.streaming && m.text && (
                   <span className="bubble-actions" onClick={(e) => e.stopPropagation()}>
-                    <button className="mini-btn" onClick={() => void say(m.text)} aria-label="Repetir en voz alta">
+                    <button
+                      className="mini-btn"
+                      onClick={() => {
+                        stopListening();
+                        void say(m.text).then(startListening);
+                      }}
+                      aria-label="Repetir en voz alta"
+                    >
                       <Icon name="volume" /> Repetir
                     </button>
-                    <button className="mini-btn" onClick={() => void say(m.text, "slow")} aria-label="Repetir despacio">
+                    <button
+                      className="mini-btn"
+                      onClick={() => {
+                        stopListening();
+                        void say(m.text, "slow").then(startListening);
+                      }}
+                      aria-label="Repetir despacio"
+                    >
                       🐢 Despacio
                     </button>
                     {!m.translation && (
@@ -195,7 +375,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                       </button>
                     )}
                     {isLast && (
-                      <button className="mini-btn" onClick={() => void convo.rephrase()} disabled={busy}>
+                      <button className="mini-btn" onClick={() => void rephrase()} disabled={thinking}>
                         🤔 No entiendo
                       </button>
                     )}
@@ -203,16 +383,21 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                 )}
               </div>
               {m.role === "user" && (
-                <CorrectionCard msg={m} asrEngine={prefs.asrEngine} asrLang={asrLang} onSay={(t) => void say(t)} />
+                <CorrectionCard
+                  msg={m}
+                  listenOnce={practiceListen}
+                  onStopListening={() => practiceHandle.current?.finish()}
+                  onSay={(t) => void say(t)}
+                />
               )}
             </div>
           );
         })}
-        {mic.phase !== "idle" && (mic.transcript || mic.phase === "transcribing") && (
+        {(phase === "hearing" || phase === "transcribing") && (
           <div className="row row-user">
             <div className="bubble bubble-user bubble-live">
               <span className="bubble-who">You</span>
-              {mic.phase === "transcribing" ? <span className="dots" aria-label="Transcribiendo" /> : mic.transcript}
+              {partial || <span className="dots" aria-label="Escuchando" />}
             </div>
           </div>
         )}
@@ -240,21 +425,10 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                       <button className="mini-btn" onClick={() => void say(s.en)} aria-label="Escuchar">
                         <Icon name="volume" />
                       </button>
-                      <button
-                        className="mini-btn"
-                        aria-label="Escribirla"
-                        onClick={() => {
-                          setDraft(s.en);
-                          setSuggestions(null);
-                          setTimeout(() => inputRef.current?.focus(), 50);
-                        }}
-                      >
-                        ✎
-                      </button>
                     </div>
                   </div>
                 ))}
-                <p className="muted small">Mejor dilas con tus palabras: mantén pulsado el micro.</p>
+                <p className="muted small">Dilas con tus palabras: te estoy escuchando.</p>
               </>
             )}
           </div>
@@ -262,40 +436,38 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       </div>
 
       <div className="composer-wrap">
-        {mic.error && <p className="mic-error">{MIC_ERROR_TEXT[mic.error]}</p>}
-        {mic.phase === "listening" ? (
-          <div className="composer composer-live">
-            <span className="rec-dot">
-              <Icon name="mic" />
+        {micError && micError !== "no-speech" && <p className="mic-error">{MIC_ERROR_TEXT[micError]}</p>}
+        {status ? (
+          <button
+            className="composer composer-live"
+            onClick={() => {
+              // Tocar la barra: pausar y escribir
+              if (phase === "listening") {
+                setPaused(true);
+                pausedRef.current = true;
+                stopListening();
+                setPhase("idle");
+                setTimeout(() => inputRef.current?.focus(), 50);
+              }
+            }}
+            aria-label={status.text}
+          >
+            <span className={`rec-dot${status.tone === "rec" ? "" : " rec-dot-idle"}`}>
+              <Icon name={status.tone === "speak" ? "volume" : "mic"} />
             </span>
-            <Waveform level={mic.level} />
-            <span className="composer-status">Listening…</span>
-          </div>
-        ) : mic.phase === "transcribing" ? (
-          <div className="composer composer-live">
-            <span className="rec-dot rec-dot-idle">
-              <Icon name="mic" />
-            </span>
-            <Waveform level={() => 0.08} />
-            <span className="composer-status">Transcribiendo…</span>
-          </div>
-        ) : speaking ? (
-          <div className="composer composer-live">
-            <span className="rec-dot rec-dot-idle">
-              <Icon name="volume" />
-            </span>
-            <Waveform level={() => 0.5} tone="speak" />
-            <button className="composer-status link-btn" onClick={() => stopSpeaking()}>
-              Parar voz
-            </button>
-          </div>
+            <Waveform
+              level={status.tone === "rec" ? micLevel : status.tone === "speak" ? speakLevel : idleLevel}
+              tone={status.tone === "rec" ? "rec" : "speak"}
+            />
+            <span className="composer-status">{status.text}</span>
+          </button>
         ) : (
           <form className="composer" onSubmit={submitDraft}>
             <input
               ref={inputRef}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder={thinking ? `${character.name.split(" ")[0]} está pensando…` : "Write in English or hold the mic…"}
+              placeholder={paused ? "Escribe en inglés o toca el micro…" : "Write in English…"}
               lang="en"
               autoComplete="off"
               autoCapitalize="sentences"
@@ -314,56 +486,84 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
         <button
           className={`dock-btn${suggestions ? " on" : ""}`}
           onClick={() => void toggleSuggestions()}
-          disabled={busy && !suggestions}
+          disabled={thinking && !suggestions}
           aria-label="Ideas para responder"
           title="¿Qué digo?"
         >
           <Icon name="bulb" />
         </button>
-        <button className="dock-btn dock-end" onClick={() => void end()} disabled={ending || thinking} aria-label="Terminar conversación" title="Terminar">
+        <button className="dock-btn dock-end" onClick={() => void end()} disabled={ending} aria-label="Colgar" title="Colgar">
           {ending ? <span className="spinner" /> : <Icon name="phone" />}
         </button>
         <button className="dock-btn" onClick={() => setSheet(true)} aria-label="Ajustes" title="Ajustes">
           <Icon name="gear" />
         </button>
-        <TalkButton
-          disabled={thinking || !mic.available}
-          phase={mic.phase}
-          level={mic.level}
-          onStart={startTalking}
-          onFinish={() => void finishTalking()}
-        />
+        <button
+          className={`dock-btn talk-btn${phase === "listening" || phase === "hearing" ? " is-listening" : ""}${paused ? " is-muted" : ""}`}
+          onClick={onMic}
+          disabled={!voiceInputAvailable}
+          aria-label={
+            speaking ? "Interrumpir y hablar" : phase === "hearing" ? "Enviar ya" : phase === "listening" ? "Silenciar micro" : "Activar micro"
+          }
+          aria-pressed={!paused}
+        >
+          {phase === "transcribing" ? <span className="spinner" /> : <Icon name={paused ? "micOff" : "mic"} size={26} />}
+        </button>
       </nav>
-      <p className="dock-hint">{mic.phase === "listening" ? "Suelta o toca para enviar" : "Mantén pulsado o toca el micro para hablar"}</p>
+      <p className="dock-hint">
+        {paused
+          ? "Micro en pausa · toca 🎤 para hablar"
+          : phase === "hearing"
+            ? "Haz una pausa y se enviará solo"
+            : "Habla cuando quieras · se envía al hacer una pausa"}
+      </p>
 
       {sheet && (
         <div className="sheet-backdrop" onClick={() => setSheet(false)}>
           <div className="sheet" role="dialog" aria-label="Ajustes de la conversación" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-handle" />
             <h2>Ajustes de la conversación</h2>
+            <Toggle
+              label="Modo llamada"
+              hint="Escucha sola después de cada respuesta"
+              checked={prefs.handsFree}
+              onChange={(v) => onPrefs({ handsFree: v })}
+            />
+            <label className="field">
+              <span>Pausa para enviar</span>
+              <div className="seg seg-wide" role="group" aria-label="Pausa para enviar">
+                {(["short", "normal", "long"] as const).map((p) => (
+                  <button key={p} className={prefs.pause === p ? "on" : ""} onClick={() => onPrefs({ pause: p })} type="button">
+                    <strong>{p === "short" ? "Corta" : p === "normal" ? "Normal" : "Larga"}</strong>
+                    <small>{PAUSE_MS[p] / 1000} s</small>
+                  </button>
+                ))}
+              </div>
+            </label>
             <Toggle label="Voz lenta" hint="El personaje habla más despacio" checked={prefs.rate === "slow"} onChange={(v) => onPrefs({ rate: v ? "slow" : "normal" })} />
             <Toggle label="Modo escucha" hint="Oculta el texto: entrena el oído" checked={!prefs.subtitles} onChange={(v) => onPrefs({ subtitles: !v })} />
-            <Toggle label="Leer respuestas en voz alta" checked={prefs.autoSpeak} onChange={(v) => onPrefs({ autoSpeak: v })} />
-            <Toggle label="Revisar lo que digo antes de enviarlo" hint="Puedes corregir la transcripción" checked={prefs.reviewTranscript} onChange={(v) => onPrefs({ reviewTranscript: v })} />
-            <Toggle label="Voz realista (IA)" hint="Voz neuronal en tu dispositivo" checked={prefs.voiceEngine === "neural"} onChange={(v) => onPrefs({ voiceEngine: v ? "neural" : "system" })} />
-            {prefs.voiceEngine === "neural" && (
-              <label className="field">
-                <span>Voz de {character.name.split(" ")[0]}</span>
-                <select
-                  value={neuralVoice}
-                  onChange={(e) => {
-                    onPrefs({ voiceOverrides: { ...prefs.voiceOverrides, [character.id]: e.target.value } });
-                    unlockTTS();
-                  }}
-                >
-                  {NEURAL_VOICES.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
+            <Toggle
+              label="Revisar lo que digo antes de enviarlo"
+              hint="La transcripción va al cuadro de texto"
+              checked={prefs.reviewTranscript}
+              onChange={(v) => onPrefs({ reviewTranscript: v })}
+            />
+            <label className="field">
+              <span>Voz de {name}</span>
+              <select
+                value={neuralVoice}
+                onChange={(e) => {
+                  onPrefs({ voiceOverrides: { ...prefs.voiceOverrides, [character.id]: e.target.value } });
+                  unlockTTS();
+                }}
+              >
+                {NEURAL_VOICES.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <div className="actions">
               <button className="btn-dark" onClick={() => void say(lastAssistant?.text ?? "Hello! This is how I sound.")}>
                 Probar voz
@@ -378,6 +578,9 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
     </div>
   );
 }
+
+const speakLevel = () => 0.55;
+const idleLevel = () => 0.06;
 
 export function Toggle({
   label,

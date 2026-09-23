@@ -1242,6 +1242,16 @@ section > .section-title:first-child {
   transform: scale(1.04);
 }
 
+.talk-btn.is-muted {
+  color: #9a9a9a;
+}
+
+button.composer {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
 .talk-ring {
   position: absolute;
   inset: 0;

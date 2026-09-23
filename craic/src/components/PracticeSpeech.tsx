@@ -1,32 +1,34 @@
 import { useState } from "react";
 import { scoreLabel, scoreSpeech, type SpeechScore } from "../lib/scoring";
-import { MIC_ERROR_TEXT } from "../speech/recognition";
+import { MIC_ERROR_TEXT, type MicError } from "../speech/recognition";
 import { unlockTTS } from "../speech/tts";
-import { useVoiceInput, type AsrEngine } from "../speech/voiceInput";
 
 interface Props {
   target: string;
-  engine: AsrEngine;
-  lang: string;
+  /** Escucha una frase (se para sola cuando dejas de hablar) y devuelve el texto. */
+  listenOnce: () => Promise<string>;
   onListen: () => void;
+  /** Detiene la escucha en curso (tocar otra vez). */
+  onStop?: () => void;
+  error?: MicError | null;
 }
 
 /** «Dilo tú»: repite la frase y comprueba palabra a palabra qué se entendió. */
-export function PracticeSpeech({ target, engine, lang, onListen }: Props) {
-  const mic = useVoiceInput(engine, lang);
+export function PracticeSpeech({ target, listenOnce, onListen, onStop, error }: Props) {
+  const [state, setState] = useState<"idle" | "listening">("idle");
   const [result, setResult] = useState<(SpeechScore & { heard: string }) | null>(null);
 
-  const toggle = async () => {
+  const go = async () => {
     unlockTTS();
-    if (mic.phase === "listening") {
-      const heard = await mic.stop();
-      if (heard) setResult({ ...scoreSpeech(target, heard), heard });
+    if (state === "listening") {
+      onStop?.();
       return;
     }
-    if (mic.phase === "idle") {
-      setResult(null);
-      await mic.start();
-    }
+    setResult(null);
+    setState("listening");
+    const heard = await listenOnce();
+    setState("idle");
+    if (heard) setResult({ ...scoreSpeech(target, heard), heard });
   };
 
   return (
@@ -35,16 +37,11 @@ export function PracticeSpeech({ target, engine, lang, onListen }: Props) {
         <button type="button" className="chip" onClick={onListen}>
           🔊 Escuchar
         </button>
-        <button
-          type="button"
-          className={`chip${mic.phase === "listening" ? " chip-rec" : ""}`}
-          onClick={() => void toggle()}
-          disabled={mic.phase === "transcribing" || !mic.available}
-        >
-          {mic.phase === "listening" ? "⏹ Parar" : mic.phase === "transcribing" ? "Escuchándote…" : "🎤 Dilo tú"}
+        <button type="button" className={`chip${state === "listening" ? " chip-rec" : ""}`} onClick={() => void go()}>
+          {state === "listening" ? "● Te escucho… (para al terminar)" : "🎤 Dilo tú"}
         </button>
       </div>
-      {mic.error && <p className="practice-err">{MIC_ERROR_TEXT[mic.error]}</p>}
+      {error && state === "idle" && !result && <p className="practice-err">{MIC_ERROR_TEXT[error]}</p>}
       {result && (
         <div className="practice-result" aria-live="polite">
           <p>

@@ -40,9 +40,7 @@ export const CHARACTERS: Character[] = [
     tagline: "Irlandés de Dublín, de visita en Córdoba",
     short: "Dublín 🇮🇪",
     persona:
-      "You are Liam, a 27-year-old from Dublin, Ireland. You work as a sound technician and you are visiting Córdoba, Spain, for three weeks. " +
-      "You are friendly, relaxed, curious and a bit funny. You love the Mezquita, tapas, the heat surprises you, and you miss Irish rain a little. " +
-      "You sometimes use light Irish expressions like \"grand\", \"no bother\" or \"the craic\".",
+      "You are Liam, 27, a sound technician from Dublin on a three-week trip to Córdoba. Friendly, relaxed, a bit funny. You love tapas and the Mezquita, the heat shocks you. You say things like \"grand\" and \"no bother\".",
     voiceLangs: ["en-IE", "en-GB", "en-US", "en"],
     voiceGender: "male",
     openers: [
@@ -62,9 +60,7 @@ export const CHARACTERS: Character[] = [
     tagline: "Londinense, diseñadora gráfica, de vacaciones",
     short: "Londres 🇬🇧",
     persona:
-      "You are Emily, a 31-year-old graphic designer from London (Hackney). You are in Córdoba for a week on holiday with a friend. " +
-      "You are warm, chatty and a little sarcastic in a friendly British way. You love markets, coffee, live music and cycling around London, and you are learning some Spanish. " +
-      "You sometimes use everyday British expressions like \"lovely\", \"brilliant\", \"fancy a…?\" or \"to be fair\".",
+      "You are Emily, 31, a graphic designer from London on holiday in Córdoba. Warm, chatty, a little sarcastic. You love markets, coffee and live music. You say things like \"lovely\" and \"to be fair\".",
     voiceLangs: ["en-GB", "en-IE", "en-US", "en"],
     voiceGender: "female",
     openers: [
@@ -84,9 +80,7 @@ export const CHARACTERS: Character[] = [
     tagline: "Estadounidense de Austin, Erasmus en Córdoba",
     short: "Austin 🇺🇸",
     persona:
-      "You are Jake, a 22-year-old computer science student from Austin, Texas, USA. You are spending a semester abroad at the University of Córdoba. " +
-      "You are enthusiastic, open and easygoing. You like basketball, video games, barbecue and road trips, and you find Spanish meal times very late. " +
-      "You speak American English and sometimes say things like \"awesome\", \"for sure\" or \"I'm down\".",
+      "You are Jake, 22, a computer science student from Austin, Texas, doing a semester in Córdoba. Enthusiastic and easygoing. You love basketball and road trips, and Spanish dinner times surprise you. You say \"awesome\" and \"for sure\".",
     voiceLangs: ["en-US", "en-GB", "en"],
     voiceGender: "male",
     openers: [
@@ -97,21 +91,17 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "interviewer",
-    flag: "gb",
-    accent: "Inglés británico · Entrevista",
-    neuralVoice: "bf_isabella",
+    flag: "us",
+    accent: "Inglés americano · Entrevista",
+    neuralVoice: "af_heart",
     kind: "interview",
     name: "Sarah Mitchell",
     emoji: "💼",
     tagline: "Entrevista de prácticas de ingeniería",
     short: "Entrevista de prácticas",
     persona:
-      "You are Sarah Mitchell, engineering manager at Brightwell Engineering, a British engineering company. " +
-      "You are interviewing a Spanish engineering student for a three-month summer internship in your team, by video call. " +
-      "You are professional, polite and encouraging. Ask typical internship interview questions one by one: background, studies, projects, teamwork, problem solving, strengths and weaknesses, motivation, availability. " +
-      "Keep comments about yourself very short. Briefly acknowledge each answer before the next question. " +
-      "If the candidate asks about the job, give short realistic answers about the internship.",
-    voiceLangs: ["en-GB", "en-IE", "en-US", "en"],
+      "You are Sarah Mitchell, engineering manager at Brightwell Engineering (an American company with an office in Madrid), interviewing a Spanish engineering student for a summer internship by video call. Professional and encouraging. Briefly acknowledge each answer, then ask the next typical interview question (studies, projects, teamwork, problems solved, strengths, motivation).",
+    voiceLangs: ["en-US", "en-GB", "en"],
     voiceGender: "female",
     openers: [
       "Good morning, and thanks for joining the call. I'm Sarah Mitchell, engineering manager at Brightwell. Could you start by telling me a little about yourself?",
@@ -121,21 +111,18 @@ export const CHARACTERS: Character[] = [
 ];
 
 /** Voces neuronales (Kokoro) que se pueden elegir en Ajustes. */
+/** Voces neuronales (Kokoro), de mejor a peor calidad según sus autores. */
 export const NEURAL_VOICES: { id: string; label: string; accent: "GB" | "US"; gender: "male" | "female" }[] = [
-  { id: "bm_george", label: "George (UK)", accent: "GB", gender: "male" },
-  { id: "bm_fable", label: "Fable (UK)", accent: "GB", gender: "male" },
-  { id: "bm_lewis", label: "Lewis (UK)", accent: "GB", gender: "male" },
-  { id: "bm_daniel", label: "Daniel (UK)", accent: "GB", gender: "male" },
-  { id: "bf_emma", label: "Emma (UK)", accent: "GB", gender: "female" },
-  { id: "bf_isabella", label: "Isabella (UK)", accent: "GB", gender: "female" },
-  { id: "bf_alice", label: "Alice (UK)", accent: "GB", gender: "female" },
-  { id: "bf_lily", label: "Lily (UK)", accent: "GB", gender: "female" },
-  { id: "am_michael", label: "Michael (US)", accent: "US", gender: "male" },
-  { id: "am_puck", label: "Puck (US)", accent: "US", gender: "male" },
-  { id: "am_fenrir", label: "Fenrir (US)", accent: "US", gender: "male" },
-  { id: "af_heart", label: "Heart (US)", accent: "US", gender: "female" },
-  { id: "af_bella", label: "Bella (US)", accent: "US", gender: "female" },
-  { id: "af_nicole", label: "Nicole (US)", accent: "US", gender: "female" },
+  { id: "af_heart", label: "Heart (US) ★★★", accent: "US", gender: "female" },
+  { id: "af_bella", label: "Bella (US) ★★★", accent: "US", gender: "female" },
+  { id: "bf_emma", label: "Emma (UK) ★★", accent: "GB", gender: "female" },
+  { id: "af_nicole", label: "Nicole (US) ★★", accent: "US", gender: "female" },
+  { id: "am_michael", label: "Michael (US) ★★", accent: "US", gender: "male" },
+  { id: "am_fenrir", label: "Fenrir (US) ★★", accent: "US", gender: "male" },
+  { id: "am_puck", label: "Puck (US) ★★", accent: "US", gender: "male" },
+  { id: "bm_george", label: "George (UK) ★", accent: "GB", gender: "male" },
+  { id: "bm_fable", label: "Fable (UK) ★", accent: "GB", gender: "male" },
+  { id: "bf_isabella", label: "Isabella (UK) ★", accent: "GB", gender: "female" },
 ];
 
 export function getCharacter(id: string): Character {
@@ -143,7 +130,7 @@ export function getCharacter(id: string): Character {
 }
 
 export const LEVEL_STYLE: Record<Level, string> = {
-  B1: "Use simple, clear English for an intermediate (B1) learner: short sentences, common everyday words, no idioms or slang unless very common.",
-  B2: "Use natural everyday English for an upper-intermediate (B2) learner: common phrasal verbs and expressions are fine, but keep sentences short.",
-  C1: "Use fully natural native English for an advanced (C1) learner: idioms, phrasal verbs and a natural rhythm, still short turns.",
+  B1: "Simple everyday English (B1 level), common words.",
+  B2: "Natural everyday English (B2 level), common phrasal verbs are fine.",
+  C1: "Fully natural native English (C1 level), idioms welcome.",
 };

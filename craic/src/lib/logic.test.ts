@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyCorrections, cleanTranslation, parseSuggestions, questionOf, similarQuestion } from "../llm/parse";
 import { cleanTranscript, hasSpeech, normalize } from "../speech/asrText";
-import { resampleTo16k } from "../speech/recorder";
+import { resampleTo16k } from "../speech/mic";
 import { splitForSpeech } from "../speech/tts";
 import { computeProgress } from "./progress";
 import { scoreSpeech, tokenize } from "./scoring";

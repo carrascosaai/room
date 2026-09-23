@@ -22,7 +22,7 @@ function Row({ label, value, state, text }: { label: string; value: number; stat
     <div className="load-row">
       <div className="load-head">
         <strong>{label}</strong>
-        <span className="muted small">{state === "ready" ? "✓ Lista" : state === "error" ? "Voz del sistema" : text}</span>
+        <span className="muted small">{state === "ready" ? "✓ Lista" : state === "error" ? "No disponible" : text}</span>
       </div>
       <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
         <div className="progress-bar" style={{ width: `${Math.max(pct, 2)}%` }} />
@@ -37,11 +37,15 @@ interface Props {
   progress: LoadProgress | null;
   error: AppError | null;
   firstDownload: boolean;
+  needTTS: boolean;
+  /** La IA ya está lista; solo se espera a la voz / el oído */
+  llmReady: boolean;
+  onSkip: () => void;
   onRetry: () => void;
   onBack: () => void;
 }
 
-export function Loading({ character, prefs, progress, error, firstDownload, onRetry, onBack }: Props) {
+export function Loading({ character, prefs, progress, error, firstDownload, needTTS, llmReady, onSkip, onRetry, onBack }: Props) {
   const audio = useAudioModels();
   if (error) {
     return (
@@ -73,17 +77,27 @@ export function Loading({ character, prefs, progress, error, firstDownload, onRe
       </div>
       <h2>Llamando a {character.name.split(" ")[0]}…</h2>
       <p className="muted small">{firstDownload ? "Primera vez: preparando todo en tu dispositivo" : "Cargando desde tu dispositivo"}</p>
-      <Row label="Cerebro (IA)" value={progress?.progress ?? 0} state="llm" text={describe(progress?.text ?? "")} />
-      {prefs.voiceEngine === "neural" && (
-        <Row label="Voz realista" value={audio.ttsProgress} state={audio.tts} text={`${Math.round(audio.ttsProgress * 100)}%`} />
+      <Row
+        label="Cerebro (IA)"
+        value={llmReady ? 1 : (progress?.progress ?? 0)}
+        state={llmReady ? "ready" : "llm"}
+        text={describe(progress?.text ?? "")}
+      />
+      {needTTS && (
+        <Row label="Voz natural" value={audio.ttsProgress} state={audio.tts} text={`${Math.round(audio.ttsProgress * 100)}%`} />
       )}
-      {prefs.asrEngine === "whisper" && (
-        <Row label="Oído (Whisper)" value={audio.asrProgress} state={audio.asr} text={`${Math.round(audio.asrProgress * 100)}%`} />
+      {prefs.asrEngine === "local" && (
+        <Row label="Oído" value={audio.asrProgress} state={audio.asr} text={`${Math.round(audio.asrProgress * 100)}%`} />
+      )}
+      {llmReady && (
+        <button className="btn-ghost skip-btn" onClick={onSkip}>
+          Empezar ya (voz provisional mientras termina)
+        </button>
       )}
       {firstDownload && (
         <p className="muted small">
           Solo se descarga la primera vez; después carga en segundos y funciona sin conexión. No cierres la app. La
-          conversación empieza cuando la IA esté lista; la voz y el oído terminan en segundo plano.
+          llamada empieza en cuanto todo esté listo.
         </p>
       )}
     </div>

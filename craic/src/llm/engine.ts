@@ -1,4 +1,5 @@
 import type { MLCEngineInterface } from "@mlc-ai/web-llm";
+import { PriorityScheduler, type Priority } from "./scheduler";
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -12,6 +13,8 @@ export interface CompleteOptions {
   jsonSchema?: string;
   /** Etiqueta de la tarea (solo para depurar y para el modo demo). */
   tag?: "reply" | "correct" | "expressions" | "suggest" | "translate" | "rephrase";
+  /** high = respuesta del personaje, normal = ayudas, low = correcciones (interrumpibles) */
+  priority?: Priority;
   /** Recibe el texto acumulado; si devuelve true se corta la generación. */
   onText?: (text: string) => boolean | void;
 }
@@ -27,22 +30,14 @@ export interface LoadProgress {
   text: string;
 }
 
-// Las peticiones al modelo se hacen de una en una.
-function createQueue() {
-  let chain: Promise<unknown> = Promise.resolve();
-  return <T>(fn: () => Promise<T>): Promise<T> => {
-    const p = chain.then(fn, fn);
-    chain = p.catch(() => undefined);
-    return p;
-  };
-}
-
 class WebLLMEngine implements LLM {
-  private enqueue = createQueue();
-  constructor(private engine: MLCEngineInterface, private worker: Worker) {}
+  private scheduler: PriorityScheduler;
+  constructor(private engine: MLCEngineInterface, private worker: Worker) {
+    this.scheduler = new PriorityScheduler(() => this.engine.interruptGenerate());
+  }
 
   complete(messages: ChatMessage[], opts: CompleteOptions = {}): Promise<string> {
-    return this.enqueue(async () => {
+    return this.scheduler.submit(async () => {
       const base = {
         messages,
         temperature: opts.temperature ?? 0.7,
@@ -75,7 +70,7 @@ class WebLLMEngine implements LLM {
         }
       }
       return text;
-    });
+    }, opts.priority ?? "normal");
   }
 
   async unload() {
@@ -97,7 +92,13 @@ export async function loadWebLLM(
     const engine = await CreateWebWorkerMLCEngine(worker, modelId, {
       initProgressCallback: (r) => onProgress({ progress: r.progress, text: r.text }),
     });
-    return new WebLLMEngine(engine, worker);
+    const llm = new WebLLMEngine(engine, worker);
+    // Calentamiento: compila los shaders de la GPU ya, para que la primera
+    // respuesta de verdad no tarde de más.
+    void llm
+      .complete([{ role: "user", content: "Hi" }], { maxTokens: 1, priority: "low", temperature: 0 })
+      .catch(() => undefined);
+    return llm;
   } catch (err) {
     worker.terminate();
     throw err;
