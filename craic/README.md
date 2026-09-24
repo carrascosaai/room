@@ -27,10 +27,10 @@ colgar, ajustes y micrófono).
 - **Página en español, inglés o francés:** se elige sola según el idioma del
   navegador de quien entra (cualquier otro idioma → inglés) y se puede cambiar
   abajo en la pantalla de inicio o en Ajustes. Las correcciones, traducciones,
-  ideas y expresiones del resumen se explican en ese idioma, y no se ofrece
-  practicar el propio: en inglés se practica francés; en francés, inglés; en
-  español, los dos. Los textos se traducen con `t("…")` (`src/i18n/`), y un test
-  falla si alguno no tiene traducción.
+  ideas y expresiones del resumen se explican en ese idioma. Inglés y francés
+  se pueden practicar siempre; la primera vez sale elegido el francés si la
+  página está en inglés y el inglés en los demás casos. Los textos se traducen
+  con `t("…")` (`src/i18n/`), y un test falla si alguno no tiene traducción.
 - **Inglés y francés:** eliges el idioma arriba. En francés hay 6 personajes con
   su acento y expresiones (Camille de París, Julien de Marsella, Thomas de
   Bruselas, Chloé de Ginebra, Émilie de Montreal, Aminata de Dakar) y una
