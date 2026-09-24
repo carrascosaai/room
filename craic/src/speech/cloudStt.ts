@@ -71,16 +71,18 @@ const PHANTOM =
   /^(thank you( very much)?|thanks( for watching)?|you|bye|okay|merci( beaucoup)?|sous-titr\w*.*|amara\.org.*|\.+|…)[.!]*$/i;
 
 /** Texto de un audio. Lanza si falla (y deja de usar la nube un rato). */
-export async function transcribe(samples: Float32Array, lang: string, signal?: AbortSignal): Promise<string> {
+export async function transcribe(samples: Float32Array, lang: string, signal?: AbortSignal, context?: string): Promise<string> {
   const body = encodeWav(samples);
   const base = lang.toLowerCase().startsWith("fr") ? "fr" : "en";
+  const q = new URLSearchParams({ lang: base });
+  if (context) q.set("prompt", context.replace(/\s+/g, " ").trim().slice(-300));
   for (let attempt = 0; ; attempt++) {
     const ctrl = new AbortController();
     const abort = () => ctrl.abort();
     signal?.addEventListener("abort", abort);
     const t = setTimeout(abort, 15000);
     try {
-      const r = await fetch(`${endpoint()}?lang=${base}`, {
+      const r = await fetch(`${endpoint()}?${q}`, {
         method: "POST",
         headers: { "content-type": "audio/wav", "x-client-id": clientId() },
         body,

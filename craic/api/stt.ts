@@ -48,9 +48,14 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
   if (!allowedOrigin(req)) return json(403, { error: "forbidden" });
   if (limited(req)) return json(429, { error: "rate limited" });
 
+  const declared = Number(req.headers.get("content-length"));
+  if (declared > MAX_BYTES) return json(413, { error: "audio too long" });
   const audio = await req.arrayBuffer();
   if (audio.byteLength < 1000 || audio.byteLength > MAX_BYTES) return json(400, { error: "invalid audio" });
-  const lang = new URL(req.url).searchParams.get("lang") === "fr" ? "fr" : "en";
+  const params = new URL(req.url).searchParams;
+  const lang = params.get("lang") === "fr" ? "fr" : "en";
+  // Contexto (lo último que dijo el personaje): ayuda con nombres y temas.
+  const prompt = (params.get("prompt") ?? "").slice(0, 300);
 
   let last: Response | null = null;
   for (const model of MODELS()) {
@@ -60,6 +65,7 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
     form.append("language", lang);
     form.append("temperature", "0");
     form.append("response_format", "json");
+    if (prompt) form.append("prompt", prompt);
     const r = await fetchImpl(URL_STT, { method: "POST", headers: { authorization: `Bearer ${key}` }, body: form });
     if (r.ok) {
       const d = (await r.json()) as { text?: string };

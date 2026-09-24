@@ -19,6 +19,8 @@ export interface ListenOptions {
   lang: string;
   /** Silencio (ms) que marca el final de tu frase */
   silenceMs: number;
+  /** Texto previo de la conversación (mejora la transcripción en la nube). */
+  context?: string;
   onPhase: (p: ListenPhase) => void;
   onPartial?: (text: string) => void;
   onFinal: (text: string) => void;
@@ -129,7 +131,7 @@ function listenCloud(opts: ListenOptions): ListenHandle {
     if (!audio.length || voicedMs < MIN_VOICED_MS) return finishWith(() => opts.onFinal(""));
     release();
     opts.onPhase("transcribing");
-    transcribe(audio, opts.lang, ctrl.signal)
+    transcribe(audio, opts.lang, ctrl.signal, opts.context)
       .then((text) => finishWith(() => opts.onFinal(cleanTranscript(text))))
       .catch(() => {
         if (ctrl.signal.aborted) return;
