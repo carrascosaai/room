@@ -87,7 +87,8 @@ const cooldown = new Map<string, number>();
 const MAX_MESSAGES = 40;
 const MAX_CHARS = 20000;
 const MAX_TOKENS = 700;
-const RATE_PER_MIN = 60;
+const RATE_PER_MIN = 40;
+const RATE_PER_IP = 1500;
 
 // Combinación que ha funcionado (se recuerda mientras la instancia siga viva).
 const working: Record<string, string | undefined> = {};
@@ -118,17 +119,28 @@ function allowedOrigin(req: Request): boolean {
   }
 }
 
-function rateLimited(req: Request): boolean {
-  const ip = req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
-  const now = Date.now();
-  const h = hits.get(ip);
+function bump(key: string, limit: number, now: number): boolean {
+  const h = hits.get(key);
   if (!h || now - h.t > 60000) {
-    hits.set(ip, { n: 1, t: now });
-    if (hits.size > 5000) hits.clear();
+    hits.set(key, { n: 1, t: now });
+    if (hits.size > 20000) hits.clear();
     return false;
   }
   h.n++;
-  return h.n > RATE_PER_MIN;
+  return h.n > limit;
+}
+
+/**
+ * Límite por dispositivo (identificador aleatorio del navegador) y, mucho más
+ * alto, por IP: las operadoras móviles comparten una IP entre muchos clientes.
+ */
+function rateLimited(req: Request): boolean {
+  const ip = req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
+  const cid = (req.headers.get("x-client-id") ?? "").replace(/[^\w-]/g, "").slice(0, 40);
+  const now = Date.now();
+  const perIp = bump(`ip:${ip}`, RATE_PER_IP, now);
+  const perClient = bump(`c:${ip}|${cid || "none"}`, cid ? RATE_PER_MIN : RATE_PER_MIN * 2, now);
+  return perIp || perClient;
 }
 
 function validate(b: unknown): Body | string {

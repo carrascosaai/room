@@ -262,9 +262,9 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
 
   const loadingAudio =
     audio.tts === "loading"
-      ? `Preparando la voz… ${Math.round(audio.ttsProgress * 100)}%`
+      ? `Descargando la voz natural… ${Math.round(audio.ttsProgress * 100)}% · mientras, voz del sistema`
       : audio.asr === "loading" && prefs.asrEngine === "local"
-        ? `Preparando el oído… ${Math.round(audio.asrProgress * 100)}%`
+        ? `Mejorando el oído… ${Math.round(audio.asrProgress * 100)}%`
         : null;
 
   const status: { tone: "rec" | "speak" | "idle"; text: string } | null =

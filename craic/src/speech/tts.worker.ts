@@ -71,6 +71,8 @@ self.onmessage = async (e: MessageEvent<TtsIn>) => {
     if (!tts) {
       const p = load(msg.device);
       tts = p.then((r) => r.model);
+      // El error se comunica con «load-error»; esta promesa no debe quedar sin capturar.
+      tts.catch(() => undefined);
       try {
         const r = await p;
         post({ type: "ready", device: r.device });

@@ -8,6 +8,7 @@ import { getScenario, scenariosFor } from "../scenarios";
 import { ASR_MODELS, TTS_SIZE_MB } from "../speech/audioModels";
 import { Flag } from "./Brand";
 import { Icon } from "./Icon";
+import { ShareButton } from "./ShareButton";
 
 interface Props {
   prefs: Prefs;
@@ -40,7 +41,8 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
   const [region, setRegion] = useState<Region | "all">(() => getCharacter(prefs.characterId).region);
 
   useEffect(() => {
-    if (demo) return;
+    // Con la IA en la nube no hace falta mirar los modelos del dispositivo (ni gastar red).
+    if (demo || cloud) return;
     let alive = true;
     (Object.keys(MODEL_OPTIONS) as ModelTier[]).forEach(async (tier) => {
       const id = modelIdFor(tier, f16);
@@ -56,7 +58,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
     return () => {
       alive = false;
     };
-  }, [f16, demo]);
+  }, [f16, demo, cloud]);
 
   const character = getCharacter(prefs.characterId);
   const scenarios = scenariosFor(character.kind);
@@ -251,6 +253,11 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
           </p>
         )}
       </section>
+
+      <div className="share-row">
+        <span className="muted small">100% gratis · sin registro · sin anuncios</span>
+        <ShareButton className="btn-ghost btn-small" label="Compartir" />
+      </div>
 
       <button className="cta" onClick={() => onStart({ cached: isCached })}>
         <Icon name="call" /> {isCached || cloud ? `Llamar a ${character.name.split(" ")[0]}` : `Descargar y llamar a ${character.name.split(" ")[0]}`}

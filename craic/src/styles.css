@@ -1795,3 +1795,16 @@ select {
   text-align: center;
   margin: 24px 16px;
 }
+
+/* ---------- Compartir ---------- */
+.share-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 2px 12px;
+}
+.share-hint {
+  text-align: center;
+  margin: 18px 0 4px;
+}

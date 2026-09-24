@@ -24,7 +24,7 @@ import { MODEL_OPTIONS, modelIdFor } from "./llm/models";
 import { getScenario } from "./scenarios";
 import { loadASR, loadTTS, useAudioModels } from "./speech/audioModels";
 import { recognitionSupported } from "./speech/recognition";
-import { needsNeuralVoice, unlockTTS } from "./speech/tts";
+import { needsNeuralVoice, ttsSupported, unlockTTS } from "./speech/tts";
 
 type Screen = "check" | "home" | "loading" | "chat" | "summary" | "review" | "progress" | "settings";
 
@@ -174,7 +174,8 @@ export default function App() {
 
   const loadAudio = useCallback(() => {
     if (demo) return;
-    if (needTTS) loadTTS(prefs.voiceQuality === "high" && gpu?.ok ? "webgpu" : "wasm");
+    // En el móvil, la voz ligera (~90 MB) en vez de la de alta calidad (~330 MB).
+    if (needTTS) loadTTS(prefs.voiceQuality === "high" && gpu?.ok && !gpu.mobile ? "webgpu" : "wasm");
     if (prefs.asrEngine === "local") loadASR(prefs.asrModel);
   }, [needTTS, prefs.voiceQuality, prefs.asrEngine, prefs.asrModel, gpu]);
 
@@ -261,10 +262,12 @@ export default function App() {
     [prefs.tier, f16, ensureEngine, openChat, loadAudio, useCloud, audioCached, gpu, updatePrefs],
   );
 
-  // Se abre la llamada cuando la voz natural y el oído están listos (o fallaron).
+  // La llamada se abre ya: mientras se descarga la voz natural se usa la del
+  // sistema, y mientras se prepara el oído local, el reconocimiento del
+  // navegador. Solo se espera si no hay ninguna alternativa.
   const audioReady =
-    (!needTTS || audio.tts === "ready" || audio.tts === "error") &&
-    (prefs.asrEngine !== "local" || audio.asr === "ready" || audio.asr === "error" || (recognitionSupported && audio.asr === "idle"));
+    (!needTTS || ttsSupported || audio.tts === "ready" || audio.tts === "error") &&
+    (prefs.asrEngine !== "local" || recognitionSupported || audio.asr === "ready" || audio.asr === "error");
   useEffect(() => {
     if (pendingOpen && audioReady && screen === "loading") {
       openChat(pendingOpen.messages, pendingOpen.startedAt);

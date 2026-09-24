@@ -1,3 +1,4 @@
+import { ShareButton } from "./ShareButton";
 import { useEffect, useRef, useState } from "react";
 import type { Character, Level } from "../characters";
 import type { Msg } from "../conversation";
@@ -103,6 +104,10 @@ export function EndOfSession({ llm, character, level, messages, startedAt, onNew
         <button className="btn-ghost" onClick={onHistory}>
           Ver progreso
         </button>
+      </div>
+      <p className="muted small share-hint">¿Te ha servido? Pásaselo a alguien que esté aprendiendo inglés: es gratis.</p>
+      <div className="actions">
+        <ShareButton className="btn-ghost" />
       </div>
     </div>
   );
