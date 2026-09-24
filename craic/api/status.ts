@@ -1,5 +1,5 @@
 // Estado del cupo gratuito de Groq (para el propietario): hace una petición
-// mínima a la IA y a la voz y devuelve los límites que informa Groq.
+// mínima a la IA, a la voz y al oído (Whisper) y devuelve los límites que informa Groq.
 // Se guarda 60 s para que abrir la página muchas veces no gaste cupo.
 export const config = { runtime: "edge" };
 
@@ -59,11 +59,38 @@ export async function handle(_req: Request, fetchImpl: typeof fetch = fetch): Pr
   } catch (e) {
     voice = { error: String(e) };
   }
+  let ears: Limits | { error: string };
+  try {
+    // 0,5 s de silencio: lo mínimo para leer el cupo de Whisper.
+    const pcm = new Uint8Array(44 + 16000);
+    const v = new DataView(pcm.buffer);
+    [..."RIFF"].forEach((c, i) => v.setUint8(i, c.charCodeAt(0)));
+    v.setUint32(4, 36 + 16000, true);
+    [..."WAVEfmt "].forEach((c, i) => v.setUint8(8 + i, c.charCodeAt(0)));
+    v.setUint32(16, 16, true);
+    v.setUint16(20, 1, true);
+    v.setUint16(22, 1, true);
+    v.setUint32(24, 16000, true);
+    v.setUint32(28, 32000, true);
+    v.setUint16(32, 2, true);
+    v.setUint16(34, 16, true);
+    [..."data"].forEach((c, i) => v.setUint8(36 + i, c.charCodeAt(0)));
+    v.setUint32(40, 16000, true);
+    const form = new FormData();
+    form.append("file", new Blob([pcm], { type: "audio/wav" }), "s.wav");
+    form.append("model", (env("STT_MODELS") ?? "whisper-large-v3-turbo").split(",")[0].trim());
+    const r = await fetchImpl(`${BASE}/audio/transcriptions`, { method: "POST", headers: { authorization: `Bearer ${key}` }, body: form });
+    await r.text().catch(() => "");
+    ears = pick(r);
+  } catch (e) {
+    ears = { error: String(e) };
+  }
   const data = {
     enabled: true,
     checkedAt: new Date().toISOString(),
     chat,
     voice,
+    ears,
     extraProviders: ["GEMINI_API_KEY", "CEREBRAS_API_KEY", "OPENROUTER_API_KEY"].filter((k) => !!env(k)),
   };
   cache = { at: Date.now(), data };

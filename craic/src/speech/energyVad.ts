@@ -22,6 +22,10 @@ export class EnergyVad {
     return Math.sqrt(s / frame.length);
   }
 
+  silenceFraction(): number {
+    return this.speaking ? Math.min(1, (this.quiet * FRAME_MS) / this.silenceMs) : 0;
+  }
+
   threshold(): number {
     return Math.max(0.01, this.noise * 3.2);
   }

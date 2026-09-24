@@ -932,6 +932,30 @@ section > .section-title:first-child {
   opacity: 0.75;
 }
 
+.live-voice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+  padding-top: 2px;
+}
+
+.pause-bar {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.pause-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--user-label);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
 .bubble-hidden {
   cursor: pointer;
 }

@@ -31,6 +31,7 @@ export const FR: Record<string, string> = {
   "Traduciendo…": "Traduction…",
   "🌐 Traducir": "🌐 Traduire",
   "🤔 No entiendo": "🤔 Je ne comprends pas",
+  "Cuando la barra se llena, se envía": "Quand la barre est pleine, c'est envoyé",
   "Escuchando": "À l'écoute",
   "💡 Ideas para responder": "💡 Idées de réponse",
   "Cerrar ideas": "Fermer les idées",
