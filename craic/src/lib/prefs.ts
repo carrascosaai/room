@@ -1,5 +1,7 @@
 import type { Level } from "../characters";
 import { getUiLang } from "../i18n";
+import { recognitionSupported } from "../speech/recognition";
+import { isMobile } from "./webgpu";
 import { defaultTarget, type TargetLang } from "../lang";
 import type { ModelTier } from "../llm/models";
 import type { AsrModelId } from "../speech/asr.worker";
@@ -89,7 +91,10 @@ export function loadPrefs(): Prefs {
     if (typeof raw.mig !== "number" || raw.mig < 2) saved.aiEngine = "auto";
     // v3: pausas más largas (3 s por defecto) para poder pensar sin que se envíe.
     if (typeof raw.mig !== "number" || raw.mig < 3 || typeof saved.pause !== "number") saved.pause = 3000;
-    raw.mig = 3;
+    // v4: en el móvil, el reconocimiento del sistema (Apple/Google): instantáneo y
+    // preciso; el modelo local tarda demasiado en el procesador del móvil.
+    if ((typeof raw.mig !== "number" || raw.mig < 4) && isMobile() && recognitionSupported) saved.asrEngine = "browser";
+    raw.mig = 4;
     return { ...DEFAULT_PREFS, ...saved };
   } catch {
     return DEFAULT_PREFS;

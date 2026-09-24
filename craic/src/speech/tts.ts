@@ -5,6 +5,7 @@
 // Kokoro en el dispositivo; 3) como último recurso, la voz normal del sistema.
 import { useSyncExternalStore } from "react";
 import { getAudioStatus, synthesize } from "./audioModels";
+import { checkCloudTts, cloudTtsReady, fetchSpeech } from "./cloudTts";
 
 export type SpeechRate = "slow" | "normal";
 export type VoiceEngine = "auto" | "neural" | "system";
@@ -132,7 +133,10 @@ export function premiumSystemVoice(
   return [...good].sort((a, b) => score(b) - score(a))[0];
 }
 
-type Mode = { kind: "neural"; voice: string } | { kind: "system"; voice?: SpeechSynthesisVoice };
+type Mode =
+  | { kind: "cloud"; gender: "male" | "female" }
+  | { kind: "neural"; voice: string }
+  | { kind: "system"; voice?: SpeechSynthesisVoice };
 
 export function resolveMode(opts: SpeakOptions): Mode {
   const engine = opts.engine ?? "auto";
@@ -142,6 +146,8 @@ export function resolveMode(opts: SpeakOptions): Mode {
       const premium = premiumSystemVoice(voicesCache, opts.langs, opts.gender, opts.hint);
       if (premium) return { kind: "system", voice: premium };
     }
+    // Voz en la nube (Orpheus): la más natural y rápida en cualquier móvil. Solo inglés.
+    if (baseLang(opts.langs) === "en" && cloudTtsReady()) return { kind: "cloud", gender: opts.gender ?? "female" };
     if (neuralOk) return { kind: "neural", voice: opts.neuralVoice! };
   }
   return { kind: "system", voice: pickVoice(voicesCache, opts.langs, opts.gender, opts.hint) };
@@ -151,6 +157,8 @@ export function resolveMode(opts: SpeakOptions): Mode {
 export async function needsNeuralVoice(langs: string[], gender?: "male" | "female"): Promise<boolean> {
   // La voz neuronal (Kokoro) solo habla inglés.
   if (baseLang(langs) !== "en") return false;
+  // Con la voz en la nube no hace falta descargar nada.
+  if (await checkCloudTts()) return false;
   const voices = await loadVoices();
   return !premiumSystemVoice(voices, langs, gender);
 }
@@ -212,7 +220,7 @@ export function stopSpeaking() {
   setSpeaking(false);
 }
 
-function playClip(clip: Clip, myToken: number): Promise<void> {
+function playClip(clip: Clip, myToken: number, rate = 1): Promise<void> {
   return new Promise((resolve) => {
     if (myToken !== token) return resolve();
     const c = ctx();
@@ -220,6 +228,7 @@ function playClip(clip: Clip, myToken: number): Promise<void> {
     buf.copyToChannel(clip.audio as Float32Array<ArrayBuffer>, 0);
     const src = c.createBufferSource();
     src.buffer = buf;
+    src.playbackRate.value = rate;
     src.connect(c.destination);
     src.onended = () => resolve();
     currentSource = src;
@@ -270,7 +279,30 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
       started = true;
       setSpeaking(true);
     }
-    if (mode.kind === "neural") {
+    if (mode.kind === "cloud") {
+      const key = `cloud|${mode.gender}|${s}`;
+      const hit = cache.get(key);
+      // Se pide ya (en paralelo a lo que esté sonando) y suena cuando le toca.
+      const clip: Promise<Clip | null> = hit
+        ? Promise.resolve(hit)
+        : fetchSpeech(s, mode.gender)
+            .then((buf) => ctx().decodeAudioData(buf))
+            .then(
+              (b) => {
+                const c = { audio: b.getChannelData(0), sampleRate: b.sampleRate };
+                cachePut(key, c);
+                return c;
+              },
+              () => null,
+            );
+      chain = chain.then(async () => {
+        if (myToken !== token) return;
+        const c = await clip;
+        if (myToken !== token) return;
+        if (c) await playClip(c, myToken, opts.rate === "slow" ? 0.9 : 1);
+        else await speakSystemSentence(s, pickVoice(voicesCache, opts.langs, opts.gender, opts.hint), opts);
+      });
+    } else if (mode.kind === "neural") {
       const key = `${mode.voice}|${speed}|${s}`;
       const hit = cache.get(key);
       // La generación empieza YA (en paralelo a lo que esté sonando).
