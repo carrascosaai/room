@@ -1,4 +1,4 @@
-import { getUiLang, t } from "../i18n";
+import { t } from "../i18n";
 import { useEffect, useState } from "react";
 import { CHARACTERS, REGIONS, type Region, getCharacter, type Level } from "../characters";
 import type { Draft } from "../lib/draft";
@@ -8,7 +8,7 @@ import { approxSizeMB, fetchDownloadSizeMB, formatMB, MODEL_OPTIONS, modelIdFor,
 import { getScenario, scenariosFor } from "../scenarios";
 import { ASR_MODELS, TTS_SIZE_MB } from "../speech/audioModels";
 import { Flag } from "./Brand";
-import { allowedTargets, langOf } from "../lang";
+import { langOf, type TargetLang } from "../lang";
 import { Icon } from "./Icon";
 import { ShareButton } from "./ShareButton";
 import { UiLangSelect } from "./UiLangSelect";
@@ -65,7 +65,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
 
   const character = getCharacter(prefs.characterId);
   const lang = langOf(character);
-  const targets = allowedTargets(getUiLang());
+  const targets: TargetLang[] = ["en", "fr"];
   const scenarios = scenariosFor(character.kind);
   const scenario = getScenario(prefs.scenarioId, character.kind);
   const tier = prefs.tier;

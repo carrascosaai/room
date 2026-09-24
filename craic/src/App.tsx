@@ -1,7 +1,7 @@
 import { t, useUiLang } from "./i18n";
-import { allowedTargets, langOf } from "./lang";
+import { langOf } from "./lang";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CHARACTERS, getCharacter, type Level } from "./characters";
+import { getCharacter, type Level } from "./characters";
 import { Wordmark } from "./components/Brand";
 import { Chat } from "./components/Chat";
 import { History } from "./components/History";
@@ -23,7 +23,7 @@ import { toAppError, type AppError } from "./llm/errors";
 import { CloudLLM, cloudAvailable } from "./llm/cloudEngine";
 import { createMockEngine } from "./llm/mockEngine";
 import { MODEL_OPTIONS, modelIdFor } from "./llm/models";
-import { getScenario, scenariosFor } from "./scenarios";
+import { getScenario } from "./scenarios";
 import { loadASR, loadTTS, useAudioModels } from "./speech/audioModels";
 import { recognitionSupported } from "./speech/recognition";
 import { needsNeuralVoice, ttsSupported, unlockTTS } from "./speech/tts";
@@ -163,14 +163,6 @@ export default function App() {
 
   const character = getCharacter(prefs.characterId);
   const uiLang = useUiLang();
-
-  // No se practica el idioma propio: si la página está en inglés, francés (y al revés).
-  useEffect(() => {
-    const ok = allowedTargets(uiLang);
-    if (ok.includes(langOf(character))) return;
-    const first = CHARACTERS.find((c) => langOf(c) === ok[0])!;
-    updatePrefs({ lang: ok[0], characterId: first.id, scenarioId: scenariosFor(first.kind)[0].id });
-  }, [uiLang, character, updatePrefs]);
 
   useEffect(() => {
     document.title = t("Craic · Aprende inglés y francés hablando gratis");
