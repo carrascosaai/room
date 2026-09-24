@@ -97,9 +97,13 @@ export const LANGS: Record<TargetLang, LangInfo> = {
 export const langOf = (c: { lang?: TargetLang }): TargetLang => c.lang ?? "en";
 export const infoOf = (c: { lang?: TargetLang }): LangInfo => LANGS[langOf(c)];
 
-/** Idiomas que tiene sentido practicar según el idioma de la interfaz (no se practica el propio). */
-export function allowedTargets(ui: "es" | "en" | "fr"): TargetLang[] {
-  return ui === "en" ? ["fr"] : ui === "fr" ? ["en"] : ["en", "fr"];
+/**
+ * Idioma que sale elegido la primera vez según el idioma de la página
+ * (página en inglés → francés; si no, inglés). Los dos se pueden elegir siempre:
+ * mucha gente tiene el móvil en inglés y quiere practicar inglés.
+ */
+export function defaultTarget(ui: "es" | "en" | "fr"): TargetLang {
+  return ui === "en" ? "fr" : "en";
 }
 
 /** Nombre en inglés de la lengua materna del alumno (para los prompts). */

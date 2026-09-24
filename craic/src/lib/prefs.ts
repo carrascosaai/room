@@ -1,5 +1,6 @@
 import type { Level } from "../characters";
-import type { TargetLang } from "../lang";
+import { getUiLang } from "../i18n";
+import { defaultTarget, type TargetLang } from "../lang";
 import type { ModelTier } from "../llm/models";
 import type { AsrModelId } from "../speech/asr.worker";
 import type { SpeechRate, VoiceEngine } from "../speech/tts";
@@ -73,6 +74,11 @@ export const pauseMs = (p: Prefs) => Math.min(PAUSE_MAX, Math.max(PAUSE_MIN, Num
 export function loadPrefs(): Prefs {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) ?? "{}") as Partial<Prefs> & { whisperSize?: string };
+    // Primera visita: el idioma a practicar según el de la página (inglés → francés).
+    if (!saved.characterId && defaultTarget(getUiLang()) === "fr") {
+      saved.characterId = "camille";
+      saved.lang = "fr";
+    }
     // Migración de versiones anteriores
     if ((saved.asrEngine as string) === "whisper") saved.asrEngine = "local";
     if (saved.voiceEngine === "neural" && saved.voiceQuality === undefined) saved.voiceEngine = "auto";
