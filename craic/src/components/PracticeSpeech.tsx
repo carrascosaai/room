@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { useState } from "react";
 import { scoreLabel, scoreSpeech, type SpeechScore } from "../lib/scoring";
 import { MIC_ERROR_TEXT, type MicError } from "../speech/recognition";
@@ -35,17 +36,17 @@ export function PracticeSpeech({ target, listenOnce, onListen, onStop, error }: 
     <div className="practice">
       <div className="practice-row">
         <button type="button" className="chip" onClick={onListen}>
-          🔊 Escuchar
+          {t("🔊 Escuchar")}
         </button>
         <button type="button" className={`chip${state === "listening" ? " chip-rec" : ""}`} onClick={() => void go()}>
-          {state === "listening" ? "● Te escucho… (para al terminar)" : "🎤 Dilo tú"}
+          {state === "listening" ? t("● Te escucho… (para al terminar)") : t("🎤 Dilo tú")}
         </button>
       </div>
-      {error && state === "idle" && !result && <p className="practice-err">{MIC_ERROR_TEXT[error]}</p>}
+      {error && state === "idle" && !result && <p className="practice-err">{t(MIC_ERROR_TEXT[error])}</p>}
       {result && (
         <div className="practice-result" aria-live="polite">
           <p>
-            <strong>{result.score}%</strong> · {scoreLabel(result.score)}
+            <strong>{result.score}%</strong> · {t(scoreLabel(result.score))}
           </p>
           <p className="practice-words" lang="en">
             {result.words.map((w, i) => (
@@ -55,7 +56,7 @@ export function PracticeSpeech({ target, listenOnce, onListen, onStop, error }: 
             ))}
           </p>
           <p className="muted small">
-            Se entendió: <em lang="en">«{result.heard}»</em>
+            {t("Se entendió:")} <em>«{result.heard}»</em>
           </p>
         </div>
       )}

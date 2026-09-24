@@ -1,5 +1,9 @@
 import { type Character, type Level } from "../characters";
-import { infoOf, LANGS, type TargetLang } from "../lang";
+import { getUiLang } from "../i18n";
+import { infoOf, LANGS, NATIVE_NAME, type TargetLang } from "../lang";
+
+/** Lengua materna del alumno (= idioma de la página), en inglés para el modelo. */
+const native = () => NATIVE_NAME[getUiLang()];
 import type { Scenario } from "../scenarios";
 import type { ChatMessage } from "./engine";
 import { CORRECTION_TYPES } from "./parse";
@@ -54,10 +58,10 @@ export function buildReplyMessages(
   const L = infoOf(character);
   const system = [
     character.persona,
-    `You're on a voice call with a Spanish student practising ${L.name}. Always speak ${L.name}.`,
+    `You're on a voice call with a ${native()}-speaking student practising ${L.name}. Always speak ${L.name}.`,
     opts.scenario?.setting ? `Situation: ${opts.scenario.setting}` : "",
     topicHint(history, opts.scenario?.topics),
-    `Talk like a real person on a call: 1 or 2 short sentences, max ${MAX_WORDS[level]} words. ${L.levelStyle[level]} React to what they said (if they asked you something, answer it with your own opinion or experience first), then ask ONE short question. Never correct them. If they use a Spanish word, say it in ${L.name} and carry on. Never say you're an AI. No emojis or lists.`,
+    `Talk like a real person on a call: 1 or 2 short sentences, max ${MAX_WORDS[level]} words. ${L.levelStyle[level]} React to what they said (if they asked you something, answer it with your own opinion or experience first), then ask ONE short question. Never correct them. If they use a ${native()} word, say it in ${L.name} and carry on. Never say you're an AI. No emojis or lists.`,
     casual ? SLANG[level] : "",
   ]
     .filter(Boolean)
@@ -97,11 +101,11 @@ export function buildSuggestionMessages(level: Level, lastReply: string, context
     {
       role: "system",
       content: [
-        `TASK: SUGGEST. You help a Spanish ${level} learner of ${name} who doesn't know what to answer.`,
+        `TASK: SUGGEST. You help a ${native()}-speaking ${level} learner of ${name} who doesn't know what to answer.`,
         `Write 3 different natural answers in ${name} the learner could say to the partner's last message.`,
         "Each answer: 1 or 2 short sentences, first person, at the learner's level. Make them different (positive, negative, detailed).",
-        "Add a Spanish translation to each one.",
-        `Answer ONLY with JSON: {"suggestions":[{"en":"answer in ${name}","es":"traducción al español"}]}`,
+        `Add a ${native()} translation to each one.`,
+        `Answer ONLY with JSON: {"suggestions":[{"en":"answer in ${name}","es":"translation in ${native()}"}]}`,
       ].join("\n"),
     },
     { role: "user", content: `${ctx ? ctx + "\n" : ""}Partner's last message: "${lastReply}"` },
@@ -130,19 +134,19 @@ export function buildTranslateMessages(text: string, lang: TargetLang = "en"): C
   return [
     {
       role: "system",
-      content: `TASK: TRANSLATE. Translate the ${L.name} text into natural Spanish from Spain. Answer ONLY with the translation, nothing else.`,
+      content: `TASK: TRANSLATE. Translate the ${L.name} text into natural ${native() === "Spanish" ? "Spanish from Spain" : native()}. Answer ONLY with the translation, nothing else.`,
     },
     { role: "user", content: L.translateExample[0] },
-    { role: "assistant", content: L.translateExample[1] },
+    { role: "assistant", content: L.translateExample[1][getUiLang()] ?? L.translateExample[1].es! },
     { role: "user", content: text },
   ];
 }
 
 const CORRECTION_SYSTEM = (level: Level, lang: TargetLang) =>
   [
-    `You correct a Spanish ${level} learner's spoken ${LANGS[lang].name}. Only real mistakes (grammar, tense, prepositions, articles, word order, wrong or Spanish words). Ignore punctuation and capitals${lang === "fr" ? " and missing written accents" : ""}.`,
-    `JSON only: {"errors":[{"original":"wrong part","corrected":"natural version","explanation":"una frase corta en español","type":"${CORRECTION_TYPES.join("|")}"}],"tip":""}`,
-    'No mistakes: "errors":[] and a short "tip" in Spanish to sound more native.',
+    `You correct a ${native()}-speaking ${level} learner's spoken ${LANGS[lang].name}. Only real mistakes (grammar, tense, prepositions, articles, word order, wrong or ${native()} words). Ignore punctuation and capitals${lang === "fr" ? " and missing written accents" : ""}.`,
+    `JSON only: {"errors":[{"original":"wrong part","corrected":"natural version","explanation":"one short sentence in ${native()}","type":"${CORRECTION_TYPES.join("|")}"}],"tip":""}`,
+    `No mistakes: "errors":[] and a short "tip" in ${native()} to sound more native. Always write explanations and tips in ${native()}.`,
   ].join("\n");
 
 export function buildCorrectionMessages(
@@ -152,7 +156,8 @@ export function buildCorrectionMessages(
   lang: TargetLang = "en",
 ): ChatMessage[] {
   const messages: ChatMessage[] = [{ role: "system", content: CORRECTION_SYSTEM(level, lang) }];
-  for (const [u, a] of LANGS[lang].fewShot) {
+  const shots = LANGS[lang].fewShot;
+  for (const [u, a] of shots[getUiLang()] ?? shots.es ?? []) {
     messages.push({ role: "user", content: u });
     messages.push({ role: "assistant", content: a });
   }

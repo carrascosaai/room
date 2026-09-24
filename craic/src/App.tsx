@@ -1,6 +1,7 @@
-import { langOf } from "./lang";
+import { t, useUiLang } from "./i18n";
+import { allowedTargets, langOf } from "./lang";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getCharacter, type Level } from "./characters";
+import { CHARACTERS, getCharacter, type Level } from "./characters";
 import { Wordmark } from "./components/Brand";
 import { Chat } from "./components/Chat";
 import { History } from "./components/History";
@@ -22,7 +23,7 @@ import { toAppError, type AppError } from "./llm/errors";
 import { CloudLLM, cloudAvailable } from "./llm/cloudEngine";
 import { createMockEngine } from "./llm/mockEngine";
 import { MODEL_OPTIONS, modelIdFor } from "./llm/models";
-import { getScenario } from "./scenarios";
+import { getScenario, scenariosFor } from "./scenarios";
 import { loadASR, loadTTS, useAudioModels } from "./speech/audioModels";
 import { recognitionSupported } from "./speech/recognition";
 import { needsNeuralVoice, ttsSupported, unlockTTS } from "./speech/tts";
@@ -134,7 +135,7 @@ export default function App() {
             // Atascado: se cierra el motor y se reintenta una vez desde cero.
             if (toAppError(err).kind !== "stall") throw err;
             console.warn("Carga atascada, reintentando", err);
-            setProgress({ progress: 0, text: "Reintentando…" });
+            setProgress({ progress: 0, text: t("Reintentando…") });
             return await loadWebLLM(modelId, setProgress);
           }
         };
@@ -161,6 +162,19 @@ export default function App() {
   );
 
   const character = getCharacter(prefs.characterId);
+  const uiLang = useUiLang();
+
+  // No se practica el idioma propio: si la página está en inglés, francés (y al revés).
+  useEffect(() => {
+    const ok = allowedTargets(uiLang);
+    if (ok.includes(langOf(character))) return;
+    const first = CHARACTERS.find((c) => langOf(c) === ok[0])!;
+    updatePrefs({ lang: ok[0], characterId: first.id, scenarioId: scenariosFor(first.kind)[0].id });
+  }, [uiLang, character, updatePrefs]);
+
+  useEffect(() => {
+    document.title = t("Craic · Aprende inglés y francés hablando gratis");
+  }, [uiLang]);
 
   // ¿Hace falta la voz neuronal o el navegador ya tiene una voz natural?
   useEffect(() => {
@@ -330,14 +344,14 @@ export default function App() {
     <div className="app">
       <header className="top">
         {screen === "settings" || screen === "summary" ? (
-          <button className="round-btn" aria-label="Volver" onClick={() => setScreen("home")}>
+          <button className="round-btn" aria-label={t("Volver")} onClick={() => setScreen("home")}>
             <Icon name="back" />
           </button>
         ) : install.canPrompt || install.showIOSHint ? (
           <button
             className="round-btn"
-            aria-label="Instalar app"
-            title="Instalar app"
+            aria-label={t("Instalar app")}
+            title={t("Instalar app")}
             onClick={() => (install.canPrompt ? void install.install() : setIosHint((v) => !v))}
           >
             <Icon name="download" />
@@ -345,35 +359,35 @@ export default function App() {
         ) : (
           <span className="top-spacer" />
         )}
-        <button className="wordmark-btn" onClick={() => setScreen("home")} aria-label="Inicio">
+        <button className="wordmark-btn" onClick={() => setScreen("home")} aria-label={t("Inicio")}>
           <Wordmark />
         </button>
-        <button className="round-btn" aria-label="Ajustes" onClick={() => setScreen("settings")}>
+        <button className="round-btn" aria-label={t("Ajustes")} onClick={() => setScreen("settings")}>
           <Icon name="gear" />
         </button>
       </header>
       {iosHint && (
         <p className="note">
-          En iPhone/iPad: pulsa <strong>Compartir</strong> en Safari y luego <strong>«Añadir a pantalla de inicio»</strong>.
+          {t("En iPhone/iPad: pulsa «Compartir» en Safari y luego «Añadir a pantalla de inicio».")}
         </p>
       )}
 
       {tabbed && canRun && (
-        <nav className="tabs" aria-label="Secciones">
-          {TABS.map((t) => (
+        <nav className="tabs" aria-label={t("Secciones")}>
+          {TABS.map((tab) => (
             <button
-              key={t.id}
-              className={screen === t.id ? "on" : ""}
-              aria-current={screen === t.id ? "page" : undefined}
-              onClick={() => setScreen(t.id)}
+              key={tab.id}
+              className={screen === tab.id ? "on" : ""}
+              aria-current={screen === tab.id ? "page" : undefined}
+              onClick={() => setScreen(tab.id)}
             >
-              <Icon name={t.icon} size={18} /> {t.label}
+              <Icon name={tab.icon} size={18} /> {t(tab.label)}
             </button>
           ))}
         </nav>
       )}
 
-      {screen === "check" && <p className="muted center">Comprobando tu dispositivo…</p>}
+      {screen === "check" && <p className="muted center">{t("Comprobando tu dispositivo…")}</p>}
 
       {screen === "home" && gpu && !canRun && !gpu.ok && <NoWebGPU status={gpu} />}
 
