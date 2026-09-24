@@ -43,4 +43,14 @@ describe("EnergyVad", () => {
     for (let i = 0; i < 5; i++) vad.push(frame(0.15));
     expect(vad.speaking).toBe(true);
   });
+
+  it("informa de cuánto de la pausa ha pasado", () => {
+    const vad = new EnergyVad(1000);
+    for (let i = 0; i < 10; i++) vad.push(frame(0.002));
+    for (let i = 0; i < 10; i++) vad.push(frame(0.1));
+    expect(vad.silenceFraction()).toBe(0);
+    for (let i = 0; i < 16; i++) vad.push(frame(0.002));
+    expect(vad.silenceFraction()).toBeGreaterThan(0.45);
+    expect(vad.silenceFraction()).toBeLessThan(0.55);
+  });
 });

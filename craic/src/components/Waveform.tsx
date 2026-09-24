@@ -33,3 +33,22 @@ export function Waveform({ level, tone = "rec" }: { level: () => number; tone?: 
     </span>
   );
 }
+
+/** Barra que se llena mientras estás callado: al llenarse, se envía lo que dijiste. */
+export function PauseBar({ progress }: { progress: () => number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      if (ref.current) ref.current.style.transform = `scaleX(${progress().toFixed(3)})`;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [progress]);
+  return (
+    <span className="pause-bar" aria-hidden="true">
+      <span ref={ref} />
+    </span>
+  );
+}

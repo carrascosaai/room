@@ -9,12 +9,12 @@ import type { Scenario } from "../scenarios";
 import { getAudioStatus, useAudioModels } from "../speech/audioModels";
 import { MIC_ERROR_TEXT, type MicError } from "../speech/recognition";
 import { stopSpeaking, unlockTTS, useSpeaking } from "../speech/tts";
-import { listen, listenOnce, micLevel, voiceInputAvailable, type ListenHandle, type ListenPhase } from "../speech/voiceInput";
+import { listen, listenOnce, micLevel, pauseProgress, voiceInputAvailable, type ListenHandle, type ListenPhase } from "../speech/voiceInput";
 import { Flag, Wordmark } from "./Brand";
 import { CorrectionCard } from "./CorrectionCard";
 import { infoOf, langOf } from "../lang";
 import { Icon } from "./Icon";
-import { Waveform } from "./Waveform";
+import { PauseBar, Waveform } from "./Waveform";
 
 interface Props {
   llm: LLM;
@@ -416,7 +416,15 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
           <div className="row row-user">
             <div className="bubble bubble-user bubble-live">
               <span className="bubble-who">{t("Tú")}</span>
-              {partial || <span className="dots" aria-label={t("Escuchando")} />}
+              {partial ||
+                (phase === "hearing" ? (
+                  <span className="live-voice" title={t("Cuando la barra se llena, se envía")}>
+                    <span className="dots" aria-label={t("Escuchando")} />
+                    <PauseBar progress={pauseProgress} />
+                  </span>
+                ) : (
+                  <span className="dots" aria-label={t("Escuchando")} />
+                ))}
             </div>
           </div>
         )}

@@ -4,7 +4,8 @@
 //  - "local": Silero VAD + Moonshine/Whisper en el dispositivo (sin pitidos, sin internet).
 //  - "browser": reconocimiento del navegador con temporizador de silencio.
 import { cleanTranscript } from "./asrText";
-import { asrSend, getAudioStatus, onAsrMessage } from "./audioModels";
+import { asrSend, getAudioStatus, loadASR, onAsrMessage } from "./audioModels";
+import { loadPrefs } from "../lib/prefs";
 import { cloudSttOff, cloudSttReady, transcribe } from "./cloudStt";
 import { EnergyVad, FRAME_MS } from "./energyVad";
 import { acquireMic, mic, micFailure, releaseMic } from "./mic";
@@ -42,6 +43,12 @@ export function effectiveEngine(engine: AsrEngine): AsrEngine | null {
   return recognitionSupported ? "browser" : localReady ? "local" : null;
 }
 
+let currentVad: EnergyVad | null = null;
+/** 0–1: cuánto de tu pausa ha pasado ya (para que veas cuándo se enviará). */
+export function pauseProgress(): number {
+  return currentVad?.silenceFraction() ?? 0;
+}
+
 /** Si el micro se quedó mudo una vez (sin datos), no se insiste con la grabación propia. */
 let micStuck = false;
 
@@ -59,6 +66,9 @@ export function listen(opts: ListenOptions): ListenHandle {
   console.info(`[craic] escuchando con: ${engine ?? "ninguno"} (oído local: ${getAudioStatus().asr})`);
   let handle: ListenHandle;
   if (!engine) {
+    // Sin nube ni reconocedor del navegador (p. ej. Firefox): se descarga el
+    // oído local y la llamada reintenta sola cuando esté listo.
+    if (english && getAudioStatus().asr !== "loading" && getAudioStatus().asr !== "ready") loadASR(loadPrefs().asrModel);
     opts.onError(english ? "loading" : "language");
     handle = { finish() {}, cancel() {} };
   } else handle = engine === "local" ? listenLocal(opts) : listenBrowser(opts);
@@ -81,6 +91,7 @@ function listenCloud(opts: ListenOptions): ListenHandle {
   let offFrame: (() => void) | null = null;
   let released = false;
   const vad = new EnergyVad(opts.silenceMs);
+  currentVad = vad;
   const pre: Float32Array[] = [];
   let chunks: Float32Array[] = [];
   let recording = false;
@@ -89,6 +100,7 @@ function listenCloud(opts: ListenOptions): ListenHandle {
   let watchdog: ReturnType<typeof setTimeout> | null = null;
 
   const release = () => {
+    if (currentVad === vad) currentVad = null;
     offFrame?.();
     offFrame = null;
     if (watchdog) clearTimeout(watchdog);
@@ -136,7 +148,6 @@ function listenCloud(opts: ListenOptions): ListenHandle {
         recording = true;
         chunks = [...pre];
         opts.onPhase("hearing");
-        opts.onPartial?.("…");
       } else if (frames * FRAME_MS > MAX_WAIT_MS) {
         // Nadie habla: se vuelve a empezar (libera el micro un momento).
         finishWith(() => opts.onFinal(""));

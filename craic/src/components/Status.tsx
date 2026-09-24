@@ -11,7 +11,7 @@ type Limits = {
   tokensLeftThisMinute?: string | null;
   error?: string;
 };
-type Data = { enabled: boolean; checkedAt?: string; chat?: Limits[]; voice?: Limits; extraProviders?: string[] };
+type Data = { enabled: boolean; checkedAt?: string; chat?: Limits[]; voice?: Limits; ears?: Limits; extraProviders?: string[] };
 
 function Bar({ left, total }: { left?: string | null; total?: string | null }) {
   const l = Number(left);
@@ -38,7 +38,7 @@ function Block({ title, l }: { title: string; l?: Limits }) {
         <p className="muted">—</p>
       ) : l.error || (l.status && l.status >= 400) ? (
         <p className="note note-warn">
-          {l.status === 429 ? "Cupo agotado ahora mismo: la app usa el plan B (reintentos / voz del móvil)." : `Error ${l.status ?? ""} ${l.error ?? ""}`}
+          {l.status === 429 ? "Cupo agotado ahora mismo: la app usa el plan B (reintentos / voz y reconocimiento del móvil)." : `Error ${l.status ?? ""} ${l.error ?? ""}`}
         </p>
       ) : (
         <>
@@ -82,6 +82,7 @@ export function Status() {
           <>
             {data.chat?.map((c) => <Block key={c.model} title={`IA · ${c.model}`} l={c} />)}
             <Block title="Voz realista · Orpheus" l={data.voice} />
+            <Block title="Oído (tu voz a texto) · Whisper" l={data.ears} />
             <section className="card">
               <h2>Reserva</h2>
               <p className="small">
