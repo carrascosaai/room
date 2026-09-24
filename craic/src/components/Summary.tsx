@@ -1,3 +1,4 @@
+import { t, typeLabel } from "../i18n";
 import { ShareButton } from "./ShareButton";
 import { langOf } from "../lang";
 import { useEffect, useRef, useState } from "react";
@@ -74,8 +75,8 @@ export function EndOfSession({ llm, character, level, messages, startedAt, onNew
   if (!session) {
     return (
       <div className="card">
-        <h2>Preparando tu resumen…</h2>
-        <p className="muted">Buscando tus errores más repetidos y expresiones útiles de la conversación.</p>
+        <h2>{t("Preparando tu resumen…")}</h2>
+        <p className="muted">{t("Buscando tus errores más repetidos y expresiones útiles de la conversación.")}</p>
         <div className="progress">
           <div className="progress-bar progress-indeterminate" />
         </div>
@@ -87,26 +88,28 @@ export function EndOfSession({ llm, character, level, messages, startedAt, onNew
     <div>
       <SessionReport session={session} />
       {saveError ? (
-        <p className="note note-warn">No se pudo guardar la sesión en este dispositivo (¿modo incógnito?).</p>
+        <p className="note note-warn">{t("No se pudo guardar la sesión en este dispositivo (¿modo incógnito?).")}</p>
       ) : (
         added !== null && (
           <p className="note">
-            Sesión guardada.{" "}
+            {t("Sesión guardada.")}{" "}
             {added > 0
-              ? `${added} ${added === 1 ? "expresión nueva añadida" : "expresiones nuevas añadidas"} a tu vocabulario.`
-              : "Las expresiones ya estaban en tu vocabulario."}
+              ? added === 1
+                ? t("1 expresión nueva añadida a tu vocabulario.")
+                : t("{n} expresiones nuevas añadidas a tu vocabulario.", { n: added })
+              : t("Las expresiones ya estaban en tu vocabulario.")}
           </p>
         )
       )}
       <div className="actions">
         <button className="btn-dark" onClick={onNew}>
-          Llamar otra vez
+          {t("Llamar otra vez")}
         </button>
         <button className="btn-ghost" onClick={onHistory}>
-          Ver progreso
+          {t("Ver progreso")}
         </button>
       </div>
-      <p className="muted small share-hint">¿Te ha servido? Pásaselo a alguien que esté aprendiendo idiomas: es gratis.</p>
+      <p className="muted small share-hint">{t("¿Te ha servido? Pásaselo a alguien que esté aprendiendo idiomas: es gratis.")}</p>
       <div className="actions">
         <ShareButton className="btn-ghost" />
       </div>
@@ -122,33 +125,33 @@ export function SessionReport({ session, showTranscript = false }: { session: Se
   return (
     <>
       <section className="card">
-        <h2>Resumen · {session.characterName}</h2>
+        <h2>{t("Resumen")} · {session.characterName}</h2>
         <div className="stats">
           <div>
             <strong>{userTurns}</strong>
-            <small>intervenciones</small>
+            <small>{t("intervenciones")}</small>
           </div>
           <div>
             <strong>{totalErrors}</strong>
-            <small>correcciones</small>
+            <small>{t("correcciones")}</small>
           </div>
           <div>
             <strong>{minutes}</strong>
-            <small>min · {session.level}</small>
+            <small>{t("min")} · {session.level}</small>
           </div>
         </div>
       </section>
 
       <section className="card">
-        <h2>Errores más repetidos</h2>
+        <h2>{t("Errores más repetidos")}</h2>
         {session.errorStats.length === 0 ? (
-          <p className="muted">¡No se detectaron errores! 🎉</p>
+          <p className="muted">{t("¡No se detectaron errores! 🎉")}</p>
         ) : (
           <ul className="err-list">
             {session.errorStats.slice(0, 4).map((s) => (
               <li key={s.type}>
                 <div className="err-head">
-                  <span className="corr-tag">{s.type}</span>
+                  <span className="corr-tag">{typeLabel(s.type)}</span>
                   <span className="muted">×{s.count}</span>
                 </div>
                 {s.examples.map((e, i) => (
@@ -163,9 +166,9 @@ export function SessionReport({ session, showTranscript = false }: { session: Se
       </section>
 
       <section className="card">
-        <h2>Expresiones para aprender</h2>
+        <h2>{t("Expresiones para aprender")}</h2>
         {session.expressions.length === 0 ? (
-          <p className="muted">Esta vez no se encontraron expresiones. Prueba una conversación más larga.</p>
+          <p className="muted">{t("Esta vez no se encontraron expresiones. Prueba una conversación más larga.")}</p>
         ) : (
           <ul className="expr-list">
             {session.expressions.map((x) => (
@@ -186,12 +189,12 @@ export function SessionReport({ session, showTranscript = false }: { session: Se
       {showTranscript && (
         <details className="card">
           <summary>
-            <strong>Conversación completa</strong>
+            <strong>{t("Conversación completa")}</strong>
           </summary>
           <div className="transcript">
             {session.messages.map((m, i) => (
               <div key={i} className={`t-line t-${m.role}`}>
-                <b>{m.role === "user" ? "Tú" : session.characterName}:</b> <span lang="en">{m.text}</span>
+                <b>{m.role === "user" ? t("Tú") : session.characterName}:</b> <span lang="en">{m.text}</span>
                 {m.corrections?.errors.map((e, j) => (
                   <div key={j} className="corr-line t-fix">
                     <s>{e.original}</s> → <strong lang="en">{e.corrected}</strong>

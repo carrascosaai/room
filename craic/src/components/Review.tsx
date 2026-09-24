@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { useEffect, useMemo, useState } from "react";
 import { deleteVocab, listVocab, updateVocab, type VocabItem } from "../lib/db";
 import type { Prefs } from "../lib/prefs";
@@ -77,46 +78,45 @@ export function Review({ prefs }: { prefs: Prefs }) {
     };
   }, [items]);
 
-  if (!items) return <p className="muted center">Cargando…</p>;
+  if (!items) return <p className="muted center">{t("Cargando…")}</p>;
 
   return (
     <div className="review">
       <div className="stat-row">
         <div className="stat">
           <strong>{queue.length}</strong>
-          <small>para hoy</small>
+          <small>{t("para hoy")}</small>
         </div>
         <div className="stat">
           <strong>{stats.total}</strong>
-          <small>expresiones</small>
+          <small>{t("expresiones")}</small>
         </div>
         <div className="stat">
           <strong>{stats.learned}</strong>
-          <small>dominadas</small>
+          <small>{t("dominadas")}</small>
         </div>
       </div>
 
       {!stats.total ? (
         <div className="card empty">
           <Icon name="cards" size={32} />
-          <h2>Tu mazo está vacío</h2>
+          <h2>{t("Tu mazo está vacío")}</h2>
           <p className="muted">
-            Al terminar cada conversación se guardan expresiones útiles. También puedes añadir correcciones con «+ A mi
-            vocabulario».
+            {t("Al terminar cada conversación se guardan expresiones útiles. También puedes añadir correcciones con «+ A mi vocabulario».")}
           </p>
         </div>
       ) : card ? (
         <div className="card flashcard">
-          <span className="corr-tag">{masteryLabel(card.box)}</span>
-          <p className="muted small">¿Cómo se dice en {card.lang === "fr" ? "francés" : "inglés"}?</p>
+          <span className="corr-tag">{t(masteryLabel(card.box))}</span>
+          <p className="muted small">{card.lang === "fr" ? t("¿Cómo se dice en francés?") : t("¿Cómo se dice en inglés?")}</p>
           <p className="flash-es">{card.es}</p>
           {flipped ? (
             <>
-              <p className="flash-en" lang="en">
+              <p className="flash-en" lang={card.lang ?? "en"}>
                 {card.en}
               </p>
               {card.example && (
-                <p className="muted flash-ex" lang="en">
+                <p className="muted flash-ex" lang={card.lang ?? "en"}>
                   {card.example}
                 </p>
               )}
@@ -129,10 +129,10 @@ export function Review({ prefs }: { prefs: Prefs }) {
               />
               <div className="flash-actions">
                 <button className="btn-ghost" onClick={() => void answer(false)}>
-                  No lo sabía
+                  {t("No lo sabía")}
                 </button>
                 <button className="btn-dark" onClick={() => void answer(true)}>
-                  ¡Lo sabía!
+                  {t("¡Lo sabía!")}
                 </button>
               </div>
             </>
@@ -145,39 +145,39 @@ export function Review({ prefs }: { prefs: Prefs }) {
                 void say(card.en);
               }}
             >
-              Dilo en voz alta y toca para comprobar
+              {t("Dilo en voz alta y toca para comprobar")}
             </button>
           )}
         </div>
       ) : (
         <div className="card empty">
           <span className="big-emoji">🎉</span>
-          <h2>{done ? "¡Repaso terminado!" : "Todo al día"}</h2>
-          <p className="muted">Vuelve mañana: las expresiones reaparecen justo antes de que las olvides.</p>
+          <h2>{done ? t("¡Repaso terminado!") : t("Todo al día")}</h2>
+          <p className="muted">{t("Vuelve mañana: las expresiones reaparecen justo antes de que las olvides.")}</p>
         </div>
       )}
 
       {stats.total > 0 && (
         <section>
           <button className="section-toggle" onClick={() => setShowList((v) => !v)} aria-expanded={showList}>
-            Todas las expresiones ({stats.total}) <Icon name="chevron" size={18} className={showList ? "rot" : ""} />
+            {t("Todas las expresiones ({n})", { n: stats.total })} <Icon name="chevron" size={18} className={showList ? "rot" : ""} />
           </button>
           {showList && (
             <ul className="vocab-list">
               {items.map((x) => (
                 <li key={x.id} className="card vocab-item">
                   <div>
-                    <strong lang="en">{x.en}</strong>
+                    <strong lang={x.lang ?? "en"}>{x.en}</strong>
                     <span>{x.es}</span>
-                    <small className="muted">{masteryLabel(x.box)}</small>
+                    <small className="muted">{t(masteryLabel(x.box))}</small>
                   </div>
                   <div className="vocab-actions">
-                    <button className="icon-plain" aria-label={`Escuchar «${x.en}»`} onClick={() => void say(x.example || x.en)}>
+                    <button className="icon-plain" aria-label={t("Escuchar «{x}»", { x: x.en })} onClick={() => void say(x.example || x.en)}>
                       <Icon name="volume" size={20} />
                     </button>
                     <button
                       className="icon-plain"
-                      aria-label={`Borrar «${x.en}»`}
+                      aria-label={t("Borrar «{x}»", { x: x.en })}
                       onClick={async () => {
                         await deleteVocab(x.id);
                         const all = await reload();

@@ -1834,3 +1834,21 @@ select {
   line-height: 1;
   margin: 0;
 }
+
+/* ---------- Idioma de la página ---------- */
+.ui-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+.ui-lang select {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+}
+.home-footer {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 14px;
+}

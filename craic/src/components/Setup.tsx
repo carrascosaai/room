@@ -1,3 +1,4 @@
+import { getUiLang, t } from "../i18n";
 import { useEffect, useState } from "react";
 import { CHARACTERS, REGIONS, type Region, getCharacter, type Level } from "../characters";
 import type { Draft } from "../lib/draft";
@@ -7,9 +8,10 @@ import { approxSizeMB, fetchDownloadSizeMB, formatMB, MODEL_OPTIONS, modelIdFor,
 import { getScenario, scenariosFor } from "../scenarios";
 import { ASR_MODELS, TTS_SIZE_MB } from "../speech/audioModels";
 import { Flag } from "./Brand";
-import { langOf } from "../lang";
+import { allowedTargets, langOf } from "../lang";
 import { Icon } from "./Icon";
 import { ShareButton } from "./ShareButton";
+import { UiLangSelect } from "./UiLangSelect";
 
 interface Props {
   prefs: Prefs;
@@ -28,7 +30,7 @@ interface Props {
   onDiscardDraft: () => void;
 }
 
-const LEVELS: { id: Level; label: string }[] = [
+export const LEVELS: { id: Level; label: string }[] = [
   { id: "B1", label: "Intermedio" },
   { id: "B2", label: "Interm. alto" },
   { id: "C1", label: "Avanzado" },
@@ -63,6 +65,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
 
   const character = getCharacter(prefs.characterId);
   const lang = langOf(character);
+  const targets = allowedTargets(getUiLang());
   const scenarios = scenariosFor(character.kind);
   const scenario = getScenario(prefs.scenarioId, character.kind);
   const tier = prefs.tier;
@@ -81,26 +84,27 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
         <div className="card resume-card">
           <Flag code={draftChar.flag} size={44} />
           <div className="resume-text">
-            <strong>Continúa con {draftChar.name.split(" ")[0]}</strong>
+            <strong>{t("Continúa con {name}", { name: draftChar.name.split(" ")[0] })}</strong>
             <small>
-              {draft.messages.filter((m) => m.role === "user").length} intervenciones · la dejaste a medias
+              {t("{n} intervenciones · la dejaste a medias", { n: draft.messages.filter((m) => m.role === "user").length })}
             </small>
           </div>
           <div className="resume-actions">
             <button className="btn-dark btn-small" onClick={onResume}>
-              Seguir
+              {t("Seguir")}
             </button>
-            <button className="icon-plain" onClick={onDiscardDraft} aria-label="Descartar conversación guardada">
+            <button className="icon-plain" onClick={onDiscardDraft} aria-label={t("Descartar conversación guardada")}>
               <Icon name="close" size={18} />
             </button>
           </div>
         </div>
       )}
 
+      {targets.length > 1 && (
       <section>
-        <h2 className="section-title">¿Qué idioma quieres practicar?</h2>
-        <div className="seg seg-wide lang-seg" role="group" aria-label="Idioma">
-          {(["en", "fr"] as const).map((l) => (
+        <h2 className="section-title">{t("¿Qué idioma quieres practicar?")}</h2>
+        <div className="seg seg-wide lang-seg" role="group" aria-label={t("Idioma")}>
+          {targets.map((l) => (
             <button
               key={l}
               className={lang === l ? "on" : ""}
@@ -113,18 +117,19 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
               }}
             >
               <Flag code={l === "en" ? "gb" : "fr"} size={30} />
-              <strong>{l === "en" ? "Inglés" : "Francés"}</strong>
+              <strong>{l === "en" ? t("Inglés") : t("Francés")}</strong>
             </button>
           ))}
         </div>
       </section>
+      )}
 
       <section>
-        <h2 className="section-title">¿Con quién quieres hablar?</h2>
-        <div className="region-chips" role="group" aria-label="Filtrar por acento">
+        <h2 className="section-title">{t("¿Con quién quieres hablar?")}</h2>
+        <div className="region-chips" role="group" aria-label={t("Filtrar por acento")}>
           {REGIONS[lang].map((r) => (
             <button key={r.id} type="button" className={region === r.id ? "on" : ""} onClick={() => setRegion(r.id)} aria-pressed={region === r.id}>
-              {r.label}
+              {t(r.label)}
             </button>
           ))}
         </div>
@@ -144,15 +149,15 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
             >
               <Flag code={c.flag} size={44} />
               <strong>{c.name}</strong>
-              <span className="char-accent">{c.accent}</span>
-              <small>{c.tagline}</small>
+              <span className="char-accent">{t(c.accent)}</span>
+              <small>{t(c.tagline)}</small>
             </button>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 className="section-title">Situación</h2>
+        <h2 className="section-title">{t("Situación")}</h2>
         <div className="scenario-list">
           {scenarios.map((s) => (
             <button
@@ -165,8 +170,8 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
                 {s.emoji}
               </span>
               <span>
-                <strong>{s.title}</strong>
-                <small>{s.goal}</small>
+                <strong>{t(s.title)}</strong>
+                <small>{t(s.goal)}</small>
               </span>
             </button>
           ))}
@@ -175,27 +180,27 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
 
       {character.kind === "casual" && (
         <section>
-          <h2 className="section-title">¿Quién empieza?</h2>
-          <div className="seg seg-wide" role="group" aria-label="Quién empieza la llamada">
+          <h2 className="section-title">{t("¿Quién empieza?")}</h2>
+          <div className="seg seg-wide" role="group" aria-label={t("Quién empieza la llamada")}>
             <button className={!prefs.userStarts ? "on" : ""} onClick={() => onChange({ userStarts: false })}>
               <strong>{character.name.split(" ")[0]}</strong>
-              <small>Te saluda y pregunta</small>
+              <small>{t("Te saluda y pregunta")}</small>
             </button>
             <button className={prefs.userStarts ? "on" : ""} onClick={() => onChange({ userStarts: true })}>
-              <strong>Yo</strong>
-              <small>Tú sacas el tema</small>
+              <strong>{t("Yo")}</strong>
+              <small>{t("Tú sacas el tema")}</small>
             </button>
           </div>
         </section>
       )}
 
       <section>
-        <h2 className="section-title">Tu nivel</h2>
-        <div className="seg seg-wide" role="group" aria-label="Nivel">
+        <h2 className="section-title">{t("Tu nivel")}</h2>
+        <div className="seg seg-wide" role="group" aria-label={t("Nivel")}>
           {LEVELS.map((l) => (
             <button key={l.id} className={prefs.level === l.id ? "on" : ""} onClick={() => onChange({ level: l.id })}>
               <strong>{l.id}</strong>
-              <small>{l.label}</small>
+              <small>{t(l.label)}</small>
             </button>
           ))}
         </div>
@@ -203,36 +208,35 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
 
       <section className="card model-card">
         {cloudOk && (
-          <div className="seg seg-wide engine-seg" role="group" aria-label="Dónde funciona la IA">
+          <div className="seg seg-wide engine-seg" role="group" aria-label={t("Dónde funciona la IA")}>
             <button className={cloud ? "on" : ""} onClick={() => onChange({ aiEngine: "cloud" })}>
-              <strong>☁️ En la nube</strong>
-              <small>Rápida · sin descargas</small>
+              <strong>{t("☁️ En la nube")}</strong>
+              <small>{t("Rápida · sin descargas")}</small>
             </button>
             <button className={!cloud ? "on" : ""} onClick={() => onChange({ aiEngine: "local" })}>
-              <strong>🔒 En tu dispositivo</strong>
-              <small>Privada · sin internet</small>
+              <strong>{t("🔒 En tu dispositivo")}</strong>
+              <small>{t("Privada · sin internet")}</small>
             </button>
           </div>
         )}
         {cloud ? (
           <p className="muted small">
-            Responde al instante. Tus frases se envían a la IA (Groq) para contestarte; no se guardan en ningún sitio de la
-            app. La voz y el reconocimiento siguen funcionando en tu dispositivo.
+            {t("Responde al instante. Tus frases se envían a la IA (Groq) para contestarte; no se guardan en ningún sitio de la app. La voz y el reconocimiento siguen funcionando en tu dispositivo.")}
           </p>
         ) : (
           <>
         <button className="model-summary" onClick={() => setShowModels((v) => !v)} aria-expanded={showModels}>
           <span>
-            <strong>IA: {MODEL_OPTIONS[tier].label}</strong>
+            <strong>{t("IA: {model}", { model: t(MODEL_OPTIONS[tier].label) })}</strong>
             <small>
               {demo
-                ? "Modo demo"
+                ? t("Modo demo")
                 : isCached
-                  ? "✓ Descargada · funciona sin conexión"
-                  : `Descarga única de ${sizes[tier] ? "" : "≈ "}${formatMB(llmMB)}`}
+                  ? t("✓ Descargada · funciona sin conexión")
+                  : t("Descarga única de {size}", { size: (sizes[tier] ? "" : "≈ ") + formatMB(llmMB) })}
             </small>
           </span>
-          <span className="muted small">Cambiar</span>
+          <span className="muted small">{t("Cambiar")}</span>
         </button>
         {showModels && (
           <div className="model-list">
@@ -244,11 +248,11 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
                   <input type="radio" name="tier" checked={tier === m.tier} onChange={() => onChange({ tier: m.tier })} />
                   <span>
                     <strong>
-                      {m.label}
-                      {m.tier === "light" && <em className="pill">Recomendado</em>}
+                      {t(m.label)}
+                      {m.tier === "light" && <em className="pill">{t("Recomendado")}</em>}
                     </strong>
-                    <small>{m.description}</small>
-                    <small className="size">{demo ? "Modo demo" : c ? "✓ Ya descargado" : `Descarga: ${sizes[m.tier] ? "" : "≈ "}${formatMB(s)}`}</small>
+                    <small>{t(m.description)}</small>
+                    <small className="size">{demo ? t("Modo demo") : c ? t("✓ Ya descargado") : t("Descarga: {size}", { size: (sizes[m.tier] ? "" : "≈ ") + formatMB(s) })}</small>
                   </span>
                 </label>
               );
@@ -258,33 +262,36 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
           </>
         )}
         {!cloud && mobile && tier === "quality" && (
-          <p className="note">En móvil el modelo «Mejor calidad» puede quedarse sin memoria. Si falla, vuelve al ligero.</p>
+          <p className="note">{t("En móvil el modelo «Mejor calidad» puede quedarse sin memoria. Si falla, vuelve al ligero.")}</p>
         )}
         {totalMB > 0 && (
           <p className="note">
-            Primera vez: se descargarán <strong>≈ {formatMB(totalMB)}</strong>
+            {t("Primera vez: se descargarán")} <strong>≈ {formatMB(totalMB)}</strong>
             {cloud ? (
-              <> para la voz natural y el oído, una sola vez.</>
+              <> {t("para la voz natural y el oído, una sola vez.")}</>
             ) : (
-              extraMB > 0 && <> (IA {formatMB(llmMB)} + voz natural y oído {formatMB(extraMB)})</>
+              extraMB > 0 && <> {t("(IA {llm} + voz natural y oído {extra})", { llm: formatMB(llmMB), extra: formatMB(extraMB) })}</>
             )}{" "}
-            Mejor con Wi-Fi.{!cloud && " Después funciona sin conexión."}
+            {t("Mejor con Wi-Fi.")}{!cloud && " " + t("Después funciona sin conexión.")}
           </p>
         )}
         {lowSpace && (
           <p className="note note-warn">
-            Puede que no haya espacio suficiente ({formatMB(free ?? 0)} libres). Libera espacio o usa el modelo ligero.
+            {t("Puede que no haya espacio suficiente ({free} libres). Libera espacio o usa el modelo ligero.", { free: formatMB(free ?? 0) })}
           </p>
         )}
       </section>
 
       <div className="share-row">
-        <span className="muted small">100% gratis · sin registro · sin anuncios</span>
-        <ShareButton className="btn-ghost btn-small" label="Compartir" />
+        <span className="muted small">{t("100% gratis · sin registro · sin anuncios")}</span>
+        <ShareButton className="btn-ghost btn-small" label={t("Compartir")} />
+      </div>
+      <div className="home-footer">
+        <UiLangSelect />
       </div>
 
       <button className="cta" onClick={() => onStart({ cached: isCached })}>
-        <Icon name="call" /> {isCached || cloud ? `Llamar a ${character.name.split(" ")[0]}` : `Descargar y llamar a ${character.name.split(" ")[0]}`}
+        <Icon name="call" /> {isCached || cloud ? t("Llamar a {name}", { name: character.name.split(" ")[0] }) : t("Descargar y llamar a {name}", { name: character.name.split(" ")[0] })}
       </button>
     </div>
   );

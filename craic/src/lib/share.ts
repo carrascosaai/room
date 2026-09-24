@@ -1,11 +1,12 @@
+import { t } from "../i18n";
 // Compartir la app: menú nativo del móvil (WhatsApp, TikTok, Instagram…) o,
 // si no existe, copiar el enlace.
 export const SHARE_URL = "https://craic.vercel.app";
-export const SHARE_TEXT =
-  "Estoy practicando inglés y francés hablando por llamada con una IA: acentos de Irlanda, Liverpool, Texas, Australia, París, Quebec… y te corrige en español. Es GRATIS y sin registrarse 👉";
+export const shareText = () =>
+  t("Estoy practicando idiomas hablando por llamada con una IA: acentos de Irlanda, Liverpool, Texas, Australia, París, Quebec… y te corrige en tu idioma. Es GRATIS y sin registrarse 👉");
 
 export async function shareApp(): Promise<"shared" | "copied" | "cancelled"> {
-  const data = { title: "Craic · Aprende inglés y francés hablando gratis", text: SHARE_TEXT, url: SHARE_URL };
+  const data = { title: t("Craic · Aprende inglés y francés hablando gratis"), text: shareText(), url: SHARE_URL };
   try {
     if (navigator.share) {
       await navigator.share(data);
@@ -15,10 +16,10 @@ export async function shareApp(): Promise<"shared" | "copied" | "cancelled"> {
     if ((err as Error)?.name === "AbortError") return "cancelled";
   }
   try {
-    await navigator.clipboard.writeText(`${SHARE_TEXT} ${SHARE_URL}`);
+    await navigator.clipboard.writeText(`${shareText()} ${SHARE_URL}`);
     return "copied";
   } catch {
-    window.prompt("Copia el enlace:", SHARE_URL);
+    window.prompt(t("Copia el enlace:"), SHARE_URL);
     return "copied";
   }
 }

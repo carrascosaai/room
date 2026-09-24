@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { useEffect, useRef, useState } from "react";
 import type { Character } from "../characters";
 import { collectDiagnostics, hasOtherTabs } from "../lib/diagnostics";
@@ -11,13 +12,13 @@ import { Flag } from "./Brand";
 function describe(text: string): string {
   if (/fetching|download/i.test(text)) {
     const mb = text.match(/(\d+)\s*MB fetched/i)?.[1];
-    return mb ? `Descargando… ${mb} MB` : "Descargando…";
+    return mb ? t("Descargando… {mb} MB", { mb }) : t("Descargando…");
   }
-  if (/from cache/i.test(text)) return "Cargando desde tu dispositivo…";
-  if (/start to fetch|param/i.test(text)) return "Abriendo el modelo…";
-  if (/shader|gpu/i.test(text)) return "Preparando la GPU…";
-  if (/finish/i.test(text)) return "Lista";
-  return "Preparando…";
+  if (/from cache/i.test(text)) return t("Cargando desde tu dispositivo…");
+  if (/start to fetch|param/i.test(text)) return t("Abriendo el modelo…");
+  if (/shader|gpu/i.test(text)) return t("Preparando la GPU…");
+  if (/finish/i.test(text)) return t("Lista");
+  return t("Preparando…");
 }
 
 function Row({ label, value, state, text }: { label: string; value: number; state: ModelState | "llm"; text: string }) {
@@ -26,7 +27,7 @@ function Row({ label, value, state, text }: { label: string; value: number; stat
     <div className="load-row">
       <div className="load-head">
         <strong>{label}</strong>
-        <span className="muted small">{state === "ready" ? "✓ Lista" : state === "error" ? "No disponible" : text}</span>
+        <span className="muted small">{state === "ready" ? t("✓ Lista") : state === "error" ? t("No disponible") : text}</span>
       </div>
       <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
         <div className="progress-bar" style={{ width: `${Math.max(pct, 2)}%` }} />
@@ -72,7 +73,7 @@ function DiagnosticsButton() {
           }
         }}
       >
-        {state === "copied" ? "✓ Diagnóstico copiado" : "Copiar diagnóstico"}
+        {state === "copied" ? t("✓ Diagnóstico copiado") : t("Copiar diagnóstico")}
       </button>
       {state !== "idle" && <pre className="diag">{text}</pre>}
     </>
@@ -121,42 +122,42 @@ export function Loading({
   if (error) {
     return (
       <div className="card warn-card">
-        <h2>{error.title}</h2>
-        <p>{error.detail}</p>
+        <h2>{t(error.title)}</h2>
+        <p>{t(error.detail)}</p>
         {error.raw && (
           <details className="muted">
-            <summary>Detalle técnico</summary>
+            <summary>{t("Detalle técnico")}</summary>
             <code className="raw">{error.raw}</code>
           </details>
         )}
         <div className="actions">
           <button className="btn-dark" onClick={onRetry}>
-            Reintentar
+            {t("Reintentar")}
           </button>
           {(error.kind === "stall" || error.kind === "unknown") && (
             <button className="btn-ghost" onClick={onRedownload}>
-              Borrar el modelo y descargarlo de nuevo
+              {t("Borrar el modelo y descargarlo de nuevo")}
             </button>
           )}
           {cloudOk && !cloud && (
             <button className="btn-dark" onClick={onUseCloud}>
-              Usar la IA en la nube (rápida)
+              {t("Usar la IA en la nube (rápida)")}
             </button>
           )}
           {(error.kind === "stall" || error.kind === "memory") && (
             <button className="btn-ghost" onClick={onSwitchModel}>
-              Probar el otro modelo
+              {t("Probar el otro modelo")}
             </button>
           )}
           <button className="btn-ghost" onClick={onBack}>
-            Volver
+            {t("Volver")}
           </button>
         </div>
-        {hasOtherTabs() && <p className="note note-warn">Tienes Craic abierto en otra pestaña: ciérrala, puede estar bloqueando la GPU.</p>}
+        {hasOtherTabs() && <p className="note note-warn">{t("Tienes Craic abierto en otra pestaña: ciérrala, puede estar bloqueando la GPU.")}</p>}
         <div className="actions">
           <DiagnosticsButton />
         </div>
-        <p className="muted tiny">versión {__APP_VERSION__}</p>
+        <p className="muted tiny">{t("versión")} {__APP_VERSION__}</p>
       </div>
     );
   }
@@ -166,19 +167,19 @@ export function Loading({
         <Flag code={character.flag} size={88} />
         <span className="calling-pulse" />
       </div>
-      <h2>Llamando a {character.name.split(" ")[0]}…</h2>
-      <p className="muted small">{firstDownload ? "Primera vez: preparando todo en tu dispositivo" : "Cargando desde tu dispositivo"}</p>
+      <h2>{t("Llamando a {name}…", { name: character.name.split(" ")[0] })}</h2>
+      <p className="muted small">{firstDownload ? t("Primera vez: preparando todo en tu dispositivo") : t("Cargando desde tu dispositivo")}</p>
       <Row
-        label={cloud ? "Cerebro (IA en la nube)" : "Cerebro (IA)"}
+        label={cloud ? t("Cerebro (IA en la nube)") : t("Cerebro (IA)")}
         value={llmReady || cloud ? 1 : (progress?.progress ?? 0)}
         state={llmReady || cloud ? "ready" : "llm"}
         text={describe(progress?.text ?? "")}
       />
       {needTTS && (
-        <Row label="Voz natural" value={audio.ttsProgress} state={audio.tts} text={`${Math.round(audio.ttsProgress * 100)}%`} />
+        <Row label={t("Voz natural")} value={audio.ttsProgress} state={audio.tts} text={`${Math.round(audio.ttsProgress * 100)}%`} />
       )}
       {prefs.asrEngine === "local" && (
-        <Row label="Oído" value={audio.asrProgress} state={audio.asr} text={`${Math.round(audio.asrProgress * 100)}%`} />
+        <Row label={t("Oído")} value={audio.asrProgress} state={audio.asr} text={`${Math.round(audio.asrProgress * 100)}%`} />
       )}
       {progress?.text && !cloud && (
         <p className="muted tiny raw-progress" title={progress.text}>
@@ -187,28 +188,28 @@ export function Loading({
       )}
       {stalled && (
         <div className="note note-warn stall">
-          <strong>Esto está tardando más de lo normal.</strong>
+          <strong>{t("Esto está tardando más de lo normal.")}</strong>
           <p>
             {net === "checking" || net === null
-              ? "Comprobando la conexión…"
+              ? t("Comprobando la conexión…")
               : net === "ok"
-                ? "La conexión funciona, así que puede ser que el navegador se haya quedado bloqueado. Recarga la página; lo ya descargado se conserva."
-                : NET_TEXT[net]}
+                ? t("La conexión funciona, así que puede ser que el navegador se haya quedado bloqueado. Recarga la página; lo ya descargado se conserva.")
+                : t(NET_TEXT[net])}
           </p>
-          {hasOtherTabs() && <p>Tienes Craic abierto en otra pestaña: ciérrala, puede estar bloqueando la GPU.</p>}
+          {hasOtherTabs() && <p>{t("Tienes Craic abierto en otra pestaña: ciérrala, puede estar bloqueando la GPU.")}</p>}
           <div className="actions">
             <button className="btn-dark btn-small" onClick={() => location.reload()}>
-              Recargar
+              {t("Recargar")}
             </button>
             <DiagnosticsButton />
             {llmReady && (
               <button className="btn-ghost btn-small" onClick={onSkip}>
-                Empezar sin voz natural
+                {t("Empezar sin voz natural")}
               </button>
             )}
             {cloudOk && !cloud && (
               <button className="btn-ghost btn-small" onClick={onUseCloud}>
-                Usar la IA en la nube
+                {t("Usar la IA en la nube")}
               </button>
             )}
           </div>
@@ -216,13 +217,12 @@ export function Loading({
       )}
       {llmReady && (
         <button className="btn-ghost skip-btn" onClick={onSkip}>
-          Empezar ya (voz provisional mientras termina)
+          {t("Empezar ya (voz provisional mientras termina)")}
         </button>
       )}
       {firstDownload && (
         <p className="muted small">
-          Solo se descarga la primera vez; después carga en segundos y funciona sin conexión. No cierres la app. La
-          llamada empieza en cuanto todo esté listo.
+          {t("Solo se descarga la primera vez; después carga en segundos y funciona sin conexión. No cierres la app. La llamada empieza en cuanto todo esté listo.")}
         </p>
       )}
     </div>

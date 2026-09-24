@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NEURAL_VOICES, type Character, type Level } from "../characters";
 import { useConversation, type Msg } from "../conversation";
@@ -266,22 +267,22 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
 
   const loadingAudio =
     audio.tts === "loading"
-      ? `Descargando la voz natural… ${Math.round(audio.ttsProgress * 100)}% · mientras, voz del sistema`
+      ? t("Descargando la voz natural… {p}% · mientras, voz del sistema", { p: Math.round(audio.ttsProgress * 100) })
       : audio.asr === "loading" && prefs.asrEngine === "local"
-        ? `Mejorando el oído… ${Math.round(audio.asrProgress * 100)}%`
+        ? t("Mejorando el oído… {p}%", { p: Math.round(audio.asrProgress * 100) })
         : null;
 
   const status: { tone: "rec" | "speak" | "idle"; text: string } | null =
     phase === "hearing"
-      ? { tone: "rec", text: "Te escucho…" }
+      ? { tone: "rec", text: t("Te escucho…") }
       : phase === "listening"
-        ? { tone: "rec", text: "Escuchando…" }
+        ? { tone: "rec", text: t("Escuchando…") }
         : phase === "transcribing"
-          ? { tone: "idle", text: "Un momento…" }
+          ? { tone: "idle", text: t("Un momento…") }
           : thinking
-            ? { tone: "idle", text: `${name} está pensando…` }
+            ? { tone: "idle", text: t("{name} está pensando…", { name }) }
             : speaking
-              ? { tone: "speak", text: `${name} habla…` }
+              ? { tone: "speak", text: t("{name} habla…", { name }) }
               : null;
 
   return (
@@ -289,7 +290,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       <header className="call-top">
         <span className="top-spacer" />
         <Wordmark small />
-        <button className="round-btn" aria-label="Ajustes de la conversación" onClick={() => setSheet(true)}>
+        <button className="round-btn" aria-label={t("Ajustes de la conversación")} onClick={() => setSheet(true)}>
           <Icon name="sliders" />
         </button>
       </header>
@@ -299,7 +300,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
         <span className="convo-card-text">
           <strong>{`${infoOf(character).callWith} ${name}`}</strong>
           <small>
-            {character.accent} · {level}
+            {t(character.accent)} · {level}
           </small>
         </span>
         <Icon name="chevron" className="chev" />
@@ -307,22 +308,22 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       {cardOpen && (
         <div className="convo-details">
           <p>
-            {scenario.emoji} <strong>{scenario.title}</strong> — {scenario.goal}
+            {scenario.emoji} <strong>{t(scenario.title)}</strong> — {t(scenario.goal)}
           </p>
           <p className="muted small">
             {prefs.handsFree
-              ? "Modo llamada: habla cuando quieras; al hacer una pausa se envía solo."
-              : "Toca el micro para hablar; al hacer una pausa se envía solo."}
+              ? t("Modo llamada: habla cuando quieras; al hacer una pausa se envía solo.")
+              : t("Toca el micro para hablar; al hacer una pausa se envía solo.")}
           </p>
         </div>
       )}
 
-      {demo && <div className="banner banner-warn">Modo demo: respuestas de prueba, sin modelo real.</div>}
+      {demo && <div className="banner banner-warn">{t("Modo demo: respuestas de prueba, sin modelo real.")}</div>}
       {engineError && (
         <div className="banner banner-warn">
-          {engineError.title}. {engineError.detail}{" "}
+          {t(engineError.title)}. {t(engineError.detail)}{" "}
           <button className="link-btn" onClick={() => location.reload()}>
-            Recargar
+            {t("Recargar")}
           </button>
         </div>
       )}
@@ -332,8 +333,9 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
         <div className="messages-spacer" />
         {!messages.length && (
           <p className="muted start-hint">
-            {character.name.split(" ")[0]} ha descolgado y te escucha. Empieza tú: salúdale, pregúntale algo o cuéntale
-            cualquier cosa.
+            {t("{name} ha descolgado y te escucha. Empieza tú: salúdale, pregúntale algo o cuéntale cualquier cosa.", {
+              name: character.name.split(" ")[0],
+            })}
           </p>
         )}
         {messages.map((m) => {
@@ -348,14 +350,14 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                 tabIndex={hidden ? 0 : undefined}
               >
                 <span className="bubble-who">
-                  {m.role === "user" ? "You" : name}
-                  {m.rephrase && <em> · más fácil</em>}
+                  {m.role === "user" ? t("Tú") : name}
+                  {m.rephrase && <em> · {t("más fácil")}</em>}
                 </span>
                 {hidden ? (
                   <span className="hidden-text">👂 Escucha y responde · toca para ver el texto</span>
                 ) : (
-                  <span lang={m.role === "assistant" ? "en" : undefined}>
-                    {m.text || (m.streaming ? <span className="dots" aria-label="Pensando" /> : null)}
+                  <span lang={m.role === "assistant" ? langOf(character) : undefined}>
+                    {m.text || (m.streaming ? <span className="dots" aria-label={t("Pensando")} /> : null)}
                   </span>
                 )}
                 {m.translation && <span className="translation">{m.translation}</span>}
@@ -367,9 +369,9 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                         stopListening();
                         void say(m.text).then(startListening);
                       }}
-                      aria-label="Repetir en voz alta"
+                      aria-label={t("Repetir en voz alta")}
                     >
-                      <Icon name="volume" /> Repetir
+                      <Icon name="volume" /> {t("Repetir")}
                     </button>
                     <button
                       className="mini-btn"
@@ -377,18 +379,18 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                         stopListening();
                         void say(m.text, "slow").then(startListening);
                       }}
-                      aria-label="Repetir despacio"
+                      aria-label={t("Repetir despacio")}
                     >
-                      🐢 Despacio
+                      🐢 {t("Despacio")}
                     </button>
                     {!m.translation && (
                       <button className="mini-btn" onClick={() => void convo.translate(m.id)} disabled={m.translating}>
-                        {m.translating ? "Traduciendo…" : "🌐 Traducir"}
+                        {m.translating ? t("Traduciendo…") : t("🌐 Traducir")}
                       </button>
                     )}
                     {isLast && (
                       <button className="mini-btn" onClick={() => void rephrase()} disabled={thinking}>
-                        🤔 No entiendo
+                        {t("🤔 No entiendo")}
                       </button>
                     )}
                   </span>
@@ -409,39 +411,39 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
         {(phase === "hearing" || phase === "transcribing") && (
           <div className="row row-user">
             <div className="bubble bubble-user bubble-live">
-              <span className="bubble-who">You</span>
-              {partial || <span className="dots" aria-label="Escuchando" />}
+              <span className="bubble-who">{t("Tú")}</span>
+              {partial || <span className="dots" aria-label={t("Escuchando")} />}
             </div>
           </div>
         )}
         {suggestions && (
           <div className="suggestions">
             <div className="suggestions-head">
-              <strong>💡 Ideas para responder</strong>
-              <button className="mini-btn" onClick={() => setSuggestions(null)} aria-label="Cerrar ideas">
+              <strong>{t("💡 Ideas para responder")}</strong>
+              <button className="mini-btn" onClick={() => setSuggestions(null)} aria-label={t("Cerrar ideas")}>
                 ✕
               </button>
             </div>
             {suggestions === "loading" ? (
-              <p className="muted small">Pensando respuestas posibles…</p>
+              <p className="muted small">{t("Pensando respuestas posibles…")}</p>
             ) : suggestions.length === 0 ? (
-              <p className="muted small">No se me ocurren ideas ahora mismo. Prueba otra vez.</p>
+              <p className="muted small">{t("No se me ocurren ideas ahora mismo. Prueba otra vez.")}</p>
             ) : (
               <>
                 {suggestions.map((s, i) => (
                   <div key={i} className="suggestion">
                     <div>
-                      <strong lang="en">{s.en}</strong>
+                      <strong lang={langOf(character)}>{s.en}</strong>
                       {s.es && <small>{s.es}</small>}
                     </div>
                     <div className="suggestion-actions">
-                      <button className="mini-btn" onClick={() => void say(s.en)} aria-label="Escuchar">
+                      <button className="mini-btn" onClick={() => void say(s.en)} aria-label={t("Escuchar")}>
                         <Icon name="volume" />
                       </button>
                     </div>
                   </div>
                 ))}
-                <p className="muted small">Dilas con tus palabras: te estoy escuchando.</p>
+                <p className="muted small">{t("Dilas con tus palabras: te estoy escuchando.")}</p>
               </>
             )}
           </div>
@@ -449,7 +451,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       </div>
 
       <div className="composer-wrap">
-        {micError && micError !== "no-speech" && <p className="mic-error">{MIC_ERROR_TEXT[micError]}</p>}
+        {micError && micError !== "no-speech" && <p className="mic-error">{t(MIC_ERROR_TEXT[micError])}</p>}
         {status ? (
           <button
             className="composer composer-live"
@@ -480,35 +482,35 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
               ref={inputRef}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder={paused ? `Escribe en ${infoOf(character).es} o toca el micro…` : infoOf(character).placeholder}
-              lang="en"
+              placeholder={paused ? t("Escribe en {lang} o toca el micro…", { lang: t(infoOf(character).es) }) : infoOf(character).placeholder}
+              lang={langOf(character)}
               autoComplete="off"
               autoCapitalize="sentences"
               spellCheck={false}
               enterKeyHint="send"
-              aria-label="Escribe tu respuesta"
+              aria-label={t("Escribe tu respuesta")}
             />
-            <button className="send-btn" type="submit" disabled={thinking || !draft.trim()} aria-label="Enviar">
+            <button className="send-btn" type="submit" disabled={thinking || !draft.trim()} aria-label={t("Enviar")}>
               <Icon name="send" />
             </button>
           </form>
         )}
       </div>
 
-      <nav className="dock" aria-label="Controles de la llamada">
+      <nav className="dock" aria-label={t("Controles de la llamada")}>
         <button
           className={`dock-btn${suggestions ? " on" : ""}`}
           onClick={() => void toggleSuggestions()}
           disabled={thinking && !suggestions}
-          aria-label="Ideas para responder"
-          title="¿Qué digo?"
+          aria-label={t("Ideas para responder")}
+          title={t("¿Qué digo?")}
         >
           <Icon name="bulb" />
         </button>
-        <button className="dock-btn dock-end" onClick={() => void end()} disabled={ending} aria-label="Colgar" title="Colgar">
+        <button className="dock-btn dock-end" onClick={() => void end()} disabled={ending} aria-label={t("Colgar")} title={t("Colgar")}>
           {ending ? <span className="spinner" /> : <Icon name="phone" />}
         </button>
-        <button className="dock-btn" onClick={() => setSheet(true)} aria-label="Ajustes" title="Ajustes">
+        <button className="dock-btn" onClick={() => setSheet(true)} aria-label={t("Ajustes")} title={t("Ajustes")}>
           <Icon name="gear" />
         </button>
         <button
@@ -516,7 +518,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
           onClick={onMic}
           disabled={!voiceInputAvailable}
           aria-label={
-            speaking ? "Interrumpir y hablar" : phase === "hearing" ? "Enviar ya" : phase === "listening" ? "Silenciar micro" : "Activar micro"
+            speaking ? t("Interrumpir y hablar") : phase === "hearing" ? t("Enviar ya") : phase === "listening" ? t("Silenciar micro") : t("Activar micro")
           }
           aria-pressed={!paused}
         >
@@ -525,35 +527,35 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       </nav>
       <p className="dock-hint">
         {paused
-          ? "Micro en pausa · toca 🎤 para hablar"
+          ? t("Micro en pausa · toca 🎤 para hablar")
           : phase === "hearing"
-            ? "Haz una pausa y se enviará solo"
-            : "Habla cuando quieras · se envía al hacer una pausa"}
+            ? t("Haz una pausa y se enviará solo")
+            : t("Habla cuando quieras · se envía al hacer una pausa")}
       </p>
 
       {sheet && (
         <div className="sheet-backdrop" onClick={() => setSheet(false)}>
-          <div className="sheet" role="dialog" aria-label="Ajustes de la conversación" onClick={(e) => e.stopPropagation()}>
+          <div className="sheet" role="dialog" aria-label={t("Ajustes de la conversación")} onClick={(e) => e.stopPropagation()}>
             <div className="sheet-handle" />
-            <h2>Ajustes de la conversación</h2>
+            <h2>{t("Ajustes de la conversación")}</h2>
             <Toggle
-              label="Modo llamada"
-              hint="Escucha sola después de cada respuesta"
+              label={t("Modo llamada")}
+              hint={t("Escucha sola después de cada respuesta")}
               checked={prefs.handsFree}
               onChange={(v) => onPrefs({ handsFree: v })}
             />
             <PauseSlider value={pauseMs(prefs)} onChange={(ms) => onPrefs({ pause: ms })} />
-            <Toggle label="Voz lenta" hint="El personaje habla más despacio" checked={prefs.rate === "slow"} onChange={(v) => onPrefs({ rate: v ? "slow" : "normal" })} />
-            <Toggle label="Modo escucha" hint="Oculta el texto: entrena el oído" checked={!prefs.subtitles} onChange={(v) => onPrefs({ subtitles: !v })} />
+            <Toggle label={t("Voz lenta")} hint={t("El personaje habla más despacio")} checked={prefs.rate === "slow"} onChange={(v) => onPrefs({ rate: v ? "slow" : "normal" })} />
+            <Toggle label={t("Modo escucha")} hint={t("Oculta el texto: entrena el oído")} checked={!prefs.subtitles} onChange={(v) => onPrefs({ subtitles: !v })} />
             <Toggle
-              label="Revisar lo que digo antes de enviarlo"
-              hint="La transcripción va al cuadro de texto"
+              label={t("Revisar lo que digo antes de enviarlo")}
+              hint={t("La transcripción va al cuadro de texto")}
               checked={prefs.reviewTranscript}
               onChange={(v) => onPrefs({ reviewTranscript: v })}
             />
             {langOf(character) === "en" && (
             <label className="field">
-              <span>Voz de {name}</span>
+              <span>{t("Voz de {name}", { name })}</span>
               <select
                 value={neuralVoice}
                 onChange={(e) => {
@@ -571,10 +573,10 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
             )}
             <div className="actions">
               <button className="btn-dark" onClick={() => void say(lastAssistant?.text ?? (langOf(character) === "fr" ? "Bonjour ! Voilà ma voix." : "Hello! This is how I sound."))}>
-                Probar voz
+                {t("Probar voz")}
               </button>
               <button className="btn-ghost" onClick={() => setSheet(false)}>
-                Cerrar
+                {t("Cerrar")}
               </button>
             </div>
           </div>
@@ -615,7 +617,7 @@ export function PauseSlider({ value, onChange }: { value: number; onChange: (ms:
   return (
     <label className="field pause-field">
       <span>
-        Espera antes de enviar: <strong>{s % 1 ? s.toFixed(1) : s} s</strong>
+        {t("Espera antes de enviar:")} <strong>{s % 1 ? s.toFixed(1) : s} s</strong>
       </span>
       <input
         type="range"
@@ -624,10 +626,10 @@ export function PauseSlider({ value, onChange }: { value: number; onChange: (ms:
         step={500}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        aria-label="Segundos de silencio antes de enviar"
+        aria-label={t("Segundos de silencio antes de enviar")}
       />
       <small className="muted">
-        {s <= 2 ? "Rápido: para frases cortas." : s <= 5 ? "Te da tiempo a pensar a mitad de frase." : "Mucho margen: piensa con calma, no se enviará hasta que calles del todo."}
+        {s <= 2 ? t("Rápido: para frases cortas.") : s <= 5 ? t("Te da tiempo a pensar a mitad de frase.") : t("Mucho margen: piensa con calma, no se enviará hasta que calles del todo.")}
       </small>
     </label>
   );

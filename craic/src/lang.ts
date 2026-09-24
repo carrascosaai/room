@@ -13,12 +13,12 @@ export interface LangInfo {
   placeholder: string;
   /** «Call with Liam» / «Appel avec Camille» */
   callWith: string;
-  /** Ejemplo para el prompt de traducción */
-  translateExample: [string, string];
+  /** Ejemplo para el prompt de traducción (frase y su traducción a cada lengua materna) */
+  translateExample: [string, Partial<Record<"es" | "en" | "fr", string>>];
   /** Estilo por nivel */
   levelStyle: Record<"B1" | "B2" | "C1", string>;
-  /** Frases de ejemplo para el prompt de correcciones */
-  fewShot: [string, string][];
+  /** Frases de ejemplo para el prompt de correcciones, con las explicaciones en cada lengua materna */
+  fewShot: Partial<Record<"es" | "en" | "fr", [string, string][]>>;
 }
 
 export const LANGS: Record<TargetLang, LangInfo> = {
@@ -28,22 +28,34 @@ export const LANGS: Record<TargetLang, LangInfo> = {
     sr: "en-GB",
     placeholder: "Write in English…",
     callWith: "Call with",
-    translateExample: ["Do you fancy grabbing a coffee later?", "¿Te apetece tomar un café luego?"],
+    translateExample: ["Do you fancy grabbing a coffee later?", { es: "¿Te apetece tomar un café luego?", fr: "Ça te dirait d'aller boire un café tout à l'heure ?" }],
     levelStyle: {
       B1: "Simple everyday English (B1 level), common words.",
       B2: "Natural everyday English (B2 level), common phrasal verbs are fine.",
       C1: "Fully natural native English (C1 level), idioms welcome.",
     },
-    fewShot: [
-      [
-        'Learner: "Yesterday I go to the beach and I like a lot."',
-        '{"errors":[{"original":"I go","corrected":"I went","explanation":"Con \'yesterday\' va pasado: go → went.","type":"tiempo verbal"},{"original":"I like a lot","corrected":"I really liked it","explanation":"\'Like\' necesita objeto (it) y va en pasado.","type":"gramática"}],"tip":""}',
+    fewShot: {
+      es: [
+        [
+          'Learner: "Yesterday I go to the beach and I like a lot."',
+          '{"errors":[{"original":"I go","corrected":"I went","explanation":"Con \'yesterday\' va pasado: go → went.","type":"tiempo verbal"},{"original":"I like a lot","corrected":"I really liked it","explanation":"\'Like\' necesita objeto (it) y va en pasado.","type":"gramática"}],"tip":""}',
+        ],
+        [
+          'Learner: "I am studying engineering here."',
+          '{"errors":[],"tip":"¡Perfecto! Suena más natural con contracción: \\"I\'m studying engineering here.\\""}',
+        ],
       ],
-      [
-        'Learner: "I am studying engineering here."',
-        '{"errors":[],"tip":"¡Perfecto! Suena más natural con contracción: \\"I\'m studying engineering here.\\""}',
+      fr: [
+        [
+          'Learner: "Yesterday I go to the beach and I like a lot."',
+          '{"errors":[{"original":"I go","corrected":"I went","explanation":"Avec « yesterday », on met le passé : go → went.","type":"tiempo verbal"},{"original":"I like a lot","corrected":"I really liked it","explanation":"« Like » a besoin d\'un complément (it) et se met au passé.","type":"gramática"}],"tip":""}',
+        ],
+        [
+          'Learner: "I am studying engineering here."',
+          '{"errors":[],"tip":"Parfait ! Plus naturel avec la contraction : \\"I\'m studying engineering here.\\""}',
+        ],
       ],
-    ],
+    },
   },
   fr: {
     name: "French",
@@ -51,24 +63,44 @@ export const LANGS: Record<TargetLang, LangInfo> = {
     sr: "fr-FR",
     placeholder: "Écris en français…",
     callWith: "Appel avec",
-    translateExample: ["Ça te dirait d'aller boire un café tout à l'heure ?", "¿Te apetece tomar un café luego?"],
+    translateExample: ["Ça te dirait d'aller boire un café tout à l'heure ?", { es: "¿Te apetece tomar un café luego?", en: "Do you fancy grabbing a coffee later?" }],
     levelStyle: {
       B1: "Simple everyday French (B1 level), common words, short sentences.",
       B2: "Natural everyday French (B2 level), common expressions are fine.",
       C1: "Fully natural native French (C1 level), idioms and familiar French welcome.",
     },
-    fewShot: [
-      [
-        'Learner: "Hier je vais à la plage et je suis très content de la mer."',
-        '{"errors":[{"original":"je vais","corrected":"je suis allé","explanation":"Con «hier» va en passé composé: je suis allé.","type":"tiempo verbal"},{"original":"content de la mer","corrected":"j\'ai adoré la mer","explanation":"«Content de» suena raro aquí; lo natural es «j\'ai adoré».","type":"vocabulario"}],"tip":""}',
+    fewShot: {
+      es: [
+        [
+          'Learner: "Hier je vais à la plage et je suis très content de la mer."',
+          '{"errors":[{"original":"je vais","corrected":"je suis allé","explanation":"Con «hier» va en passé composé: je suis allé.","type":"tiempo verbal"},{"original":"content de la mer","corrected":"j\'ai adoré la mer","explanation":"«Content de» suena raro aquí; lo natural es «j\'ai adoré».","type":"vocabulario"}],"tip":""}',
+        ],
+        [
+          'Learner: "J\'étudie l\'ingénierie à Cordoue."',
+          '{"errors":[],"tip":"¡Perfecto! También se dice «Je fais des études d\'ingénieur à Cordoue»."}',
+        ],
       ],
-      [
-        'Learner: "J\'étudie l\'ingénierie à Cordoue."',
-        '{"errors":[],"tip":"¡Perfecto! También se dice «Je fais des études d\'ingénieur à Cordoue»."}',
+      en: [
+        [
+          'Learner: "Hier je vais à la plage et je suis très content de la mer."',
+          '{"errors":[{"original":"je vais","corrected":"je suis allé","explanation":"With «hier» you need the passé composé: je suis allé.","type":"tiempo verbal"},{"original":"content de la mer","corrected":"j\'ai adoré la mer","explanation":"«Content de» sounds odd here; the natural phrase is «j\'ai adoré».","type":"vocabulario"}],"tip":""}',
+        ],
+        [
+          'Learner: "J\'étudie l\'ingénierie à Cordoue."',
+          '{"errors":[],"tip":"Perfect! You can also say «Je fais des études d\'ingénieur à Cordoue»."}',
+        ],
       ],
-    ],
+    },
   },
 };
 
 export const langOf = (c: { lang?: TargetLang }): TargetLang => c.lang ?? "en";
 export const infoOf = (c: { lang?: TargetLang }): LangInfo => LANGS[langOf(c)];
+
+/** Idiomas que tiene sentido practicar según el idioma de la interfaz (no se practica el propio). */
+export function allowedTargets(ui: "es" | "en" | "fr"): TargetLang[] {
+  return ui === "en" ? ["fr"] : ui === "fr" ? ["en"] : ["en", "fr"];
+}
+
+/** Nombre en inglés de la lengua materna del alumno (para los prompts). */
+export const NATIVE_NAME: Record<"es" | "en" | "fr", string> = { es: "Spanish", en: "English", fr: "French" };

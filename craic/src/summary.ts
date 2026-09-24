@@ -1,5 +1,6 @@
 import type { Character, Level } from "./characters";
-import { infoOf, type TargetLang } from "./lang";
+import { getUiLang } from "./i18n";
+import { infoOf, NATIVE_NAME, type TargetLang } from "./lang";
 import type { ChatMessage } from "./llm/engine";
 import { parseJsonLoose, type Correction, type CorrectionType } from "./llm/parse";
 
@@ -53,11 +54,11 @@ export function buildExpressionMessages(character: Character, level: Level, mess
 
   const name = infoOf(character).name;
   const system = [
-    `You help a Spanish learner of ${name} (level ${level}).`,
+    `You help a ${NATIVE_NAME[getUiLang()]}-speaking learner of ${name} (level ${level}).`,
     `From the conversation, choose 6 to 8 useful, natural ${name} expressions (2 to 6 words each) that the learner can reuse.`,
     "Prefer phrases the native speaker used and the corrected versions of the learner's mistakes. Do not choose single basic words.",
-    `For each one give a natural Spanish translation and a short example sentence in ${name}.`,
-    `Answer ONLY with JSON: {"expressions":[{"en":"expression in ${name}","es":"traducción al español","example":"Short example sentence in ${name}."}]}`,
+    `For each one give a natural ${NATIVE_NAME[getUiLang()]} translation and a short example sentence in ${name}.`,
+    `Answer ONLY with JSON: {"expressions":[{"en":"expression in ${name}","es":"translation in ${NATIVE_NAME[getUiLang()]}","example":"Short example sentence in ${name}."}]}`,
   ].join("\n");
   const user = `CONVERSATION:\n${transcript}${fixes ? `\n\nCORRECTED LEARNER PHRASES:\n${fixes}` : ""}`;
   return [
