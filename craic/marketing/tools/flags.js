@@ -1,6 +1,11 @@
 const UJ = `<rect width="60" height="60" fill="#012169"/><path d="M0 0l60 60M60 0L0 60" stroke="#fff" stroke-width="12"/><path d="M0 0l60 60M60 0L0 60" stroke="#c8102e" stroke-width="4"/><path d="M30 0v60M0 30h60" stroke="#fff" stroke-width="18"/><path d="M30 0v60M0 30h60" stroke="#c8102e" stroke-width="10"/>`;
 const star = (x, y, r, f) => { let p = []; for (let i = 0; i < 10; i++) { const a = Math.PI / 5 * i - Math.PI / 2, rr = i % 2 ? r * .45 : r; p.push((x + rr * Math.cos(a)).toFixed(1) + "," + (y + rr * Math.sin(a)).toFixed(1)); } return `<polygon points="${p.join(" ")}" fill="${f}"/>`; };
 window.FLAGS = {
+  fr: '<rect width="20" height="60" fill="#0055a4"/><rect x="20" width="20" height="60" fill="#fff"/><rect x="40" width="20" height="60" fill="#ef4135"/>',
+  be: '<rect width="20" height="60" fill="#1a1a1a"/><rect x="20" width="20" height="60" fill="#fdda24"/><rect x="40" width="20" height="60" fill="#ef3340"/>',
+  ch: '<rect width="60" height="60" fill="#da291c"/><path d="M30 16v28M16 30h28" stroke="#fff" stroke-width="9"/>',
+  qc: '<rect width="60" height="60" fill="#003da5"/><path d="M30 0v60M0 30h60" stroke="#fff" stroke-width="8"/>',
+  sn: '<rect width="20" height="60" fill="#00853f"/><rect x="20" width="20" height="60" fill="#fdef42"/><rect x="40" width="20" height="60" fill="#e31b23"/>',
   ie: `<rect width="20" height="60" fill="#169b62"/><rect x="20" width="20" height="60" fill="#fff"/><rect x="40" width="20" height="60" fill="#ff883e"/>`,
   gb: UJ,
   eng: `<rect width="60" height="60" fill="#fff"/><path d="M30 0v60M0 30h60" stroke="#ce1124" stroke-width="12"/>`,

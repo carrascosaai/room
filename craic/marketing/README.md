@@ -7,6 +7,7 @@
 | `videos/craic-1-gratis.mp4` | Qué es Craic y que es gratis | «¿Llevas años con el inglés y te bloqueas al hablar?» |
 | `videos/craic-2-acentos.mp4` | 18 acentos (Liverpool, Escocia, Australia…) | «Si entiendes a uno de Liverpool…» |
 | `videos/craic-3-entrevista.mp4` | Practicar entrevistas de trabajo | «¿Entrevista en inglés y te mueres de vergüenza?» |
+| `videos/craic-4-frances.mp4` | Ahora también francés (París, Marsella, Bélgica, Suiza, Quebec, Dakar) | «¿Entenderías a una quebequesa?» |
 
 La app que se ve es la real; la conversación está preparada para el vídeo
 (micrófono y respuestas simulados) y la narración está hecha con ElevenLabs.
@@ -24,6 +25,10 @@ La app que se ve es la real; la conversación está preparada para el vídeo
 **Vídeo 3**
 > Practica tu entrevista de trabajo en inglés antes de la de verdad 💼 Te pregunta como un reclutador y te corrige en español cada respuesta. Gratis, a cualquier hora 👉 craic.vercel.app
 > #entrevistadetrabajo #inglés #trabajo #prácticas #aprenderingles #IA #gratis
+
+**Vídeo 4 (francés)**
+> ¿Entenderías a una quebequesa? 🇨🇦 Ahora también puedes practicar FRANCÉS hablando: París, Marsella, Bélgica, Suiza, Montreal, Dakar… Te corrige en español. Gratis y sin registro 👉 craic.vercel.app
+> #francés #aprenderfrances #french #frenchtips #quebec #idiomas #IA #gratis
 
 **YouTube (título)**: «Aprende inglés hablando GRATIS con IA (18 acentos y correcciones en español)»
 
