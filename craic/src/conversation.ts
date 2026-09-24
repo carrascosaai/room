@@ -94,6 +94,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
         langs: character.voiceLangs,
         gender: character.voiceGender,
         hint: character.voiceHint,
+        cloudVoice: character.cloudVoice,
         neuralVoice: v.neuralVoice,
         engine: v.engine,
       };

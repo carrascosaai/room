@@ -38,14 +38,14 @@ export function checkCloudTts(): Promise<boolean> {
 }
 
 /** Audio (WAV/MP3) de una frase. Lanza si falla; tras un fallo se deja de usar un rato. */
-export async function fetchSpeech(text: string, gender: "male" | "female"): Promise<ArrayBuffer> {
+export async function fetchSpeech(text: string, gender: "male" | "female", voice?: string): Promise<ArrayBuffer> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 10000);
   try {
     const r = await fetch(endpoint(), {
       method: "POST",
       headers: { "content-type": "application/json", "x-client-id": clientId() },
-      body: JSON.stringify({ text, gender }),
+      body: JSON.stringify({ text, gender, voice }),
       signal: ctrl.signal,
     });
     if (!r.ok) {
