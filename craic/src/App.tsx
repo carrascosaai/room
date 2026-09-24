@@ -1,4 +1,5 @@
 import { t, useUiLang } from "./i18n";
+import { checkCloudStt } from "./speech/cloudStt";
 import { langOf } from "./lang";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCharacter, type Level } from "./characters";
@@ -183,8 +184,11 @@ export default function App() {
     if (demo) return;
     // En el móvil, la voz ligera (~90 MB) en vez de la de alta calidad (~330 MB).
     if (needTTS) loadTTS(prefs.voiceQuality === "high" && gpu?.ok && !gpu.mobile ? "webgpu" : "wasm");
-    // El oído local solo entiende inglés.
-    if (prefs.asrEngine === "local" && langOf(character) === "en") loadASR(prefs.asrModel);
+    // El oído local solo entiende inglés, y solo hace falta si no hay oído en la nube.
+    if (prefs.asrEngine === "local" && langOf(character) === "en")
+      void checkCloudStt().then((cloud) => {
+        if (!cloud) loadASR(prefs.asrModel);
+      });
   }, [needTTS, prefs.voiceQuality, prefs.asrEngine, prefs.asrModel, gpu, character]);
 
   // Precarga: si el modelo ya está descargado, se carga en segundo plano

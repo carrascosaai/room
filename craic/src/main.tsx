@@ -4,10 +4,14 @@ import { registerSW } from "virtual:pwa-register";
 import { inject } from "@vercel/analytics";
 import App from "./App";
 import { Status } from "./components/Status";
+import { checkCloudStt } from "./speech/cloudStt";
 import "./styles.css";
 
 // Visitas anónimas (sin cookies) en Vercel → Analytics.
 if (import.meta.env.PROD) inject();
+
+// ¿Está el reconocimiento de voz en la nube? (se usa en cuanto empiece una llamada)
+void checkCloudStt();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

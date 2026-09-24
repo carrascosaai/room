@@ -5,6 +5,7 @@
 // Kokoro en el dispositivo; 3) como último recurso, la voz normal del sistema.
 import { useSyncExternalStore } from "react";
 import { getAudioStatus, synthesize } from "./audioModels";
+import { sharedAudioCtx } from "./audioCtx";
 import { checkCloudTts, cloudTtsReady, fetchSpeech } from "./cloudTts";
 
 export type SpeechRate = "slow" | "normal";
@@ -166,14 +167,7 @@ export async function needsNeuralVoice(langs: string[], gender?: "male" | "femal
 }
 
 // ---------- Reproducción ----------
-let audioCtx: AudioContext | null = null;
-function ctx(): AudioContext {
-  if (!audioCtx) {
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    audioCtx = new Ctx();
-  }
-  return audioCtx;
-}
+const ctx = sharedAudioCtx;
 
 let unlocked = false;
 /** iOS/Safari solo permiten audio tras un gesto del usuario: llamar en cada toque. */

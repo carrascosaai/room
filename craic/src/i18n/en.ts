@@ -382,7 +382,7 @@ export const EN: Record<string, string> = {
   "Permiso de micrófono denegado. Actívalo en los ajustes del navegador (icono del candado junto a la dirección) y recarga. Mientras tanto, puedes escribir.": "Microphone permission denied. Enable it in your browser settings (padlock icon next to the address) and reload. Meanwhile, you can type.",
   "No te he oído. Habla un poco más cerca del móvil.": "I didn't hear you. Speak a little closer to the phone.",
   "No se encuentra ningún micrófono en este dispositivo.": "No microphone found on this device.",
-  "El reconocimiento de voz del navegador necesita internet. Comprueba la red o escribe.": "The browser's speech recognition needs internet. Check your connection or type.",
+  "No he podido reconocer tu voz (fallo de conexión). Vuelve a hablar o escribe.": "I couldn't recognise your voice (connection problem). Speak again or type.",
   "Tu navegador no reconoce este idioma por voz. Prueba con Chrome o Edge, o escribe tu respuesta.": "Your browser can't recognise this language by voice. Try Chrome or Edge, or type your answer.",
   "El reconocimiento de voz aún se está preparando. Un momento…": "Speech recognition is still getting ready. One moment…",
   "El reconocimiento de voz ha fallado. Inténtalo otra vez o escribe tu respuesta.": "Speech recognition failed. Try again or type your answer.",
