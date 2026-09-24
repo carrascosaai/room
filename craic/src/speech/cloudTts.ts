@@ -27,8 +27,12 @@ export function checkCloudTts(): Promise<boolean> {
       const t = setTimeout(() => ctrl.abort(), 8000);
       const r = await fetch(endpoint(), { cache: "no-store", signal: ctrl.signal });
       clearTimeout(t);
-      const d = (await r.json()) as { enabled?: boolean };
-      state = d.enabled ? "ok" : "off";
+      const d = (await r.json()) as { enabled?: boolean; reason?: string; retryAfter?: number };
+      // Cupo agotado de momento: se vuelve a intentar cuando se recargue.
+      if (!d.enabled && d.reason === "quota") {
+        state = "ok";
+        offUntil = Date.now() + (d.retryAfter ?? 600) * 1000;
+      } else state = d.enabled ? "ok" : "off";
     } catch {
       state = "off";
     }
@@ -50,7 +54,7 @@ export async function fetchSpeech(text: string, gender: "male" | "female", voice
     });
     if (!r.ok) {
       // Saturada: un minuto con la voz del dispositivo. Otro error: el resto de la sesión.
-      if (r.status === 429) offUntil = Date.now() + 60000;
+      if (r.status === 429) offUntil = Date.now() + Math.max(60, Number(r.headers.get("retry-after")) || 0) * 1000;
       else state = "off";
       throw new Error(`tts ${r.status}`);
     }

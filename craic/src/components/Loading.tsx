@@ -43,6 +43,8 @@ interface Props {
   error: AppError | null;
   firstDownload: boolean;
   needTTS: boolean;
+  /** El oído está en la nube: no hay nada que descargar para escucharte. */
+  cloudEars?: boolean;
   /** La IA ya está lista; solo se espera a la voz / el oído */
   llmReady: boolean;
   onSkip: () => void;
@@ -89,6 +91,7 @@ export function Loading({
   error,
   firstDownload,
   needTTS,
+  cloudEars,
   llmReady,
   onSkip,
   onRetry,
@@ -178,7 +181,7 @@ export function Loading({
       {needTTS && (
         <Row label={t("Voz natural")} value={audio.ttsProgress} state={audio.tts} text={`${Math.round(audio.ttsProgress * 100)}%`} />
       )}
-      {prefs.asrEngine === "local" && (
+      {prefs.asrEngine === "local" && !cloudEars && (
         <Row label={t("Oído")} value={audio.asrProgress} state={audio.asr} text={`${Math.round(audio.asrProgress * 100)}%`} />
       )}
       {progress?.text && !cloud && (

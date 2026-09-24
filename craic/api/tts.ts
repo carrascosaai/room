@@ -21,8 +21,9 @@ const RATE_PER_MIN = 60;
 /** Voz que ha funcionado para cada género (se recuerda mientras viva la instancia). */
 const working: Record<string, string | undefined> = {};
 const badVoices = new Set<string>();
-/** Estado del servicio: ¿aceptados los términos? ¿cupo? (comprobado de verdad, 10 min). */
-let status: { ok: boolean; at: number; reason?: string } | null = null;
+/** Lo aprendido de las peticiones reales (comprobarlo aparte gastaría cupo). */
+let termsMissing = false;
+let blockedUntil = 0;
 const hits = new Map<string, { n: number; t: number }>();
 
 const json = (s: number, data: unknown, extra: Record<string, string> = {}) =>
@@ -70,34 +71,47 @@ async function speak(key: string, text: string, gender: "female" | "male", fetch
       });
     }
     const body = await r.text().catch(() => "");
-    last = json(r.status === 429 ? 429 : r.status >= 500 ? 502 : r.status, { error: body.slice(0, 300) });
+    if (r.status === 429) {
+      // Cupo agotado: hasta cuándo (lo dice Groq). Mientras, la app usa la voz del móvil.
+      const wait = retryAfterSeconds(r, body);
+      blockedUntil = Date.now() + wait * 1000;
+      return json(429, { error: body.slice(0, 300) }, { "retry-after": String(Math.ceil(wait)) });
+    }
+    last = json(r.status >= 500 ? 502 : r.status, { error: body.slice(0, 300) });
     // Voz que no existe → probar la siguiente; cualquier otro error se devuelve.
     if (r.status === 400 && /voice/i.test(body) && !/terms/i.test(body)) {
       badVoices.add(voice);
       continue;
     }
-    if (/terms/i.test(body)) status = { ok: false, at: Date.now(), reason: "terms" };
+    if (/terms/i.test(body)) termsMissing = true;
     break;
   }
   return last ?? json(502, { error: "no voice" });
+}
+
+/** Segundos hasta que vuelva a haber cupo (cabecera retry-after o «try again in 7m12.5s»). */
+export function retryAfterSeconds(r: Response, body: string): number {
+  const h = Number(r.headers.get("retry-after"));
+  if (h > 0) return h;
+  const m = /try again in\s+(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:([\d.]+)s)?/i.exec(body);
+  if (m && (m[1] || m[2] || m[3])) return Number(m[1] ?? 0) * 3600 + Number(m[2] ?? 0) * 60 + Number(m[3] ?? 0);
+  return 60;
 }
 
 export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Promise<Response> {
   const key = env("GROQ_API_KEY") ?? env("LLM_API_KEY");
   if (req.method === "GET") {
     if (!key) return json(200, { enabled: false }, { "cache-control": "no-store" });
-    // Comprobación real (una vez cada 10 min por instancia): así la app no intenta
-    // usar la voz si, por ejemplo, faltan por aceptar los términos del modelo.
-    if (!status || Date.now() - status.at > 600000) {
-      const r = await speak(key, "Hi.", "female", fetchImpl).catch(() => json(502, {}));
-      status = r.ok ? { ok: true, at: Date.now() } : { ok: false, at: Date.now(), reason: status?.reason ?? String(r.status) };
-    }
-    return json(200, { enabled: status.ok, reason: status.ok ? undefined : status.reason }, { "cache-control": "no-store" });
+    // Sin petición de prueba: cada una gastaría cupo (solo hay 100 al día).
+    const reason = termsMissing ? "terms" : Date.now() < blockedUntil ? "quota" : undefined;
+    return json(200, { enabled: !reason, reason, retryAfter: reason === "quota" ? Math.ceil((blockedUntil - Date.now()) / 1000) : undefined }, { "cache-control": "no-store" });
   }
   if (req.method !== "POST") return json(405, { error: "method not allowed" });
   if (!key) return json(503, { error: "disabled" });
   if (!allowedOrigin(req)) return json(403, { error: "forbidden" });
   if (limited(req)) return json(429, { error: "rate limited" });
+  if (termsMissing) return json(503, { error: "terms" });
+  if (Date.now() < blockedUntil) return json(429, { error: "quota" }, { "retry-after": String(Math.ceil((blockedUntil - Date.now()) / 1000)) });
   let body: { text?: unknown; gender?: unknown; voice?: unknown };
   try {
     body = await req.json();
