@@ -67,6 +67,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const handleRef = useRef<ListenHandle | null>(null);
+  const netErrorsRef = useRef(0);
   const pausedRef = useRef(paused);
   pausedRef.current = paused;
   const busyRef = useRef(false); // el personaje piensa o habla
@@ -108,6 +109,8 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       onError: (e) => {
         setMicError(e);
         if (e === "loading" && getAudioStatus().asr === "loading") setTimeout(() => startListening(), 1200);
+        // Fallo de red al transcribir: se sigue escuchando (hasta 3 veces seguidas).
+        else if (e === "network" && ++netErrorsRef.current <= 3) setTimeout(() => startListening(), 1000);
         else if (e === "denied" || e === "no-mic" || e === "loading" || e === "language") {
           setPaused(true);
           pausedRef.current = true;
@@ -115,6 +118,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       },
       onFinal: (text) => {
         handleRef.current = null;
+        netErrorsRef.current = 0;
         setPartial("");
         if (!text) {
           // No se entendió nada: se sigue escuchando.

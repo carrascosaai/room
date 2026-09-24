@@ -41,7 +41,7 @@ export const MIC_ERROR_TEXT: Record<MicError, string> = {
     "Permiso de micrófono denegado. Actívalo en los ajustes del navegador (icono del candado junto a la dirección) y recarga. Mientras tanto, puedes escribir.",
   "no-speech": "No te he oído. Habla un poco más cerca del móvil.",
   "no-mic": "No se encuentra ningún micrófono en este dispositivo.",
-  network: "El reconocimiento de voz del navegador necesita internet. Comprueba la red o escribe.",
+  network: "No he podido reconocer tu voz (fallo de conexión). Vuelve a hablar o escribe.",
   language: "Tu navegador no reconoce este idioma por voz. Prueba con Chrome o Edge, o escribe tu respuesta.",
   loading: "El reconocimiento de voz aún se está preparando. Un momento…",
   other: "El reconocimiento de voz ha fallado. Inténtalo otra vez o escribe tu respuesta.",

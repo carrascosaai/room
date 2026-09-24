@@ -1,8 +1,12 @@
 // Escucha con detección de final de frase: cuando dejas de hablar, se envía solo.
+//  - "cloud" (por defecto si está disponible): la app graba tu voz, detecta la
+//    pausa y la transcribe Whisper en la nube. Mucho más fiable que el del navegador.
 //  - "local": Silero VAD + Moonshine/Whisper en el dispositivo (sin pitidos, sin internet).
 //  - "browser": reconocimiento del navegador con temporizador de silencio.
 import { cleanTranscript } from "./asrText";
 import { asrSend, getAudioStatus, onAsrMessage } from "./audioModels";
+import { cloudSttOff, cloudSttReady, transcribe } from "./cloudStt";
+import { EnergyVad, FRAME_MS } from "./energyVad";
 import { acquireMic, mic, micFailure, releaseMic } from "./mic";
 import { getSR, joinResults, mapSRError, recognitionSupported, type MicError } from "./recognition";
 
@@ -38,8 +42,17 @@ export function effectiveEngine(engine: AsrEngine): AsrEngine | null {
   return recognitionSupported ? "browser" : localReady ? "local" : null;
 }
 
+/** Si el micro se quedó mudo una vez (sin datos), no se insiste con la grabación propia. */
+let micStuck = false;
+
 export function listen(opts: ListenOptions): ListenHandle {
   active?.cancel();
+  if (cloudSttReady() && !micStuck && typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia) {
+    console.info("[craic] escuchando con: nube (Whisper)");
+    const h = listenCloud(opts);
+    active = h;
+    return h;
+  }
   // El oído local solo entiende inglés: otros idiomas, solo con el del navegador.
   const english = /^en\b/i.test(opts.lang);
   const engine = english ? effectiveEngine(opts.engine) : recognitionSupported ? "browser" : null;
@@ -55,6 +68,146 @@ export function listen(opts: ListenOptions): ListenHandle {
 
 export function micLevel(): number {
   return mic.level;
+}
+
+const MAX_UTTERANCE_MS = 30000;
+const MAX_WAIT_MS = 45000;
+const PRE_ROLL = 10; // ~320 ms antes de detectar voz, para no comerse la primera sílaba
+const MIN_VOICED_MS = 200;
+
+function listenCloud(opts: ListenOptions): ListenHandle {
+  let done = false;
+  let opened = false;
+  let offFrame: (() => void) | null = null;
+  let released = false;
+  const vad = new EnergyVad(opts.silenceMs);
+  const pre: Float32Array[] = [];
+  let chunks: Float32Array[] = [];
+  let recording = false;
+  let frames = 0;
+  const ctrl = new AbortController();
+  let watchdog: ReturnType<typeof setTimeout> | null = null;
+
+  const release = () => {
+    offFrame?.();
+    offFrame = null;
+    if (watchdog) clearTimeout(watchdog);
+    watchdog = null;
+    if (!released) {
+      released = true;
+      // Soltar el micro en seguida: en iPhone, mientras está abierto la voz
+      // del personaje sale bajita por el auricular.
+      releaseMic();
+    }
+  };
+  const finishWith = (fn: () => void) => {
+    if (done) return;
+    done = true;
+    release();
+    if (active === handle) active = null;
+    opts.onPhase("idle");
+    fn();
+  };
+
+  const send = () => {
+    if (done) return;
+    const audio = concat(chunks);
+    chunks = [];
+    const voicedMs = vad.voicedFrames * FRAME_MS;
+    if (!audio.length || voicedMs < MIN_VOICED_MS) return finishWith(() => opts.onFinal(""));
+    release();
+    opts.onPhase("transcribing");
+    transcribe(audio, opts.lang, ctrl.signal)
+      .then((text) => finishWith(() => opts.onFinal(cleanTranscript(text))))
+      .catch(() => {
+        if (ctrl.signal.aborted) return;
+        finishWith(() => opts.onError("network"));
+      });
+  };
+
+  const onFrame = (frame: Float32Array) => {
+    if (done) return;
+    frames++;
+    const ev = vad.push(frame);
+    if (!recording) {
+      pre.push(frame);
+      if (pre.length > PRE_ROLL) pre.shift();
+      if (ev === "start") {
+        recording = true;
+        chunks = [...pre];
+        opts.onPhase("hearing");
+        opts.onPartial?.("…");
+      } else if (frames * FRAME_MS > MAX_WAIT_MS) {
+        // Nadie habla: se vuelve a empezar (libera el micro un momento).
+        finishWith(() => opts.onFinal(""));
+      }
+      return;
+    }
+    chunks.push(frame);
+    if (ev === "end" || chunks.length * FRAME_MS > MAX_UTTERANCE_MS) {
+      recording = false;
+      send();
+    }
+  };
+
+  const handle: ListenHandle = {
+    finish() {
+      if (done) return;
+      if (recording && chunks.length) {
+        recording = false;
+        vad.voicedFrames = Math.max(vad.voicedFrames, MIN_VOICED_MS / FRAME_MS);
+        send();
+      } else if (!offFrame && opened) {
+        /* ya transcribiendo */
+      } else finishWith(() => opts.onFinal(""));
+    },
+    cancel() {
+      if (done) return;
+      ctrl.abort();
+      finishWith(() => undefined);
+    },
+  };
+
+  acquireMic();
+  mic
+    .open()
+    .then(() => {
+      if (done) return;
+      opened = true;
+      offFrame = mic.onFrame(onFrame);
+      opts.onPhase("listening");
+      // Si en 4 s no llega ni un dato, el micro está bloqueado (pasa en algunos
+      // iPhone): se cambia al reconocimiento del navegador.
+      watchdog = setTimeout(() => {
+        if (done || frames > 0) return;
+        micStuck = true;
+        console.warn("[craic] el micro no da audio: se usa el reconocimiento del navegador");
+        done = true;
+        release();
+        if (active === handle) active = null;
+        const next = listen(opts);
+        handle.finish = () => next.finish();
+        handle.cancel = () => next.cancel();
+      }, 4000);
+    })
+    .catch((err) => {
+      finishWith(() => {
+        const f = micFailure(err);
+        if (f === "other") cloudSttOff(Infinity);
+        opts.onError(f === "denied" ? "denied" : f === "no-mic" ? "no-mic" : "other");
+      });
+    });
+  return handle;
+}
+
+function concat(parts: Float32Array[]): Float32Array {
+  const out = new Float32Array(parts.reduce((n, p) => n + p.length, 0));
+  let o = 0;
+  for (const p of parts) {
+    out.set(p, o);
+    o += p.length;
+  }
+  return out;
 }
 
 function listenLocal(opts: ListenOptions): ListenHandle {
