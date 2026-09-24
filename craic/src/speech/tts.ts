@@ -66,11 +66,17 @@ export function loadVoices(): Promise<SpeechSynthesisVoice[]> {
 }
 if (ttsSupported) void loadVoices();
 
-const FEMALE = /female|woman|samantha|serena|kate|moira|fiona|karen|tessa|susan|hazel|libby|sonia|emily|jenny|aria|ava|victoria|martha|stephanie|sarah|michelle|natasha|clara|emma|molly|ana\b|google uk english female/i;
-const MALE = /\bmale\b|daniel|arthur|oliver|george|ryan|thomas|guy|connor|alex|fred|aaron|tom|rishi|andrew|brian|christopher|eric|roger|steffan|william|liam|google uk english male/i;
+const FEMALE = /female|woman|amelie|amélie|audrey|marie|julie|denise|vivienne|eloise|ariane|sylvie|charline|chantal|aurelie|celine|virginie|samantha|serena|kate|moira|fiona|karen|tessa|susan|hazel|libby|sonia|emily|jenny|aria|ava|victoria|martha|stephanie|sarah|michelle|natasha|clara|emma|molly|ana\b|google uk english female/i;
+const MALE = /\bmale\b|henri|remy|rémy|paul|jean|antoine|fabrice|gerard|gérard|nicolas|claude|mathieu|daniel|arthur|oliver|george|ryan|thomas|guy|connor|alex|fred|aaron|tom|rishi|andrew|brian|christopher|eric|roger|steffan|william|liam|google uk english male/i;
 const NOVELTY = /novelty|whisper|bells|bubbles|jester|organ|zarvox|trinoids|bad news|good news|boing|cellos|superstar|wobble|albert|grandma|grandpa|rocko|shelley|flo|eddy|reed|sandy/i;
 /** Voces que suenan a persona: Edge «Natural/Online», Apple «Premium/Mejorada», Google «Studio/WaveNet». */
 const PREMIUM = /natural|neural|premium|enhanced|mejorada|online|wavenet|studio|siri/i;
+
+/** Idioma base del personaje ("en", "fr"…) */
+const baseLang = (langs: string[]) => (langs[0] ?? "en").slice(0, 2).toLowerCase();
+function sameLanguage(v: SpeechSynthesisVoice, langs: string[]) {
+  return new RegExp(`^${baseLang(langs)}([-_]|$)`, "i").test(v.lang);
+}
 
 function langRank(v: SpeechSynthesisVoice, langs: string[]) {
   const l = v.lang.replace("_", "-").toLowerCase();
@@ -102,7 +108,7 @@ export function pickVoice(
   gender?: "male" | "female",
   hint?: string,
 ): SpeechSynthesisVoice | undefined {
-  const english = voices.filter((v) => /^en([-_]|$)/i.test(v.lang) && !NOVELTY.test(v.name));
+  const english = voices.filter((v) => sameLanguage(v, langs) && !NOVELTY.test(v.name));
   if (!english.length) return undefined;
   const score = (v: SpeechSynthesisVoice) =>
     (langs.length - langRank(v, langs)) * 100 + (PREMIUM.test(v.name) ? 60 : 0) + (/google/i.test(v.name) ? 10 : 0) + genderScore(v, gender) + hintScore(v, hint);
@@ -119,7 +125,7 @@ export function premiumSystemVoice(
   // Solo voces con el acento del personaje (una voz «natural» americana no sirve para alguien de Sídney).
   const accents = langs.filter((l) => l.length > 2).slice(0, 2);
   const good = voices.filter(
-    (v) => PREMIUM.test(v.name) && !NOVELTY.test(v.name) && (accents.length ? langRank(v, accents) < accents.length : /^en([-_]|$)/i.test(v.lang)),
+    (v) => PREMIUM.test(v.name) && !NOVELTY.test(v.name) && (accents.length ? langRank(v, accents) < accents.length : sameLanguage(v, langs)),
   );
   if (!good.length) return undefined;
   const score = (v: SpeechSynthesisVoice) => (langs.length - langRank(v, langs)) * 10 + genderScore(v, gender) + hintScore(v, hint);
@@ -130,7 +136,7 @@ type Mode = { kind: "neural"; voice: string } | { kind: "system"; voice?: Speech
 
 export function resolveMode(opts: SpeakOptions): Mode {
   const engine = opts.engine ?? "auto";
-  const neuralOk = !!opts.neuralVoice && getAudioStatus().tts === "ready";
+  const neuralOk = !!opts.neuralVoice && baseLang(opts.langs) === "en" && getAudioStatus().tts === "ready";
   if (engine !== "system") {
     if (engine === "auto") {
       const premium = premiumSystemVoice(voicesCache, opts.langs, opts.gender, opts.hint);
@@ -143,6 +149,8 @@ export function resolveMode(opts: SpeakOptions): Mode {
 
 /** ¿Hace falta cargar la voz neuronal o ya hay una voz natural del sistema? */
 export async function needsNeuralVoice(langs: string[], gender?: "male" | "female"): Promise<boolean> {
+  // La voz neuronal (Kokoro) solo habla inglés.
+  if (baseLang(langs) !== "en") return false;
   const voices = await loadVoices();
   return !premiumSystemVoice(voices, langs, gender);
 }

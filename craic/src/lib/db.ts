@@ -68,7 +68,7 @@ export async function deleteSession(id: string): Promise<void> {
 const vocabKey = (en: string) => en.toLowerCase().replace(/[^\p{L}\p{N}' ]/gu, "").trim();
 
 /** Añade expresiones nuevas (sin duplicar las que ya estaban). Devuelve cuántas se añadieron. */
-export async function addVocab(items: Expression[], sessionId: string): Promise<number> {
+export async function addVocab(items: Expression[], sessionId: string, lang?: Expression["lang"]): Promise<number> {
   const d = await db();
   const existing = new Set((await d.getAll("vocab")).map((v) => vocabKey(v.en)));
   const tx = d.transaction("vocab", "readwrite");
@@ -78,7 +78,7 @@ export async function addVocab(items: Expression[], sessionId: string): Promise<
     const k = vocabKey(it.en);
     if (!k || existing.has(k)) continue;
     existing.add(k);
-    await tx.store.put({ ...it, id: newId(), sessionId, addedAt: now + i });
+    await tx.store.put({ ...it, ...(lang ? { lang } : {}), id: newId(), sessionId, addedAt: now + i });
     added++;
   }
   await tx.done;
@@ -96,7 +96,7 @@ export async function updateVocab(item: VocabItem): Promise<void> {
 
 /** Añade una sola expresión (p. ej. una corrección) al vocabulario. */
 export async function addOneVocab(it: Expression): Promise<boolean> {
-  return (await addVocab([it], "manual")) > 0;
+  return (await addVocab([it], "manual", it.lang)) > 0;
 }
 
 export async function deleteVocab(id: string): Promise<void> {

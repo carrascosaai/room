@@ -96,6 +96,48 @@ export function Flag({ code, size = 52 }: { code: FlagCode; size?: number }) {
               )}
             </>
           )}
+          {code === "fr" && (
+            <>
+              <rect width="20" height="60" fill="#0055a4" />
+              <rect x="20" width="20" height="60" fill="#fff" />
+              <rect x="40" width="20" height="60" fill="#ef4135" />
+            </>
+          )}
+          {code === "be" && (
+            <>
+              <rect width="20" height="60" fill="#1a1a1a" />
+              <rect x="20" width="20" height="60" fill="#fdda24" />
+              <rect x="40" width="20" height="60" fill="#ef3340" />
+            </>
+          )}
+          {code === "ch" && (
+            <>
+              <rect width="60" height="60" fill="#da291c" />
+              <path d="M30 16v28M16 30h28" stroke="#fff" strokeWidth="9" />
+            </>
+          )}
+          {code === "qc" && (
+            <>
+              <rect width="60" height="60" fill="#003da5" />
+              <path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="8" />
+              {[
+                [15, 15],
+                [45, 15],
+                [15, 45],
+                [45, 45],
+              ].map(([x, y]) => (
+                <path key={`${x}${y}`} d={`M${x} ${y - 6}c3 3 3 6 0 9c-3-3-3-6 0-9zM${x - 5} ${y + 1}h10`} stroke="#fff" strokeWidth="2" fill="#fff" />
+              ))}
+            </>
+          )}
+          {code === "sn" && (
+            <>
+              <rect width="20" height="60" fill="#00853f" />
+              <rect x="20" width="20" height="60" fill="#fdef42" />
+              <rect x="40" width="20" height="60" fill="#e31b23" />
+              <Star x={30} y={31} r={7} fill="#00853f" />
+            </>
+          )}
           {code === "ca" && (
             <>
               <rect width="60" height="60" fill="#fff" />

@@ -40,11 +40,13 @@ export function effectiveEngine(engine: AsrEngine): AsrEngine | null {
 
 export function listen(opts: ListenOptions): ListenHandle {
   active?.cancel();
-  const engine = effectiveEngine(opts.engine);
+  // El oído local solo entiende inglés: otros idiomas, solo con el del navegador.
+  const english = /^en\b/i.test(opts.lang);
+  const engine = english ? effectiveEngine(opts.engine) : recognitionSupported ? "browser" : null;
   console.info(`[craic] escuchando con: ${engine ?? "ninguno"} (oído local: ${getAudioStatus().asr})`);
   let handle: ListenHandle;
   if (!engine) {
-    opts.onError("loading");
+    opts.onError(english ? "loading" : "language");
     handle = { finish() {}, cancel() {} };
   } else handle = engine === "local" ? listenLocal(opts) : listenBrowser(opts);
   active = handle;

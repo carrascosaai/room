@@ -27,9 +27,9 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Craic · Practica inglés hablando",
+        name: "Craic · Practica inglés y francés hablando",
         short_name: "Craic",
-        description: "Aprende inglés hablando por llamada con una IA. 18 acentos, correcciones en español. Gratis y sin registro.",
+        description: "Aprende inglés y francés hablando por llamada con una IA. Correcciones en español. Gratis y sin registro.",
         lang: "es",
         start_url: ".",
         scope: ".",

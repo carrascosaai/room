@@ -42,7 +42,7 @@ export const MIC_ERROR_TEXT: Record<MicError, string> = {
   "no-speech": "No te he oído. Habla un poco más cerca del móvil.",
   "no-mic": "No se encuentra ningún micrófono en este dispositivo.",
   network: "El reconocimiento de voz del navegador necesita internet. Comprueba la red o escribe.",
-  language: "Tu navegador no reconoce inglés por voz. Puedes escribir tu respuesta.",
+  language: "Tu navegador no reconoce este idioma por voz. Prueba con Chrome o Edge, o escribe tu respuesta.",
   loading: "El reconocimiento de voz aún se está preparando. Un momento…",
   other: "El reconocimiento de voz ha fallado. Inténtalo otra vez o escribe tu respuesta.",
 };

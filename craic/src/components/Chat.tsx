@@ -11,6 +11,7 @@ import { stopSpeaking, unlockTTS, useSpeaking } from "../speech/tts";
 import { listen, listenOnce, micLevel, voiceInputAvailable, type ListenHandle, type ListenPhase } from "../speech/voiceInput";
 import { Flag, Wordmark } from "./Brand";
 import { CorrectionCard } from "./CorrectionCard";
+import { infoOf, langOf } from "../lang";
 import { Icon } from "./Icon";
 import { Waveform } from "./Waveform";
 
@@ -28,6 +29,8 @@ interface Props {
 }
 
 export function recognitionLangFor(prefs: Prefs, character: Character) {
+  // Francés: el reconocimiento de Francia (o de Canadá para Quebec).
+  if (langOf(character) !== "en") return character.voiceLangs[0] === "fr-CA" ? "fr-CA" : "fr-FR";
   if (prefs.recognitionLang !== "auto") return prefs.recognitionLang;
   return character.voiceLangs[0] === "en-US" ? "en-US" : "en-GB";
 }
@@ -78,7 +81,8 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
 
   const listenOpts = useCallback(
     () => ({
-      engine: prefsRef.current.asrEngine,
+      // El oído local (Moonshine) solo sabe inglés: en francés, el del navegador.
+      engine: langOf(character) === "en" ? prefsRef.current.asrEngine : "browser",
       lang: recognitionLangFor(prefsRef.current, character),
       silenceMs: pauseMs(prefsRef.current),
     }),
@@ -103,7 +107,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       onError: (e) => {
         setMicError(e);
         if (e === "loading" && getAudioStatus().asr === "loading") setTimeout(() => startListening(), 1200);
-        else if (e === "denied" || e === "no-mic" || e === "loading") {
+        else if (e === "denied" || e === "no-mic" || e === "loading" || e === "language") {
           setPaused(true);
           pausedRef.current = true;
         }
@@ -293,7 +297,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       <button className={`convo-card${cardOpen ? " open" : ""}`} onClick={() => setCardOpen((v) => !v)} aria-expanded={cardOpen}>
         <Flag code={character.flag} />
         <span className="convo-card-text">
-          <strong>Call with {name}</strong>
+          <strong>{`${infoOf(character).callWith} ${name}`}</strong>
           <small>
             {character.accent} · {level}
           </small>
@@ -392,6 +396,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
               </div>
               {m.role === "user" && (
                 <CorrectionCard
+                  lang={langOf(character)}
                   msg={m}
                   listenOnce={practiceListen}
                   onStopListening={() => practiceHandle.current?.finish()}
@@ -475,7 +480,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
               ref={inputRef}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder={paused ? "Escribe en inglés o toca el micro…" : "Write in English…"}
+              placeholder={paused ? `Escribe en ${infoOf(character).es} o toca el micro…` : infoOf(character).placeholder}
               lang="en"
               autoComplete="off"
               autoCapitalize="sentences"
@@ -546,6 +551,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
               checked={prefs.reviewTranscript}
               onChange={(v) => onPrefs({ reviewTranscript: v })}
             />
+            {langOf(character) === "en" && (
             <label className="field">
               <span>Voz de {name}</span>
               <select
@@ -562,8 +568,9 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
                 ))}
               </select>
             </label>
+            )}
             <div className="actions">
-              <button className="btn-dark" onClick={() => void say(lastAssistant?.text ?? "Hello! This is how I sound.")}>
+              <button className="btn-dark" onClick={() => void say(lastAssistant?.text ?? (langOf(character) === "fr" ? "Bonjour ! Voilà ma voix." : "Hello! This is how I sound."))}>
                 Probar voz
               </button>
               <button className="btn-ghost" onClick={() => setSheet(false)}>

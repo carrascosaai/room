@@ -24,6 +24,11 @@ export function tokenize(text: string): string[] {
   let t = (text ?? "").toLowerCase().replace(/[’‘`]/g, "'");
   for (const [re, rep] of CONTRACTIONS) t = t.replace(re, rep);
   return t
+    // Acentos fuera (é → e), así «été» y «ete» cuentan igual.
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    // Elisiones del francés: «j'ai» → «j ai», «qu'il» → «qu il».
+    .replace(/\b(qu|[a-z])'/g, "$1 ")
     .replace(/[^a-z0-9' ]+/g, " ")
     .split(/\s+/)
     .map((w) => w.replace(/^'+|'+$/g, "").replace(/'s$/, ""))

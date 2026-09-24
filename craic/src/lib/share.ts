@@ -2,10 +2,10 @@
 // si no existe, copiar el enlace.
 export const SHARE_URL = "https://craic.vercel.app";
 export const SHARE_TEXT =
-  "Estoy practicando inglés hablando por llamada con una IA: 18 acentos (Irlanda, Liverpool, Escocia, Texas, Australia…) y te corrige en español. Es GRATIS y sin registrarse 👉";
+  "Estoy practicando inglés y francés hablando por llamada con una IA: acentos de Irlanda, Liverpool, Texas, Australia, París, Quebec… y te corrige en español. Es GRATIS y sin registrarse 👉";
 
 export async function shareApp(): Promise<"shared" | "copied" | "cancelled"> {
-  const data = { title: "Craic · Aprende inglés hablando gratis", text: SHARE_TEXT, url: SHARE_URL };
+  const data = { title: "Craic · Aprende inglés y francés hablando gratis", text: SHARE_TEXT, url: SHARE_URL };
   try {
     if (navigator.share) {
       await navigator.share(data);

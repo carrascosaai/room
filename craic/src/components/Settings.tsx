@@ -93,7 +93,7 @@ export function Settings({ prefs, onChange }: { prefs: Prefs; onChange: (p: Part
             </button>
           </div>
         )}
-        {CHARACTERS.map((c) => (
+        {CHARACTERS.filter((c) => (c.lang ?? "en") === "en").map((c) => (
           <div key={c.id} className="voice-row">
             <span className="voice-name">{c.name.split(" ")[0]}</span>
             <select

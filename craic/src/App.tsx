@@ -1,3 +1,4 @@
+import { langOf } from "./lang";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCharacter, type Level } from "./characters";
 import { Wordmark } from "./components/Brand";
@@ -176,8 +177,9 @@ export default function App() {
     if (demo) return;
     // En el móvil, la voz ligera (~90 MB) en vez de la de alta calidad (~330 MB).
     if (needTTS) loadTTS(prefs.voiceQuality === "high" && gpu?.ok && !gpu.mobile ? "webgpu" : "wasm");
-    if (prefs.asrEngine === "local") loadASR(prefs.asrModel);
-  }, [needTTS, prefs.voiceQuality, prefs.asrEngine, prefs.asrModel, gpu]);
+    // El oído local solo entiende inglés.
+    if (prefs.asrEngine === "local" && langOf(character) === "en") loadASR(prefs.asrModel);
+  }, [needTTS, prefs.voiceQuality, prefs.asrEngine, prefs.asrModel, gpu, character]);
 
   // Precarga: si el modelo ya está descargado, se carga en segundo plano
   // mientras eliges personaje, así «Llamar» es casi instantáneo.
@@ -267,7 +269,7 @@ export default function App() {
   // navegador. Solo se espera si no hay ninguna alternativa.
   const audioReady =
     (!needTTS || ttsSupported || audio.tts === "ready" || audio.tts === "error") &&
-    (prefs.asrEngine !== "local" || recognitionSupported || audio.asr === "ready" || audio.asr === "error");
+    (prefs.asrEngine !== "local" || langOf(character) !== "en" || recognitionSupported || audio.asr === "ready" || audio.asr === "error");
   useEffect(() => {
     if (pendingOpen && audioReady && screen === "loading") {
       openChat(pendingOpen.messages, pendingOpen.startedAt);

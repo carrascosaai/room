@@ -24,6 +24,14 @@ Diseño inspirado en ISSEN: la conversación es una **llamada** con el personaje
 (tarjeta de conversación arriba, barra «Listening…» con onda y dock con ideas,
 colgar, ajustes y micrófono).
 
+- **Inglés y francés:** eliges el idioma arriba. En francés hay 6 personajes con
+  su acento y expresiones (Camille de París, Julien de Marsella, Thomas de
+  Bruselas, Chloé de Ginebra, Émilie de Montreal, Aminata de Dakar) y una
+  entrevista de prácticas (Sophie Martin). Las correcciones, traducciones,
+  sugerencias y el repaso funcionan igual, siempre explicados en español. En
+  francés se usan la voz y el reconocimiento del navegador (la voz neuronal y el
+  oído local solo existen en inglés).
+
 - **Personajes:** Liam (Dublín, de visita en Córdoba), Emily (Londres), Jake
   (EE. UU., Erasmus en Córdoba) y Sarah Mitchell (entrevistas de prácticas de ingeniería).
 - **Situaciones (role-play):** charla libre, de tapas, dar indicaciones, planes del

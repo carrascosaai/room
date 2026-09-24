@@ -1,3 +1,4 @@
+import { langOf } from "./lang";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Character, Level } from "./characters";
 import type { LLM } from "./llm/engine";
@@ -113,7 +114,8 @@ export function useConversation({ llm, character, level, scenario, voice, initia
       update(() => []);
       return () => stopSpeaking();
     }
-    const pool = scenario.openers.length ? scenario.openers : character.openers;
+    const scenarioOpeners = langOf(character) === "fr" ? (scenario.openersFr ?? []) : scenario.openers;
+    const pool = scenarioOpeners.length ? scenarioOpeners : character.openers;
     const opener = pool[Math.floor(Math.random() * pool.length)];
     update(() => [{ id: uid(), role: "assistant", text: opener }]);
     return () => stopSpeaking();
@@ -183,7 +185,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
           return;
         }
         try {
-          const raw = await llm.complete(buildCorrectionMessages(level, previousQuestion, text), {
+          const raw = await llm.complete(buildCorrectionMessages(level, previousQuestion, text, langOf(character)), {
             tag: "correct",
             priority: "low",
             temperature: 0.1,
@@ -244,6 +246,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
           level,
           last.text,
           messagesRef.current.map((m) => ({ role: m.role, text: m.text })),
+          langOf(character),
         ),
         { tag: "suggest", temperature: 0.8, maxTokens: 260, jsonSchema: SUGGESTION_SCHEMA },
       );
@@ -253,7 +256,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
       return [];
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [llm, level]);
+  }, [llm, level, character]);
 
   const translate = useCallback(
     async (id: string) => {
@@ -261,7 +264,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
       if (!m || m.translation || m.translating) return;
       patch(id, { translating: true });
       try {
-        const raw = await llm.complete(buildTranslateMessages(m.text), {
+        const raw = await llm.complete(buildTranslateMessages(m.text, langOf(character)), {
           tag: "translate",
           temperature: 0.2,
           maxTokens: 160,
@@ -273,7 +276,7 @@ export function useConversation({ llm, character, level, scenario, voice, initia
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [llm, patch],
+    [llm, patch, character],
   );
 
   /** Espera a que terminen las correcciones pendientes y devuelve la conversación. */
