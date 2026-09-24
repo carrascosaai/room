@@ -271,13 +271,13 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
     phase === "hearing"
       ? { tone: "rec", text: "Te escucho…" }
       : phase === "listening"
-        ? { tone: "rec", text: "Listening…" }
+        ? { tone: "rec", text: "Escuchando…" }
         : phase === "transcribing"
           ? { tone: "idle", text: "Un momento…" }
           : thinking
             ? { tone: "idle", text: `${name} está pensando…` }
             : speaking
-              ? { tone: "speak", text: `${name} habla · toca 🎤 para interrumpir` }
+              ? { tone: "speak", text: `${name} habla…` }
               : null;
 
   return (
@@ -293,7 +293,7 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       <button className={`convo-card${cardOpen ? " open" : ""}`} onClick={() => setCardOpen((v) => !v)} aria-expanded={cardOpen}>
         <Flag code={character.flag} />
         <span className="convo-card-text">
-          <strong>Conversation with {name}</strong>
+          <strong>Call with {name}</strong>
           <small>
             {character.accent} · {level}
           </small>
