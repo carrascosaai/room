@@ -1,12 +1,17 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
+import { inject } from "@vercel/analytics";
 import App from "./App";
+import { Status } from "./components/Status";
 import "./styles.css";
+
+// Visitas anónimas (sin cookies) en Vercel → Analytics.
+if (import.meta.env.PROD) inject();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    {new URLSearchParams(location.search).has("estado") ? <Status /> : <App />}
   </StrictMode>,
 );
 
