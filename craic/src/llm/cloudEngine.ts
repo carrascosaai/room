@@ -37,6 +37,20 @@ export function cloudAvailable(recheck = false): Promise<boolean> {
   return availability;
 }
 
+/** Identificador aleatorio de este navegador (solo para el límite de uso, no identifica a nadie). */
+function clientId(): string {
+  try {
+    let id = localStorage.getItem("craic:cid");
+    if (!id) {
+      id = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
+      localStorage.setItem("craic:cid", id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
+
 export class CloudError extends Error {
   constructor(
     message: string,
@@ -70,7 +84,7 @@ export class CloudLLM implements LLM {
     try {
       const res = await fetch(endpoint(), {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", "x-client-id": clientId() },
         body: JSON.stringify({
           messages,
           temperature: opts.temperature ?? 0.7,

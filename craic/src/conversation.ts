@@ -192,7 +192,10 @@ export function useConversation({ llm, character, level, scenario, voice, initia
           });
           patch(userMsg.id, { corrections: parseCorrections(raw, text), correctionState: "done" });
         } catch (err) {
-          handleEngineError(err);
+          // Una corrección que falla (p. ej. la nube saturada un momento) no debe
+          // alarmar: la conversación sigue funcionando.
+          console.warn("Corrección no disponible", err);
+          if (toAppError(err).kind === "memory") handleEngineError(err);
           patch(userMsg.id, { correctionState: "error" });
         }
       })();

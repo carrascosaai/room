@@ -29,7 +29,7 @@ export default defineConfig({
       manifest: {
         name: "Craic · Practica inglés hablando",
         short_name: "Craic",
-        description: "Practica inglés hablando con una IA que se ejecuta en tu dispositivo. Gratis, sin cuentas.",
+        description: "Aprende inglés hablando por llamada con una IA. 18 acentos, correcciones en español. Gratis y sin registro.",
         lang: "es",
         start_url: ".",
         scope: ".",
@@ -45,16 +45,23 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // La app completa (incluida la librería WebLLM, ~6 MB) queda en caché
-        // para funcionar sin conexión. Los pesos del modelo los guarda WebLLM
-        // en su propia caché, no el service worker.
+        // Solo lo imprescindible se descarga al entrar (unos 400 KB). Los motores
+        // pesados (IA local ~12 MB, voz y oído) se guardan la primera vez que se
+        // usan: con la IA en la nube la mayoría de gente nunca los descarga.
         globPatterns: ["**/*.{js,css,html,svg,png,webmanifest}"],
-        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
+        globIgnores: ["**/og.png", "**/*.worker-*.js", "**/lib-*.js"],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: "index.html",
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
         // El runtime ONNX (voz y Whisper, ~21 MB) se guarda la primera vez que se usa.
         runtimeCaching: [
+          {
+            // Archivos con hash (no cambian nunca): se guardan al usarse por primera vez.
+            urlPattern: ({ url }) => url.pathname.startsWith("/assets/"),
+            handler: "CacheFirst",
+            options: { cacheName: "craic-assets", expiration: { maxEntries: 40, purgeOnQuotaError: true } },
+          },
           {
             urlPattern: ({ url }) => url.pathname.includes("/ort/"),
             handler: "CacheFirst",
