@@ -268,6 +268,7 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
   let chain: Promise<void> = Promise.resolve();
   let started = false;
   let pending: string[] = [];
+  let firstSent = false;
   let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
   const flushCloud = () => {
@@ -310,12 +311,15 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
       setSpeaking(true);
     }
     if (mode.kind === "cloud") {
-      // La voz en la nube tiene cupo diario: las frases se juntan en una sola
-      // petición (la IA escribe tan rápido que la respuesta entera llega en
-      // unas décimas), así cada respuesta gasta 1 petición y no 3.
+      // La primera frase se pide ya (para que empiece a hablar cuanto antes);
+      // el resto se junta en una sola petición mientras suena la primera:
+      // rápido y solo 2 peticiones del cupo diario por respuesta.
       pending.push(s);
-      if (pending.join(" ").length > 300) flushCloud();
-      else flushTimer ??= setTimeout(flushCloud, 300);
+      if (!firstSent) {
+        firstSent = true;
+        flushCloud();
+      } else if (pending.join(" ").length > 300) flushCloud();
+      else flushTimer ??= setTimeout(flushCloud, 400);
     } else if (mode.kind === "neural") {
       const key = `${mode.voice}|${speed}|${s}`;
       const hit = cache.get(key);

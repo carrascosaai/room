@@ -84,7 +84,9 @@ export function micLevel(): number {
 
 const MAX_UTTERANCE_MS = 30000;
 const MAX_WAIT_MS = 45000;
-const PRE_ROLL = 10; // ~320 ms antes de detectar voz, para no comerse la primera sílaba
+const PRE_ROLL = 32; // ~1 s antes de detectar voz: no se pierde el principio aunque hables flojito
+/** Silencio a partir del cual se empieza a transcribir «por si acaso» (se gana ~1 s). */
+const EARLY_MS = 600;
 const MIN_VOICED_MS = 200;
 
 function listenCloud(opts: ListenOptions): ListenHandle {
@@ -123,15 +125,36 @@ function listenCloud(opts: ListenOptions): ListenHandle {
     fn();
   };
 
+  /** Transcripción adelantada: empieza en cuanto callas un poco; si sigues hablando, se descarta. */
+  let early: { promise: Promise<string>; ctrl: AbortController } | null = null;
+  const startEarly = () => {
+    const c = new AbortController();
+    const abortAll = () => c.abort();
+    ctrl.signal.addEventListener("abort", abortAll);
+    const promise = transcribe(concat(chunks), opts.lang, c.signal, opts.context);
+    promise.catch(() => undefined);
+    early = { promise, ctrl: c };
+  };
+  const dropEarly = () => {
+    early?.ctrl.abort();
+    early = null;
+  };
+
   const send = () => {
     if (done) return;
     const audio = concat(chunks);
     chunks = [];
     const voicedMs = vad.voicedFrames * FRAME_MS;
-    if (!audio.length || voicedMs < MIN_VOICED_MS) return finishWith(() => opts.onFinal(""));
+    if (!audio.length || voicedMs < MIN_VOICED_MS) {
+      dropEarly();
+      return finishWith(() => opts.onFinal(""));
+    }
     release();
     opts.onPhase("transcribing");
-    transcribe(audio, opts.lang, ctrl.signal, opts.context)
+    // Lo que se añadió tras la transcripción adelantada es solo silencio: vale igual.
+    const pending = early ? early.promise.catch(() => transcribe(audio, opts.lang, ctrl.signal, opts.context)) : transcribe(audio, opts.lang, ctrl.signal, opts.context);
+    early = null;
+    pending
       .then((text) => finishWith(() => opts.onFinal(cleanTranscript(text))))
       .catch(() => {
         if (ctrl.signal.aborted) return;
@@ -157,6 +180,9 @@ function listenCloud(opts: ListenOptions): ListenHandle {
       return;
     }
     chunks.push(frame);
+    const quiet = vad.quietMs();
+    if (ev !== "end" && quiet === 0 && early) dropEarly(); // sigues hablando
+    else if (!early && ev !== "end" && quiet >= Math.min(EARLY_MS, opts.silenceMs - 200) && vad.voicedFrames * FRAME_MS >= MIN_VOICED_MS) startEarly();
     if (ev === "end" || chunks.length * FRAME_MS > MAX_UTTERANCE_MS) {
       recording = false;
       send();
@@ -177,6 +203,7 @@ function listenCloud(opts: ListenOptions): ListenHandle {
     cancel() {
       if (done) return;
       ctrl.abort();
+      dropEarly();
       finishWith(() => undefined);
     },
   };

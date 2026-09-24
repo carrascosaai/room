@@ -22,12 +22,18 @@ export class EnergyVad {
     return Math.sqrt(s / frame.length);
   }
 
+  /** Milisegundos de silencio seguidos desde la última palabra (0 si estás hablando). */
+  quietMs(): number {
+    return this.speaking ? this.quiet * FRAME_MS : 0;
+  }
+
   silenceFraction(): number {
     return this.speaking ? Math.min(1, (this.quiet * FRAME_MS) / this.silenceMs) : 0;
   }
 
   threshold(): number {
-    return Math.max(0.01, this.noise * 3.2);
+    // Mínimo bajo: en muchos móviles (con cancelación de eco) la voz llega flojita.
+    return Math.max(0.005, this.noise * 3);
   }
 
   push(frame: Float32Array): VadEvent {
