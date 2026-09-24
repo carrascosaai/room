@@ -26,6 +26,7 @@ export function Settings({ prefs, onChange }: { prefs: Prefs; onChange: (p: Part
       langs: c.voiceLangs,
       gender: c.voiceGender,
       hint: c.voiceHint,
+      cloudVoice: c.cloudVoice,
       neuralVoice: prefs.voiceOverrides[c.id] ?? c.neuralVoice,
       engine: prefs.voiceEngine,
     });

@@ -21,6 +21,8 @@ export interface SpeakOptions {
   gender?: "male" | "female";
   /** Nombres de voces del sistema con el acento del personaje (regex), p. ej. "fiona" */
   hint?: string;
+  /** Voz en la nube del personaje (Orpheus) */
+  cloudVoice?: string;
   /** Voz Kokoro, p. ej. "af_heart" */
   neuralVoice?: string;
   engine?: VoiceEngine;
@@ -134,7 +136,7 @@ export function premiumSystemVoice(
 }
 
 type Mode =
-  | { kind: "cloud"; gender: "male" | "female" }
+  | { kind: "cloud"; gender: "male" | "female"; voice?: string }
   | { kind: "neural"; voice: string }
   | { kind: "system"; voice?: SpeechSynthesisVoice };
 
@@ -147,7 +149,7 @@ export function resolveMode(opts: SpeakOptions): Mode {
       if (premium) return { kind: "system", voice: premium };
     }
     // Voz en la nube (Orpheus): la más natural y rápida en cualquier móvil. Solo inglés.
-    if (baseLang(opts.langs) === "en" && cloudTtsReady()) return { kind: "cloud", gender: opts.gender ?? "female" };
+    if (baseLang(opts.langs) === "en" && cloudTtsReady()) return { kind: "cloud", gender: opts.gender ?? "female", voice: opts.cloudVoice };
     if (neuralOk) return { kind: "neural", voice: opts.neuralVoice! };
   }
   return { kind: "system", voice: pickVoice(voicesCache, opts.langs, opts.gender, opts.hint) };
@@ -280,12 +282,12 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
       setSpeaking(true);
     }
     if (mode.kind === "cloud") {
-      const key = `cloud|${mode.gender}|${s}`;
+      const key = `cloud|${mode.voice ?? mode.gender}|${s}`;
       const hit = cache.get(key);
       // Se pide ya (en paralelo a lo que esté sonando) y suena cuando le toca.
       const clip: Promise<Clip | null> = hit
         ? Promise.resolve(hit)
-        : fetchSpeech(s, mode.gender)
+        : fetchSpeech(s, mode.gender, mode.voice)
             .then((buf) => ctx().decodeAudioData(buf))
             .then(
               (b) => {

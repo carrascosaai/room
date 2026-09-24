@@ -51,6 +51,8 @@ export interface Character {
   accent: string;
   /** Voz neuronal Kokoro por defecto */
   neuralVoice: string;
+  /** Voz en la nube (Orpheus): daniel, austin, troy / hannah, diana, autumn */
+  cloudVoice?: string;
   /** Tipo de conversación: charla o entrevista */
   kind: ScenarioKind;
   /** Frases de apertura: el personaje empieza la conversación (salvo que empieces tú) */
@@ -64,6 +66,7 @@ export const CHARACTERS: Character[] = [
   // ---------- Irlanda ----------
   {
     id: "liam",
+    cloudVoice: "daniel",
     flag: "ie",
     region: "ie",
     accent: "Inglés irlandés · Dublín",
@@ -86,6 +89,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "aoife",
+    cloudVoice: "diana",
     flag: "ie",
     region: "ie",
     accent: "Inglés irlandés · Cork",
@@ -107,6 +111,7 @@ export const CHARACTERS: Character[] = [
   // ---------- Reino Unido ----------
   {
     id: "emily",
+    cloudVoice: "hannah",
     flag: "gb",
     region: "uk",
     accent: "Inglés británico · Londres",
@@ -129,6 +134,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "kieran",
+    cloudVoice: "troy",
     flag: "eng",
     region: "uk",
     accent: "Inglés de Liverpool · scouse",
@@ -149,6 +155,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "jess",
+    cloudVoice: "autumn",
     flag: "eng",
     region: "uk",
     accent: "Inglés de Mánchester · manc",
@@ -169,6 +176,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "stevie",
+    cloudVoice: "austin",
     flag: "eng",
     region: "uk",
     accent: "Inglés de Newcastle · geordie",
@@ -189,6 +197,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "callum",
+    cloudVoice: "troy",
     flag: "sco",
     region: "uk",
     accent: "Inglés escocés · Glasgow",
@@ -209,6 +218,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "isla",
+    cloudVoice: "hannah",
     flag: "sco",
     region: "uk",
     accent: "Inglés escocés · Edimburgo",
@@ -229,6 +239,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "rhys",
+    cloudVoice: "daniel",
     flag: "wal",
     region: "uk",
     accent: "Inglés galés · Cardiff",
@@ -250,6 +261,7 @@ export const CHARACTERS: Character[] = [
   // ---------- Estados Unidos ----------
   {
     id: "jake",
+    cloudVoice: "austin",
     flag: "us",
     region: "us",
     accent: "Inglés americano · Texas",
@@ -272,6 +284,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "tony",
+    cloudVoice: "troy",
     flag: "us",
     region: "us",
     accent: "Inglés de Nueva York · Brooklyn",
@@ -292,6 +305,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "maddie",
+    cloudVoice: "autumn",
     flag: "us",
     region: "us",
     accent: "Inglés de California · San Diego",
@@ -312,6 +326,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "sean",
+    cloudVoice: "daniel",
     flag: "us",
     region: "us",
     accent: "Inglés de Boston",
@@ -332,6 +347,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "marybeth",
+    cloudVoice: "diana",
     flag: "us",
     region: "us",
     accent: "Inglés del Sur · Georgia",
@@ -353,6 +369,7 @@ export const CHARACTERS: Character[] = [
   // ---------- Australia y Nueva Zelanda ----------
   {
     id: "chloe",
+    cloudVoice: "hannah",
     flag: "au",
     region: "oceania",
     accent: "Inglés australiano · Sídney",
@@ -373,6 +390,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "jack",
+    cloudVoice: "austin",
     flag: "au",
     region: "oceania",
     accent: "Inglés australiano · Melbourne",
@@ -393,6 +411,7 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: "sam",
+    cloudVoice: "autumn",
     flag: "nz",
     region: "oceania",
     accent: "Inglés neozelandés · Auckland",
@@ -414,6 +433,7 @@ export const CHARACTERS: Character[] = [
   // ---------- Canadá ----------
   {
     id: "emma",
+    cloudVoice: "diana",
     flag: "ca",
     region: "ca",
     accent: "Inglés canadiense · Toronto",
@@ -435,6 +455,7 @@ export const CHARACTERS: Character[] = [
   // ---------- Entrevista ----------
   {
     id: "interviewer",
+    cloudVoice: "hannah",
     flag: "us",
     region: "work",
     accent: "Inglés americano · Entrevista",

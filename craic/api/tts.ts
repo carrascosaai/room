@@ -53,8 +53,8 @@ function limited(req: Request): boolean {
   return ++h.n > RATE_PER_MIN;
 }
 
-async function speak(key: string, text: string, gender: "female" | "male", fetchImpl: typeof fetch): Promise<Response> {
-  const candidates = [working[gender], ...VOICES[gender]()].filter((v, i, a): v is string => !!v && a.indexOf(v) === i && !badVoices.has(v));
+async function speak(key: string, text: string, gender: "female" | "male", fetchImpl: typeof fetch, wanted?: string): Promise<Response> {
+  const candidates = [wanted, working[gender], ...VOICES[gender]()].filter((v, i, a): v is string => !!v && a.indexOf(v) === i && !badVoices.has(v));
   let last: Response | null = null;
   for (const voice of candidates.slice(0, 4)) {
     const r = await fetchImpl(URL_TTS, {
@@ -63,7 +63,7 @@ async function speak(key: string, text: string, gender: "female" | "male", fetch
       body: JSON.stringify({ model: MODEL(), input: text, voice, response_format: "wav" }),
     });
     if (r.ok) {
-      working[gender] = voice;
+      if (voice !== wanted) working[gender] = voice;
       return new Response(r.body, {
         status: 200,
         headers: { "content-type": r.headers.get("content-type") ?? "audio/wav", "cache-control": "private, max-age=86400", "x-voice": voice },
@@ -98,7 +98,7 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
   if (!key) return json(503, { error: "disabled" });
   if (!allowedOrigin(req)) return json(403, { error: "forbidden" });
   if (limited(req)) return json(429, { error: "rate limited" });
-  let body: { text?: unknown; gender?: unknown };
+  let body: { text?: unknown; gender?: unknown; voice?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -107,7 +107,8 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
   const text = typeof body.text === "string" ? body.text.trim() : "";
   if (!text || text.length > MAX_CHARS) return json(400, { error: "invalid text" });
   const gender = body.gender === "male" ? "male" : "female";
-  return speak(key, text, gender, fetchImpl);
+  const voice = typeof body.voice === "string" && /^[a-z]{2,15}$/.test(body.voice) ? body.voice : undefined;
+  return speak(key, text, gender, fetchImpl, voice);
 }
 
 export default function handler(req: Request): Promise<Response> {
