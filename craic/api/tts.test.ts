@@ -37,3 +37,20 @@ describe("api/tts", () => {
     expect((await handle(post({ text: "x".repeat(500) }))).status).toBe(400);
   });
 });
+
+describe("api/tts · cupo", () => {
+  it("GET no gasta cupo y avisa cuando se agota", async () => {
+    process.env.GROQ_API_KEY = "k";
+    const f = vi.fn(async () => new Response('{"error":{"message":"Rate limit reached for model on requests per day (RPD): Limit 100, Used 100. Please try again in 7m12.5s."}}', { status: 429 }));
+    const get = () => handle(new Request("https://craic.vercel.app/api/tts"), f as unknown as typeof fetch);
+    expect(await (await get()).json()).toMatchObject({ enabled: true });
+    expect(f).not.toHaveBeenCalled();
+    const r = await handle(post({ text: "Hi", gender: "male" }), f as unknown as typeof fetch);
+    expect(r.status).toBe(429);
+    expect(Number(r.headers.get("retry-after"))).toBe(433);
+    expect(await (await get()).json()).toMatchObject({ enabled: false, reason: "quota" });
+    // Mientras dura, ni se pregunta a Groq.
+    expect((await handle(post({ text: "Hi", gender: "male" }), f as unknown as typeof fetch)).status).toBe(429);
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+});

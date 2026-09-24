@@ -267,21 +267,22 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
   const speed = NEURAL_SPEED[opts.rate];
   let chain: Promise<void> = Promise.resolve();
   let started = false;
+  let pending: string[] = [];
+  let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const push = (sentence: string) => {
-    const s = sentence.trim();
-    if (!s || myToken !== token) return;
-    if (!started) {
-      started = true;
-      setSpeaking(true);
-    }
-    if (mode.kind === "cloud") {
-      const key = `cloud|${mode.voice ?? mode.gender}|${s}`;
+  const flushCloud = () => {
+    if (flushTimer) clearTimeout(flushTimer);
+    flushTimer = null;
+    if (mode.kind !== "cloud" || !pending.length || myToken !== token) return;
+    const parts = packForCloud(pending);
+    pending = [];
+    for (const text of parts) {
+      const key = `cloud|${mode.voice ?? mode.gender}|${text}`;
       const hit = cache.get(key);
       // Se pide ya (en paralelo a lo que esté sonando) y suena cuando le toca.
       const clip: Promise<Clip | null> = hit
         ? Promise.resolve(hit)
-        : fetchSpeech(s, mode.gender, mode.voice)
+        : fetchSpeech(text, mode.gender, mode.voice)
             .then((buf) => ctx().decodeAudioData(buf))
             .then(
               (b) => {
@@ -296,8 +297,25 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
         const c = await clip;
         if (myToken !== token) return;
         if (c) await playClip(c, myToken, opts.rate === "slow" ? 0.9 : 1);
-        else await speakSystemSentence(s, pickVoice(voicesCache, opts.langs, opts.gender, opts.hint), opts);
+        else for (const f of splitForSpeech(text)) await speakSystemSentence(f, pickVoice(voicesCache, opts.langs, opts.gender, opts.hint), opts);
       });
+    }
+  };
+
+  const push = (sentence: string) => {
+    const s = sentence.trim();
+    if (!s || myToken !== token) return;
+    if (!started) {
+      started = true;
+      setSpeaking(true);
+    }
+    if (mode.kind === "cloud") {
+      // La voz en la nube tiene cupo diario: las frases se juntan en una sola
+      // petición (la IA escribe tan rápido que la respuesta entera llega en
+      // unas décimas), así cada respuesta gasta 1 petición y no 3.
+      pending.push(s);
+      if (pending.join(" ").length > 300) flushCloud();
+      else flushTimer ??= setTimeout(flushCloud, 300);
     } else if (mode.kind === "neural") {
       const key = `${mode.voice}|${speed}|${s}`;
       const hit = cache.get(key);
@@ -323,10 +341,23 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
   return {
     push,
     end: async () => {
+      flushCloud();
       await chain;
       if (myToken === token) setSpeaking(false);
     },
   };
+}
+
+/** Junta frases en trozos de hasta 400 caracteres (el máximo de la voz en la nube). */
+export function packForCloud(sentences: string[], max = 400): string[] {
+  const out: string[] = [];
+  for (const s of sentences.flatMap((x) => (x.length > max ? x.match(new RegExp(`.{1,${max}}(\\s|$)`, "g")) ?? [x] : [x]))) {
+    const t = s.trim();
+    if (!t) continue;
+    if (out.length && (out[out.length - 1] + " " + t).length <= max) out[out.length - 1] += " " + t;
+    else out.push(t);
+  }
+  return out;
 }
 
 /** Divide un texto en frases para la voz. */

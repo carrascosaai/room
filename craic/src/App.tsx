@@ -67,6 +67,10 @@ export default function App() {
   const audio = useAudioModels();
   const [iosHint, setIosHint] = useState(false);
   const [needTTS, setNeedTTS] = useState(true);
+  const [cloudEars, setCloudEars] = useState(false);
+  useEffect(() => {
+    void checkCloudStt().then(setCloudEars);
+  }, []);
   /** Llamada lista para abrir en cuanto la voz y el oído estén preparados */
   const [pendingOpen, setPendingOpen] = useState<{ messages?: Msg[]; startedAt?: number } | null>(null);
 
@@ -279,7 +283,7 @@ export default function App() {
   // navegador. Solo se espera si no hay ninguna alternativa.
   const audioReady =
     (!needTTS || ttsSupported || audio.tts === "ready" || audio.tts === "error") &&
-    (prefs.asrEngine !== "local" || langOf(character) !== "en" || recognitionSupported || audio.asr === "ready" || audio.asr === "error");
+    (cloudEars || prefs.asrEngine !== "local" || langOf(character) !== "en" || recognitionSupported || audio.asr === "ready" || audio.asr === "error");
   useEffect(() => {
     if (pendingOpen && audioReady && screen === "loading") {
       openChat(pendingOpen.messages, pendingOpen.startedAt);
@@ -416,6 +420,7 @@ export default function App() {
           error={loadError}
           firstDownload={firstDownload}
           needTTS={needTTS}
+          cloudEars={cloudEars}
           llmReady={!!pendingOpen}
           onSkip={() => {
             if (pendingOpen) {

@@ -58,13 +58,13 @@ function Block({ title, l }: { title: string; l?: Limits }) {
 export function Status() {
   const [data, setData] = useState<Data | null>(null);
   const [err, setErr] = useState("");
-  const load = () => {
+  const load = (voz = false) => {
     setErr("");
-    fetch("/api/status", { cache: "no-store" })
+    fetch(voz ? "/api/status?voz=1" : "/api/status", { cache: "no-store" })
       .then((r) => r.json() as Promise<Data>)
       .then(setData, (e) => setErr(String(e)));
   };
-  useEffect(load, []);
+  useEffect(() => load(), []);
   return (
     <div className="app">
       <div className="settings">
@@ -81,7 +81,17 @@ export function Status() {
         ) : (
           <>
             {data.chat?.map((c) => <Block key={c.model} title={`IA · ${c.model}`} l={c} />)}
-            <Block title="Voz realista · Orpheus" l={data.voice} />
+            {data.voice ? (
+              <Block title="Voz realista · Orpheus" l={data.voice} />
+            ) : (
+              <section className="card">
+                <h2>Voz realista · Orpheus</h2>
+                <p className="small">No se comprueba sola porque cada prueba gasta 1 de sus 100 frases diarias.</p>
+                <button className="btn-ghost" onClick={() => load(true)}>
+                  Comprobar voz (gasta 1)
+                </button>
+              </section>
+            )}
             <Block title="Oído (tu voz a texto) · Whisper" l={data.ears} />
             <section className="card">
               <h2>Reserva</h2>
@@ -93,7 +103,7 @@ export function Status() {
             </section>
             <p className="muted small">Comprobado: {data.checkedAt && new Date(data.checkedAt).toLocaleString("es-ES")}</p>
             <div className="actions">
-              <button className="btn-dark" onClick={load}>
+              <button className="btn-dark" onClick={() => load()}>
                 Actualizar
               </button>
               <a className="btn-ghost" href="/">
