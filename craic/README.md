@@ -196,6 +196,11 @@ y por día). Para aguantar mucha gente:
   `CEREBRAS_MODELS` y `OPENROUTER_MODELS`.
 - `GET /api/chat?models=1` lista los modelos que tu cuenta de Groq tiene disponibles.
 - Cada persona con WebGPU puede elegir «En tu dispositivo»: no gasta cupo de nadie.
+- Prueba de carga (40 peticiones simultáneas contra producción, solo Groq gratis):
+  la mayoría responde en ~2 s; las que chocan con el límite reciben 429 y el
+  navegador reintenta con espera creciente. Para miles de personas a la vez hace
+  falta más cupo: añade `GEMINI_API_KEY`/`CEREBRAS_API_KEY` o pasa Groq al plan
+  de pago por uso (céntimos por cada mil conversaciones; ver groq.com/pricing).
 
 Privacidad: en modo nube, las frases de la conversación se envían a Groq para
 generar la respuesta. La app no las guarda en ningún servidor.

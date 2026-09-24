@@ -70,8 +70,9 @@ export class CloudLLM implements LLM {
       } catch (err) {
         const status = (err as CloudError).status;
         const retriable = status === 429 || status === 502 || status === 503;
-        if (!retriable || attempt >= 2) throw err;
-        await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)));
+        if (!retriable || attempt >= 4) throw err;
+        // Espera creciente con algo de azar para que no reintente todo el mundo a la vez.
+        await new Promise((r) => setTimeout(r, 800 * (attempt + 1) + Math.random() * 700));
       }
     }
   }
