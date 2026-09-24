@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Msg } from "../conversation";
 import { addOneVocab } from "../lib/db";
+import type { TargetLang } from "../lang";
 import { applyCorrections } from "../llm/parse";
 import { PracticeSpeech } from "./PracticeSpeech";
 
@@ -9,9 +10,10 @@ interface Props {
   listenOnce: () => Promise<string>;
   onStopListening: () => void;
   onSay: (text: string) => void;
+  lang?: TargetLang;
 }
 
-export function CorrectionCard({ msg, listenOnce, onStopListening, onSay }: Props) {
+export function CorrectionCard({ msg, listenOnce, onStopListening, onSay, lang }: Props) {
   const [saved, setSaved] = useState<Set<number>>(new Set());
 
   if (msg.correctionState === "pending") {
@@ -34,7 +36,7 @@ export function CorrectionCard({ msg, listenOnce, onStopListening, onSay }: Prop
 
   const save = async (i: number) => {
     const e = errors[i];
-    await addOneVocab({ en: e.corrected, es: e.explanation || `en vez de «${e.original}»`, example: full ?? "" });
+    await addOneVocab({ en: e.corrected, es: e.explanation || `en vez de «${e.original}»`, example: full ?? "", lang });
     setSaved((s) => new Set(s).add(i));
   };
 

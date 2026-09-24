@@ -126,3 +126,11 @@ describe("audio helpers", () => {
     ]);
   });
 });
+
+import { scoreSpeech as scoreFr } from "./scoring";
+describe("scoreSpeech en francés", () => {
+  it("acepta acentos y elisiones", () => {
+    expect(scoreFr("J'ai été à la plage", "j'ai ete a la plage").score).toBe(100);
+    expect(scoreFr("Qu'est-ce que tu fais ?", "qu est-ce que tu fais").score).toBe(100);
+  });
+});

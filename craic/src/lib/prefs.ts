@@ -1,4 +1,5 @@
 import type { Level } from "../characters";
+import type { TargetLang } from "../lang";
 import type { ModelTier } from "../llm/models";
 import type { AsrModelId } from "../speech/asr.worker";
 import type { SpeechRate, VoiceEngine } from "../speech/tts";
@@ -7,6 +8,8 @@ import type { AsrEngine } from "../speech/voiceInput";
 export interface Prefs {
   /** Dónde corre la IA: auto = en la nube si está disponible (rápida), si no en el dispositivo */
   aiEngine: "auto" | "cloud" | "local";
+  /** Idioma que practicas */
+  lang: TargetLang;
   tier: ModelTier;
   rate: SpeechRate;
   level: Level;
@@ -41,6 +44,7 @@ export interface Prefs {
 const KEY = "craic:prefs";
 export const DEFAULT_PREFS: Prefs = {
   aiEngine: "auto",
+  lang: "en",
   tier: "light",
   rate: "normal",
   level: "B1",

@@ -11,7 +11,7 @@ import { PracticeSpeech } from "./PracticeSpeech";
 
 const DEFAULT_VOICE = "af_heart";
 
-/** Repaso del vocabulario: ves el español, lo dices en inglés y te autoevalúas. */
+/** Repaso del vocabulario: ves el español, lo dices en inglés o francés y te autoevalúas. */
 export function Review({ prefs }: { prefs: Prefs }) {
   const [items, setItems] = useState<VocabItem[] | null>(null);
   const [queue, setQueue] = useState<VocabItem[]>([]);
@@ -25,7 +25,7 @@ export function Review({ prefs }: { prefs: Prefs }) {
     setMicError(null);
     const { result, handle: h } = listenOnce({
       engine: prefs.asrEngine,
-      lang: prefs.recognitionLang === "auto" ? "en-GB" : prefs.recognitionLang,
+      lang: card?.lang === "fr" ? "fr-FR" : prefs.recognitionLang === "auto" ? "en-GB" : prefs.recognitionLang,
       silenceMs: pauseMs(prefs),
       onPhase: () => {},
       onError: setMicError,
@@ -50,8 +50,8 @@ export function Review({ prefs }: { prefs: Prefs }) {
   const say = (text: string) =>
     speak(text, {
       rate: prefs.rate,
-      langs: ["en-GB", "en-IE", "en"],
-      neuralVoice: DEFAULT_VOICE,
+      langs: card?.lang === "fr" ? ["fr-FR", "fr"] : ["en-GB", "en-IE", "en"],
+      neuralVoice: card?.lang === "fr" ? undefined : DEFAULT_VOICE,
       engine: prefs.voiceEngine,
     });
 
@@ -108,7 +108,7 @@ export function Review({ prefs }: { prefs: Prefs }) {
       ) : card ? (
         <div className="card flashcard">
           <span className="corr-tag">{masteryLabel(card.box)}</span>
-          <p className="muted small">¿Cómo se dice en inglés?</p>
+          <p className="muted small">¿Cómo se dice en {card.lang === "fr" ? "francés" : "inglés"}?</p>
           <p className="flash-es">{card.es}</p>
           {flipped ? (
             <>

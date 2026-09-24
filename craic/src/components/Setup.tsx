@@ -7,6 +7,7 @@ import { approxSizeMB, fetchDownloadSizeMB, formatMB, MODEL_OPTIONS, modelIdFor,
 import { getScenario, scenariosFor } from "../scenarios";
 import { ASR_MODELS, TTS_SIZE_MB } from "../speech/audioModels";
 import { Flag } from "./Brand";
+import { langOf } from "../lang";
 import { Icon } from "./Icon";
 import { ShareButton } from "./ShareButton";
 
@@ -61,6 +62,7 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
   }, [f16, demo, cloud]);
 
   const character = getCharacter(prefs.characterId);
+  const lang = langOf(character);
   const scenarios = scenariosFor(character.kind);
   const scenario = getScenario(prefs.scenarioId, character.kind);
   const tier = prefs.tier;
@@ -96,16 +98,38 @@ export function Setup({ prefs, f16, mobile, demo, draft, audioCached, needTTS, c
       )}
 
       <section>
+        <h2 className="section-title">¿Qué idioma quieres practicar?</h2>
+        <div className="seg seg-wide lang-seg" role="group" aria-label="Idioma">
+          {(["en", "fr"] as const).map((l) => (
+            <button
+              key={l}
+              className={lang === l ? "on" : ""}
+              aria-pressed={lang === l}
+              onClick={() => {
+                if (l === lang) return;
+                const first = CHARACTERS.find((c) => langOf(c) === l)!;
+                setRegion("all");
+                onChange({ lang: l, characterId: first.id, scenarioId: scenariosFor(first.kind)[0].id });
+              }}
+            >
+              <Flag code={l === "en" ? "gb" : "fr"} size={30} />
+              <strong>{l === "en" ? "Inglés" : "Francés"}</strong>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section>
         <h2 className="section-title">¿Con quién quieres hablar?</h2>
         <div className="region-chips" role="group" aria-label="Filtrar por acento">
-          {REGIONS.map((r) => (
+          {REGIONS[lang].map((r) => (
             <button key={r.id} type="button" className={region === r.id ? "on" : ""} onClick={() => setRegion(r.id)} aria-pressed={region === r.id}>
               {r.label}
             </button>
           ))}
         </div>
         <div className="char-grid">
-          {CHARACTERS.filter((c) => region === "all" || c.region === region).map((c) => (
+          {CHARACTERS.filter((c) => langOf(c) === lang && (region === "all" || c.region === region)).map((c) => (
             <button
               key={c.id}
               className={`char-card${prefs.characterId === c.id ? " on" : ""}`}

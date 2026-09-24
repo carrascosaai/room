@@ -14,6 +14,8 @@ export interface Scenario {
   setting: string;
   /** Frases de apertura; vacío = usar las del personaje */
   openers: string[];
+  /** Las mismas aperturas en francés (para los personajes francófonos) */
+  openersFr?: string[];
   /** Temas para ir cambiando de conversación (cada pocas intervenciones) */
   topics?: string[];
 }
@@ -42,7 +44,7 @@ export const EVERYDAY_TOPICS = [
   "a 'what would you do if…' hypothetical question (winning the lottery, a superpower, living abroad)",
   "the weather and their favourite season",
   "fashion and shopping habits",
-  "learning English: what's hard and why they're learning",
+  "learning languages: what's hard and why they're learning",
   "cars, transport and getting around",
   "the environment and climate change",
   "healthy habits, sleep and stress",
@@ -78,6 +80,7 @@ export const SCENARIOS: Scenario[] = [
       "Okay, quick question, and be honest: do you think social media makes people happier or unhappier?",
       "I've got a debate for you. Is it better to live in a big city or in a small village?",
     ],
+    openersFr: ["Bon, petite question, et sois honnête : tu crois que les réseaux sociaux rendent les gens plus heureux ou plus malheureux ?", "J'ai un débat pour toi. Il vaut mieux vivre dans une grande ville ou dans un petit village ?"],
   },
   {
     id: "whatif",
@@ -91,6 +94,7 @@ export const SCENARIOS: Scenario[] = [
       "Let's play a game. If you won a million euros tomorrow, what's the first thing you'd do?",
       "Here's one for you: if you could have any superpower, which one would you pick?",
     ],
+    openersFr: ["On fait un jeu. Si tu gagnais un million d'euros demain, tu ferais quoi en premier ?", "Allez, une question : si tu pouvais avoir un super-pouvoir, tu choisirais lequel ?"],
   },
   {
     id: "screens",
@@ -104,6 +108,7 @@ export const SCENARIOS: Scenario[] = [
       "I need a new series to watch. What have you been watching lately?",
       "What kind of music do you listen to? I'm always looking for new stuff.",
     ],
+    openersFr: ["Il me faut une nouvelle série. Tu regardes quoi en ce moment ?", "Tu écoutes quel genre de musique ? Je cherche toujours des nouveautés."],
   },
   {
     id: "sports",
@@ -117,6 +122,7 @@ export const SCENARIOS: Scenario[] = [
       "Do you play any sports, or are you more of a watch-it-on-the-sofa kind of person?",
       "Did you see any football this weekend? Who do you support?",
     ],
+    openersFr: ["Tu fais du sport, ou tu es plutôt du genre à regarder depuis le canapé ?", "Tu as regardé du foot ce week-end ? Tu es supporter de quelle équipe ?"],
   },
   {
     id: "past",
@@ -130,6 +136,7 @@ export const SCENARIOS: Scenario[] = [
       "What were you like as a kid? I bet you were a bit of a troublemaker.",
       "What's your best memory from school?",
     ],
+    openersFr: ["Tu étais comment quand tu étais petit ? Je parie que tu faisais des bêtises.", "C'est quoi, ton meilleur souvenir de l'école ?"],
   },
   {
     id: "future",
@@ -143,6 +150,7 @@ export const SCENARIOS: Scenario[] = [
       "Where do you see yourself in five years? Be honest, even if it's crazy.",
       "If you could have any job in the world, what would it be?",
     ],
+    openersFr: ["Tu te vois où dans cinq ans ? Sois honnête, même si c'est un peu fou.", "Si tu pouvais faire n'importe quel métier au monde, ce serait lequel ?"],
   },
   {
     id: "tapas",
@@ -156,6 +164,7 @@ export const SCENARIOS: Scenario[] = [
       "Right, I'm starving, but this menu is all in Spanish. What would you recommend?",
       "Okay, I have no idea what half of these tapas are. What's salmorejo?",
     ],
+    openersFr: ["Bon, j'ai super faim, mais le menu est tout en espagnol. Qu'est-ce que tu me conseilles ?", "Je n'ai aucune idée de ce que sont la moitié de ces tapas. C'est quoi, le salmorejo ?"],
   },
   {
     id: "directions",
@@ -169,6 +178,7 @@ export const SCENARIOS: Scenario[] = [
       "Sorry to bother you, I think I'm a bit lost. How do I get to the Mezquita from here?",
       "Excuse me, do you know where the train station is? My phone just died.",
     ],
+    openersFr: ["Pardon de te déranger, je crois que je suis un peu perdu. Comment je vais à la Mezquita d'ici ?", "Excuse-moi, tu sais où est la gare ? Mon téléphone vient de mourir."],
   },
   {
     id: "weekend",
@@ -182,6 +192,7 @@ export const SCENARIOS: Scenario[] = [
       "So, I'm free this weekend and I want to do something fun. Any plans?",
       "I was thinking we could do something together on Saturday. What do you fancy doing?",
     ],
+    openersFr: ["Alors, je suis libre ce week-end et j'ai envie de faire un truc sympa. Tu as des idées ?", "Je me disais qu'on pourrait faire quelque chose ensemble samedi. Ça te dit quoi ?"],
   },
   {
     id: "travel",
@@ -195,6 +206,7 @@ export const SCENARIOS: Scenario[] = [
       "I love travelling. What's the best trip you've ever been on?",
       "Have you ever been abroad? I want to hear a good travel story.",
     ],
+    openersFr: ["J'adore voyager. C'est quoi, le meilleur voyage que tu aies jamais fait ?", "Tu es déjà parti à l'étranger ? Raconte-moi une bonne histoire de voyage."],
   },
   {
     id: "studies",
@@ -208,6 +220,7 @@ export const SCENARIOS: Scenario[] = [
       "So tell me, are you studying or working at the moment? What do you do?",
       "I've always wondered what people's jobs are really like. What does a normal day look like for you?",
     ],
+    openersFr: ["Alors, dis-moi, tu étudies ou tu travailles en ce moment ? Tu fais quoi ?", "Je me suis toujours demandé à quoi ressemble le travail des autres. C'est comment, une journée normale pour toi ?"],
   },
   {
     id: "problem",
@@ -221,6 +234,7 @@ export const SCENARIOS: Scenario[] = [
       "Oh no, I think I've lost my wallet. I had it at the café an hour ago. What should I do?",
       "Ugh, I fell asleep by the pool and now I'm completely sunburnt. Where can I get something for it?",
     ],
+    openersFr: ["Oh non, je crois que j'ai perdu mon portefeuille. Je l'avais au café il y a une heure. Je fais quoi ?", "Aïe, je me suis endormi au bord de la piscine et j'ai un coup de soleil terrible. Où je peux trouver quelque chose ?"],
   },
   {
     id: "interview",
@@ -242,6 +256,7 @@ export const SCENARIOS: Scenario[] = [
     openers: [
       "Let's get a bit more technical. Could you walk me through an engineering project you're proud of?",
     ],
+    openersFr: ["Passons à quelque chose de plus technique. Pouvez-vous me présenter un projet d'ingénierie dont vous êtes fier ?"],
   },
   {
     id: "behavioural",
@@ -252,6 +267,7 @@ export const SCENARIOS: Scenario[] = [
     setting:
       "Ask behavioural interview questions, one at a time: a time they worked in a team with a conflict, a time they made a mistake, a time they had a tight deadline, a time they showed leadership. Encourage concrete examples (situation, task, action, result).",
     openers: ["Tell me about a time you had to work in a team and something went wrong. What happened?"],
+    openersFr: ["Parlez-moi d'une fois où vous avez travaillé en équipe et où quelque chose s'est mal passé. Que s'est-il passé ?"],
   },
 ];
 
