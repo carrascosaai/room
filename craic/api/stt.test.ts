@@ -20,6 +20,7 @@ describe("api/stt", () => {
     expect(await r.json()).toMatchObject({ text: "Hello there" });
     const form = (f.mock.calls[0] as unknown as [string, RequestInit])[1].body as FormData;
     expect(form.get("language")).toBe("fr");
+    expect(form.get("prompt")).toBeNull();
   });
 
   it("pasa al otro modelo si uno está saturado", async () => {
@@ -34,5 +35,17 @@ describe("api/stt", () => {
 
   it("rechaza audios vacíos", async () => {
     expect((await handle(post(10))).status).toBe(400);
+  });
+
+  it("pasa el contexto a Whisper", async () => {
+    const f = vi.fn(async () => new Response('{"text":"Córdoba"}', { status: 200 }));
+    const req = new Request("https://craic.vercel.app/api/stt?lang=en&prompt=Do%20you%20live%20in%20C%C3%B3rdoba%3F", {
+      method: "POST",
+      headers: { origin: "https://craic.vercel.app", "x-client-id": "ctx" },
+      body: new Uint8Array(5000),
+    });
+    await handle(req, f as unknown as typeof fetch);
+    const form = (f.mock.calls[0] as unknown as [string, RequestInit])[1].body as FormData;
+    expect(form.get("prompt")).toBe("Do you live in Córdoba?");
   });
 });

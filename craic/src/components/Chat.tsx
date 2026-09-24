@@ -52,6 +52,8 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
   });
   const waitsForYou = prefs.userStarts && character.kind === "casual" && !initialMessages?.length;
   const { messages, thinking, engineError, say } = convo;
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
   const audio = useAudioModels();
   const speaking = useSpeaking();
   const [phase, setPhase] = useState<ListenPhase>("idle");
@@ -87,6 +89,8 @@ export function Chat({ llm, character, level, scenario, prefs, onPrefs, onEnd, o
       engine: langOf(character) === "en" ? prefsRef.current.asrEngine : "browser",
       lang: recognitionLangFor(prefsRef.current, character),
       silenceMs: pauseMs(prefsRef.current),
+      // Lo último que dijo el personaje: ayuda a Whisper con nombres y temas.
+      context: [...messagesRef.current].reverse().find((m) => m.role === "assistant")?.text,
     }),
     [character],
   );
