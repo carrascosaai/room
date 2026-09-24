@@ -22,8 +22,8 @@ const env = (k: string): string | undefined =>
 
 // Modelos de Groq disponibles (septiembre 2026; ver GET /api/chat?models=1).
 // Los que ya no existan se saltan solos durante una hora.
-const DEFAULT_FAST = "openai/gpt-oss-20b,openai/gpt-oss-120b,qwen/qwen3.8-27b,llama-3.1-8b-instant";
-const DEFAULT_SMART = "openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.8-27b,llama-3.3-70b-versatile";
+const DEFAULT_FAST = "openai/gpt-oss-20b,openai/gpt-oss-120b,qwen/qwen3.8-27b";
+const DEFAULT_SMART = "openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.8-27b";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -197,6 +197,9 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
 
   let lastStatus = 502;
   let lastError = "sin modelos disponibles";
+  // Si algún modelo estaba saturado, se responde 429 (el navegador reintenta)
+  // aunque el último fallo fuera otro (p. ej. un modelo retirado).
+  let saturated = false;
   for (const c of order.slice(0, 8)) {
     const payload: Record<string, unknown> = {
       model: c.model,
@@ -245,6 +248,7 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
     if (working[tier] === c.id) working[tier] = undefined;
     // Cupo agotado: esta combinación descansa (lo que diga el proveedor, 20 s–10 min) y se prueba otra.
     if (res.status === 429) {
+      saturated = true;
       const retry = Number(res.headers.get("retry-after"));
       const ms = Math.min(Math.max(Number.isFinite(retry) && retry > 0 ? retry * 1000 : 20000, 20000), 600000);
       cooldown.set(c.id, Date.now() + ms);
@@ -263,6 +267,7 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
     break;
   }
   if (cooldown.size > 500) cooldown.clear();
+  if (saturated) return json(429, { error: "busy" }, { "retry-after": "2" });
   return json(lastStatus === 429 ? 429 : lastStatus >= 500 ? 502 : lastStatus, { error: lastError });
 }
 

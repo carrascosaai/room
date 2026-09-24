@@ -79,4 +79,15 @@ describe("api/chat", () => {
     setEnv("LLM_MODELS_FAST");
     setEnv("GEMINI_API_KEY");
   });
+
+  it("answers 429 (retry) when models are saturated even if the last one is missing", async () => {
+    setEnv("LLM_MODELS_FAST", "busy-model,gone-model");
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 429 }))
+      .mockResolvedValueOnce(new Response('{"error":{"message":"The model `gone-model` does not exist"}}', { status: 404 }));
+    const r = await handle(post({ messages: msgs }), f as unknown as typeof fetch);
+    expect(r.status).toBe(429);
+    setEnv("LLM_MODELS_FAST");
+  });
 });
