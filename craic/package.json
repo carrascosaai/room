@@ -20,6 +20,7 @@
     "@fontsource/rubik": "^5.3.0",
     "@huggingface/transformers": "3.8.1",
     "@mlc-ai/web-llm": "0.2.85",
+    "@vercel/analytics": "^2.0.1",
     "idb": "^8.0.3",
     "kokoro-js": "1.2.1",
     "react": "^19.3.0",
