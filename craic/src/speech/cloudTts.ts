@@ -44,7 +44,9 @@ export function checkCloudTts(): Promise<boolean> {
 /** Audio (WAV/MP3) de una frase. Lanza si falla; tras un fallo se deja de usar un rato. */
 export async function fetchSpeech(text: string, gender: "male" | "female", voice?: string): Promise<ArrayBuffer> {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 10000);
+  // Margen amplio: si hay mucha gente, el servidor espera unos segundos al
+  // límite por minuto antes de responder (mejor eso que la voz robótica).
+  const t = setTimeout(() => ctrl.abort(), 22000);
   try {
     const r = await fetch(endpoint(), {
       method: "POST",
@@ -53,14 +55,16 @@ export async function fetchSpeech(text: string, gender: "male" | "female", voice
       signal: ctrl.signal,
     });
     if (!r.ok) {
-      // Saturada: un minuto con la voz del dispositivo. Otro error: el resto de la sesión.
-      if (r.status === 429) offUntil = Date.now() + Math.max(60, Number(r.headers.get("retry-after")) || 0) * 1000;
-      else state = "off";
+      // Cupo agotado: voz del dispositivo hasta que se recargue. Servicio
+      // desactivado: el resto de la sesión. Fallo pasajero: se reintenta pronto.
+      if (r.status === 429) offUntil = Date.now() + Math.max(15, Number(r.headers.get("retry-after")) || 0) * 1000;
+      else if (r.status === 503 || r.status === 401 || r.status === 403) state = "off";
+      else offUntil = Date.now() + 15000;
       throw new Error(`tts ${r.status}`);
     }
     return await r.arrayBuffer();
   } catch (e) {
-    if ((e as Error).name === "AbortError") offUntil = Date.now() + 30000;
+    if ((e as Error).name === "AbortError") offUntil = Date.now() + 20000;
     throw e;
   } finally {
     clearTimeout(t);

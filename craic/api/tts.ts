@@ -16,6 +16,9 @@ const VOICES = {
   male: () => list(env("TTS_VOICES_MALE"), "daniel,austin,troy,leo,dan,zac"),
 };
 const MAX_CHARS = 400;
+/** Espera máxima por el límite por minuto antes de rendirse (segundos). */
+const MAX_WAIT_S = 9;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const RATE_PER_MIN = 60;
 
 /** Voz que ha funcionado para cada género (se recuerda mientras viva la instancia). */
@@ -57,7 +60,9 @@ function limited(req: Request): boolean {
 async function speak(key: string, text: string, gender: "female" | "male", fetchImpl: typeof fetch, wanted?: string): Promise<Response> {
   const candidates = [wanted, working[gender], ...VOICES[gender]()].filter((v, i, a): v is string => !!v && a.indexOf(v) === i && !badVoices.has(v));
   let last: Response | null = null;
-  for (const voice of candidates.slice(0, 4)) {
+  let waits = 0;
+  for (let i = 0; i < Math.min(4, candidates.length); i++) {
+    const voice = candidates[i];
     const r = await fetchImpl(URL_TTS, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
@@ -72,8 +77,17 @@ async function speak(key: string, text: string, gender: "female" | "male", fetch
     }
     const body = await r.text().catch(() => "");
     if (r.status === 429) {
-      // Cupo agotado: hasta cuándo (lo dice Groq). Mientras, la app usa la voz del móvil.
       const wait = retryAfterSeconds(r, body);
+      // Límite por minuto (compartido por todos): se espera unos segundos y se
+      // repite, en vez de pasar a la voz robótica del móvil.
+      if (wait <= MAX_WAIT_S && waits < 2) {
+        waits++;
+        blockedUntil = Math.max(blockedUntil, Date.now() + wait * 1000);
+        await sleep(wait * 1000 + 150);
+        i--;
+        continue;
+      }
+      // Cupo agotado de verdad: hasta cuándo (lo dice Groq). Mientras, la app usa la voz del móvil.
       blockedUntil = Date.now() + wait * 1000;
       return json(429, { error: body.slice(0, 300) }, { "retry-after": String(Math.ceil(wait)) });
     }
@@ -103,7 +117,7 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
   if (req.method === "GET") {
     if (!key) return json(200, { enabled: false }, { "cache-control": "no-store" });
     // Sin petición de prueba: cada una gastaría cupo (solo hay 100 al día).
-    const reason = termsMissing ? "terms" : Date.now() < blockedUntil ? "quota" : undefined;
+    const reason = termsMissing ? "terms" : blockedUntil - Date.now() > MAX_WAIT_S * 1000 ? "quota" : undefined;
     return json(200, { enabled: !reason, reason, retryAfter: reason === "quota" ? Math.ceil((blockedUntil - Date.now()) / 1000) : undefined }, { "cache-control": "no-store" });
   }
   if (req.method !== "POST") return json(405, { error: "method not allowed" });
@@ -111,7 +125,10 @@ export async function handle(req: Request, fetchImpl: typeof fetch = fetch): Pro
   if (!allowedOrigin(req)) return json(403, { error: "forbidden" });
   if (limited(req)) return json(429, { error: "rate limited" });
   if (termsMissing) return json(503, { error: "terms" });
-  if (Date.now() < blockedUntil) return json(429, { error: "quota" }, { "retry-after": String(Math.ceil((blockedUntil - Date.now()) / 1000)) });
+  // Límite por minuto a punto de liberarse: se espera; si es el cupo del día, se avisa.
+  const blockedFor = blockedUntil - Date.now();
+  if (blockedFor > MAX_WAIT_S * 1000) return json(429, { error: "quota" }, { "retry-after": String(Math.ceil(blockedFor / 1000)) });
+  if (blockedFor > 0) await sleep(blockedFor + 150);
   let body: { text?: unknown; gender?: unknown; voice?: unknown };
   try {
     body = await req.json();

@@ -275,7 +275,8 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
     if (flushTimer) clearTimeout(flushTimer);
     flushTimer = null;
     if (mode.kind !== "cloud" || !pending.length || myToken !== token) return;
-    const parts = packForCloud(pending);
+    // Trozos moderados: el límite por minuto se cuenta en caracteres.
+    const parts = packForCloud(pending, 280);
     pending = [];
     for (const text of parts) {
       const key = `cloud|${mode.voice ?? mode.gender}|${text}`;
@@ -318,7 +319,7 @@ export function createSpeechStream(opts: SpeakOptions): SpeechStream {
       if (!firstSent) {
         firstSent = true;
         flushCloud();
-      } else if (pending.join(" ").length > 300) flushCloud();
+      } else if (pending.join(" ").length > 250) flushCloud();
       else flushTimer ??= setTimeout(flushCloud, 400);
     } else if (mode.kind === "neural") {
       const key = `${mode.voice}|${speed}|${s}`;
