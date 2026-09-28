@@ -54,3 +54,22 @@ describe("api/tts · cupo", () => {
     expect(f).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("api/tts · límite por minuto", () => {
+  it("espera unos segundos y repite en vez de fallar", async () => {
+    vi.resetModules();
+    const { handle: fresh } = await import("./tts");
+    vi.useFakeTimers();
+    process.env.GROQ_API_KEY = "k";
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('{"error":{"message":"Rate limit reached on tokens per minute (TPM): Limit 1200, Used 1100, Requested 200. Please try again in 5s."}}', { status: 429 }))
+      .mockResolvedValueOnce(new Response(new Uint8Array([1]), { status: 200 }));
+    const pr = fresh(post({ text: "Hello again", gender: "female" }), f as unknown as typeof fetch);
+    await vi.advanceTimersByTimeAsync(6000);
+    const r = await pr;
+    vi.useRealTimers();
+    expect(r.status).toBe(200);
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+});
