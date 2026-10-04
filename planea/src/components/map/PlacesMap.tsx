@@ -4,9 +4,10 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import L from "leaflet";
 import "leaflet.markercluster";
-import { useEffect, useRef } from "react";
+import { Layers, LocateFixed } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { KINDS } from "@/lib/kinds";
-import { TILES } from "@/lib/map";
+import { BASE_STYLES, type BaseStyle, DEFAULT_STYLE, STYLE_KEY } from "@/lib/map";
 import type { Kind } from "@/lib/types";
 
 export interface MapPoint {
@@ -71,14 +72,28 @@ export default function PlacesMap({
   const cluster = useRef<L.MarkerClusterGroup | null>(null);
   const onSelectRef = useRef(onSelect);
   const fitted = useRef(false);
+  const base = useRef<L.Layer[]>([]);
+  const me = useRef<L.LayerGroup | null>(null);
+  const [style, setStyle] = useState<BaseStyle>(() => {
+    try {
+      const s = localStorage.getItem(STYLE_KEY) as BaseStyle | null;
+      return s && s in BASE_STYLES ? s : DEFAULT_STYLE;
+    } catch {
+      return DEFAULT_STYLE;
+    }
+  });
+  const [menu, setMenu] = useState(false);
+  const [locating, setLocating] = useState(false);
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
 
   useEffect(() => {
     if (!el.current || map.current) return;
-    const m = L.map(el.current, { zoomControl: true, attributionControl: true, preferCanvas: true }).setView(center, zoom);
-    L.tileLayer(TILES.url, { attribution: TILES.attribution, tileSize: TILES.tileSize, zoomOffset: TILES.zoomOffset, maxZoom: 19 }).addTo(m);
+    const m = L.map(el.current, { zoomControl: false, attributionControl: true, maxZoom: 20, zoomSnap: 0.5 }).setView(center, zoom);
+    L.control.zoom({ position: "bottomright" }).addTo(m);
+    L.control.scale({ position: "bottomleft", imperial: false }).addTo(m);
+    me.current = L.layerGroup().addTo(m);
     m.on("click", () => onSelectRef.current(null));
     cluster.current = L.markerClusterGroup({
       chunkedLoading: true,
@@ -96,6 +111,46 @@ export default function PlacesMap({
     // El mapa se crea una sola vez; el centro inicial no cambia después.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Estilo del mapa (calles, oscuro o satélite con nombres de calles).
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    for (const l of base.current) m.removeLayer(l);
+    const t = BASE_STYLES[style].tiles;
+    const opts = { tileSize: t.tileSize, zoomOffset: t.zoomOffset, maxZoom: 20, maxNativeZoom: t.maxNativeZoom, detectRetina: false };
+    const layers: L.Layer[] = [L.tileLayer(t.url, { ...opts, attribution: t.attribution })];
+    if (t.labels) layers.push(L.tileLayer(t.labels, { ...opts, maxNativeZoom: 20, pane: "overlayPane" }));
+    for (const l of layers) l.addTo(m);
+    (layers[0] as L.TileLayer).bringToBack();
+    base.current = layers;
+    el.current?.setAttribute("data-style", style);
+    try {
+      localStorage.setItem(STYLE_KEY, style);
+    } catch {
+      /* sin almacenamiento */
+    }
+  }, [style]);
+
+  const locate = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        const m = map.current;
+        const g = me.current;
+        if (!m || !g) return;
+        const ll: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+        g.clearLayers();
+        L.circle(ll, { radius: Math.min(pos.coords.accuracy, 300), color: "#5ce1e6", weight: 1, fillOpacity: 0.12 }).addTo(g);
+        L.circleMarker(ll, { radius: 8, color: "#fff", weight: 3, fillColor: "#2b8cff", fillOpacity: 1 }).bindTooltip("Estás aquí").addTo(g);
+        m.setView(ll, 16, { animate: true });
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
+    );
+  };
 
   useEffect(() => {
     const g = cluster.current;
@@ -131,5 +186,44 @@ export default function PlacesMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  return <div ref={el} className="absolute inset-0" aria-label="Mapa de sitios" />;
+  return (
+    <>
+      <div ref={el} className="planea-map absolute inset-0" aria-label="Mapa de sitios" />
+      <div className="absolute bottom-24 right-2.5 z-[450] flex flex-col items-end gap-2">
+        {menu && (
+          <div className="flex flex-col overflow-hidden rounded-2xl border border-line-strong bg-surface/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
+            {(Object.keys(BASE_STYLES) as BaseStyle[]).map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => {
+                  setStyle(k);
+                  setMenu(false);
+                }}
+                className={`px-4 py-2.5 text-left text-sm font-medium ${style === k ? "bg-lime text-lime-ink" : "text-ink hover:bg-surface-2"}`}
+              >
+                {BASE_STYLES[k].label}
+              </button>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setMenu((v) => !v)}
+          aria-label="Cambiar estilo del mapa"
+          className="grid size-11 place-items-center rounded-full border border-line-strong bg-surface/95 text-ink shadow-lg shadow-black/40 backdrop-blur-xl"
+        >
+          <Layers size={19} />
+        </button>
+        <button
+          type="button"
+          onClick={locate}
+          aria-label="Mi ubicación"
+          className="grid size-11 place-items-center rounded-full border border-line-strong bg-surface/95 text-ink shadow-lg shadow-black/40 backdrop-blur-xl"
+        >
+          <LocateFixed size={19} className={locating ? "animate-spin" : undefined} />
+        </button>
+      </div>
+    </>
+  );
 }
