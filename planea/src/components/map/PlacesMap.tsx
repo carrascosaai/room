@@ -119,8 +119,8 @@ export default function PlacesMap({
     for (const l of base.current) m.removeLayer(l);
     const t = BASE_STYLES[style].tiles;
     const opts = { tileSize: t.tileSize, zoomOffset: t.zoomOffset, maxZoom: 20, maxNativeZoom: t.maxNativeZoom, detectRetina: false };
-    const layers: L.Layer[] = [L.tileLayer(t.url, { ...opts, attribution: t.attribution })];
-    if (t.labels) layers.push(L.tileLayer(t.labels, { ...opts, maxNativeZoom: 20, pane: "overlayPane" }));
+    const layers: L.Layer[] = [L.tileLayer(t.url, { ...opts, attribution: t.attribution, className: t.className ?? "" })];
+    for (const url of t.labels ?? []) layers.push(L.tileLayer(url, { ...opts, pane: "overlayPane" }));
     for (const l of layers) l.addTo(m);
     (layers[0] as L.TileLayer).bringToBack();
     base.current = layers;

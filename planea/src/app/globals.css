@@ -157,7 +157,11 @@
 }
 
 .planea-map[data-style="oscuro"] {
-  background: #0d0d12 !important;
+  background: #0f1c2c !important;
+}
+/* Modo oscuro sobre el mapa de OpenStreetMap (igual que SEA Activity Intelligence). */
+.map-tiles-dark {
+  filter: brightness(0.62) contrast(1.05) saturate(0.65) invert(1) hue-rotate(180deg);
 }
 .leaflet-bar a {
   width: 40px !important;
