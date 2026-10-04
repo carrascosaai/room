@@ -1,0 +1,426 @@
+# ciudad;tipo(discoteca|bar|sala|zona);nombre;zona/calle;nota (resumen de opiniones y redes)
+madrid;discoteca;Teatro Kapital;Calle de Atocha;7 plantas con ambientes distintos, la macrodiscoteca más famosa de Madrid
+madrid;discoteca;Fitz Club;;Muy comentada en TikTok: buen ambiente, entrada cara el sábado
+madrid;discoteca;Vandido;Barrio de Salamanca;Club exclusivo con dos salas: reggaeton/comercial y Golden Room de house
+madrid;discoteca;Rubicon;Recoletos;Reggaeton y éxitos con pantallas gigantes, de las salas con más energía
+madrid;discoteca;Istar;;Templo del afrohouse en Madrid, ambiente internacional y DJs reconocidos
+madrid;discoteca;Barranco Club;;La mejor discoteca latina según TikTok, gratis antes de las 00:30
+madrid;discoteca;B12;Calle de Joaquín Costa;Famosa por los chupitos y los donetes a las 3 de la mañana
+madrid;discoteca;Joy Eslava;Sol;Clásico de Sol abierto todos los días, en un antiguo teatro
+madrid;discoteca;Medias Puri;Tirso de Molina;Discoteca-espectáculo con shows, muy de moda en redes
+madrid;discoteca;Fabrik;Humanes de Madrid;La catedral del techno de Madrid, macrofiestas y DJs internacionales
+madrid;bar;Café La Palma;Malasaña;Clásico de Malasaña con conciertos y buen ambiente
+madrid;bar;Tupperware;Malasaña;Bar alternativo de indie, rock y pop ochentero, barato y sin pretensiones
+madrid;bar;1862 Dry Bar;Malasaña;Cócteles clásicos bien hechos a precio razonable
+madrid;bar;Kinki Cocktail Bar;Malasaña;Coctelería con 5 estrellas en reseñas
+madrid;bar;Rockade;Malasaña;Bar de rock muy bien valorado (4,8)
+madrid;bar;Súper Pop Bar;Chueca;Pop a tope y muy buenas reseñas en Chueca
+madrid;bar;Baranoa;Chueca;Variedad de ritmos y copas en Chueca
+madrid;zona;Malasaña;Plaza del Dos de Mayo;Cuna de la Movida: bares alternativos, música en directo y pubs
+madrid;zona;Chueca;Plaza de Chueca;Referente LGTBI+, pubs, terrazas y cócteles
+madrid;zona;Gran Vía y Sol;Puerta del Sol;Bares y discotecas para todos los estilos, la calle llena toda la noche
+madrid;zona;Huertas y Santa Ana;Plaza de Santa Ana;Bares y pubs irlandeses, público algo más mayor
+madrid;zona;Moncloa-Argüelles;Calle de Fernando el Católico;Zona universitaria: chupitos y copas baratas sin entrada
+madrid;zona;Barrio de Salamanca;Calle de Jorge Juan;La zona "VIP": locales exclusivos y famosos
+madrid;zona;La Latina;Cava Baja;Tapas, vermut y terrazas que acaban en copas
+barcelona;discoteca;Opium Barcelona;Port Olímpic;Club frente al mar con DJs internacionales y terraza de playa
+barcelona;discoteca;Pacha Barcelona;Port Olímpic;Club de playa del Port Olímpic, ambiente Ibiza
+barcelona;discoteca;Shôko Barcelona;Port Olímpic;Club asiático en primera línea de playa
+barcelona;discoteca;Catwalk;Port Olímpic;Hip hop y comercial junto a la playa
+barcelona;discoteca;Twenties Barcelona;;La favorita de estudiantes y jóvenes, producción LED espectacular
+barcelona;discoteca;Boris Barcelona;;Ambiente selecto con zonas privadas y éxitos del momento
+barcelona;discoteca;Razzmatazz;Poblenou;Cinco salas: indie, techno y conciertos, un clásico absoluto
+barcelona;discoteca;Sala Apolo;Poble-sec;Sala histórica con fiestas como Nasty Mondays
+barcelona;discoteca;Bling Bling;Zona Alta;Club pijo de la zona alta, muy de moda
+barcelona;discoteca;Sutton Club;Zona Alta;Club elegante de la zona alta, reggaeton y comercial
+barcelona;bar;Paradiso;El Born;Speakeasy detrás de una nevera, de los mejores bares del mundo
+barcelona;bar;Sor Rita;Barri Gòtic;Bar kitsch muy instagrameable
+barcelona;bar;Marula Café;Barri Gòtic;Funk y soul hasta tarde
+barcelona;zona;Port Olímpic;Port Olímpic;Discotecas a pie de playa: Opium, Pacha, Shôko, Catwalk
+barcelona;zona;El Born y Gòtic;Passeig del Born;Coctelerías de autor, jazz y bares con historia
+barcelona;zona;Poblenou;Rambla del Poblenou;Barrio de moda, techno en Razzmatazz y bares
+barcelona;zona;Gràcia;Plaça del Sol;Ambiente local en plazas, de tranquilo a muy animado
+barcelona;zona;Eixample;Carrer d'Aribau;Bares de copas y discotecas en la zona de Aribau
+barcelona;zona;Zona Alta;Carrer de Tuset;La zona más exclusiva, gente local y discotecas top
+valencia;discoteca;High Cube;Marina;La mejor valorada en Yelp, junto al puerto
+valencia;discoteca;Radio City;El Carmen;Clásico del Carmen, buena música para bailar
+valencia;discoteca;Mya;Ciudad de las Artes y las Ciencias;Club de varias plantas en la Ciudad de las Artes
+valencia;discoteca;Havana The Cánovas Club;Plaza Cánovas;Club moderno en Cánovas, sesiones de tarde a madrugada
+valencia;discoteca;Rumbo 144;Avenida Blasco Ibáñez;De las mejores según muchos, cierra a las 7:30
+valencia;discoteca;Fox Congo;;Ambiente animado y acogedor (4,7)
+valencia;discoteca;L'Umbracle Terraza;Ciudad de las Artes y las Ciencias;Terraza-discoteca bajo L'Umbracle en verano
+valencia;bar;Jimmy Glass Jazz;El Carmen;Mítico bar de jazz con directo
+valencia;sala;Electropura;Ruzafa;Sala de conciertos y copas muy frecuentada en Ruzafa
+valencia;zona;Barrio del Carmen;Calle de Caballeros;La zona de copas con más éxito: Caballeros y plaza del Tossal
+valencia;zona;Ruzafa;Calle de Sueca;Barrio de moda: tapas, bares de copas y pubs
+valencia;zona;Zona universitaria;Avenida Blasco Ibáñez;Pubs y discotecas universitarias
+valencia;zona;Cánovas;Plaza Cánovas del Castillo;Pubs y discotecas de público pijo
+valencia;zona;Marina y Malvarrosa;Marina de València;Terrazas y clubs junto al mar
+sevilla;discoteca;Muelle de Nueva York;;Muy bien valorada por ambiente
+sevilla;discoteca;Lobby Club;;Local precioso con varios ambientes, más de 1.500 reseñas
+sevilla;discoteca;Vizzio;;Discoteca premium: comercial, latino y zonas VIP
+sevilla;discoteca;Obbio;Paseo de Colón;Discoteca del Paseo de Colón, buen ambiente
+sevilla;discoteca;Catedral Club;Alfalfa;Club junto a la plaza de la Alfalfa
+sevilla;bar;Sala Fun Club;Alameda;Para bailar y beber toda la noche
+sevilla;zona;Alfalfa;Calle Pérez Galdós;Calle Pérez Galdós llena de gente los viernes y sábados, ambiente universitario
+sevilla;zona;Alameda de Hércules;Alameda de Hércules;Zona alternativa y LGTBI+, bares de copas hasta las 3
+sevilla;zona;Calle Betis (Triana);Calle Betis;Junto al río, de bares tranquilos a pubs hasta el amanecer
+sevilla;zona;Triana;Calle San Jacinto;Tapas en San Jacinto y copas con vistas al Guadalquivir
+sevilla;zona;Paseo de Colón y Puerto de Cuba;Paseo de Cristóbal Colón;Discotecas y terrazas junto al río
+malaga;discoteca;Barsovia Club;Centro;R&B, afrobeat y electrónica en pleno centro (4,6)
+malaga;discoteca;Sala Gold;;5 estrellas: muy buen ambiente y buena música
+malaga;discoteca;Gallery Club;Centro;Ambiente internacional, 3 barras y 2 VIP
+malaga;discoteca;Cosa Nuestra;;Noches temáticas, DJs y música urbana
+malaga;discoteca;Mirror Málaga;;Ambiente joven y DJ todos los días
+malaga;discoteca;Sala Andén;Plaza de Uncibay;Una de las discotecas más famosas de Málaga
+malaga;bar;Metro Copas;Plaza Mitjana;De los bares de copas favoritos de los jóvenes
+malaga;bar;Tita Conchi;Plaza Mitjana;Bar de copas muy popular en Mitjana
+malaga;bar;Antojo;Soho;El pub del Soho que más está marcando la diferencia
+malaga;zona;Centro y Calle Larios;Calle Larios;El punto de arranque de la noche: Larios, Merced y Granada
+malaga;zona;Plaza Mitjana y Uncibay;Plaza Mitjana;Zona de pubs de 00:00 a 03:00
+malaga;zona;Calle Echegaray;Calle Echegaray;Calle en auge con locales nuevos
+malaga;zona;Soho;Calle Tomás Heredia;Barrio de arte urbano con pubs de moda
+malaga;zona;Los Álamos;Calle Los Álamos Torremolinos;Marcha de playa en verano entre Málaga y Torremolinos
+granada;discoteca;Mae West;;Icónica, tres salas: Bribón de la Habana, Molly Malone y Mae West
+granada;discoteca;Basaba;Camino de Ronda;De las más modernas de Granada
+granada;discoteca;Planta Baja;;Club de dos plantas con conciertos y DJs
+granada;bar;Babel;Calle Pedro Antonio de Alarcón;19 años en la marcha con música española
+granada;bar;Hannigan & Sons;Pedro Antonio de Alarcón;Clásico irlandés
+granada;bar;Loop Bar & Club;Pedro Antonio de Alarcón;Para bailar hasta tarde
+granada;zona;Pedro Antonio de Alarcón;Calle Pedro Antonio de Alarcón;La calle universitaria: decenas de bares, pubs y discotecas baratos
+granada;zona;Calle Elvira;Calle Elvira;Bares, teterías y pubs junto a Plaza Nueva
+granada;zona;Realejo;Campo del Príncipe;Bares de tapas y copas con ambiente local
+cordoba;discoteca;Sala M100;Polígono Chinales;De las salas más populares, gran espectáculo de luz y sonido
+cordoba;discoteca;Hangar Córdoba;;Sala de conciertos y discoteca, referente desde 2014
+cordoba;discoteca;Sojo Ribera;La Ribera;Cócteles, música y vistas al Puente Romano
+cordoba;discoteca;Marfil Córdoba;Calle Julio Pellicer;Ambiente festivo en el centro
+cordoba;discoteca;Ophium Nightclub;;700 m², dos salas y patio interior
+cordoba;bar;Jazz Café;Centro;Jazz y blues en directo
+cordoba;zona;Ciudad Jardín;Calle Previsión;Zona de pubs universitarios
+cordoba;zona;La Ribera;Paseo de la Ribera;Copas junto al Guadalquivir
+cordoba;zona;Centro (Tendillas);Plaza de las Tendillas;Bares y pubs del centro
+zaragoza;discoteca;GBN Lounge Club;Puerta del Carmen;De las salas con más ambiente de Zaragoza
+zaragoza;discoteca;Kenbo;Centro;Imprescindible en pleno centro, en el antiguo El Plata
+zaragoza;discoteca;Sala Oasis;;Sala de conciertos y discoteca de referencia
+zaragoza;discoteca;Parros;;Clásico desde 1999, reformado en 2024 con videomapping
+zaragoza;discoteca;Hide Club;;Discoteca muy recomendada
+zaragoza;discoteca;Supernova Club;;Fiesta para noctámbulos
+zaragoza;bar;Louisiana;Tomás Bretón;Bar rockero
+zaragoza;bar;Dan O'Hara;Tomás Bretón;Pub irlandés clásico
+zaragoza;bar;La Taberna del Blues;Tomás Bretón;Blues e intimismo
+zaragoza;zona;Tomás Bretón;Calle Tomás Bretón;Tabernas y bares rockeros
+zaragoza;zona;Plaza San Francisco;Plaza San Francisco;Universitarios y gente de todas las edades
+zaragoza;zona;Calle Doctor Cerrada;Calle Doctor Cerrada;Bares de ambiente LGTBI+
+zaragoza;zona;El Tubo;Calle Estébanes;Tapeo y bares junto al Pilar
+zaragoza;zona;La Magdalena;Plaza de la Magdalena;Zona alternativa de bares
+bilbao;discoteca;Sala Sonora;Erandio;De las discotecas más conocidas, en Astrabudua
+bilbao;discoteca;Fever Bilbao;Bolueta;Gran discoteca de las afueras
+bilbao;discoteca;Rock Star;Gran Vía;De los pocos clubs del centro
+bilbao;discoteca;Cotton Club;Indautxu;Mítico, con artistas en directo
+bilbao;discoteca;Oker;Indautxu;Para bailar hasta la madrugada
+bilbao;bar;Sir Winston Churchill;Indautxu;Pub muy valorado
+bilbao;zona;Licenciado Poza (Pozas);Calle Licenciado Poza;Poteo de pintxos y copas junto a San Mamés
+bilbao;zona;Casco Viejo;Plaza Nueva;Poteo clásico de pintxos y bares
+bilbao;zona;Indautxu y Galerías Urquijo;Calle Urquijo;Electrónica y comercial para todas las edades
+bilbao;zona;Albia y Mazarredo;Alameda de Mazarredo;Para seguir la noche de copas
+salamanca;discoteca;MOMA;Gran Vía;De las más populares, latino y kizomba
+salamanca;discoteca;Camelot;Calle Bordadores;Referente de la noche salmantina desde 1986
+salamanca;discoteca;Kandhavia;;Más de 30 años, fiestas universitarias e internacionales
+salamanca;bar;Barvel;Gran Vía;Coctelería-discoteca decorada de superhéroes Marvel
+salamanca;bar;Murphy's Law;Gran Vía;Pub clásico de Gran Vía
+salamanca;bar;Slainte;Calle Van Dyck;Cervezas artesanas
+salamanca;zona;Van Dyck;Calle Van Dyck;Zona de referencia de bares y tapas
+salamanca;zona;Gran Vía;Gran Vía Salamanca;Bares, pubs y discotecas
+salamanca;zona;Plaza Mayor;Plaza Mayor;Punto de encuentro y bares alrededor, ambiente Erasmus
+alicante;discoteca;Marmarela;Puerto Deportivo;Club muy concurrido en el puerto, junto al mar
+alicante;discoteca;Calle 365;Casco antiguo;Discoteca del Barrio
+alicante;discoteca;Magma Club;Playa de San Juan;Discoteca de la zona de San Juan
+alicante;discoteca;Pelican Experience;Playa de San Juan;Muy popular en San Juan
+alicante;discoteca;Monna Club;Calle Castaños;En la calle Castaños
+alicante;discoteca;Sala Stereo;Mercado Central;Sala junto al Mercado Central
+alicante;discoteca;Suquia Puerto;Puerto;Discoteca, coctelería y cachimbas en el puerto
+alicante;zona;El Barrio;Calle Labradores;Casco antiguo junto a San Nicolás: pubs y terrazas
+alicante;zona;Calle Castaños;Calle Castaños;Bares y discotecas en el centro
+alicante;zona;Puerto Deportivo;Paseo del Puerto;Clubs y terrazas junto al mar
+alicante;zona;Playa de San Juan;Avenida de Niza;Discotecas y terrazas de playa
+murcia;discoteca;Sala REM;;Clásico de la electrónica y el house
+murcia;discoteca;Sweet Murcia;;Latino, reguetón y comercial, ambiente joven
+murcia;discoteca;Sala Musik;;Tres salas distintas, conciertos y fiestas temáticas
+murcia;discoteca;Guru;Avenida Ciclista Mariano Rojas;Gran discoteca de la zona
+murcia;discoteca;Garaje Beat Club;Avenida Ciclista Mariano Rojas;Sala de conciertos y club
+murcia;bar;La Chica de Ayer;;Pub de los 80 y 90
+murcia;bar;Corleone;Calle San Lorenzo;Muy recomendado en el centro
+murcia;zona;Plaza de las Flores;Plaza de las Flores;Bares y terrazas en el centro
+murcia;zona;Pérez Casas;Calle Pérez Casas;Ambiente selecto de copas y terrazas
+murcia;zona;Ciclista Mariano Rojas;Avenida Ciclista Mariano Rojas;Las grandes discotecas de Murcia
+murcia;zona;Atalayas;Centro Comercial Atalayas;Zona de discotecas al este
+cadiz;discoteca;Momart Sala Club;Punta de San Felipe;De las más conocidas, terraza grande y DJs
+cadiz;discoteca;Sala Supersonic;Punta de San Felipe;Conciertos de rock, abierta de jueves a sábado hasta las 7
+cadiz;discoteca;La Posada de Babylonia;;Discoteca oriental para todas las edades
+cadiz;discoteca;Calachica;Punta de San Felipe;Enorme complejo con piscina, restaurante y discoteca
+cadiz;zona;Punta de San Felipe;Punta de San Felipe;Discotecas y terrazas con vistas al mar hasta tarde
+cadiz;zona;El Pópulo;Barrio del Pópulo;Bares pequeños y pubs con música, el ambiente más auténtico
+cadiz;zona;La Viña;Calle Virgen de la Palma;Bares de tapas y ambiente carnavalero
+marbella;discoteca;Pangea;Puerto Banús;Vistas al puerto, jet-set y terraza
+marbella;discoteca;Seven Marbella;Puerto Banús;Elegante y exclusiva, DJs conocidos
+marbella;discoteca;Olivia Valere;;Palacio árabe con varias pistas, un clásico
+marbella;discoteca;Mirage;Puerto Banús;800 m² con sonido Funktion One
+marbella;discoteca;Tibu Banús;Puerto Banús;Gogós y DJs, copas a precio razonable
+marbella;discoteca;Funky Buddha;Puerto Banús;Glamour pero relajado
+marbella;zona;Puerto Banús;Puerto Banús;La zona más exclusiva: clubs y yates
+marbella;zona;Casco Antiguo;Plaza de los Naranjos;Bares y terrazas con encanto
+magaluf;discoteca;BCM Mallorca;Avinguda de s'Olivera;De los clubs más grandes del mundo, 5.000 personas y DJs internacionales
+magaluf;discoteca;Boomerang Magaluf;Punta Ballena;Club clásico de Magaluf
+magaluf;discoteca;Carwash Magaluf;Punta Ballena;Fiesta de los 70-80-90 muy popular
+magaluf;discoteca;Tokio Joe's;Punta Ballena;De los principales clubs de R&B de Mallorca
+magaluf;zona;Punta Ballena;Carrer de Punta Ballena;La calle de fiesta de Magaluf: bares y clubs uno tras otro
+palma;discoteca;Lío Mallorca;Paseo Marítimo;Cabaret-club en el antiguo Tito's, el más famoso de Palma
+palma;discoteca;Bananas Palma;;Muy bien valorada para techno
+palma;discoteca;Kaelum Club;Avenida Gabriel Roca;Club del Paseo Marítimo
+palma;zona;Paseo Marítimo;Passeig Marítim;Las discotecas de Palma frente al puerto
+palma;zona;La Lonja;Plaça de la Llotja;Bares de copas y cócteles en el casco antiguo
+palma;zona;Santa Catalina;Carrer de la Fàbrica;Barrio de moda con bares y terrazas
+ibiza;discoteca;UNVRS;Ibiza;El primer hyperclub del mundo, número 1 de DJ Mag 2026
+ibiza;discoteca;Hï Ibiza;Platja d'en Bossa;Mejor club del mundo para DJ Mag 2022-2025
+ibiza;discoteca;Ushuaïa Ibiza;Platja d'en Bossa;Escenario al aire libre del día a la noche con superestrellas
+ibiza;discoteca;Pacha Ibiza;Ibiza;El club más icónico de la isla desde 1973
+ibiza;discoteca;Amnesia;Sant Rafel;50 aniversario en 2026, la cuna de la fiesta de la espuma
+ibiza;discoteca;DC10;Sant Jordi;Templo del underground junto al aeropuerto
+ibiza;zona;Platja d'en Bossa;Platja d'en Bossa;La zona de los superclubs y beach clubs
+ibiza;zona;Puerto de Ibiza;Carrer de la Verge;Bares, desfiles de fiestas y copas en el puerto
+ibiza;zona;West End (Sant Antoni);West End Sant Antoni;Bares y clubs sin parar en Sant Antoni
+las-palmas;discoteca;Moma Club;;Electrónica con DJs hasta el amanecer
+las-palmas;discoteca;Urban Disco;;Famosa por los Urban Erasmus Saturdays
+las-palmas;discoteca;Club Sotavento;Muelle Deportivo;Chic y renovada, junto a Alcaravaneras
+las-palmas;bar;Chester;Parque Santa Catalina;Bar de dos plantas con música comercial
+las-palmas;bar;Rampage;Triana;Patio exterior y gran interior
+las-palmas;bar;Cuasquías;;Conciertos de jazz, blues y rock en un edificio tradicional
+las-palmas;zona;Plaza de España (Mesa y López);Plaza de España;Animada hasta la mañana, donde empieza la noche
+las-palmas;zona;Santa Catalina;Parque Santa Catalina;Bares y discotecas junto al parque
+las-palmas;zona;Vegueta y Triana;Calle Mendizábal;Bares de copas en el casco histórico
+playa-de-las-americas;discoteca;Tramps Tenerife;Veronicas;Un fijo de la noche tinerfeña con muy buenas reseñas
+playa-de-las-americas;discoteca;Papagayo Beach Club;Playa de las Américas;Discoteca al aire libre, de las más bonitas de Tenerife
+playa-de-las-americas;discoteca;Linekers;Veronicas;Clásico del strip de Veronicas
+playa-de-las-americas;zona;Veronicas;Centro Comercial Veronicas;300 metros de bares y clubs, la zona de fiesta de Tenerife
+santa-cruz-de-tenerife;zona;La Noria;Calle de La Noria;Casas antiguas convertidas en pubs y clubs
+santa-cruz-de-tenerife;bar;Mojos y Mojitos;Calle de La Noria;Clásico de La Noria
+santa-cruz-de-tenerife;bar;Los Reunidos;Calle de La Noria;Muy popular en La Noria
+benidorm;discoteca;KM Playa;Paseo de Levante;Frente al mar en Levante, entrada gratis
+benidorm;discoteca;Penélope Beach Club;Paseo de Levante;La mejor en los rankings de discotecas
+benidorm;discoteca;KU Benidorm;Paseo de Levante;Discoteca de playa en Levante
+benidorm;discoteca;Hippodrome;Rincón de Loix;Clásico de la zona guiri
+benidorm;bar;Red Dog;Rincón de Loix;Bar famoso de la zona guiri
+benidorm;bar;The Heartbreak Rock Bar;Paseo de Levante;Rock en directo con decoración motera
+benidorm;zona;Zona Guiri (Rincón de Loix);Calle Gerona;Calles Gerona, Lepanto y Mallorca: bares y pubs británicos
+benidorm;zona;Paseo de Levante;Avenida de Alcoi;Discotecas de playa con entrada gratis
+lloret-de-mar;discoteca;Tropics Lloret;;Una de las más famosas, con 4 salas
+lloret-de-mar;discoteca;Disco Prive Lloret;;Tres salas: R&B, hip hop, reggaeton y dance
+lloret-de-mar;discoteca;Revolution Disco;;De las más grandes de la Costa Brava, 2.500 personas
+lloret-de-mar;zona;Carrer de la Riera;Carrer de la Riera;Bares, pubs y discotecas en el centro de Lloret
+salou;discoteca;Flash Back Salou;;La discoteca más completa de Salou
+salou;discoteca;Enjoy Salou;;De las más populares de la Costa Dorada
+salou;discoteca;Tropical Salou;;Mejor fiesta internacional
+salou;discoteca;City Hall Salou;;La más elegante
+salou;discoteca;La Cage Salou;;La mejor para gente joven
+salou;bar;Nikita;;Para empezar la noche
+salou;zona;Carrer de Barcelona;Carrer de Barcelona;La calle de los pubs y discotecas de Salou
+valladolid;discoteca;Coocon Club;;De los más activos, after muy reconocido
+valladolid;discoteca;Asklepios;Centro;Abierta hasta muy tarde en pleno centro
+valladolid;bar;Zerocafé;;Espacio alternativo con más de 1.200 reseñas casi perfectas
+valladolid;bar;Kafka;La Antigua;De los mejores bares de La Antigua
+valladolid;bar;El Farol;Plaza de Cantarranas;El bar más famoso de Cantarranas
+valladolid;zona;San Miguel;Plaza de San Miguel;La zona con más ambiente: pubs bien decorados
+valladolid;zona;Plaza Coca y Poniente;Plaza de Coca;La zona "cool", house en IT o Cameo
+valladolid;zona;Paraíso y La Antigua;Calle Paraíso;Cervecerías, cachis y chupiterías baratas
+valladolid;zona;Macías Picavea;Calle Macías Picavea;Ambiente joven y buenos precios
+vigo;discoteca;Rouge Vigo;;Entre las mejores discotecas de Vigo
+vigo;discoteca;Tokyo Disco;;Muy popular
+vigo;discoteca;Olimpo Vigo;;Discoteca destacada
+vigo;discoteca;Mondo Club;;Club muy conocido
+vigo;sala;La Iguana Club;Churruca;Mítica sala de conciertos de Churruca
+vigo;sala;La Fábrica de Chocolate;Churruca;Sala de conciertos y club
+vigo;zona;Churruca;Rúa Churruca;La zona alternativa: indie, funky y pop
+vigo;zona;Areal;Rúa do Areal;Pubs, discotecas y terrazas hasta la madrugada
+vigo;zona;Casco Vello;Praza da Constitución;Bares y tapas en el casco antiguo
+a-coruna;sala;Sala Pelícano;Cantones;Una de las salas de conciertos más espectaculares de Europa
+a-coruna;discoteca;Backstage Club;;Emblemática, ambiente LGTBI+, para acabar la noche
+a-coruna;bar;El Tranvía;Orzán;Pub con encanto, copas y buena música
+a-coruna;bar;Claro Boba!;Orzán;Espacio LGTBIQ+ con ganas de pasarlo bien
+a-coruna;bar;La Chela;;Copas y speakeasy con actuaciones
+a-coruna;zona;Orzán-Riazor;Rúa do Orzán;La zona de pubs por excelencia
+a-coruna;zona;La Marina y el puerto;Avenida da Mariña;Bares y terrazas junto al mar
+a-coruna;zona;Plaza de la Cormelana;Praza da Cormelana;Bares y ambiente de noche
+santiago-de-compostela;discoteca;Maycar;Ensanche;Abierta desde 1969, el clásico para acabar la noche
+santiago-de-compostela;sala;Sala Capitol;;Antiguo cine con conciertos y eventos
+santiago-de-compostela;bar;Modus Vivendi;Zona Vieja;Pub legendario con música en directo
+santiago-de-compostela;zona;Zona Vieja;Rúa do Franco;Pubs y bares alternativos llenos de universitarios
+santiago-de-compostela;zona;Zona Nueva (Santiago de Chile);Rúa de Santiago de Chile;Discotecas y locales comerciales del ensanche
+gijon;zona;Cimadevilla;Cimadevilla;Barrio alternativo y rockero de bares y pubs
+gijon;zona;Fomento y Marqués de San Esteban;Calle Marqués de San Esteban;Pubs y bares latinos
+gijon;zona;Playa de San Lorenzo;Paseo del Muro de San Lorenzo;Pubs y terrazas junto a la playa
+oviedo;zona;Calle Mon;Calle Mon;La zona de fiesta: bares, pubs y pequeñas discotecas hasta el amanecer
+oviedo;zona;Calle Gascona;Calle Gascona;Bulevar de la sidra, la calle con más ambiente
+oviedo;discoteca;Kapital Oviedo;Calle Cimadevilla;Discoteca en una de las calles de fiesta
+santander;zona;Cañadío;Plaza de Cañadío;El epicentro de la noche en Santander
+santander;zona;Río de la Pila;Calle Río de la Pila;Bares alternativos y pubs, mucha gente joven
+santander;bar;El Bogart;Calle Gómez Oreña;De los locales más emblemáticos de Cañadío
+santander;bar;El Bulín;Río de la Pila;Bar emblemático con gran música
+santander;discoteca;SET Disco;Río de la Pila;Discoteca de Río de la Pila
+san-sebastian;discoteca;Bataplan;Playa de La Concha;La discoteca más famosa de Donostia, sobre La Concha, house y electrónica
+san-sebastian;bar;Buga;Parte Vieja;Bar de pintxos que de noche se convierte en fiesta
+san-sebastian;bar;Arkaitzpe;Calle Mayor;De bar de pintxos a centro de la fiesta
+san-sebastian;zona;Parte Vieja;Calle 31 de Agosto;200 bares: pintxos que se vuelven copas
+san-sebastian;zona;Reyes Católicos;Calle Reyes Católicos;Bares de copas junto a la catedral del Buen Pastor
+san-sebastian;zona;Gros;Calle Zabaleta;Bares y ambiente surfero junto a la Zurriola
+pamplona;zona;Calle San Nicolás;Calle San Nicolás;21 bares en 190 metros, la mejor calle de tapeo de España
+pamplona;zona;Estafeta y Jarauta;Calle Estafeta;Bares y pubs para todos los gustos
+pamplona;zona;Casco Viejo;Plaza del Castillo;El centro de la noche pamplonica
+pamplona;zona;San Juan e Iturrama;Avenida de Bayona;Más pubs y discotecas para seguir
+pamplona;bar;La Cocina Vasca;Casco Viejo;Bar que se convierte en discoteca a partir de las 23:00
+logrono;zona;Calle Laurel;Calle Laurel;La senda de los elefantes: más de 60 bares en 200 metros
+logrono;zona;Calle San Juan;Calle San Juan;Pinchos y tardeo
+logrono;zona;Calle Mayor y Sagasta;Calle Marqués de San Nicolás;Las calles más marchosas para copas
+logrono;zona;Discotecas (Duquesa de la Victoria);Calle Duquesa de la Victoria;Donde están las discotecas
+burgos;zona;Las Llanas;Llana de Afuera;Junto a la catedral, la zona joven más animada
+burgos;zona;Las Bernardas;Calle San Juan;Disco-bares para cuando todo cierra
+burgos;bar;The Classic Lounge;Llana de Afuera;Ambiente acogedor y música en vivo
+leon;zona;Barrio Húmedo;Plaza de San Martín;La zona más emblemática: bares y ambiente desde las 22:00
+leon;zona;Barrio Romántico;Plaza Mayor;Bares de copas y pubs
+leon;bar;Glam Theatre;Barrio Húmedo;Discobar y bar de copas popular
+leon;bar;Moloko;Barrio Húmedo;Ideal para las primeras copas
+caceres;zona;La Madrila;Calle Doctor Fleming;La zona de marcha de Cáceres
+caceres;zona;Plaza Mayor;Plaza Mayor;Donde empieza la noche
+caceres;discoteca;Pantera Cáceres;Avenida de España;Discoteca del centro
+caceres;discoteca;Lambretta;Calle Venecia;Bien valorada (4,2)
+badajoz;discoteca;Aloha Badajoz;Recinto ferial;Discoteca al aire libre
+badajoz;discoteca;Atenea Sala Teatro;Casco antiguo;Famosa por sus cócteles y decoración griega
+badajoz;discoteca;Bambora;Calle Zurbarán;Pop, latino y electrónica
+badajoz;zona;Casco Antiguo;Plaza Alta;Pequeños pubs en el centro
+huelva;zona;Pescadería y Muñoz de Vargas;Avenida Pablo Rada;Las principales zonas de marcha
+huelva;zona;Plaza de la Merced;Plaza de la Merced;Zona universitaria de copas
+huelva;bar;Tagomago;;Pop y buen ambiente
+huelva;bar;Mandala;;Mirador-lounge referente del verano
+almeria;zona;Cuatro Calles;Calle Trajano;Bares y clubs: Trajano, González Egea, Padre Luque
+almeria;zona;Plaza Masnou;Plaza Masnou;Bares de copas del centro
+jaen;discoteca;Sala Kharma;;Discoteca, sala de conciertos, pub y terraza lounge
+jaen;bar;Chubby-Cheek;;Club de jazz mítico
+jaen;bar;Bundesbar;;La mejor cervecería de Jaén
+jaen;bar;Rock States Pub;;Bar rockero de la vieja escuela
+jaen;zona;Centro (Bulevar y Plaza de la Constitución);Plaza de la Constitución;Tapa gratis con la bebida y bares de copas
+jerez-de-la-frontera;bar;Kapote;Avenida Álvaro Domecq;Emblemático, decoración moderna y buena música
+jerez-de-la-frontera;bar;Lacre;Avenida Álvaro Domecq;Bar de copas emblemático
+jerez-de-la-frontera;bar;Öxi Guadalete;;Ambiente sofisticado y buena terraza
+jerez-de-la-frontera;discoteca;Bereber;;De las discotecas más conocidas de Jerez
+jerez-de-la-frontera;discoteca;Sala Stage;;Discoteca conocida
+jerez-de-la-frontera;zona;Avenida Álvaro Domecq;Avenida Álvaro Domecq;Bares de copas de moda
+jerez-de-la-frontera;zona;Centro (Plaza del Arenal);Plaza del Arenal;Pubs y bares del centro
+vitoria-gasteiz;zona;La Kutxi (Cuchillería);Calle Cuchillería;La calle más llena de la noche vitoriana
+vitoria-gasteiz;zona;La Cuesta y La Pinto;Calle Pintorería;Bares y pubs del Casco Viejo
+vitoria-gasteiz;zona;Centro (Dato y Virgen Blanca);Plaza de la Virgen Blanca;Bares de diseño más tranquilos
+vitoria-gasteiz;discoteca;Kubik;;Discoteca de Vitoria
+vitoria-gasteiz;discoteca;Mítika;;Discoteca de Vitoria
+vitoria-gasteiz;sala;Urban Rock Concept;;Sala de conciertos
+torremolinos;zona;La Nogalera;Plaza de La Nogalera;El corazón de la noche y referente LGTBI+, de 1:00 a 4:00 a tope
+torremolinos;discoteca;Parthenon;La Nogalera;Desde 1996, gran ambiente y shows
+torremolinos;discoteca;Aqua Club;;Discoteca y punto de encuentro
+benalmadena;zona;Puerto Marina;Puerto Marina;Bares y discotecas del puerto deportivo
+castellon;discoteca;Clams Disco;Acceso Sur;La discoteca por excelencia de Castellón
+castellon;zona;Centro histórico;Plaza Mayor;Tapas que se convierten en copas
+castellon;zona;Playa del Gurugú;Playa del Gurugú;Discotecas y beach clubs junto al mar
+peniscola;discoteca;La Fleca;;De las discotecas más grandes y populares de la zona
+girona;bar;Cu-Cut;Barri Vell;Local modernista desde 1983 con música alternativa
+girona;bar;Cua de Gall;;Los mejores cócteles con tapitas
+girona;bar;Gipsy;;Cócteles en un local con paredes de roca
+girona;discoteca;Lux Girona;;Discoteca de Girona
+girona;zona;Barri Vell;Barri Vell;Bares de copas y pubs con encanto
+girona;zona;La Devesa;Parc de la Devesa;Bares y pubs junto al parque
+lleida;bar;Sala Manolita;;Referente de la noche, decoración años 70
+lleida;discoteca;Baba Room;;Discoteca de Lleida
+albacete;zona;La Zona;Calle Tejares;La mayor zona de fiesta de Castilla-La Mancha, pubs hasta las 6
+albacete;zona;Calle Tejares;Calle Tejares;Decenas de pubs y bares, marcha de los más jóvenes
+toledo;zona;Calle Alfileritos;Calle Alfileritos;Bares y pubs junto a Zocodover, jueves universitarios
+toledo;zona;Santa Teresa;Avenida de Europa;Zona moderna con bares y restaurantes
+toledo;sala;Círculo de Arte;;Música en vivo en una antigua iglesia
+ciudad-real;bar;Compay Disco-Pub;;Disco-pub para bailar
+cuenca;bar;La Edad de Oro;;Bar con decoración peculiar y música de los 70 y 80 a buen precio
+cuenca;bar;Caótico Social Club;;Club para bailar
+soria;zona;La Zona (Rota de Calatañazor);Calle Rota de Calatañazor;La zona de copas junto a la Plaza de Toros
+soria;zona;Real y Zapatería;Calle Zapatería;Bares alternativos de rock a salsa
+segovia;zona;Casco Antiguo;Plaza Mayor;Bares castellanos y discotecas modernas
+segovia;bar;La Guagua;;Referente de la noche, gran oferta musical
+palencia;zona;Zona Vieja;Calle Mayor Antigua;La zona de copas más animada
+palencia;bar;Bar México;Calle Mayor Antigua;La mejor chupitería de Palencia
+palencia;bar;Disco Bar Merlín;Zona Vieja;Discobar de la Zona Vieja
+avila;bar;La Oca Cocktail Bar;;De los afterworks mejor valorados
+avila;bar;Café Teatro Delicatessen;;Decoración original y copas a buen precio
+huesca;bar;Monasterio;Plaza de San Lorenzo;Bar de copas que se llena el finde, 2x1
+huesca;bar;Sala Street Theatre;Centro;De los discobares más famosos
+huesca;bar;Tarari Disco;Plaza de los Fueros;El bar de copas con mejor ambiente
+huesca;bar;Warhol Pop;;Discobar con música para todos
+huesca;sala;Sala Edén;;Sala de conciertos icónica con más de 20 años
+huesca;zona;Plaza de los Fueros;Plaza de los Fueros;Una de las zonas de copas de Huesca
+lugo;zona;Praza do Campo y Rúa Nova;Rúa Nova;Vinos y tapas gratis dentro de la muralla
+lugo;zona;Campo Castelo;Campo Castelo;Terrazas y bares de todo tipo
+lugo;zona;Acea de Olga;Rúa Acea de Olga;Zona universitaria con locales hasta el amanecer
+ourense;zona;Os Viños;Rúa Lepanto;La zona de tapas y vinos por excelencia
+elche;discoteca;Divine Club;Centro;De las discotecas más conocidas del centro
+elche;zona;El Raval;Carrer de Sant Josep;Bares y teterías que de noche son pubs
+elche;zona;Polígono de Altabix;Polígono Industrial Altabix;La zona de clubs por excelencia
+cartagena;bar;The Superbar;Centro;Bar de tardeo de moda en calle peatonal
+cartagena;bar;Cervecería Principal;Casco antiguo;Ambiente animado en el casco antiguo
+cartagena;bar;Al Borak Afterwork & Gin Club;Centro;Copas relajadas con terraza
+cartagena;zona;Calle del Carmen y Mayor;Calle Mayor;Bares y tabernas del casco antiguo
+cartagena;zona;Paseo Alfonso XIII;Paseo Alfonso XIII;Ocio y bares
+pontevedra;zona;Paio Gómez Charino;Rúa Paio Gómez Charino;La calle principal de copas, junto a Cinco Rúas
+pontevedra;zona;Praza do Teucro;Praza do Teucro;Plaza peatonal con bares y música en directo
+pontevedra;bar;Ítaca Copas;Zona Monumental;Disco-pub con DJ
+pontevedra;bar;Al-Lio Coctel Bar;Zona Monumental;Cócteles de calidad
+gandia;discoteca;Falkata;Playa de Gandía;La más grande de la playa: 10.000 m² y seis escenarios
+gandia;discoteca;Bacarrá;Carrer del Navegant;De las más famosas y antiguas, dos plantas y gran terraza
+gandia;discoteca;Cocoloco;Playa de Gandía;22 años reuniendo a más de 2.000 personas cada noche
+gandia;discoteca;Eclipse Gandía;Playa de Gandía;Para mayores de 25
+gandia;zona;Gandía Playa;Passeig Marítim Neptú;Discotecas y chiringuitos con DJ en verano
+sitges;zona;Calle del Pecado;Carrer del Primer de Maig;La calle de la noche de Sitges: bares y discotecas
+sitges;bar;Pachito Sitges;Carrer del Primer de Maig;Desde 1969, referente de la noche
+sitges;bar;Las Vegas Sitges;Carrer del Primer de Maig;Histórico desde los 50
+sitges;bar;Everlasting Love;Carrer del Primer de Maig;Copas y baile en la calle del Pecado
+maspalomas;zona;Yumbo Centrum;Yumbo Centrum;De centro comercial a epicentro LGTBI+ con más de 30 locales
+maspalomas;zona;Kasbah;Centro Comercial Kasbah;Discotecas, pubs y terrazas al aire libre
+maspalomas;discoteca;Pachá Gran Canaria;Playa del Inglés;Superclub con DJs internacionales
+puerto-del-carmen;discoteca;Lanzarote Palace;Varadero;Se llena a partir de la 1
+puerto-del-carmen;discoteca;Ibiza Disco Lanzarote;Avenida de las Playas;De las discotecas más populares de Lanzarote
+puerto-del-carmen;zona;Avenida de las Playas;Avenida de las Playas;Bares, clubs y música en directo junto al mar
+corralejo;discoteca;Loft Fuerteventura;Centro Comercial Atlántico;Frente a la playa, abierta todos los días hasta las 5:30
+corralejo;zona;Calle Principal de Corralejo;Avenida Nuestra Señora del Carmen;Bares y discotecas de Corralejo
+merida;bar;Barocco Copas;Plaza de la Constitución;Pub de copas abierto hasta las 4:30
+merida;discoteca;MalaMadre The Club;;Discoteca muy popular (4,2)
+merida;bar;Mamba Mérida;Plaza de España;Copas hasta las 4:30
+ceuta;zona;Parque Marítimo y Puerto Deportivo;Puerto Deportivo de Ceuta;Restaurantes, pubs y discotecas con ambiente el finde
+conil-de-la-frontera;bar;Vintage The Music Bar;Plaza de la Constitución;Dos plantas con terraza y decoración retro
+conil-de-la-frontera;bar;Palo Palo;Plaza de España;Disco-pub muy animado
+conil-de-la-frontera;discoteca;El Cortijo El Palmar;El Palmar;Discoteca al aire libre de verano hasta las 6
+conil-de-la-frontera;discoteca;Ícaro Conil;;Dos salas: latino y techno-house
+conil-de-la-frontera;zona;Centro de Conil;Plaza de España;Pubs y bares de verano
+tarifa;bar;Café Central;Casco antiguo;El punto de encuentro, gran terraza
+tarifa;bar;Bar Almedina;Castillo de Guzmán el Bueno;Bar precioso sobre la muralla
+tarifa;discoteca;Café del Mar Tarifa;;Electrónica y house toda la noche
+tarifa;zona;Casco antiguo de Tarifa;Calle Sancho IV El Bravo;Bares, pubs y ambiente surfero
+alaior;discoteca;Cova d'en Xoroi;Cala en Porter;Discoteca en una cueva en el acantilado, la más famosa de Menorca
+mahon;bar;Akelarre Jazz & Dance Club;Moll de Ponent;Música en directo en edificio histórico
+mahon;zona;Moll de Llevant;Moll de Llevant;Bares y restaurantes en el puerto
+ciutadella;bar;Jazzbah;Puerto de Ciutadella;Sala de referencia con DJs y fiestas temáticas
+ciutadella;discoteca;Kopas Club;Puerto de Ciutadella;Club de varios niveles con terrazas
+ciutadella;zona;Puerto de Ciutadella;Port de Ciutadella;Bares y pequeños clubs en el puerto
+tarragona;discoteca;Tótem;Rambla Pau Casals;De las mejores discotecas, público de más de 30
+tarragona;bar;HOTO Lounge Club;Carrer Major;Cócteles y shisha
+tarragona;bar;Sala el Cau;Baixada de la Misericòrdia;Dentro de una cueva del siglo I
+tarragona;bar;La Isla del Mojito;Port Esportiu;Salsa, mojitos y conciertos en la marina
+tarragona;zona;Part Alta;Carrer Major;Bares de copas en el casco antiguo
+tarragona;zona;Port Esportiu;Port Esportiu de Tarragona;Bares de copas en el puerto
+teruel;bar;La Torre Pub;Calle del Salvador;Techo de cristal con la torre mudéjar dentro
+teruel;bar;Scream Pub;Plaza Bolamar;Pub del centro histórico
+teruel;zona;Calle Óvalo;Paseo del Óvalo;Bares y tapas
+zamora;zona;Calle de los Herreros;Calle de los Herreros;Junto a la Plaza Mayor, famosa por sus bares de copas
+nerja;zona;Plaza Tutti Frutti;Plaza Tutti Frutti;El epicentro de la noche: pubs y discotecas hasta las 7
+fuengirola;zona;Calle Moncayo;Calle Moncayo;La zona de pubs de Fuengirola
+fuengirola;zona;Puerto Deportivo de Fuengirola;Puerto Deportivo de Fuengirola;Ambiente más elegante

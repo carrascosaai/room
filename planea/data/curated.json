@@ -1,0 +1,4252 @@
+[
+ {
+  "id": "cur:madrid:teatro-kapital",
+  "q": "Teatro Kapital, Madrid",
+  "fallback": "Calle de Atocha, Madrid",
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Teatro Kapital",
+  "zone": "Calle de Atocha",
+  "note": "7 plantas con ambientes distintos, la macrodiscoteca más famosa de Madrid"
+ },
+ {
+  "id": "cur:madrid:fitz-club",
+  "q": "Fitz Club, Madrid",
+  "fallback": null,
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Fitz Club",
+  "zone": "",
+  "note": "Muy comentada en TikTok: buen ambiente, entrada cara el sábado"
+ },
+ {
+  "id": "cur:madrid:vandido",
+  "q": "Vandido, Madrid",
+  "fallback": "Barrio de Salamanca, Madrid",
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Vandido",
+  "zone": "Barrio de Salamanca",
+  "note": "Club exclusivo con dos salas: reggaeton/comercial y Golden Room de house"
+ },
+ {
+  "id": "cur:madrid:rubicon",
+  "q": "Rubicon, Madrid",
+  "fallback": "Recoletos, Madrid",
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Rubicon",
+  "zone": "Recoletos",
+  "note": "Reggaeton y éxitos con pantallas gigantes, de las salas con más energía"
+ },
+ {
+  "id": "cur:madrid:istar",
+  "q": "Istar, Madrid",
+  "fallback": null,
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Istar",
+  "zone": "",
+  "note": "Templo del afrohouse en Madrid, ambiente internacional y DJs reconocidos"
+ },
+ {
+  "id": "cur:madrid:barranco-club",
+  "q": "Barranco Club, Madrid",
+  "fallback": null,
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Barranco Club",
+  "zone": "",
+  "note": "La mejor discoteca latina según TikTok, gratis antes de las 00:30"
+ },
+ {
+  "id": "cur:madrid:b12",
+  "q": "B12, Madrid",
+  "fallback": "Calle de Joaquín Costa, Madrid",
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "B12",
+  "zone": "Calle de Joaquín Costa",
+  "note": "Famosa por los chupitos y los donetes a las 3 de la mañana"
+ },
+ {
+  "id": "cur:madrid:joy-eslava",
+  "q": "Joy Eslava, Madrid",
+  "fallback": "Sol, Madrid",
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Joy Eslava",
+  "zone": "Sol",
+  "note": "Clásico de Sol abierto todos los días, en un antiguo teatro"
+ },
+ {
+  "id": "cur:madrid:medias-puri",
+  "q": "Medias Puri, Madrid",
+  "fallback": "Tirso de Molina, Madrid",
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Medias Puri",
+  "zone": "Tirso de Molina",
+  "note": "Discoteca-espectáculo con shows, muy de moda en redes"
+ },
+ {
+  "id": "cur:madrid:fabrik",
+  "q": "Fabrik, Madrid",
+  "fallback": "Humanes de Madrid, Madrid",
+  "city": "madrid",
+  "type": "discoteca",
+  "name": "Fabrik",
+  "zone": "Humanes de Madrid",
+  "note": "La catedral del techno de Madrid, macrofiestas y DJs internacionales"
+ },
+ {
+  "id": "cur:madrid:cafe-la-palma",
+  "q": "Café La Palma, Madrid",
+  "fallback": "Malasaña, Madrid",
+  "city": "madrid",
+  "type": "bar",
+  "name": "Café La Palma",
+  "zone": "Malasaña",
+  "note": "Clásico de Malasaña con conciertos y buen ambiente"
+ },
+ {
+  "id": "cur:madrid:tupperware",
+  "q": "Tupperware, Madrid",
+  "fallback": "Malasaña, Madrid",
+  "city": "madrid",
+  "type": "bar",
+  "name": "Tupperware",
+  "zone": "Malasaña",
+  "note": "Bar alternativo de indie, rock y pop ochentero, barato y sin pretensiones"
+ },
+ {
+  "id": "cur:madrid:1862-dry-bar",
+  "q": "1862 Dry Bar, Madrid",
+  "fallback": "Malasaña, Madrid",
+  "city": "madrid",
+  "type": "bar",
+  "name": "1862 Dry Bar",
+  "zone": "Malasaña",
+  "note": "Cócteles clásicos bien hechos a precio razonable"
+ },
+ {
+  "id": "cur:madrid:kinki-cocktail-bar",
+  "q": "Kinki Cocktail Bar, Madrid",
+  "fallback": "Malasaña, Madrid",
+  "city": "madrid",
+  "type": "bar",
+  "name": "Kinki Cocktail Bar",
+  "zone": "Malasaña",
+  "note": "Coctelería con 5 estrellas en reseñas"
+ },
+ {
+  "id": "cur:madrid:rockade",
+  "q": "Rockade, Madrid",
+  "fallback": "Malasaña, Madrid",
+  "city": "madrid",
+  "type": "bar",
+  "name": "Rockade",
+  "zone": "Malasaña",
+  "note": "Bar de rock muy bien valorado (4,8)"
+ },
+ {
+  "id": "cur:madrid:super-pop-bar",
+  "q": "Súper Pop Bar, Madrid",
+  "fallback": "Chueca, Madrid",
+  "city": "madrid",
+  "type": "bar",
+  "name": "Súper Pop Bar",
+  "zone": "Chueca",
+  "note": "Pop a tope y muy buenas reseñas en Chueca"
+ },
+ {
+  "id": "cur:madrid:baranoa",
+  "q": "Baranoa, Madrid",
+  "fallback": "Chueca, Madrid",
+  "city": "madrid",
+  "type": "bar",
+  "name": "Baranoa",
+  "zone": "Chueca",
+  "note": "Variedad de ritmos y copas en Chueca"
+ },
+ {
+  "id": "cur:madrid:zona-malasana",
+  "q": "Plaza del Dos de Mayo, Madrid",
+  "fallback": "Plaza del Dos de Mayo, Madrid",
+  "city": "madrid",
+  "type": "zona",
+  "name": "Malasaña",
+  "zone": "Plaza del Dos de Mayo",
+  "note": "Cuna de la Movida: bares alternativos, música en directo y pubs"
+ },
+ {
+  "id": "cur:madrid:zona-chueca",
+  "q": "Plaza de Chueca, Madrid",
+  "fallback": "Plaza de Chueca, Madrid",
+  "city": "madrid",
+  "type": "zona",
+  "name": "Chueca",
+  "zone": "Plaza de Chueca",
+  "note": "Referente LGTBI+, pubs, terrazas y cócteles"
+ },
+ {
+  "id": "cur:madrid:zona-gran-via-y-sol",
+  "q": "Puerta del Sol, Madrid",
+  "fallback": "Puerta del Sol, Madrid",
+  "city": "madrid",
+  "type": "zona",
+  "name": "Gran Vía y Sol",
+  "zone": "Puerta del Sol",
+  "note": "Bares y discotecas para todos los estilos, la calle llena toda la noche"
+ },
+ {
+  "id": "cur:madrid:zona-huertas-y-santa-ana",
+  "q": "Plaza de Santa Ana, Madrid",
+  "fallback": "Plaza de Santa Ana, Madrid",
+  "city": "madrid",
+  "type": "zona",
+  "name": "Huertas y Santa Ana",
+  "zone": "Plaza de Santa Ana",
+  "note": "Bares y pubs irlandeses, público algo más mayor"
+ },
+ {
+  "id": "cur:madrid:zona-moncloa-arguelles",
+  "q": "Calle de Fernando el Católico, Madrid",
+  "fallback": "Calle de Fernando el Católico, Madrid",
+  "city": "madrid",
+  "type": "zona",
+  "name": "Moncloa-Argüelles",
+  "zone": "Calle de Fernando el Católico",
+  "note": "Zona universitaria: chupitos y copas baratas sin entrada"
+ },
+ {
+  "id": "cur:madrid:zona-barrio-de-salamanca",
+  "q": "Calle de Jorge Juan, Madrid",
+  "fallback": "Calle de Jorge Juan, Madrid",
+  "city": "madrid",
+  "type": "zona",
+  "name": "Barrio de Salamanca",
+  "zone": "Calle de Jorge Juan",
+  "note": "La zona \"VIP\": locales exclusivos y famosos"
+ },
+ {
+  "id": "cur:madrid:zona-la-latina",
+  "q": "Cava Baja, Madrid",
+  "fallback": "Cava Baja, Madrid",
+  "city": "madrid",
+  "type": "zona",
+  "name": "La Latina",
+  "zone": "Cava Baja",
+  "note": "Tapas, vermut y terrazas que acaban en copas"
+ },
+ {
+  "id": "cur:barcelona:opium-barcelona",
+  "q": "Opium Barcelona, Barcelona",
+  "fallback": "Port Olímpic, Barcelona",
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Opium Barcelona",
+  "zone": "Port Olímpic",
+  "note": "Club frente al mar con DJs internacionales y terraza de playa"
+ },
+ {
+  "id": "cur:barcelona:pacha-barcelona",
+  "q": "Pacha Barcelona, Barcelona",
+  "fallback": "Port Olímpic, Barcelona",
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Pacha Barcelona",
+  "zone": "Port Olímpic",
+  "note": "Club de playa del Port Olímpic, ambiente Ibiza"
+ },
+ {
+  "id": "cur:barcelona:shoko-barcelona",
+  "q": "Shôko Barcelona, Barcelona",
+  "fallback": "Port Olímpic, Barcelona",
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Shôko Barcelona",
+  "zone": "Port Olímpic",
+  "note": "Club asiático en primera línea de playa"
+ },
+ {
+  "id": "cur:barcelona:catwalk",
+  "q": "Catwalk, Barcelona",
+  "fallback": "Port Olímpic, Barcelona",
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Catwalk",
+  "zone": "Port Olímpic",
+  "note": "Hip hop y comercial junto a la playa"
+ },
+ {
+  "id": "cur:barcelona:twenties-barcelona",
+  "q": "Twenties Barcelona, Barcelona",
+  "fallback": null,
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Twenties Barcelona",
+  "zone": "",
+  "note": "La favorita de estudiantes y jóvenes, producción LED espectacular"
+ },
+ {
+  "id": "cur:barcelona:boris-barcelona",
+  "q": "Boris Barcelona, Barcelona",
+  "fallback": null,
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Boris Barcelona",
+  "zone": "",
+  "note": "Ambiente selecto con zonas privadas y éxitos del momento"
+ },
+ {
+  "id": "cur:barcelona:razzmatazz",
+  "q": "Razzmatazz, Barcelona",
+  "fallback": "Poblenou, Barcelona",
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Razzmatazz",
+  "zone": "Poblenou",
+  "note": "Cinco salas: indie, techno y conciertos, un clásico absoluto"
+ },
+ {
+  "id": "cur:barcelona:sala-apolo",
+  "q": "Sala Apolo, Barcelona",
+  "fallback": "Poble-sec, Barcelona",
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Sala Apolo",
+  "zone": "Poble-sec",
+  "note": "Sala histórica con fiestas como Nasty Mondays"
+ },
+ {
+  "id": "cur:barcelona:bling-bling",
+  "q": "Bling Bling, Barcelona",
+  "fallback": "Zona Alta, Barcelona",
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Bling Bling",
+  "zone": "Zona Alta",
+  "note": "Club pijo de la zona alta, muy de moda"
+ },
+ {
+  "id": "cur:barcelona:sutton-club",
+  "q": "Sutton Club, Barcelona",
+  "fallback": "Zona Alta, Barcelona",
+  "city": "barcelona",
+  "type": "discoteca",
+  "name": "Sutton Club",
+  "zone": "Zona Alta",
+  "note": "Club elegante de la zona alta, reggaeton y comercial"
+ },
+ {
+  "id": "cur:barcelona:paradiso",
+  "q": "Paradiso, Barcelona",
+  "fallback": "El Born, Barcelona",
+  "city": "barcelona",
+  "type": "bar",
+  "name": "Paradiso",
+  "zone": "El Born",
+  "note": "Speakeasy detrás de una nevera, de los mejores bares del mundo"
+ },
+ {
+  "id": "cur:barcelona:sor-rita",
+  "q": "Sor Rita, Barcelona",
+  "fallback": "Barri Gòtic, Barcelona",
+  "city": "barcelona",
+  "type": "bar",
+  "name": "Sor Rita",
+  "zone": "Barri Gòtic",
+  "note": "Bar kitsch muy instagrameable"
+ },
+ {
+  "id": "cur:barcelona:marula-cafe",
+  "q": "Marula Café, Barcelona",
+  "fallback": "Barri Gòtic, Barcelona",
+  "city": "barcelona",
+  "type": "bar",
+  "name": "Marula Café",
+  "zone": "Barri Gòtic",
+  "note": "Funk y soul hasta tarde"
+ },
+ {
+  "id": "cur:barcelona:zona-port-olimpic",
+  "q": "Port Olímpic, Barcelona",
+  "fallback": "Port Olímpic, Barcelona",
+  "city": "barcelona",
+  "type": "zona",
+  "name": "Port Olímpic",
+  "zone": "Port Olímpic",
+  "note": "Discotecas a pie de playa: Opium, Pacha, Shôko, Catwalk"
+ },
+ {
+  "id": "cur:barcelona:zona-el-born-y-gotic",
+  "q": "Passeig del Born, Barcelona",
+  "fallback": "Passeig del Born, Barcelona",
+  "city": "barcelona",
+  "type": "zona",
+  "name": "El Born y Gòtic",
+  "zone": "Passeig del Born",
+  "note": "Coctelerías de autor, jazz y bares con historia"
+ },
+ {
+  "id": "cur:barcelona:zona-poblenou",
+  "q": "Rambla del Poblenou, Barcelona",
+  "fallback": "Rambla del Poblenou, Barcelona",
+  "city": "barcelona",
+  "type": "zona",
+  "name": "Poblenou",
+  "zone": "Rambla del Poblenou",
+  "note": "Barrio de moda, techno en Razzmatazz y bares"
+ },
+ {
+  "id": "cur:barcelona:zona-gracia",
+  "q": "Plaça del Sol, Barcelona",
+  "fallback": "Plaça del Sol, Barcelona",
+  "city": "barcelona",
+  "type": "zona",
+  "name": "Gràcia",
+  "zone": "Plaça del Sol",
+  "note": "Ambiente local en plazas, de tranquilo a muy animado"
+ },
+ {
+  "id": "cur:barcelona:zona-eixample",
+  "q": "Carrer d'Aribau, Barcelona",
+  "fallback": "Carrer d'Aribau, Barcelona",
+  "city": "barcelona",
+  "type": "zona",
+  "name": "Eixample",
+  "zone": "Carrer d'Aribau",
+  "note": "Bares de copas y discotecas en la zona de Aribau"
+ },
+ {
+  "id": "cur:barcelona:zona-zona-alta",
+  "q": "Carrer de Tuset, Barcelona",
+  "fallback": "Carrer de Tuset, Barcelona",
+  "city": "barcelona",
+  "type": "zona",
+  "name": "Zona Alta",
+  "zone": "Carrer de Tuset",
+  "note": "La zona más exclusiva, gente local y discotecas top"
+ },
+ {
+  "id": "cur:valencia:high-cube",
+  "q": "High Cube, Valencia",
+  "fallback": "Marina, Valencia",
+  "city": "valencia",
+  "type": "discoteca",
+  "name": "High Cube",
+  "zone": "Marina",
+  "note": "La mejor valorada en Yelp, junto al puerto"
+ },
+ {
+  "id": "cur:valencia:radio-city",
+  "q": "Radio City, Valencia",
+  "fallback": "El Carmen, Valencia",
+  "city": "valencia",
+  "type": "discoteca",
+  "name": "Radio City",
+  "zone": "El Carmen",
+  "note": "Clásico del Carmen, buena música para bailar"
+ },
+ {
+  "id": "cur:valencia:mya",
+  "q": "Mya, Valencia",
+  "fallback": "Ciudad de las Artes y las Ciencias, Valencia",
+  "city": "valencia",
+  "type": "discoteca",
+  "name": "Mya",
+  "zone": "Ciudad de las Artes y las Ciencias",
+  "note": "Club de varias plantas en la Ciudad de las Artes"
+ },
+ {
+  "id": "cur:valencia:havana-the-canovas-club",
+  "q": "Havana The Cánovas Club, Valencia",
+  "fallback": "Plaza Cánovas, Valencia",
+  "city": "valencia",
+  "type": "discoteca",
+  "name": "Havana The Cánovas Club",
+  "zone": "Plaza Cánovas",
+  "note": "Club moderno en Cánovas, sesiones de tarde a madrugada"
+ },
+ {
+  "id": "cur:valencia:rumbo-144",
+  "q": "Rumbo 144, Valencia",
+  "fallback": "Avenida Blasco Ibáñez, Valencia",
+  "city": "valencia",
+  "type": "discoteca",
+  "name": "Rumbo 144",
+  "zone": "Avenida Blasco Ibáñez",
+  "note": "De las mejores según muchos, cierra a las 7:30"
+ },
+ {
+  "id": "cur:valencia:fox-congo",
+  "q": "Fox Congo, Valencia",
+  "fallback": null,
+  "city": "valencia",
+  "type": "discoteca",
+  "name": "Fox Congo",
+  "zone": "",
+  "note": "Ambiente animado y acogedor (4,7)"
+ },
+ {
+  "id": "cur:valencia:l-umbracle-terraza",
+  "q": "L'Umbracle Terraza, Valencia",
+  "fallback": "Ciudad de las Artes y las Ciencias, Valencia",
+  "city": "valencia",
+  "type": "discoteca",
+  "name": "L'Umbracle Terraza",
+  "zone": "Ciudad de las Artes y las Ciencias",
+  "note": "Terraza-discoteca bajo L'Umbracle en verano"
+ },
+ {
+  "id": "cur:valencia:jimmy-glass-jazz",
+  "q": "Jimmy Glass Jazz, Valencia",
+  "fallback": "El Carmen, Valencia",
+  "city": "valencia",
+  "type": "bar",
+  "name": "Jimmy Glass Jazz",
+  "zone": "El Carmen",
+  "note": "Mítico bar de jazz con directo"
+ },
+ {
+  "id": "cur:valencia:electropura",
+  "q": "Electropura, Valencia",
+  "fallback": "Ruzafa, Valencia",
+  "city": "valencia",
+  "type": "sala",
+  "name": "Electropura",
+  "zone": "Ruzafa",
+  "note": "Sala de conciertos y copas muy frecuentada en Ruzafa"
+ },
+ {
+  "id": "cur:valencia:zona-barrio-del-carmen",
+  "q": "Calle de Caballeros, Valencia",
+  "fallback": "Calle de Caballeros, Valencia",
+  "city": "valencia",
+  "type": "zona",
+  "name": "Barrio del Carmen",
+  "zone": "Calle de Caballeros",
+  "note": "La zona de copas con más éxito: Caballeros y plaza del Tossal"
+ },
+ {
+  "id": "cur:valencia:zona-ruzafa",
+  "q": "Calle de Sueca, Valencia",
+  "fallback": "Calle de Sueca, Valencia",
+  "city": "valencia",
+  "type": "zona",
+  "name": "Ruzafa",
+  "zone": "Calle de Sueca",
+  "note": "Barrio de moda: tapas, bares de copas y pubs"
+ },
+ {
+  "id": "cur:valencia:zona-zona-universitaria",
+  "q": "Avenida Blasco Ibáñez, Valencia",
+  "fallback": "Avenida Blasco Ibáñez, Valencia",
+  "city": "valencia",
+  "type": "zona",
+  "name": "Zona universitaria",
+  "zone": "Avenida Blasco Ibáñez",
+  "note": "Pubs y discotecas universitarias"
+ },
+ {
+  "id": "cur:valencia:zona-canovas",
+  "q": "Plaza Cánovas del Castillo, Valencia",
+  "fallback": "Plaza Cánovas del Castillo, Valencia",
+  "city": "valencia",
+  "type": "zona",
+  "name": "Cánovas",
+  "zone": "Plaza Cánovas del Castillo",
+  "note": "Pubs y discotecas de público pijo"
+ },
+ {
+  "id": "cur:valencia:zona-marina-y-malvarrosa",
+  "q": "Marina de València, Valencia",
+  "fallback": "Marina de València, Valencia",
+  "city": "valencia",
+  "type": "zona",
+  "name": "Marina y Malvarrosa",
+  "zone": "Marina de València",
+  "note": "Terrazas y clubs junto al mar"
+ },
+ {
+  "id": "cur:sevilla:muelle-de-nueva-york",
+  "q": "Muelle de Nueva York, Sevilla",
+  "fallback": null,
+  "city": "sevilla",
+  "type": "discoteca",
+  "name": "Muelle de Nueva York",
+  "zone": "",
+  "note": "Muy bien valorada por ambiente"
+ },
+ {
+  "id": "cur:sevilla:lobby-club",
+  "q": "Lobby Club, Sevilla",
+  "fallback": null,
+  "city": "sevilla",
+  "type": "discoteca",
+  "name": "Lobby Club",
+  "zone": "",
+  "note": "Local precioso con varios ambientes, más de 1.500 reseñas"
+ },
+ {
+  "id": "cur:sevilla:vizzio",
+  "q": "Vizzio, Sevilla",
+  "fallback": null,
+  "city": "sevilla",
+  "type": "discoteca",
+  "name": "Vizzio",
+  "zone": "",
+  "note": "Discoteca premium: comercial, latino y zonas VIP"
+ },
+ {
+  "id": "cur:sevilla:obbio",
+  "q": "Obbio, Sevilla",
+  "fallback": "Paseo de Colón, Sevilla",
+  "city": "sevilla",
+  "type": "discoteca",
+  "name": "Obbio",
+  "zone": "Paseo de Colón",
+  "note": "Discoteca del Paseo de Colón, buen ambiente"
+ },
+ {
+  "id": "cur:sevilla:catedral-club",
+  "q": "Catedral Club, Sevilla",
+  "fallback": "Alfalfa, Sevilla",
+  "city": "sevilla",
+  "type": "discoteca",
+  "name": "Catedral Club",
+  "zone": "Alfalfa",
+  "note": "Club junto a la plaza de la Alfalfa"
+ },
+ {
+  "id": "cur:sevilla:sala-fun-club",
+  "q": "Sala Fun Club, Sevilla",
+  "fallback": "Alameda, Sevilla",
+  "city": "sevilla",
+  "type": "bar",
+  "name": "Sala Fun Club",
+  "zone": "Alameda",
+  "note": "Para bailar y beber toda la noche"
+ },
+ {
+  "id": "cur:sevilla:zona-alfalfa",
+  "q": "Calle Pérez Galdós, Sevilla",
+  "fallback": "Calle Pérez Galdós, Sevilla",
+  "city": "sevilla",
+  "type": "zona",
+  "name": "Alfalfa",
+  "zone": "Calle Pérez Galdós",
+  "note": "Calle Pérez Galdós llena de gente los viernes y sábados, ambiente universitario"
+ },
+ {
+  "id": "cur:sevilla:zona-alameda-de-hercules",
+  "q": "Alameda de Hércules, Sevilla",
+  "fallback": "Alameda de Hércules, Sevilla",
+  "city": "sevilla",
+  "type": "zona",
+  "name": "Alameda de Hércules",
+  "zone": "Alameda de Hércules",
+  "note": "Zona alternativa y LGTBI+, bares de copas hasta las 3"
+ },
+ {
+  "id": "cur:sevilla:zona-calle-betis-triana",
+  "q": "Calle Betis, Sevilla",
+  "fallback": "Calle Betis, Sevilla",
+  "city": "sevilla",
+  "type": "zona",
+  "name": "Calle Betis (Triana)",
+  "zone": "Calle Betis",
+  "note": "Junto al río, de bares tranquilos a pubs hasta el amanecer"
+ },
+ {
+  "id": "cur:sevilla:zona-triana",
+  "q": "Calle San Jacinto, Sevilla",
+  "fallback": "Calle San Jacinto, Sevilla",
+  "city": "sevilla",
+  "type": "zona",
+  "name": "Triana",
+  "zone": "Calle San Jacinto",
+  "note": "Tapas en San Jacinto y copas con vistas al Guadalquivir"
+ },
+ {
+  "id": "cur:sevilla:zona-paseo-de-colon-y-puerto-de-cuba",
+  "q": "Paseo de Cristóbal Colón, Sevilla",
+  "fallback": "Paseo de Cristóbal Colón, Sevilla",
+  "city": "sevilla",
+  "type": "zona",
+  "name": "Paseo de Colón y Puerto de Cuba",
+  "zone": "Paseo de Cristóbal Colón",
+  "note": "Discotecas y terrazas junto al río"
+ },
+ {
+  "id": "cur:malaga:barsovia-club",
+  "q": "Barsovia Club, Málaga",
+  "fallback": "Centro, Málaga",
+  "city": "malaga",
+  "type": "discoteca",
+  "name": "Barsovia Club",
+  "zone": "Centro",
+  "note": "R&B, afrobeat y electrónica en pleno centro (4,6)"
+ },
+ {
+  "id": "cur:malaga:sala-gold",
+  "q": "Sala Gold, Málaga",
+  "fallback": null,
+  "city": "malaga",
+  "type": "discoteca",
+  "name": "Sala Gold",
+  "zone": "",
+  "note": "5 estrellas: muy buen ambiente y buena música"
+ },
+ {
+  "id": "cur:malaga:gallery-club",
+  "q": "Gallery Club, Málaga",
+  "fallback": "Centro, Málaga",
+  "city": "malaga",
+  "type": "discoteca",
+  "name": "Gallery Club",
+  "zone": "Centro",
+  "note": "Ambiente internacional, 3 barras y 2 VIP"
+ },
+ {
+  "id": "cur:malaga:cosa-nuestra",
+  "q": "Cosa Nuestra, Málaga",
+  "fallback": null,
+  "city": "malaga",
+  "type": "discoteca",
+  "name": "Cosa Nuestra",
+  "zone": "",
+  "note": "Noches temáticas, DJs y música urbana"
+ },
+ {
+  "id": "cur:malaga:mirror-malaga",
+  "q": "Mirror Málaga, Málaga",
+  "fallback": null,
+  "city": "malaga",
+  "type": "discoteca",
+  "name": "Mirror Málaga",
+  "zone": "",
+  "note": "Ambiente joven y DJ todos los días"
+ },
+ {
+  "id": "cur:malaga:sala-anden",
+  "q": "Sala Andén, Málaga",
+  "fallback": "Plaza de Uncibay, Málaga",
+  "city": "malaga",
+  "type": "discoteca",
+  "name": "Sala Andén",
+  "zone": "Plaza de Uncibay",
+  "note": "Una de las discotecas más famosas de Málaga"
+ },
+ {
+  "id": "cur:malaga:metro-copas",
+  "q": "Metro Copas, Málaga",
+  "fallback": "Plaza Mitjana, Málaga",
+  "city": "malaga",
+  "type": "bar",
+  "name": "Metro Copas",
+  "zone": "Plaza Mitjana",
+  "note": "De los bares de copas favoritos de los jóvenes"
+ },
+ {
+  "id": "cur:malaga:tita-conchi",
+  "q": "Tita Conchi, Málaga",
+  "fallback": "Plaza Mitjana, Málaga",
+  "city": "malaga",
+  "type": "bar",
+  "name": "Tita Conchi",
+  "zone": "Plaza Mitjana",
+  "note": "Bar de copas muy popular en Mitjana"
+ },
+ {
+  "id": "cur:malaga:antojo",
+  "q": "Antojo, Málaga",
+  "fallback": "Soho, Málaga",
+  "city": "malaga",
+  "type": "bar",
+  "name": "Antojo",
+  "zone": "Soho",
+  "note": "El pub del Soho que más está marcando la diferencia"
+ },
+ {
+  "id": "cur:malaga:zona-centro-y-calle-larios",
+  "q": "Calle Larios, Málaga",
+  "fallback": "Calle Larios, Málaga",
+  "city": "malaga",
+  "type": "zona",
+  "name": "Centro y Calle Larios",
+  "zone": "Calle Larios",
+  "note": "El punto de arranque de la noche: Larios, Merced y Granada"
+ },
+ {
+  "id": "cur:malaga:zona-plaza-mitjana-y-uncibay",
+  "q": "Plaza Mitjana, Málaga",
+  "fallback": "Plaza Mitjana, Málaga",
+  "city": "malaga",
+  "type": "zona",
+  "name": "Plaza Mitjana y Uncibay",
+  "zone": "Plaza Mitjana",
+  "note": "Zona de pubs de 00:00 a 03:00"
+ },
+ {
+  "id": "cur:malaga:zona-calle-echegaray",
+  "q": "Calle Echegaray, Málaga",
+  "fallback": "Calle Echegaray, Málaga",
+  "city": "malaga",
+  "type": "zona",
+  "name": "Calle Echegaray",
+  "zone": "Calle Echegaray",
+  "note": "Calle en auge con locales nuevos"
+ },
+ {
+  "id": "cur:malaga:zona-soho",
+  "q": "Calle Tomás Heredia, Málaga",
+  "fallback": "Calle Tomás Heredia, Málaga",
+  "city": "malaga",
+  "type": "zona",
+  "name": "Soho",
+  "zone": "Calle Tomás Heredia",
+  "note": "Barrio de arte urbano con pubs de moda"
+ },
+ {
+  "id": "cur:malaga:zona-los-alamos",
+  "q": "Calle Los Álamos Torremolinos, Málaga",
+  "fallback": "Calle Los Álamos Torremolinos, Málaga",
+  "city": "malaga",
+  "type": "zona",
+  "name": "Los Álamos",
+  "zone": "Calle Los Álamos Torremolinos",
+  "note": "Marcha de playa en verano entre Málaga y Torremolinos"
+ },
+ {
+  "id": "cur:granada:mae-west",
+  "q": "Mae West, Granada",
+  "fallback": null,
+  "city": "granada",
+  "type": "discoteca",
+  "name": "Mae West",
+  "zone": "",
+  "note": "Icónica, tres salas: Bribón de la Habana, Molly Malone y Mae West"
+ },
+ {
+  "id": "cur:granada:basaba",
+  "q": "Basaba, Granada",
+  "fallback": "Camino de Ronda, Granada",
+  "city": "granada",
+  "type": "discoteca",
+  "name": "Basaba",
+  "zone": "Camino de Ronda",
+  "note": "De las más modernas de Granada"
+ },
+ {
+  "id": "cur:granada:planta-baja",
+  "q": "Planta Baja, Granada",
+  "fallback": null,
+  "city": "granada",
+  "type": "discoteca",
+  "name": "Planta Baja",
+  "zone": "",
+  "note": "Club de dos plantas con conciertos y DJs"
+ },
+ {
+  "id": "cur:granada:babel",
+  "q": "Babel, Granada",
+  "fallback": "Calle Pedro Antonio de Alarcón, Granada",
+  "city": "granada",
+  "type": "bar",
+  "name": "Babel",
+  "zone": "Calle Pedro Antonio de Alarcón",
+  "note": "19 años en la marcha con música española"
+ },
+ {
+  "id": "cur:granada:hannigan-sons",
+  "q": "Hannigan & Sons, Granada",
+  "fallback": "Pedro Antonio de Alarcón, Granada",
+  "city": "granada",
+  "type": "bar",
+  "name": "Hannigan & Sons",
+  "zone": "Pedro Antonio de Alarcón",
+  "note": "Clásico irlandés"
+ },
+ {
+  "id": "cur:granada:loop-bar-club",
+  "q": "Loop Bar & Club, Granada",
+  "fallback": "Pedro Antonio de Alarcón, Granada",
+  "city": "granada",
+  "type": "bar",
+  "name": "Loop Bar & Club",
+  "zone": "Pedro Antonio de Alarcón",
+  "note": "Para bailar hasta tarde"
+ },
+ {
+  "id": "cur:granada:zona-pedro-antonio-de-alarcon",
+  "q": "Calle Pedro Antonio de Alarcón, Granada",
+  "fallback": "Calle Pedro Antonio de Alarcón, Granada",
+  "city": "granada",
+  "type": "zona",
+  "name": "Pedro Antonio de Alarcón",
+  "zone": "Calle Pedro Antonio de Alarcón",
+  "note": "La calle universitaria: decenas de bares, pubs y discotecas baratos"
+ },
+ {
+  "id": "cur:granada:zona-calle-elvira",
+  "q": "Calle Elvira, Granada",
+  "fallback": "Calle Elvira, Granada",
+  "city": "granada",
+  "type": "zona",
+  "name": "Calle Elvira",
+  "zone": "Calle Elvira",
+  "note": "Bares, teterías y pubs junto a Plaza Nueva"
+ },
+ {
+  "id": "cur:granada:zona-realejo",
+  "q": "Campo del Príncipe, Granada",
+  "fallback": "Campo del Príncipe, Granada",
+  "city": "granada",
+  "type": "zona",
+  "name": "Realejo",
+  "zone": "Campo del Príncipe",
+  "note": "Bares de tapas y copas con ambiente local"
+ },
+ {
+  "id": "cur:cordoba:sala-m100",
+  "q": "Sala M100, Córdoba",
+  "fallback": "Polígono Chinales, Córdoba",
+  "city": "cordoba",
+  "type": "discoteca",
+  "name": "Sala M100",
+  "zone": "Polígono Chinales",
+  "note": "De las salas más populares, gran espectáculo de luz y sonido"
+ },
+ {
+  "id": "cur:cordoba:hangar-cordoba",
+  "q": "Hangar Córdoba, Córdoba",
+  "fallback": null,
+  "city": "cordoba",
+  "type": "discoteca",
+  "name": "Hangar Córdoba",
+  "zone": "",
+  "note": "Sala de conciertos y discoteca, referente desde 2014"
+ },
+ {
+  "id": "cur:cordoba:sojo-ribera",
+  "q": "Sojo Ribera, Córdoba",
+  "fallback": "La Ribera, Córdoba",
+  "city": "cordoba",
+  "type": "discoteca",
+  "name": "Sojo Ribera",
+  "zone": "La Ribera",
+  "note": "Cócteles, música y vistas al Puente Romano"
+ },
+ {
+  "id": "cur:cordoba:marfil-cordoba",
+  "q": "Marfil Córdoba, Córdoba",
+  "fallback": "Calle Julio Pellicer, Córdoba",
+  "city": "cordoba",
+  "type": "discoteca",
+  "name": "Marfil Córdoba",
+  "zone": "Calle Julio Pellicer",
+  "note": "Ambiente festivo en el centro"
+ },
+ {
+  "id": "cur:cordoba:ophium-nightclub",
+  "q": "Ophium Nightclub, Córdoba",
+  "fallback": null,
+  "city": "cordoba",
+  "type": "discoteca",
+  "name": "Ophium Nightclub",
+  "zone": "",
+  "note": "700 m², dos salas y patio interior"
+ },
+ {
+  "id": "cur:cordoba:jazz-cafe",
+  "q": "Jazz Café, Córdoba",
+  "fallback": "Centro, Córdoba",
+  "city": "cordoba",
+  "type": "bar",
+  "name": "Jazz Café",
+  "zone": "Centro",
+  "note": "Jazz y blues en directo"
+ },
+ {
+  "id": "cur:cordoba:zona-ciudad-jardin",
+  "q": "Calle Previsión, Córdoba",
+  "fallback": "Calle Previsión, Córdoba",
+  "city": "cordoba",
+  "type": "zona",
+  "name": "Ciudad Jardín",
+  "zone": "Calle Previsión",
+  "note": "Zona de pubs universitarios"
+ },
+ {
+  "id": "cur:cordoba:zona-la-ribera",
+  "q": "Paseo de la Ribera, Córdoba",
+  "fallback": "Paseo de la Ribera, Córdoba",
+  "city": "cordoba",
+  "type": "zona",
+  "name": "La Ribera",
+  "zone": "Paseo de la Ribera",
+  "note": "Copas junto al Guadalquivir"
+ },
+ {
+  "id": "cur:cordoba:zona-centro-tendillas",
+  "q": "Plaza de las Tendillas, Córdoba",
+  "fallback": "Plaza de las Tendillas, Córdoba",
+  "city": "cordoba",
+  "type": "zona",
+  "name": "Centro (Tendillas)",
+  "zone": "Plaza de las Tendillas",
+  "note": "Bares y pubs del centro"
+ },
+ {
+  "id": "cur:zaragoza:gbn-lounge-club",
+  "q": "GBN Lounge Club, Zaragoza",
+  "fallback": "Puerta del Carmen, Zaragoza",
+  "city": "zaragoza",
+  "type": "discoteca",
+  "name": "GBN Lounge Club",
+  "zone": "Puerta del Carmen",
+  "note": "De las salas con más ambiente de Zaragoza"
+ },
+ {
+  "id": "cur:zaragoza:kenbo",
+  "q": "Kenbo, Zaragoza",
+  "fallback": "Centro, Zaragoza",
+  "city": "zaragoza",
+  "type": "discoteca",
+  "name": "Kenbo",
+  "zone": "Centro",
+  "note": "Imprescindible en pleno centro, en el antiguo El Plata"
+ },
+ {
+  "id": "cur:zaragoza:sala-oasis",
+  "q": "Sala Oasis, Zaragoza",
+  "fallback": null,
+  "city": "zaragoza",
+  "type": "discoteca",
+  "name": "Sala Oasis",
+  "zone": "",
+  "note": "Sala de conciertos y discoteca de referencia"
+ },
+ {
+  "id": "cur:zaragoza:parros",
+  "q": "Parros, Zaragoza",
+  "fallback": null,
+  "city": "zaragoza",
+  "type": "discoteca",
+  "name": "Parros",
+  "zone": "",
+  "note": "Clásico desde 1999, reformado en 2024 con videomapping"
+ },
+ {
+  "id": "cur:zaragoza:hide-club",
+  "q": "Hide Club, Zaragoza",
+  "fallback": null,
+  "city": "zaragoza",
+  "type": "discoteca",
+  "name": "Hide Club",
+  "zone": "",
+  "note": "Discoteca muy recomendada"
+ },
+ {
+  "id": "cur:zaragoza:supernova-club",
+  "q": "Supernova Club, Zaragoza",
+  "fallback": null,
+  "city": "zaragoza",
+  "type": "discoteca",
+  "name": "Supernova Club",
+  "zone": "",
+  "note": "Fiesta para noctámbulos"
+ },
+ {
+  "id": "cur:zaragoza:louisiana",
+  "q": "Louisiana, Zaragoza",
+  "fallback": "Tomás Bretón, Zaragoza",
+  "city": "zaragoza",
+  "type": "bar",
+  "name": "Louisiana",
+  "zone": "Tomás Bretón",
+  "note": "Bar rockero"
+ },
+ {
+  "id": "cur:zaragoza:dan-o-hara",
+  "q": "Dan O'Hara, Zaragoza",
+  "fallback": "Tomás Bretón, Zaragoza",
+  "city": "zaragoza",
+  "type": "bar",
+  "name": "Dan O'Hara",
+  "zone": "Tomás Bretón",
+  "note": "Pub irlandés clásico"
+ },
+ {
+  "id": "cur:zaragoza:la-taberna-del-blues",
+  "q": "La Taberna del Blues, Zaragoza",
+  "fallback": "Tomás Bretón, Zaragoza",
+  "city": "zaragoza",
+  "type": "bar",
+  "name": "La Taberna del Blues",
+  "zone": "Tomás Bretón",
+  "note": "Blues e intimismo"
+ },
+ {
+  "id": "cur:zaragoza:zona-tomas-breton",
+  "q": "Calle Tomás Bretón, Zaragoza",
+  "fallback": "Calle Tomás Bretón, Zaragoza",
+  "city": "zaragoza",
+  "type": "zona",
+  "name": "Tomás Bretón",
+  "zone": "Calle Tomás Bretón",
+  "note": "Tabernas y bares rockeros"
+ },
+ {
+  "id": "cur:zaragoza:zona-plaza-san-francisco",
+  "q": "Plaza San Francisco, Zaragoza",
+  "fallback": "Plaza San Francisco, Zaragoza",
+  "city": "zaragoza",
+  "type": "zona",
+  "name": "Plaza San Francisco",
+  "zone": "Plaza San Francisco",
+  "note": "Universitarios y gente de todas las edades"
+ },
+ {
+  "id": "cur:zaragoza:zona-calle-doctor-cerrada",
+  "q": "Calle Doctor Cerrada, Zaragoza",
+  "fallback": "Calle Doctor Cerrada, Zaragoza",
+  "city": "zaragoza",
+  "type": "zona",
+  "name": "Calle Doctor Cerrada",
+  "zone": "Calle Doctor Cerrada",
+  "note": "Bares de ambiente LGTBI+"
+ },
+ {
+  "id": "cur:zaragoza:zona-el-tubo",
+  "q": "Calle Estébanes, Zaragoza",
+  "fallback": "Calle Estébanes, Zaragoza",
+  "city": "zaragoza",
+  "type": "zona",
+  "name": "El Tubo",
+  "zone": "Calle Estébanes",
+  "note": "Tapeo y bares junto al Pilar"
+ },
+ {
+  "id": "cur:zaragoza:zona-la-magdalena",
+  "q": "Plaza de la Magdalena, Zaragoza",
+  "fallback": "Plaza de la Magdalena, Zaragoza",
+  "city": "zaragoza",
+  "type": "zona",
+  "name": "La Magdalena",
+  "zone": "Plaza de la Magdalena",
+  "note": "Zona alternativa de bares"
+ },
+ {
+  "id": "cur:bilbao:sala-sonora",
+  "q": "Sala Sonora, Bilbao",
+  "fallback": "Erandio, Bilbao",
+  "city": "bilbao",
+  "type": "discoteca",
+  "name": "Sala Sonora",
+  "zone": "Erandio",
+  "note": "De las discotecas más conocidas, en Astrabudua"
+ },
+ {
+  "id": "cur:bilbao:fever-bilbao",
+  "q": "Fever Bilbao, Bilbao",
+  "fallback": "Bolueta, Bilbao",
+  "city": "bilbao",
+  "type": "discoteca",
+  "name": "Fever Bilbao",
+  "zone": "Bolueta",
+  "note": "Gran discoteca de las afueras"
+ },
+ {
+  "id": "cur:bilbao:rock-star",
+  "q": "Rock Star, Bilbao",
+  "fallback": "Gran Vía, Bilbao",
+  "city": "bilbao",
+  "type": "discoteca",
+  "name": "Rock Star",
+  "zone": "Gran Vía",
+  "note": "De los pocos clubs del centro"
+ },
+ {
+  "id": "cur:bilbao:cotton-club",
+  "q": "Cotton Club, Bilbao",
+  "fallback": "Indautxu, Bilbao",
+  "city": "bilbao",
+  "type": "discoteca",
+  "name": "Cotton Club",
+  "zone": "Indautxu",
+  "note": "Mítico, con artistas en directo"
+ },
+ {
+  "id": "cur:bilbao:oker",
+  "q": "Oker, Bilbao",
+  "fallback": "Indautxu, Bilbao",
+  "city": "bilbao",
+  "type": "discoteca",
+  "name": "Oker",
+  "zone": "Indautxu",
+  "note": "Para bailar hasta la madrugada"
+ },
+ {
+  "id": "cur:bilbao:sir-winston-churchill",
+  "q": "Sir Winston Churchill, Bilbao",
+  "fallback": "Indautxu, Bilbao",
+  "city": "bilbao",
+  "type": "bar",
+  "name": "Sir Winston Churchill",
+  "zone": "Indautxu",
+  "note": "Pub muy valorado"
+ },
+ {
+  "id": "cur:bilbao:zona-licenciado-poza-pozas",
+  "q": "Calle Licenciado Poza, Bilbao",
+  "fallback": "Calle Licenciado Poza, Bilbao",
+  "city": "bilbao",
+  "type": "zona",
+  "name": "Licenciado Poza (Pozas)",
+  "zone": "Calle Licenciado Poza",
+  "note": "Poteo de pintxos y copas junto a San Mamés"
+ },
+ {
+  "id": "cur:bilbao:zona-casco-viejo",
+  "q": "Plaza Nueva, Bilbao",
+  "fallback": "Plaza Nueva, Bilbao",
+  "city": "bilbao",
+  "type": "zona",
+  "name": "Casco Viejo",
+  "zone": "Plaza Nueva",
+  "note": "Poteo clásico de pintxos y bares"
+ },
+ {
+  "id": "cur:bilbao:zona-indautxu-y-galerias-urquijo",
+  "q": "Calle Urquijo, Bilbao",
+  "fallback": "Calle Urquijo, Bilbao",
+  "city": "bilbao",
+  "type": "zona",
+  "name": "Indautxu y Galerías Urquijo",
+  "zone": "Calle Urquijo",
+  "note": "Electrónica y comercial para todas las edades"
+ },
+ {
+  "id": "cur:bilbao:zona-albia-y-mazarredo",
+  "q": "Alameda de Mazarredo, Bilbao",
+  "fallback": "Alameda de Mazarredo, Bilbao",
+  "city": "bilbao",
+  "type": "zona",
+  "name": "Albia y Mazarredo",
+  "zone": "Alameda de Mazarredo",
+  "note": "Para seguir la noche de copas"
+ },
+ {
+  "id": "cur:salamanca:moma",
+  "q": "MOMA, Salamanca",
+  "fallback": "Gran Vía, Salamanca",
+  "city": "salamanca",
+  "type": "discoteca",
+  "name": "MOMA",
+  "zone": "Gran Vía",
+  "note": "De las más populares, latino y kizomba"
+ },
+ {
+  "id": "cur:salamanca:camelot",
+  "q": "Camelot, Salamanca",
+  "fallback": "Calle Bordadores, Salamanca",
+  "city": "salamanca",
+  "type": "discoteca",
+  "name": "Camelot",
+  "zone": "Calle Bordadores",
+  "note": "Referente de la noche salmantina desde 1986"
+ },
+ {
+  "id": "cur:salamanca:kandhavia",
+  "q": "Kandhavia, Salamanca",
+  "fallback": null,
+  "city": "salamanca",
+  "type": "discoteca",
+  "name": "Kandhavia",
+  "zone": "",
+  "note": "Más de 30 años, fiestas universitarias e internacionales"
+ },
+ {
+  "id": "cur:salamanca:barvel",
+  "q": "Barvel, Salamanca",
+  "fallback": "Gran Vía, Salamanca",
+  "city": "salamanca",
+  "type": "bar",
+  "name": "Barvel",
+  "zone": "Gran Vía",
+  "note": "Coctelería-discoteca decorada de superhéroes Marvel"
+ },
+ {
+  "id": "cur:salamanca:murphy-s-law",
+  "q": "Murphy's Law, Salamanca",
+  "fallback": "Gran Vía, Salamanca",
+  "city": "salamanca",
+  "type": "bar",
+  "name": "Murphy's Law",
+  "zone": "Gran Vía",
+  "note": "Pub clásico de Gran Vía"
+ },
+ {
+  "id": "cur:salamanca:slainte",
+  "q": "Slainte, Salamanca",
+  "fallback": "Calle Van Dyck, Salamanca",
+  "city": "salamanca",
+  "type": "bar",
+  "name": "Slainte",
+  "zone": "Calle Van Dyck",
+  "note": "Cervezas artesanas"
+ },
+ {
+  "id": "cur:salamanca:zona-van-dyck",
+  "q": "Calle Van Dyck, Salamanca",
+  "fallback": "Calle Van Dyck, Salamanca",
+  "city": "salamanca",
+  "type": "zona",
+  "name": "Van Dyck",
+  "zone": "Calle Van Dyck",
+  "note": "Zona de referencia de bares y tapas"
+ },
+ {
+  "id": "cur:salamanca:zona-gran-via",
+  "q": "Gran Vía Salamanca, Salamanca",
+  "fallback": "Gran Vía Salamanca, Salamanca",
+  "city": "salamanca",
+  "type": "zona",
+  "name": "Gran Vía",
+  "zone": "Gran Vía Salamanca",
+  "note": "Bares, pubs y discotecas"
+ },
+ {
+  "id": "cur:salamanca:zona-plaza-mayor",
+  "q": "Plaza Mayor, Salamanca",
+  "fallback": "Plaza Mayor, Salamanca",
+  "city": "salamanca",
+  "type": "zona",
+  "name": "Plaza Mayor",
+  "zone": "Plaza Mayor",
+  "note": "Punto de encuentro y bares alrededor, ambiente Erasmus"
+ },
+ {
+  "id": "cur:alicante:marmarela",
+  "q": "Marmarela, Alicante",
+  "fallback": "Puerto Deportivo, Alicante",
+  "city": "alicante",
+  "type": "discoteca",
+  "name": "Marmarela",
+  "zone": "Puerto Deportivo",
+  "note": "Club muy concurrido en el puerto, junto al mar"
+ },
+ {
+  "id": "cur:alicante:calle-365",
+  "q": "Calle 365, Alicante",
+  "fallback": "Casco antiguo, Alicante",
+  "city": "alicante",
+  "type": "discoteca",
+  "name": "Calle 365",
+  "zone": "Casco antiguo",
+  "note": "Discoteca del Barrio"
+ },
+ {
+  "id": "cur:alicante:magma-club",
+  "q": "Magma Club, Alicante",
+  "fallback": "Playa de San Juan, Alicante",
+  "city": "alicante",
+  "type": "discoteca",
+  "name": "Magma Club",
+  "zone": "Playa de San Juan",
+  "note": "Discoteca de la zona de San Juan"
+ },
+ {
+  "id": "cur:alicante:pelican-experience",
+  "q": "Pelican Experience, Alicante",
+  "fallback": "Playa de San Juan, Alicante",
+  "city": "alicante",
+  "type": "discoteca",
+  "name": "Pelican Experience",
+  "zone": "Playa de San Juan",
+  "note": "Muy popular en San Juan"
+ },
+ {
+  "id": "cur:alicante:monna-club",
+  "q": "Monna Club, Alicante",
+  "fallback": "Calle Castaños, Alicante",
+  "city": "alicante",
+  "type": "discoteca",
+  "name": "Monna Club",
+  "zone": "Calle Castaños",
+  "note": "En la calle Castaños"
+ },
+ {
+  "id": "cur:alicante:sala-stereo",
+  "q": "Sala Stereo, Alicante",
+  "fallback": "Mercado Central, Alicante",
+  "city": "alicante",
+  "type": "discoteca",
+  "name": "Sala Stereo",
+  "zone": "Mercado Central",
+  "note": "Sala junto al Mercado Central"
+ },
+ {
+  "id": "cur:alicante:suquia-puerto",
+  "q": "Suquia Puerto, Alicante",
+  "fallback": "Puerto, Alicante",
+  "city": "alicante",
+  "type": "discoteca",
+  "name": "Suquia Puerto",
+  "zone": "Puerto",
+  "note": "Discoteca, coctelería y cachimbas en el puerto"
+ },
+ {
+  "id": "cur:alicante:zona-el-barrio",
+  "q": "Calle Labradores, Alicante",
+  "fallback": "Calle Labradores, Alicante",
+  "city": "alicante",
+  "type": "zona",
+  "name": "El Barrio",
+  "zone": "Calle Labradores",
+  "note": "Casco antiguo junto a San Nicolás: pubs y terrazas"
+ },
+ {
+  "id": "cur:alicante:zona-calle-castanos",
+  "q": "Calle Castaños, Alicante",
+  "fallback": "Calle Castaños, Alicante",
+  "city": "alicante",
+  "type": "zona",
+  "name": "Calle Castaños",
+  "zone": "Calle Castaños",
+  "note": "Bares y discotecas en el centro"
+ },
+ {
+  "id": "cur:alicante:zona-puerto-deportivo",
+  "q": "Paseo del Puerto, Alicante",
+  "fallback": "Paseo del Puerto, Alicante",
+  "city": "alicante",
+  "type": "zona",
+  "name": "Puerto Deportivo",
+  "zone": "Paseo del Puerto",
+  "note": "Clubs y terrazas junto al mar"
+ },
+ {
+  "id": "cur:alicante:zona-playa-de-san-juan",
+  "q": "Avenida de Niza, Alicante",
+  "fallback": "Avenida de Niza, Alicante",
+  "city": "alicante",
+  "type": "zona",
+  "name": "Playa de San Juan",
+  "zone": "Avenida de Niza",
+  "note": "Discotecas y terrazas de playa"
+ },
+ {
+  "id": "cur:murcia:sala-rem",
+  "q": "Sala REM, Murcia",
+  "fallback": null,
+  "city": "murcia",
+  "type": "discoteca",
+  "name": "Sala REM",
+  "zone": "",
+  "note": "Clásico de la electrónica y el house"
+ },
+ {
+  "id": "cur:murcia:sweet-murcia",
+  "q": "Sweet Murcia, Murcia",
+  "fallback": null,
+  "city": "murcia",
+  "type": "discoteca",
+  "name": "Sweet Murcia",
+  "zone": "",
+  "note": "Latino, reguetón y comercial, ambiente joven"
+ },
+ {
+  "id": "cur:murcia:sala-musik",
+  "q": "Sala Musik, Murcia",
+  "fallback": null,
+  "city": "murcia",
+  "type": "discoteca",
+  "name": "Sala Musik",
+  "zone": "",
+  "note": "Tres salas distintas, conciertos y fiestas temáticas"
+ },
+ {
+  "id": "cur:murcia:guru",
+  "q": "Guru, Murcia",
+  "fallback": "Avenida Ciclista Mariano Rojas, Murcia",
+  "city": "murcia",
+  "type": "discoteca",
+  "name": "Guru",
+  "zone": "Avenida Ciclista Mariano Rojas",
+  "note": "Gran discoteca de la zona"
+ },
+ {
+  "id": "cur:murcia:garaje-beat-club",
+  "q": "Garaje Beat Club, Murcia",
+  "fallback": "Avenida Ciclista Mariano Rojas, Murcia",
+  "city": "murcia",
+  "type": "discoteca",
+  "name": "Garaje Beat Club",
+  "zone": "Avenida Ciclista Mariano Rojas",
+  "note": "Sala de conciertos y club"
+ },
+ {
+  "id": "cur:murcia:la-chica-de-ayer",
+  "q": "La Chica de Ayer, Murcia",
+  "fallback": null,
+  "city": "murcia",
+  "type": "bar",
+  "name": "La Chica de Ayer",
+  "zone": "",
+  "note": "Pub de los 80 y 90"
+ },
+ {
+  "id": "cur:murcia:corleone",
+  "q": "Corleone, Murcia",
+  "fallback": "Calle San Lorenzo, Murcia",
+  "city": "murcia",
+  "type": "bar",
+  "name": "Corleone",
+  "zone": "Calle San Lorenzo",
+  "note": "Muy recomendado en el centro"
+ },
+ {
+  "id": "cur:murcia:zona-plaza-de-las-flores",
+  "q": "Plaza de las Flores, Murcia",
+  "fallback": "Plaza de las Flores, Murcia",
+  "city": "murcia",
+  "type": "zona",
+  "name": "Plaza de las Flores",
+  "zone": "Plaza de las Flores",
+  "note": "Bares y terrazas en el centro"
+ },
+ {
+  "id": "cur:murcia:zona-perez-casas",
+  "q": "Calle Pérez Casas, Murcia",
+  "fallback": "Calle Pérez Casas, Murcia",
+  "city": "murcia",
+  "type": "zona",
+  "name": "Pérez Casas",
+  "zone": "Calle Pérez Casas",
+  "note": "Ambiente selecto de copas y terrazas"
+ },
+ {
+  "id": "cur:murcia:zona-ciclista-mariano-rojas",
+  "q": "Avenida Ciclista Mariano Rojas, Murcia",
+  "fallback": "Avenida Ciclista Mariano Rojas, Murcia",
+  "city": "murcia",
+  "type": "zona",
+  "name": "Ciclista Mariano Rojas",
+  "zone": "Avenida Ciclista Mariano Rojas",
+  "note": "Las grandes discotecas de Murcia"
+ },
+ {
+  "id": "cur:murcia:zona-atalayas",
+  "q": "Centro Comercial Atalayas, Murcia",
+  "fallback": "Centro Comercial Atalayas, Murcia",
+  "city": "murcia",
+  "type": "zona",
+  "name": "Atalayas",
+  "zone": "Centro Comercial Atalayas",
+  "note": "Zona de discotecas al este"
+ },
+ {
+  "id": "cur:cadiz:momart-sala-club",
+  "q": "Momart Sala Club, Cádiz",
+  "fallback": "Punta de San Felipe, Cádiz",
+  "city": "cadiz",
+  "type": "discoteca",
+  "name": "Momart Sala Club",
+  "zone": "Punta de San Felipe",
+  "note": "De las más conocidas, terraza grande y DJs"
+ },
+ {
+  "id": "cur:cadiz:sala-supersonic",
+  "q": "Sala Supersonic, Cádiz",
+  "fallback": "Punta de San Felipe, Cádiz",
+  "city": "cadiz",
+  "type": "discoteca",
+  "name": "Sala Supersonic",
+  "zone": "Punta de San Felipe",
+  "note": "Conciertos de rock, abierta de jueves a sábado hasta las 7"
+ },
+ {
+  "id": "cur:cadiz:la-posada-de-babylonia",
+  "q": "La Posada de Babylonia, Cádiz",
+  "fallback": null,
+  "city": "cadiz",
+  "type": "discoteca",
+  "name": "La Posada de Babylonia",
+  "zone": "",
+  "note": "Discoteca oriental para todas las edades"
+ },
+ {
+  "id": "cur:cadiz:calachica",
+  "q": "Calachica, Cádiz",
+  "fallback": "Punta de San Felipe, Cádiz",
+  "city": "cadiz",
+  "type": "discoteca",
+  "name": "Calachica",
+  "zone": "Punta de San Felipe",
+  "note": "Enorme complejo con piscina, restaurante y discoteca"
+ },
+ {
+  "id": "cur:cadiz:zona-punta-de-san-felipe",
+  "q": "Punta de San Felipe, Cádiz",
+  "fallback": "Punta de San Felipe, Cádiz",
+  "city": "cadiz",
+  "type": "zona",
+  "name": "Punta de San Felipe",
+  "zone": "Punta de San Felipe",
+  "note": "Discotecas y terrazas con vistas al mar hasta tarde"
+ },
+ {
+  "id": "cur:cadiz:zona-el-populo",
+  "q": "Barrio del Pópulo, Cádiz",
+  "fallback": "Barrio del Pópulo, Cádiz",
+  "city": "cadiz",
+  "type": "zona",
+  "name": "El Pópulo",
+  "zone": "Barrio del Pópulo",
+  "note": "Bares pequeños y pubs con música, el ambiente más auténtico"
+ },
+ {
+  "id": "cur:cadiz:zona-la-vina",
+  "q": "Calle Virgen de la Palma, Cádiz",
+  "fallback": "Calle Virgen de la Palma, Cádiz",
+  "city": "cadiz",
+  "type": "zona",
+  "name": "La Viña",
+  "zone": "Calle Virgen de la Palma",
+  "note": "Bares de tapas y ambiente carnavalero"
+ },
+ {
+  "id": "cur:marbella:pangea",
+  "q": "Pangea, Marbella",
+  "fallback": "Puerto Banús, Marbella",
+  "city": "marbella",
+  "type": "discoteca",
+  "name": "Pangea",
+  "zone": "Puerto Banús",
+  "note": "Vistas al puerto, jet-set y terraza"
+ },
+ {
+  "id": "cur:marbella:seven-marbella",
+  "q": "Seven Marbella, Marbella",
+  "fallback": "Puerto Banús, Marbella",
+  "city": "marbella",
+  "type": "discoteca",
+  "name": "Seven Marbella",
+  "zone": "Puerto Banús",
+  "note": "Elegante y exclusiva, DJs conocidos"
+ },
+ {
+  "id": "cur:marbella:olivia-valere",
+  "q": "Olivia Valere, Marbella",
+  "fallback": null,
+  "city": "marbella",
+  "type": "discoteca",
+  "name": "Olivia Valere",
+  "zone": "",
+  "note": "Palacio árabe con varias pistas, un clásico"
+ },
+ {
+  "id": "cur:marbella:mirage",
+  "q": "Mirage, Marbella",
+  "fallback": "Puerto Banús, Marbella",
+  "city": "marbella",
+  "type": "discoteca",
+  "name": "Mirage",
+  "zone": "Puerto Banús",
+  "note": "800 m² con sonido Funktion One"
+ },
+ {
+  "id": "cur:marbella:tibu-banus",
+  "q": "Tibu Banús, Marbella",
+  "fallback": "Puerto Banús, Marbella",
+  "city": "marbella",
+  "type": "discoteca",
+  "name": "Tibu Banús",
+  "zone": "Puerto Banús",
+  "note": "Gogós y DJs, copas a precio razonable"
+ },
+ {
+  "id": "cur:marbella:funky-buddha",
+  "q": "Funky Buddha, Marbella",
+  "fallback": "Puerto Banús, Marbella",
+  "city": "marbella",
+  "type": "discoteca",
+  "name": "Funky Buddha",
+  "zone": "Puerto Banús",
+  "note": "Glamour pero relajado"
+ },
+ {
+  "id": "cur:marbella:zona-puerto-banus",
+  "q": "Puerto Banús, Marbella",
+  "fallback": "Puerto Banús, Marbella",
+  "city": "marbella",
+  "type": "zona",
+  "name": "Puerto Banús",
+  "zone": "Puerto Banús",
+  "note": "La zona más exclusiva: clubs y yates"
+ },
+ {
+  "id": "cur:marbella:zona-casco-antiguo",
+  "q": "Plaza de los Naranjos, Marbella",
+  "fallback": "Plaza de los Naranjos, Marbella",
+  "city": "marbella",
+  "type": "zona",
+  "name": "Casco Antiguo",
+  "zone": "Plaza de los Naranjos",
+  "note": "Bares y terrazas con encanto"
+ },
+ {
+  "id": "cur:magaluf:bcm-mallorca",
+  "q": "BCM Mallorca, Magaluf",
+  "fallback": "Avinguda de s'Olivera, Magaluf",
+  "city": "magaluf",
+  "type": "discoteca",
+  "name": "BCM Mallorca",
+  "zone": "Avinguda de s'Olivera",
+  "note": "De los clubs más grandes del mundo, 5.000 personas y DJs internacionales"
+ },
+ {
+  "id": "cur:magaluf:boomerang-magaluf",
+  "q": "Boomerang Magaluf, Magaluf",
+  "fallback": "Punta Ballena, Magaluf",
+  "city": "magaluf",
+  "type": "discoteca",
+  "name": "Boomerang Magaluf",
+  "zone": "Punta Ballena",
+  "note": "Club clásico de Magaluf"
+ },
+ {
+  "id": "cur:magaluf:carwash-magaluf",
+  "q": "Carwash Magaluf, Magaluf",
+  "fallback": "Punta Ballena, Magaluf",
+  "city": "magaluf",
+  "type": "discoteca",
+  "name": "Carwash Magaluf",
+  "zone": "Punta Ballena",
+  "note": "Fiesta de los 70-80-90 muy popular"
+ },
+ {
+  "id": "cur:magaluf:tokio-joe-s",
+  "q": "Tokio Joe's, Magaluf",
+  "fallback": "Punta Ballena, Magaluf",
+  "city": "magaluf",
+  "type": "discoteca",
+  "name": "Tokio Joe's",
+  "zone": "Punta Ballena",
+  "note": "De los principales clubs de R&B de Mallorca"
+ },
+ {
+  "id": "cur:magaluf:zona-punta-ballena",
+  "q": "Carrer de Punta Ballena, Magaluf",
+  "fallback": "Carrer de Punta Ballena, Magaluf",
+  "city": "magaluf",
+  "type": "zona",
+  "name": "Punta Ballena",
+  "zone": "Carrer de Punta Ballena",
+  "note": "La calle de fiesta de Magaluf: bares y clubs uno tras otro"
+ },
+ {
+  "id": "cur:palma:lio-mallorca",
+  "q": "Lío Mallorca, Palma",
+  "fallback": "Paseo Marítimo, Palma",
+  "city": "palma",
+  "type": "discoteca",
+  "name": "Lío Mallorca",
+  "zone": "Paseo Marítimo",
+  "note": "Cabaret-club en el antiguo Tito's, el más famoso de Palma"
+ },
+ {
+  "id": "cur:palma:bananas-palma",
+  "q": "Bananas Palma, Palma",
+  "fallback": null,
+  "city": "palma",
+  "type": "discoteca",
+  "name": "Bananas Palma",
+  "zone": "",
+  "note": "Muy bien valorada para techno"
+ },
+ {
+  "id": "cur:palma:kaelum-club",
+  "q": "Kaelum Club, Palma",
+  "fallback": "Avenida Gabriel Roca, Palma",
+  "city": "palma",
+  "type": "discoteca",
+  "name": "Kaelum Club",
+  "zone": "Avenida Gabriel Roca",
+  "note": "Club del Paseo Marítimo"
+ },
+ {
+  "id": "cur:palma:zona-paseo-maritimo",
+  "q": "Passeig Marítim, Palma",
+  "fallback": "Passeig Marítim, Palma",
+  "city": "palma",
+  "type": "zona",
+  "name": "Paseo Marítimo",
+  "zone": "Passeig Marítim",
+  "note": "Las discotecas de Palma frente al puerto"
+ },
+ {
+  "id": "cur:palma:zona-la-lonja",
+  "q": "Plaça de la Llotja, Palma",
+  "fallback": "Plaça de la Llotja, Palma",
+  "city": "palma",
+  "type": "zona",
+  "name": "La Lonja",
+  "zone": "Plaça de la Llotja",
+  "note": "Bares de copas y cócteles en el casco antiguo"
+ },
+ {
+  "id": "cur:palma:zona-santa-catalina",
+  "q": "Carrer de la Fàbrica, Palma",
+  "fallback": "Carrer de la Fàbrica, Palma",
+  "city": "palma",
+  "type": "zona",
+  "name": "Santa Catalina",
+  "zone": "Carrer de la Fàbrica",
+  "note": "Barrio de moda con bares y terrazas"
+ },
+ {
+  "id": "cur:ibiza:unvrs",
+  "q": "UNVRS, Ibiza",
+  "fallback": "Ibiza, Ibiza",
+  "city": "ibiza",
+  "type": "discoteca",
+  "name": "UNVRS",
+  "zone": "Ibiza",
+  "note": "El primer hyperclub del mundo, número 1 de DJ Mag 2026"
+ },
+ {
+  "id": "cur:ibiza:hi-ibiza",
+  "q": "Hï Ibiza, Ibiza",
+  "fallback": "Platja d'en Bossa, Ibiza",
+  "city": "ibiza",
+  "type": "discoteca",
+  "name": "Hï Ibiza",
+  "zone": "Platja d'en Bossa",
+  "note": "Mejor club del mundo para DJ Mag 2022-2025"
+ },
+ {
+  "id": "cur:ibiza:ushuaia-ibiza",
+  "q": "Ushuaïa Ibiza, Ibiza",
+  "fallback": "Platja d'en Bossa, Ibiza",
+  "city": "ibiza",
+  "type": "discoteca",
+  "name": "Ushuaïa Ibiza",
+  "zone": "Platja d'en Bossa",
+  "note": "Escenario al aire libre del día a la noche con superestrellas"
+ },
+ {
+  "id": "cur:ibiza:pacha-ibiza",
+  "q": "Pacha Ibiza, Ibiza",
+  "fallback": "Ibiza, Ibiza",
+  "city": "ibiza",
+  "type": "discoteca",
+  "name": "Pacha Ibiza",
+  "zone": "Ibiza",
+  "note": "El club más icónico de la isla desde 1973"
+ },
+ {
+  "id": "cur:ibiza:amnesia",
+  "q": "Amnesia, Ibiza",
+  "fallback": "Sant Rafel, Ibiza",
+  "city": "ibiza",
+  "type": "discoteca",
+  "name": "Amnesia",
+  "zone": "Sant Rafel",
+  "note": "50 aniversario en 2026, la cuna de la fiesta de la espuma"
+ },
+ {
+  "id": "cur:ibiza:dc10",
+  "q": "DC10, Ibiza",
+  "fallback": "Sant Jordi, Ibiza",
+  "city": "ibiza",
+  "type": "discoteca",
+  "name": "DC10",
+  "zone": "Sant Jordi",
+  "note": "Templo del underground junto al aeropuerto"
+ },
+ {
+  "id": "cur:ibiza:zona-platja-d-en-bossa",
+  "q": "Platja d'en Bossa, Ibiza",
+  "fallback": "Platja d'en Bossa, Ibiza",
+  "city": "ibiza",
+  "type": "zona",
+  "name": "Platja d'en Bossa",
+  "zone": "Platja d'en Bossa",
+  "note": "La zona de los superclubs y beach clubs"
+ },
+ {
+  "id": "cur:ibiza:zona-puerto-de-ibiza",
+  "q": "Carrer de la Verge, Ibiza",
+  "fallback": "Carrer de la Verge, Ibiza",
+  "city": "ibiza",
+  "type": "zona",
+  "name": "Puerto de Ibiza",
+  "zone": "Carrer de la Verge",
+  "note": "Bares, desfiles de fiestas y copas en el puerto"
+ },
+ {
+  "id": "cur:ibiza:zona-west-end-sant-antoni",
+  "q": "West End Sant Antoni, Ibiza",
+  "fallback": "West End Sant Antoni, Ibiza",
+  "city": "ibiza",
+  "type": "zona",
+  "name": "West End (Sant Antoni)",
+  "zone": "West End Sant Antoni",
+  "note": "Bares y clubs sin parar en Sant Antoni"
+ },
+ {
+  "id": "cur:las-palmas:moma-club",
+  "q": "Moma Club, Las Palmas de Gran Canaria",
+  "fallback": null,
+  "city": "las-palmas",
+  "type": "discoteca",
+  "name": "Moma Club",
+  "zone": "",
+  "note": "Electrónica con DJs hasta el amanecer"
+ },
+ {
+  "id": "cur:las-palmas:urban-disco",
+  "q": "Urban Disco, Las Palmas de Gran Canaria",
+  "fallback": null,
+  "city": "las-palmas",
+  "type": "discoteca",
+  "name": "Urban Disco",
+  "zone": "",
+  "note": "Famosa por los Urban Erasmus Saturdays"
+ },
+ {
+  "id": "cur:las-palmas:club-sotavento",
+  "q": "Club Sotavento, Las Palmas de Gran Canaria",
+  "fallback": "Muelle Deportivo, Las Palmas de Gran Canaria",
+  "city": "las-palmas",
+  "type": "discoteca",
+  "name": "Club Sotavento",
+  "zone": "Muelle Deportivo",
+  "note": "Chic y renovada, junto a Alcaravaneras"
+ },
+ {
+  "id": "cur:las-palmas:chester",
+  "q": "Chester, Las Palmas de Gran Canaria",
+  "fallback": "Parque Santa Catalina, Las Palmas de Gran Canaria",
+  "city": "las-palmas",
+  "type": "bar",
+  "name": "Chester",
+  "zone": "Parque Santa Catalina",
+  "note": "Bar de dos plantas con música comercial"
+ },
+ {
+  "id": "cur:las-palmas:rampage",
+  "q": "Rampage, Las Palmas de Gran Canaria",
+  "fallback": "Triana, Las Palmas de Gran Canaria",
+  "city": "las-palmas",
+  "type": "bar",
+  "name": "Rampage",
+  "zone": "Triana",
+  "note": "Patio exterior y gran interior"
+ },
+ {
+  "id": "cur:las-palmas:cuasquias",
+  "q": "Cuasquías, Las Palmas de Gran Canaria",
+  "fallback": null,
+  "city": "las-palmas",
+  "type": "bar",
+  "name": "Cuasquías",
+  "zone": "",
+  "note": "Conciertos de jazz, blues y rock en un edificio tradicional"
+ },
+ {
+  "id": "cur:las-palmas:zona-plaza-de-espana-mesa-y-lopez",
+  "q": "Plaza de España, Las Palmas de Gran Canaria",
+  "fallback": "Plaza de España, Las Palmas de Gran Canaria",
+  "city": "las-palmas",
+  "type": "zona",
+  "name": "Plaza de España (Mesa y López)",
+  "zone": "Plaza de España",
+  "note": "Animada hasta la mañana, donde empieza la noche"
+ },
+ {
+  "id": "cur:las-palmas:zona-santa-catalina",
+  "q": "Parque Santa Catalina, Las Palmas de Gran Canaria",
+  "fallback": "Parque Santa Catalina, Las Palmas de Gran Canaria",
+  "city": "las-palmas",
+  "type": "zona",
+  "name": "Santa Catalina",
+  "zone": "Parque Santa Catalina",
+  "note": "Bares y discotecas junto al parque"
+ },
+ {
+  "id": "cur:las-palmas:zona-vegueta-y-triana",
+  "q": "Calle Mendizábal, Las Palmas de Gran Canaria",
+  "fallback": "Calle Mendizábal, Las Palmas de Gran Canaria",
+  "city": "las-palmas",
+  "type": "zona",
+  "name": "Vegueta y Triana",
+  "zone": "Calle Mendizábal",
+  "note": "Bares de copas en el casco histórico"
+ },
+ {
+  "id": "cur:playa-de-las-americas:tramps-tenerife",
+  "q": "Tramps Tenerife, Playa de las Américas",
+  "fallback": "Veronicas, Playa de las Américas",
+  "city": "playa-de-las-americas",
+  "type": "discoteca",
+  "name": "Tramps Tenerife",
+  "zone": "Veronicas",
+  "note": "Un fijo de la noche tinerfeña con muy buenas reseñas"
+ },
+ {
+  "id": "cur:playa-de-las-americas:papagayo-beach-club",
+  "q": "Papagayo Beach Club, Playa de las Américas",
+  "fallback": "Playa de las Américas, Playa de las Américas",
+  "city": "playa-de-las-americas",
+  "type": "discoteca",
+  "name": "Papagayo Beach Club",
+  "zone": "Playa de las Américas",
+  "note": "Discoteca al aire libre, de las más bonitas de Tenerife"
+ },
+ {
+  "id": "cur:playa-de-las-americas:linekers",
+  "q": "Linekers, Playa de las Américas",
+  "fallback": "Veronicas, Playa de las Américas",
+  "city": "playa-de-las-americas",
+  "type": "discoteca",
+  "name": "Linekers",
+  "zone": "Veronicas",
+  "note": "Clásico del strip de Veronicas"
+ },
+ {
+  "id": "cur:playa-de-las-americas:zona-veronicas",
+  "q": "Centro Comercial Veronicas, Playa de las Américas",
+  "fallback": "Centro Comercial Veronicas, Playa de las Américas",
+  "city": "playa-de-las-americas",
+  "type": "zona",
+  "name": "Veronicas",
+  "zone": "Centro Comercial Veronicas",
+  "note": "300 metros de bares y clubs, la zona de fiesta de Tenerife"
+ },
+ {
+  "id": "cur:santa-cruz-de-tenerife:zona-la-noria",
+  "q": "Calle de La Noria, Santa Cruz de Tenerife",
+  "fallback": "Calle de La Noria, Santa Cruz de Tenerife",
+  "city": "santa-cruz-de-tenerife",
+  "type": "zona",
+  "name": "La Noria",
+  "zone": "Calle de La Noria",
+  "note": "Casas antiguas convertidas en pubs y clubs"
+ },
+ {
+  "id": "cur:santa-cruz-de-tenerife:mojos-y-mojitos",
+  "q": "Mojos y Mojitos, Santa Cruz de Tenerife",
+  "fallback": "Calle de La Noria, Santa Cruz de Tenerife",
+  "city": "santa-cruz-de-tenerife",
+  "type": "bar",
+  "name": "Mojos y Mojitos",
+  "zone": "Calle de La Noria",
+  "note": "Clásico de La Noria"
+ },
+ {
+  "id": "cur:santa-cruz-de-tenerife:los-reunidos",
+  "q": "Los Reunidos, Santa Cruz de Tenerife",
+  "fallback": "Calle de La Noria, Santa Cruz de Tenerife",
+  "city": "santa-cruz-de-tenerife",
+  "type": "bar",
+  "name": "Los Reunidos",
+  "zone": "Calle de La Noria",
+  "note": "Muy popular en La Noria"
+ },
+ {
+  "id": "cur:benidorm:km-playa",
+  "q": "KM Playa, Benidorm",
+  "fallback": "Paseo de Levante, Benidorm",
+  "city": "benidorm",
+  "type": "discoteca",
+  "name": "KM Playa",
+  "zone": "Paseo de Levante",
+  "note": "Frente al mar en Levante, entrada gratis"
+ },
+ {
+  "id": "cur:benidorm:penelope-beach-club",
+  "q": "Penélope Beach Club, Benidorm",
+  "fallback": "Paseo de Levante, Benidorm",
+  "city": "benidorm",
+  "type": "discoteca",
+  "name": "Penélope Beach Club",
+  "zone": "Paseo de Levante",
+  "note": "La mejor en los rankings de discotecas"
+ },
+ {
+  "id": "cur:benidorm:ku-benidorm",
+  "q": "KU Benidorm, Benidorm",
+  "fallback": "Paseo de Levante, Benidorm",
+  "city": "benidorm",
+  "type": "discoteca",
+  "name": "KU Benidorm",
+  "zone": "Paseo de Levante",
+  "note": "Discoteca de playa en Levante"
+ },
+ {
+  "id": "cur:benidorm:hippodrome",
+  "q": "Hippodrome, Benidorm",
+  "fallback": "Rincón de Loix, Benidorm",
+  "city": "benidorm",
+  "type": "discoteca",
+  "name": "Hippodrome",
+  "zone": "Rincón de Loix",
+  "note": "Clásico de la zona guiri"
+ },
+ {
+  "id": "cur:benidorm:red-dog",
+  "q": "Red Dog, Benidorm",
+  "fallback": "Rincón de Loix, Benidorm",
+  "city": "benidorm",
+  "type": "bar",
+  "name": "Red Dog",
+  "zone": "Rincón de Loix",
+  "note": "Bar famoso de la zona guiri"
+ },
+ {
+  "id": "cur:benidorm:the-heartbreak-rock-bar",
+  "q": "The Heartbreak Rock Bar, Benidorm",
+  "fallback": "Paseo de Levante, Benidorm",
+  "city": "benidorm",
+  "type": "bar",
+  "name": "The Heartbreak Rock Bar",
+  "zone": "Paseo de Levante",
+  "note": "Rock en directo con decoración motera"
+ },
+ {
+  "id": "cur:benidorm:zona-zona-guiri-rincon-de-loix",
+  "q": "Calle Gerona, Benidorm",
+  "fallback": "Calle Gerona, Benidorm",
+  "city": "benidorm",
+  "type": "zona",
+  "name": "Zona Guiri (Rincón de Loix)",
+  "zone": "Calle Gerona",
+  "note": "Calles Gerona, Lepanto y Mallorca: bares y pubs británicos"
+ },
+ {
+  "id": "cur:benidorm:zona-paseo-de-levante",
+  "q": "Avenida de Alcoi, Benidorm",
+  "fallback": "Avenida de Alcoi, Benidorm",
+  "city": "benidorm",
+  "type": "zona",
+  "name": "Paseo de Levante",
+  "zone": "Avenida de Alcoi",
+  "note": "Discotecas de playa con entrada gratis"
+ },
+ {
+  "id": "cur:lloret-de-mar:tropics-lloret",
+  "q": "Tropics Lloret, Lloret de Mar",
+  "fallback": null,
+  "city": "lloret-de-mar",
+  "type": "discoteca",
+  "name": "Tropics Lloret",
+  "zone": "",
+  "note": "Una de las más famosas, con 4 salas"
+ },
+ {
+  "id": "cur:lloret-de-mar:disco-prive-lloret",
+  "q": "Disco Prive Lloret, Lloret de Mar",
+  "fallback": null,
+  "city": "lloret-de-mar",
+  "type": "discoteca",
+  "name": "Disco Prive Lloret",
+  "zone": "",
+  "note": "Tres salas: R&B, hip hop, reggaeton y dance"
+ },
+ {
+  "id": "cur:lloret-de-mar:revolution-disco",
+  "q": "Revolution Disco, Lloret de Mar",
+  "fallback": null,
+  "city": "lloret-de-mar",
+  "type": "discoteca",
+  "name": "Revolution Disco",
+  "zone": "",
+  "note": "De las más grandes de la Costa Brava, 2.500 personas"
+ },
+ {
+  "id": "cur:lloret-de-mar:zona-carrer-de-la-riera",
+  "q": "Carrer de la Riera, Lloret de Mar",
+  "fallback": "Carrer de la Riera, Lloret de Mar",
+  "city": "lloret-de-mar",
+  "type": "zona",
+  "name": "Carrer de la Riera",
+  "zone": "Carrer de la Riera",
+  "note": "Bares, pubs y discotecas en el centro de Lloret"
+ },
+ {
+  "id": "cur:salou:flash-back-salou",
+  "q": "Flash Back Salou, Salou",
+  "fallback": null,
+  "city": "salou",
+  "type": "discoteca",
+  "name": "Flash Back Salou",
+  "zone": "",
+  "note": "La discoteca más completa de Salou"
+ },
+ {
+  "id": "cur:salou:enjoy-salou",
+  "q": "Enjoy Salou, Salou",
+  "fallback": null,
+  "city": "salou",
+  "type": "discoteca",
+  "name": "Enjoy Salou",
+  "zone": "",
+  "note": "De las más populares de la Costa Dorada"
+ },
+ {
+  "id": "cur:salou:tropical-salou",
+  "q": "Tropical Salou, Salou",
+  "fallback": null,
+  "city": "salou",
+  "type": "discoteca",
+  "name": "Tropical Salou",
+  "zone": "",
+  "note": "Mejor fiesta internacional"
+ },
+ {
+  "id": "cur:salou:city-hall-salou",
+  "q": "City Hall Salou, Salou",
+  "fallback": null,
+  "city": "salou",
+  "type": "discoteca",
+  "name": "City Hall Salou",
+  "zone": "",
+  "note": "La más elegante"
+ },
+ {
+  "id": "cur:salou:la-cage-salou",
+  "q": "La Cage Salou, Salou",
+  "fallback": null,
+  "city": "salou",
+  "type": "discoteca",
+  "name": "La Cage Salou",
+  "zone": "",
+  "note": "La mejor para gente joven"
+ },
+ {
+  "id": "cur:salou:nikita",
+  "q": "Nikita, Salou",
+  "fallback": null,
+  "city": "salou",
+  "type": "bar",
+  "name": "Nikita",
+  "zone": "",
+  "note": "Para empezar la noche"
+ },
+ {
+  "id": "cur:salou:zona-carrer-de-barcelona",
+  "q": "Carrer de Barcelona, Salou",
+  "fallback": "Carrer de Barcelona, Salou",
+  "city": "salou",
+  "type": "zona",
+  "name": "Carrer de Barcelona",
+  "zone": "Carrer de Barcelona",
+  "note": "La calle de los pubs y discotecas de Salou"
+ },
+ {
+  "id": "cur:valladolid:coocon-club",
+  "q": "Coocon Club, Valladolid",
+  "fallback": null,
+  "city": "valladolid",
+  "type": "discoteca",
+  "name": "Coocon Club",
+  "zone": "",
+  "note": "De los más activos, after muy reconocido"
+ },
+ {
+  "id": "cur:valladolid:asklepios",
+  "q": "Asklepios, Valladolid",
+  "fallback": "Centro, Valladolid",
+  "city": "valladolid",
+  "type": "discoteca",
+  "name": "Asklepios",
+  "zone": "Centro",
+  "note": "Abierta hasta muy tarde en pleno centro"
+ },
+ {
+  "id": "cur:valladolid:zerocafe",
+  "q": "Zerocafé, Valladolid",
+  "fallback": null,
+  "city": "valladolid",
+  "type": "bar",
+  "name": "Zerocafé",
+  "zone": "",
+  "note": "Espacio alternativo con más de 1.200 reseñas casi perfectas"
+ },
+ {
+  "id": "cur:valladolid:kafka",
+  "q": "Kafka, Valladolid",
+  "fallback": "La Antigua, Valladolid",
+  "city": "valladolid",
+  "type": "bar",
+  "name": "Kafka",
+  "zone": "La Antigua",
+  "note": "De los mejores bares de La Antigua"
+ },
+ {
+  "id": "cur:valladolid:el-farol",
+  "q": "El Farol, Valladolid",
+  "fallback": "Plaza de Cantarranas, Valladolid",
+  "city": "valladolid",
+  "type": "bar",
+  "name": "El Farol",
+  "zone": "Plaza de Cantarranas",
+  "note": "El bar más famoso de Cantarranas"
+ },
+ {
+  "id": "cur:valladolid:zona-san-miguel",
+  "q": "Plaza de San Miguel, Valladolid",
+  "fallback": "Plaza de San Miguel, Valladolid",
+  "city": "valladolid",
+  "type": "zona",
+  "name": "San Miguel",
+  "zone": "Plaza de San Miguel",
+  "note": "La zona con más ambiente: pubs bien decorados"
+ },
+ {
+  "id": "cur:valladolid:zona-plaza-coca-y-poniente",
+  "q": "Plaza de Coca, Valladolid",
+  "fallback": "Plaza de Coca, Valladolid",
+  "city": "valladolid",
+  "type": "zona",
+  "name": "Plaza Coca y Poniente",
+  "zone": "Plaza de Coca",
+  "note": "La zona \"cool\", house en IT o Cameo"
+ },
+ {
+  "id": "cur:valladolid:zona-paraiso-y-la-antigua",
+  "q": "Calle Paraíso, Valladolid",
+  "fallback": "Calle Paraíso, Valladolid",
+  "city": "valladolid",
+  "type": "zona",
+  "name": "Paraíso y La Antigua",
+  "zone": "Calle Paraíso",
+  "note": "Cervecerías, cachis y chupiterías baratas"
+ },
+ {
+  "id": "cur:valladolid:zona-macias-picavea",
+  "q": "Calle Macías Picavea, Valladolid",
+  "fallback": "Calle Macías Picavea, Valladolid",
+  "city": "valladolid",
+  "type": "zona",
+  "name": "Macías Picavea",
+  "zone": "Calle Macías Picavea",
+  "note": "Ambiente joven y buenos precios"
+ },
+ {
+  "id": "cur:vigo:rouge-vigo",
+  "q": "Rouge Vigo, Vigo",
+  "fallback": null,
+  "city": "vigo",
+  "type": "discoteca",
+  "name": "Rouge Vigo",
+  "zone": "",
+  "note": "Entre las mejores discotecas de Vigo"
+ },
+ {
+  "id": "cur:vigo:tokyo-disco",
+  "q": "Tokyo Disco, Vigo",
+  "fallback": null,
+  "city": "vigo",
+  "type": "discoteca",
+  "name": "Tokyo Disco",
+  "zone": "",
+  "note": "Muy popular"
+ },
+ {
+  "id": "cur:vigo:olimpo-vigo",
+  "q": "Olimpo Vigo, Vigo",
+  "fallback": null,
+  "city": "vigo",
+  "type": "discoteca",
+  "name": "Olimpo Vigo",
+  "zone": "",
+  "note": "Discoteca destacada"
+ },
+ {
+  "id": "cur:vigo:mondo-club",
+  "q": "Mondo Club, Vigo",
+  "fallback": null,
+  "city": "vigo",
+  "type": "discoteca",
+  "name": "Mondo Club",
+  "zone": "",
+  "note": "Club muy conocido"
+ },
+ {
+  "id": "cur:vigo:la-iguana-club",
+  "q": "La Iguana Club, Vigo",
+  "fallback": "Churruca, Vigo",
+  "city": "vigo",
+  "type": "sala",
+  "name": "La Iguana Club",
+  "zone": "Churruca",
+  "note": "Mítica sala de conciertos de Churruca"
+ },
+ {
+  "id": "cur:vigo:la-fabrica-de-chocolate",
+  "q": "La Fábrica de Chocolate, Vigo",
+  "fallback": "Churruca, Vigo",
+  "city": "vigo",
+  "type": "sala",
+  "name": "La Fábrica de Chocolate",
+  "zone": "Churruca",
+  "note": "Sala de conciertos y club"
+ },
+ {
+  "id": "cur:vigo:zona-churruca",
+  "q": "Rúa Churruca, Vigo",
+  "fallback": "Rúa Churruca, Vigo",
+  "city": "vigo",
+  "type": "zona",
+  "name": "Churruca",
+  "zone": "Rúa Churruca",
+  "note": "La zona alternativa: indie, funky y pop"
+ },
+ {
+  "id": "cur:vigo:zona-areal",
+  "q": "Rúa do Areal, Vigo",
+  "fallback": "Rúa do Areal, Vigo",
+  "city": "vigo",
+  "type": "zona",
+  "name": "Areal",
+  "zone": "Rúa do Areal",
+  "note": "Pubs, discotecas y terrazas hasta la madrugada"
+ },
+ {
+  "id": "cur:vigo:zona-casco-vello",
+  "q": "Praza da Constitución, Vigo",
+  "fallback": "Praza da Constitución, Vigo",
+  "city": "vigo",
+  "type": "zona",
+  "name": "Casco Vello",
+  "zone": "Praza da Constitución",
+  "note": "Bares y tapas en el casco antiguo"
+ },
+ {
+  "id": "cur:a-coruna:sala-pelicano",
+  "q": "Sala Pelícano, A Coruña",
+  "fallback": "Cantones, A Coruña",
+  "city": "a-coruna",
+  "type": "sala",
+  "name": "Sala Pelícano",
+  "zone": "Cantones",
+  "note": "Una de las salas de conciertos más espectaculares de Europa"
+ },
+ {
+  "id": "cur:a-coruna:backstage-club",
+  "q": "Backstage Club, A Coruña",
+  "fallback": null,
+  "city": "a-coruna",
+  "type": "discoteca",
+  "name": "Backstage Club",
+  "zone": "",
+  "note": "Emblemática, ambiente LGTBI+, para acabar la noche"
+ },
+ {
+  "id": "cur:a-coruna:el-tranvia",
+  "q": "El Tranvía, A Coruña",
+  "fallback": "Orzán, A Coruña",
+  "city": "a-coruna",
+  "type": "bar",
+  "name": "El Tranvía",
+  "zone": "Orzán",
+  "note": "Pub con encanto, copas y buena música"
+ },
+ {
+  "id": "cur:a-coruna:claro-boba",
+  "q": "Claro Boba!, A Coruña",
+  "fallback": "Orzán, A Coruña",
+  "city": "a-coruna",
+  "type": "bar",
+  "name": "Claro Boba!",
+  "zone": "Orzán",
+  "note": "Espacio LGTBIQ+ con ganas de pasarlo bien"
+ },
+ {
+  "id": "cur:a-coruna:la-chela",
+  "q": "La Chela, A Coruña",
+  "fallback": null,
+  "city": "a-coruna",
+  "type": "bar",
+  "name": "La Chela",
+  "zone": "",
+  "note": "Copas y speakeasy con actuaciones"
+ },
+ {
+  "id": "cur:a-coruna:zona-orzan-riazor",
+  "q": "Rúa do Orzán, A Coruña",
+  "fallback": "Rúa do Orzán, A Coruña",
+  "city": "a-coruna",
+  "type": "zona",
+  "name": "Orzán-Riazor",
+  "zone": "Rúa do Orzán",
+  "note": "La zona de pubs por excelencia"
+ },
+ {
+  "id": "cur:a-coruna:zona-la-marina-y-el-puerto",
+  "q": "Avenida da Mariña, A Coruña",
+  "fallback": "Avenida da Mariña, A Coruña",
+  "city": "a-coruna",
+  "type": "zona",
+  "name": "La Marina y el puerto",
+  "zone": "Avenida da Mariña",
+  "note": "Bares y terrazas junto al mar"
+ },
+ {
+  "id": "cur:a-coruna:zona-plaza-de-la-cormelana",
+  "q": "Praza da Cormelana, A Coruña",
+  "fallback": "Praza da Cormelana, A Coruña",
+  "city": "a-coruna",
+  "type": "zona",
+  "name": "Plaza de la Cormelana",
+  "zone": "Praza da Cormelana",
+  "note": "Bares y ambiente de noche"
+ },
+ {
+  "id": "cur:santiago-de-compostela:maycar",
+  "q": "Maycar, Santiago de Compostela",
+  "fallback": "Ensanche, Santiago de Compostela",
+  "city": "santiago-de-compostela",
+  "type": "discoteca",
+  "name": "Maycar",
+  "zone": "Ensanche",
+  "note": "Abierta desde 1969, el clásico para acabar la noche"
+ },
+ {
+  "id": "cur:santiago-de-compostela:sala-capitol",
+  "q": "Sala Capitol, Santiago de Compostela",
+  "fallback": null,
+  "city": "santiago-de-compostela",
+  "type": "sala",
+  "name": "Sala Capitol",
+  "zone": "",
+  "note": "Antiguo cine con conciertos y eventos"
+ },
+ {
+  "id": "cur:santiago-de-compostela:modus-vivendi",
+  "q": "Modus Vivendi, Santiago de Compostela",
+  "fallback": "Zona Vieja, Santiago de Compostela",
+  "city": "santiago-de-compostela",
+  "type": "bar",
+  "name": "Modus Vivendi",
+  "zone": "Zona Vieja",
+  "note": "Pub legendario con música en directo"
+ },
+ {
+  "id": "cur:santiago-de-compostela:zona-zona-vieja",
+  "q": "Rúa do Franco, Santiago de Compostela",
+  "fallback": "Rúa do Franco, Santiago de Compostela",
+  "city": "santiago-de-compostela",
+  "type": "zona",
+  "name": "Zona Vieja",
+  "zone": "Rúa do Franco",
+  "note": "Pubs y bares alternativos llenos de universitarios"
+ },
+ {
+  "id": "cur:santiago-de-compostela:zona-zona-nueva-santiago-de-chile",
+  "q": "Rúa de Santiago de Chile, Santiago de Compostela",
+  "fallback": "Rúa de Santiago de Chile, Santiago de Compostela",
+  "city": "santiago-de-compostela",
+  "type": "zona",
+  "name": "Zona Nueva (Santiago de Chile)",
+  "zone": "Rúa de Santiago de Chile",
+  "note": "Discotecas y locales comerciales del ensanche"
+ },
+ {
+  "id": "cur:gijon:zona-cimadevilla",
+  "q": "Cimadevilla, Gijón",
+  "fallback": "Cimadevilla, Gijón",
+  "city": "gijon",
+  "type": "zona",
+  "name": "Cimadevilla",
+  "zone": "Cimadevilla",
+  "note": "Barrio alternativo y rockero de bares y pubs"
+ },
+ {
+  "id": "cur:gijon:zona-fomento-y-marques-de-san-esteban",
+  "q": "Calle Marqués de San Esteban, Gijón",
+  "fallback": "Calle Marqués de San Esteban, Gijón",
+  "city": "gijon",
+  "type": "zona",
+  "name": "Fomento y Marqués de San Esteban",
+  "zone": "Calle Marqués de San Esteban",
+  "note": "Pubs y bares latinos"
+ },
+ {
+  "id": "cur:gijon:zona-playa-de-san-lorenzo",
+  "q": "Paseo del Muro de San Lorenzo, Gijón",
+  "fallback": "Paseo del Muro de San Lorenzo, Gijón",
+  "city": "gijon",
+  "type": "zona",
+  "name": "Playa de San Lorenzo",
+  "zone": "Paseo del Muro de San Lorenzo",
+  "note": "Pubs y terrazas junto a la playa"
+ },
+ {
+  "id": "cur:oviedo:zona-calle-mon",
+  "q": "Calle Mon, Oviedo",
+  "fallback": "Calle Mon, Oviedo",
+  "city": "oviedo",
+  "type": "zona",
+  "name": "Calle Mon",
+  "zone": "Calle Mon",
+  "note": "La zona de fiesta: bares, pubs y pequeñas discotecas hasta el amanecer"
+ },
+ {
+  "id": "cur:oviedo:zona-calle-gascona",
+  "q": "Calle Gascona, Oviedo",
+  "fallback": "Calle Gascona, Oviedo",
+  "city": "oviedo",
+  "type": "zona",
+  "name": "Calle Gascona",
+  "zone": "Calle Gascona",
+  "note": "Bulevar de la sidra, la calle con más ambiente"
+ },
+ {
+  "id": "cur:oviedo:kapital-oviedo",
+  "q": "Kapital Oviedo, Oviedo",
+  "fallback": "Calle Cimadevilla, Oviedo",
+  "city": "oviedo",
+  "type": "discoteca",
+  "name": "Kapital Oviedo",
+  "zone": "Calle Cimadevilla",
+  "note": "Discoteca en una de las calles de fiesta"
+ },
+ {
+  "id": "cur:santander:zona-canadio",
+  "q": "Plaza de Cañadío, Santander",
+  "fallback": "Plaza de Cañadío, Santander",
+  "city": "santander",
+  "type": "zona",
+  "name": "Cañadío",
+  "zone": "Plaza de Cañadío",
+  "note": "El epicentro de la noche en Santander"
+ },
+ {
+  "id": "cur:santander:zona-rio-de-la-pila",
+  "q": "Calle Río de la Pila, Santander",
+  "fallback": "Calle Río de la Pila, Santander",
+  "city": "santander",
+  "type": "zona",
+  "name": "Río de la Pila",
+  "zone": "Calle Río de la Pila",
+  "note": "Bares alternativos y pubs, mucha gente joven"
+ },
+ {
+  "id": "cur:santander:el-bogart",
+  "q": "El Bogart, Santander",
+  "fallback": "Calle Gómez Oreña, Santander",
+  "city": "santander",
+  "type": "bar",
+  "name": "El Bogart",
+  "zone": "Calle Gómez Oreña",
+  "note": "De los locales más emblemáticos de Cañadío"
+ },
+ {
+  "id": "cur:santander:el-bulin",
+  "q": "El Bulín, Santander",
+  "fallback": "Río de la Pila, Santander",
+  "city": "santander",
+  "type": "bar",
+  "name": "El Bulín",
+  "zone": "Río de la Pila",
+  "note": "Bar emblemático con gran música"
+ },
+ {
+  "id": "cur:santander:set-disco",
+  "q": "SET Disco, Santander",
+  "fallback": "Río de la Pila, Santander",
+  "city": "santander",
+  "type": "discoteca",
+  "name": "SET Disco",
+  "zone": "Río de la Pila",
+  "note": "Discoteca de Río de la Pila"
+ },
+ {
+  "id": "cur:san-sebastian:bataplan",
+  "q": "Bataplan, San Sebastián",
+  "fallback": "Playa de La Concha, San Sebastián",
+  "city": "san-sebastian",
+  "type": "discoteca",
+  "name": "Bataplan",
+  "zone": "Playa de La Concha",
+  "note": "La discoteca más famosa de Donostia, sobre La Concha, house y electrónica"
+ },
+ {
+  "id": "cur:san-sebastian:buga",
+  "q": "Buga, San Sebastián",
+  "fallback": "Parte Vieja, San Sebastián",
+  "city": "san-sebastian",
+  "type": "bar",
+  "name": "Buga",
+  "zone": "Parte Vieja",
+  "note": "Bar de pintxos que de noche se convierte en fiesta"
+ },
+ {
+  "id": "cur:san-sebastian:arkaitzpe",
+  "q": "Arkaitzpe, San Sebastián",
+  "fallback": "Calle Mayor, San Sebastián",
+  "city": "san-sebastian",
+  "type": "bar",
+  "name": "Arkaitzpe",
+  "zone": "Calle Mayor",
+  "note": "De bar de pintxos a centro de la fiesta"
+ },
+ {
+  "id": "cur:san-sebastian:zona-parte-vieja",
+  "q": "Calle 31 de Agosto, San Sebastián",
+  "fallback": "Calle 31 de Agosto, San Sebastián",
+  "city": "san-sebastian",
+  "type": "zona",
+  "name": "Parte Vieja",
+  "zone": "Calle 31 de Agosto",
+  "note": "200 bares: pintxos que se vuelven copas"
+ },
+ {
+  "id": "cur:san-sebastian:zona-reyes-catolicos",
+  "q": "Calle Reyes Católicos, San Sebastián",
+  "fallback": "Calle Reyes Católicos, San Sebastián",
+  "city": "san-sebastian",
+  "type": "zona",
+  "name": "Reyes Católicos",
+  "zone": "Calle Reyes Católicos",
+  "note": "Bares de copas junto a la catedral del Buen Pastor"
+ },
+ {
+  "id": "cur:san-sebastian:zona-gros",
+  "q": "Calle Zabaleta, San Sebastián",
+  "fallback": "Calle Zabaleta, San Sebastián",
+  "city": "san-sebastian",
+  "type": "zona",
+  "name": "Gros",
+  "zone": "Calle Zabaleta",
+  "note": "Bares y ambiente surfero junto a la Zurriola"
+ },
+ {
+  "id": "cur:pamplona:zona-calle-san-nicolas",
+  "q": "Calle San Nicolás, Pamplona",
+  "fallback": "Calle San Nicolás, Pamplona",
+  "city": "pamplona",
+  "type": "zona",
+  "name": "Calle San Nicolás",
+  "zone": "Calle San Nicolás",
+  "note": "21 bares en 190 metros, la mejor calle de tapeo de España"
+ },
+ {
+  "id": "cur:pamplona:zona-estafeta-y-jarauta",
+  "q": "Calle Estafeta, Pamplona",
+  "fallback": "Calle Estafeta, Pamplona",
+  "city": "pamplona",
+  "type": "zona",
+  "name": "Estafeta y Jarauta",
+  "zone": "Calle Estafeta",
+  "note": "Bares y pubs para todos los gustos"
+ },
+ {
+  "id": "cur:pamplona:zona-casco-viejo",
+  "q": "Plaza del Castillo, Pamplona",
+  "fallback": "Plaza del Castillo, Pamplona",
+  "city": "pamplona",
+  "type": "zona",
+  "name": "Casco Viejo",
+  "zone": "Plaza del Castillo",
+  "note": "El centro de la noche pamplonica"
+ },
+ {
+  "id": "cur:pamplona:zona-san-juan-e-iturrama",
+  "q": "Avenida de Bayona, Pamplona",
+  "fallback": "Avenida de Bayona, Pamplona",
+  "city": "pamplona",
+  "type": "zona",
+  "name": "San Juan e Iturrama",
+  "zone": "Avenida de Bayona",
+  "note": "Más pubs y discotecas para seguir"
+ },
+ {
+  "id": "cur:pamplona:la-cocina-vasca",
+  "q": "La Cocina Vasca, Pamplona",
+  "fallback": "Casco Viejo, Pamplona",
+  "city": "pamplona",
+  "type": "bar",
+  "name": "La Cocina Vasca",
+  "zone": "Casco Viejo",
+  "note": "Bar que se convierte en discoteca a partir de las 23:00"
+ },
+ {
+  "id": "cur:logrono:zona-calle-laurel",
+  "q": "Calle Laurel, Logroño",
+  "fallback": "Calle Laurel, Logroño",
+  "city": "logrono",
+  "type": "zona",
+  "name": "Calle Laurel",
+  "zone": "Calle Laurel",
+  "note": "La senda de los elefantes: más de 60 bares en 200 metros"
+ },
+ {
+  "id": "cur:logrono:zona-calle-san-juan",
+  "q": "Calle San Juan, Logroño",
+  "fallback": "Calle San Juan, Logroño",
+  "city": "logrono",
+  "type": "zona",
+  "name": "Calle San Juan",
+  "zone": "Calle San Juan",
+  "note": "Pinchos y tardeo"
+ },
+ {
+  "id": "cur:logrono:zona-calle-mayor-y-sagasta",
+  "q": "Calle Marqués de San Nicolás, Logroño",
+  "fallback": "Calle Marqués de San Nicolás, Logroño",
+  "city": "logrono",
+  "type": "zona",
+  "name": "Calle Mayor y Sagasta",
+  "zone": "Calle Marqués de San Nicolás",
+  "note": "Las calles más marchosas para copas"
+ },
+ {
+  "id": "cur:logrono:zona-discotecas-duquesa-de-la-victoria",
+  "q": "Calle Duquesa de la Victoria, Logroño",
+  "fallback": "Calle Duquesa de la Victoria, Logroño",
+  "city": "logrono",
+  "type": "zona",
+  "name": "Discotecas (Duquesa de la Victoria)",
+  "zone": "Calle Duquesa de la Victoria",
+  "note": "Donde están las discotecas"
+ },
+ {
+  "id": "cur:burgos:zona-las-llanas",
+  "q": "Llana de Afuera, Burgos",
+  "fallback": "Llana de Afuera, Burgos",
+  "city": "burgos",
+  "type": "zona",
+  "name": "Las Llanas",
+  "zone": "Llana de Afuera",
+  "note": "Junto a la catedral, la zona joven más animada"
+ },
+ {
+  "id": "cur:burgos:zona-las-bernardas",
+  "q": "Calle San Juan, Burgos",
+  "fallback": "Calle San Juan, Burgos",
+  "city": "burgos",
+  "type": "zona",
+  "name": "Las Bernardas",
+  "zone": "Calle San Juan",
+  "note": "Disco-bares para cuando todo cierra"
+ },
+ {
+  "id": "cur:burgos:the-classic-lounge",
+  "q": "The Classic Lounge, Burgos",
+  "fallback": "Llana de Afuera, Burgos",
+  "city": "burgos",
+  "type": "bar",
+  "name": "The Classic Lounge",
+  "zone": "Llana de Afuera",
+  "note": "Ambiente acogedor y música en vivo"
+ },
+ {
+  "id": "cur:leon:zona-barrio-humedo",
+  "q": "Plaza de San Martín, León",
+  "fallback": "Plaza de San Martín, León",
+  "city": "leon",
+  "type": "zona",
+  "name": "Barrio Húmedo",
+  "zone": "Plaza de San Martín",
+  "note": "La zona más emblemática: bares y ambiente desde las 22:00"
+ },
+ {
+  "id": "cur:leon:zona-barrio-romantico",
+  "q": "Plaza Mayor, León",
+  "fallback": "Plaza Mayor, León",
+  "city": "leon",
+  "type": "zona",
+  "name": "Barrio Romántico",
+  "zone": "Plaza Mayor",
+  "note": "Bares de copas y pubs"
+ },
+ {
+  "id": "cur:leon:glam-theatre",
+  "q": "Glam Theatre, León",
+  "fallback": "Barrio Húmedo, León",
+  "city": "leon",
+  "type": "bar",
+  "name": "Glam Theatre",
+  "zone": "Barrio Húmedo",
+  "note": "Discobar y bar de copas popular"
+ },
+ {
+  "id": "cur:leon:moloko",
+  "q": "Moloko, León",
+  "fallback": "Barrio Húmedo, León",
+  "city": "leon",
+  "type": "bar",
+  "name": "Moloko",
+  "zone": "Barrio Húmedo",
+  "note": "Ideal para las primeras copas"
+ },
+ {
+  "id": "cur:caceres:zona-la-madrila",
+  "q": "Calle Doctor Fleming, Cáceres",
+  "fallback": "Calle Doctor Fleming, Cáceres",
+  "city": "caceres",
+  "type": "zona",
+  "name": "La Madrila",
+  "zone": "Calle Doctor Fleming",
+  "note": "La zona de marcha de Cáceres"
+ },
+ {
+  "id": "cur:caceres:zona-plaza-mayor",
+  "q": "Plaza Mayor, Cáceres",
+  "fallback": "Plaza Mayor, Cáceres",
+  "city": "caceres",
+  "type": "zona",
+  "name": "Plaza Mayor",
+  "zone": "Plaza Mayor",
+  "note": "Donde empieza la noche"
+ },
+ {
+  "id": "cur:caceres:pantera-caceres",
+  "q": "Pantera Cáceres, Cáceres",
+  "fallback": "Avenida de España, Cáceres",
+  "city": "caceres",
+  "type": "discoteca",
+  "name": "Pantera Cáceres",
+  "zone": "Avenida de España",
+  "note": "Discoteca del centro"
+ },
+ {
+  "id": "cur:caceres:lambretta",
+  "q": "Lambretta, Cáceres",
+  "fallback": "Calle Venecia, Cáceres",
+  "city": "caceres",
+  "type": "discoteca",
+  "name": "Lambretta",
+  "zone": "Calle Venecia",
+  "note": "Bien valorada (4,2)"
+ },
+ {
+  "id": "cur:badajoz:aloha-badajoz",
+  "q": "Aloha Badajoz, Badajoz",
+  "fallback": "Recinto ferial, Badajoz",
+  "city": "badajoz",
+  "type": "discoteca",
+  "name": "Aloha Badajoz",
+  "zone": "Recinto ferial",
+  "note": "Discoteca al aire libre"
+ },
+ {
+  "id": "cur:badajoz:atenea-sala-teatro",
+  "q": "Atenea Sala Teatro, Badajoz",
+  "fallback": "Casco antiguo, Badajoz",
+  "city": "badajoz",
+  "type": "discoteca",
+  "name": "Atenea Sala Teatro",
+  "zone": "Casco antiguo",
+  "note": "Famosa por sus cócteles y decoración griega"
+ },
+ {
+  "id": "cur:badajoz:bambora",
+  "q": "Bambora, Badajoz",
+  "fallback": "Calle Zurbarán, Badajoz",
+  "city": "badajoz",
+  "type": "discoteca",
+  "name": "Bambora",
+  "zone": "Calle Zurbarán",
+  "note": "Pop, latino y electrónica"
+ },
+ {
+  "id": "cur:badajoz:zona-casco-antiguo",
+  "q": "Plaza Alta, Badajoz",
+  "fallback": "Plaza Alta, Badajoz",
+  "city": "badajoz",
+  "type": "zona",
+  "name": "Casco Antiguo",
+  "zone": "Plaza Alta",
+  "note": "Pequeños pubs en el centro"
+ },
+ {
+  "id": "cur:huelva:zona-pescaderia-y-munoz-de-vargas",
+  "q": "Avenida Pablo Rada, Huelva",
+  "fallback": "Avenida Pablo Rada, Huelva",
+  "city": "huelva",
+  "type": "zona",
+  "name": "Pescadería y Muñoz de Vargas",
+  "zone": "Avenida Pablo Rada",
+  "note": "Las principales zonas de marcha"
+ },
+ {
+  "id": "cur:huelva:zona-plaza-de-la-merced",
+  "q": "Plaza de la Merced, Huelva",
+  "fallback": "Plaza de la Merced, Huelva",
+  "city": "huelva",
+  "type": "zona",
+  "name": "Plaza de la Merced",
+  "zone": "Plaza de la Merced",
+  "note": "Zona universitaria de copas"
+ },
+ {
+  "id": "cur:huelva:tagomago",
+  "q": "Tagomago, Huelva",
+  "fallback": null,
+  "city": "huelva",
+  "type": "bar",
+  "name": "Tagomago",
+  "zone": "",
+  "note": "Pop y buen ambiente"
+ },
+ {
+  "id": "cur:huelva:mandala",
+  "q": "Mandala, Huelva",
+  "fallback": null,
+  "city": "huelva",
+  "type": "bar",
+  "name": "Mandala",
+  "zone": "",
+  "note": "Mirador-lounge referente del verano"
+ },
+ {
+  "id": "cur:almeria:zona-cuatro-calles",
+  "q": "Calle Trajano, Almería",
+  "fallback": "Calle Trajano, Almería",
+  "city": "almeria",
+  "type": "zona",
+  "name": "Cuatro Calles",
+  "zone": "Calle Trajano",
+  "note": "Bares y clubs: Trajano, González Egea, Padre Luque"
+ },
+ {
+  "id": "cur:almeria:zona-plaza-masnou",
+  "q": "Plaza Masnou, Almería",
+  "fallback": "Plaza Masnou, Almería",
+  "city": "almeria",
+  "type": "zona",
+  "name": "Plaza Masnou",
+  "zone": "Plaza Masnou",
+  "note": "Bares de copas del centro"
+ },
+ {
+  "id": "cur:jaen:sala-kharma",
+  "q": "Sala Kharma, Jaén",
+  "fallback": null,
+  "city": "jaen",
+  "type": "discoteca",
+  "name": "Sala Kharma",
+  "zone": "",
+  "note": "Discoteca, sala de conciertos, pub y terraza lounge"
+ },
+ {
+  "id": "cur:jaen:chubby-cheek",
+  "q": "Chubby-Cheek, Jaén",
+  "fallback": null,
+  "city": "jaen",
+  "type": "bar",
+  "name": "Chubby-Cheek",
+  "zone": "",
+  "note": "Club de jazz mítico"
+ },
+ {
+  "id": "cur:jaen:bundesbar",
+  "q": "Bundesbar, Jaén",
+  "fallback": null,
+  "city": "jaen",
+  "type": "bar",
+  "name": "Bundesbar",
+  "zone": "",
+  "note": "La mejor cervecería de Jaén"
+ },
+ {
+  "id": "cur:jaen:rock-states-pub",
+  "q": "Rock States Pub, Jaén",
+  "fallback": null,
+  "city": "jaen",
+  "type": "bar",
+  "name": "Rock States Pub",
+  "zone": "",
+  "note": "Bar rockero de la vieja escuela"
+ },
+ {
+  "id": "cur:jaen:zona-centro-bulevar-y-plaza-de-la-constitucion",
+  "q": "Plaza de la Constitución, Jaén",
+  "fallback": "Plaza de la Constitución, Jaén",
+  "city": "jaen",
+  "type": "zona",
+  "name": "Centro (Bulevar y Plaza de la Constitución)",
+  "zone": "Plaza de la Constitución",
+  "note": "Tapa gratis con la bebida y bares de copas"
+ },
+ {
+  "id": "cur:jerez-de-la-frontera:kapote",
+  "q": "Kapote, Jerez de la Frontera",
+  "fallback": "Avenida Álvaro Domecq, Jerez de la Frontera",
+  "city": "jerez-de-la-frontera",
+  "type": "bar",
+  "name": "Kapote",
+  "zone": "Avenida Álvaro Domecq",
+  "note": "Emblemático, decoración moderna y buena música"
+ },
+ {
+  "id": "cur:jerez-de-la-frontera:lacre",
+  "q": "Lacre, Jerez de la Frontera",
+  "fallback": "Avenida Álvaro Domecq, Jerez de la Frontera",
+  "city": "jerez-de-la-frontera",
+  "type": "bar",
+  "name": "Lacre",
+  "zone": "Avenida Álvaro Domecq",
+  "note": "Bar de copas emblemático"
+ },
+ {
+  "id": "cur:jerez-de-la-frontera:oxi-guadalete",
+  "q": "Öxi Guadalete, Jerez de la Frontera",
+  "fallback": null,
+  "city": "jerez-de-la-frontera",
+  "type": "bar",
+  "name": "Öxi Guadalete",
+  "zone": "",
+  "note": "Ambiente sofisticado y buena terraza"
+ },
+ {
+  "id": "cur:jerez-de-la-frontera:bereber",
+  "q": "Bereber, Jerez de la Frontera",
+  "fallback": null,
+  "city": "jerez-de-la-frontera",
+  "type": "discoteca",
+  "name": "Bereber",
+  "zone": "",
+  "note": "De las discotecas más conocidas de Jerez"
+ },
+ {
+  "id": "cur:jerez-de-la-frontera:sala-stage",
+  "q": "Sala Stage, Jerez de la Frontera",
+  "fallback": null,
+  "city": "jerez-de-la-frontera",
+  "type": "discoteca",
+  "name": "Sala Stage",
+  "zone": "",
+  "note": "Discoteca conocida"
+ },
+ {
+  "id": "cur:jerez-de-la-frontera:zona-avenida-alvaro-domecq",
+  "q": "Avenida Álvaro Domecq, Jerez de la Frontera",
+  "fallback": "Avenida Álvaro Domecq, Jerez de la Frontera",
+  "city": "jerez-de-la-frontera",
+  "type": "zona",
+  "name": "Avenida Álvaro Domecq",
+  "zone": "Avenida Álvaro Domecq",
+  "note": "Bares de copas de moda"
+ },
+ {
+  "id": "cur:jerez-de-la-frontera:zona-centro-plaza-del-arenal",
+  "q": "Plaza del Arenal, Jerez de la Frontera",
+  "fallback": "Plaza del Arenal, Jerez de la Frontera",
+  "city": "jerez-de-la-frontera",
+  "type": "zona",
+  "name": "Centro (Plaza del Arenal)",
+  "zone": "Plaza del Arenal",
+  "note": "Pubs y bares del centro"
+ },
+ {
+  "id": "cur:vitoria-gasteiz:zona-la-kutxi-cuchilleria",
+  "q": "Calle Cuchillería, Vitoria-Gasteiz",
+  "fallback": "Calle Cuchillería, Vitoria-Gasteiz",
+  "city": "vitoria-gasteiz",
+  "type": "zona",
+  "name": "La Kutxi (Cuchillería)",
+  "zone": "Calle Cuchillería",
+  "note": "La calle más llena de la noche vitoriana"
+ },
+ {
+  "id": "cur:vitoria-gasteiz:zona-la-cuesta-y-la-pinto",
+  "q": "Calle Pintorería, Vitoria-Gasteiz",
+  "fallback": "Calle Pintorería, Vitoria-Gasteiz",
+  "city": "vitoria-gasteiz",
+  "type": "zona",
+  "name": "La Cuesta y La Pinto",
+  "zone": "Calle Pintorería",
+  "note": "Bares y pubs del Casco Viejo"
+ },
+ {
+  "id": "cur:vitoria-gasteiz:zona-centro-dato-y-virgen-blanca",
+  "q": "Plaza de la Virgen Blanca, Vitoria-Gasteiz",
+  "fallback": "Plaza de la Virgen Blanca, Vitoria-Gasteiz",
+  "city": "vitoria-gasteiz",
+  "type": "zona",
+  "name": "Centro (Dato y Virgen Blanca)",
+  "zone": "Plaza de la Virgen Blanca",
+  "note": "Bares de diseño más tranquilos"
+ },
+ {
+  "id": "cur:vitoria-gasteiz:kubik",
+  "q": "Kubik, Vitoria-Gasteiz",
+  "fallback": null,
+  "city": "vitoria-gasteiz",
+  "type": "discoteca",
+  "name": "Kubik",
+  "zone": "",
+  "note": "Discoteca de Vitoria"
+ },
+ {
+  "id": "cur:vitoria-gasteiz:mitika",
+  "q": "Mítika, Vitoria-Gasteiz",
+  "fallback": null,
+  "city": "vitoria-gasteiz",
+  "type": "discoteca",
+  "name": "Mítika",
+  "zone": "",
+  "note": "Discoteca de Vitoria"
+ },
+ {
+  "id": "cur:vitoria-gasteiz:urban-rock-concept",
+  "q": "Urban Rock Concept, Vitoria-Gasteiz",
+  "fallback": null,
+  "city": "vitoria-gasteiz",
+  "type": "sala",
+  "name": "Urban Rock Concept",
+  "zone": "",
+  "note": "Sala de conciertos"
+ },
+ {
+  "id": "cur:torremolinos:zona-la-nogalera",
+  "q": "Plaza de La Nogalera, Torremolinos",
+  "fallback": "Plaza de La Nogalera, Torremolinos",
+  "city": "torremolinos",
+  "type": "zona",
+  "name": "La Nogalera",
+  "zone": "Plaza de La Nogalera",
+  "note": "El corazón de la noche y referente LGTBI+, de 1:00 a 4:00 a tope"
+ },
+ {
+  "id": "cur:torremolinos:parthenon",
+  "q": "Parthenon, Torremolinos",
+  "fallback": "La Nogalera, Torremolinos",
+  "city": "torremolinos",
+  "type": "discoteca",
+  "name": "Parthenon",
+  "zone": "La Nogalera",
+  "note": "Desde 1996, gran ambiente y shows"
+ },
+ {
+  "id": "cur:torremolinos:aqua-club",
+  "q": "Aqua Club, Torremolinos",
+  "fallback": null,
+  "city": "torremolinos",
+  "type": "discoteca",
+  "name": "Aqua Club",
+  "zone": "",
+  "note": "Discoteca y punto de encuentro"
+ },
+ {
+  "id": "cur:benalmadena:zona-puerto-marina",
+  "q": "Puerto Marina, Benalmádena",
+  "fallback": "Puerto Marina, Benalmádena",
+  "city": "benalmadena",
+  "type": "zona",
+  "name": "Puerto Marina",
+  "zone": "Puerto Marina",
+  "note": "Bares y discotecas del puerto deportivo"
+ },
+ {
+  "id": "cur:castellon:clams-disco",
+  "q": "Clams Disco, Castellón de la Plana",
+  "fallback": "Acceso Sur, Castellón de la Plana",
+  "city": "castellon",
+  "type": "discoteca",
+  "name": "Clams Disco",
+  "zone": "Acceso Sur",
+  "note": "La discoteca por excelencia de Castellón"
+ },
+ {
+  "id": "cur:castellon:zona-centro-historico",
+  "q": "Plaza Mayor, Castellón de la Plana",
+  "fallback": "Plaza Mayor, Castellón de la Plana",
+  "city": "castellon",
+  "type": "zona",
+  "name": "Centro histórico",
+  "zone": "Plaza Mayor",
+  "note": "Tapas que se convierten en copas"
+ },
+ {
+  "id": "cur:castellon:zona-playa-del-gurugu",
+  "q": "Playa del Gurugú, Castellón de la Plana",
+  "fallback": "Playa del Gurugú, Castellón de la Plana",
+  "city": "castellon",
+  "type": "zona",
+  "name": "Playa del Gurugú",
+  "zone": "Playa del Gurugú",
+  "note": "Discotecas y beach clubs junto al mar"
+ },
+ {
+  "id": "cur:peniscola:la-fleca",
+  "q": "La Fleca, Peñíscola",
+  "fallback": null,
+  "city": "peniscola",
+  "type": "discoteca",
+  "name": "La Fleca",
+  "zone": "",
+  "note": "De las discotecas más grandes y populares de la zona"
+ },
+ {
+  "id": "cur:girona:cu-cut",
+  "q": "Cu-Cut, Girona",
+  "fallback": "Barri Vell, Girona",
+  "city": "girona",
+  "type": "bar",
+  "name": "Cu-Cut",
+  "zone": "Barri Vell",
+  "note": "Local modernista desde 1983 con música alternativa"
+ },
+ {
+  "id": "cur:girona:cua-de-gall",
+  "q": "Cua de Gall, Girona",
+  "fallback": null,
+  "city": "girona",
+  "type": "bar",
+  "name": "Cua de Gall",
+  "zone": "",
+  "note": "Los mejores cócteles con tapitas"
+ },
+ {
+  "id": "cur:girona:gipsy",
+  "q": "Gipsy, Girona",
+  "fallback": null,
+  "city": "girona",
+  "type": "bar",
+  "name": "Gipsy",
+  "zone": "",
+  "note": "Cócteles en un local con paredes de roca"
+ },
+ {
+  "id": "cur:girona:lux-girona",
+  "q": "Lux Girona, Girona",
+  "fallback": null,
+  "city": "girona",
+  "type": "discoteca",
+  "name": "Lux Girona",
+  "zone": "",
+  "note": "Discoteca de Girona"
+ },
+ {
+  "id": "cur:girona:zona-barri-vell",
+  "q": "Barri Vell, Girona",
+  "fallback": "Barri Vell, Girona",
+  "city": "girona",
+  "type": "zona",
+  "name": "Barri Vell",
+  "zone": "Barri Vell",
+  "note": "Bares de copas y pubs con encanto"
+ },
+ {
+  "id": "cur:girona:zona-la-devesa",
+  "q": "Parc de la Devesa, Girona",
+  "fallback": "Parc de la Devesa, Girona",
+  "city": "girona",
+  "type": "zona",
+  "name": "La Devesa",
+  "zone": "Parc de la Devesa",
+  "note": "Bares y pubs junto al parque"
+ },
+ {
+  "id": "cur:lleida:sala-manolita",
+  "q": "Sala Manolita, Lleida",
+  "fallback": null,
+  "city": "lleida",
+  "type": "bar",
+  "name": "Sala Manolita",
+  "zone": "",
+  "note": "Referente de la noche, decoración años 70"
+ },
+ {
+  "id": "cur:lleida:baba-room",
+  "q": "Baba Room, Lleida",
+  "fallback": null,
+  "city": "lleida",
+  "type": "discoteca",
+  "name": "Baba Room",
+  "zone": "",
+  "note": "Discoteca de Lleida"
+ },
+ {
+  "id": "cur:albacete:zona-la-zona",
+  "q": "Calle Tejares, Albacete",
+  "fallback": "Calle Tejares, Albacete",
+  "city": "albacete",
+  "type": "zona",
+  "name": "La Zona",
+  "zone": "Calle Tejares",
+  "note": "La mayor zona de fiesta de Castilla-La Mancha, pubs hasta las 6"
+ },
+ {
+  "id": "cur:albacete:zona-calle-tejares",
+  "q": "Calle Tejares, Albacete",
+  "fallback": "Calle Tejares, Albacete",
+  "city": "albacete",
+  "type": "zona",
+  "name": "Calle Tejares",
+  "zone": "Calle Tejares",
+  "note": "Decenas de pubs y bares, marcha de los más jóvenes"
+ },
+ {
+  "id": "cur:toledo:zona-calle-alfileritos",
+  "q": "Calle Alfileritos, Toledo",
+  "fallback": "Calle Alfileritos, Toledo",
+  "city": "toledo",
+  "type": "zona",
+  "name": "Calle Alfileritos",
+  "zone": "Calle Alfileritos",
+  "note": "Bares y pubs junto a Zocodover, jueves universitarios"
+ },
+ {
+  "id": "cur:toledo:zona-santa-teresa",
+  "q": "Avenida de Europa, Toledo",
+  "fallback": "Avenida de Europa, Toledo",
+  "city": "toledo",
+  "type": "zona",
+  "name": "Santa Teresa",
+  "zone": "Avenida de Europa",
+  "note": "Zona moderna con bares y restaurantes"
+ },
+ {
+  "id": "cur:toledo:circulo-de-arte",
+  "q": "Círculo de Arte, Toledo",
+  "fallback": null,
+  "city": "toledo",
+  "type": "sala",
+  "name": "Círculo de Arte",
+  "zone": "",
+  "note": "Música en vivo en una antigua iglesia"
+ },
+ {
+  "id": "cur:ciudad-real:compay-disco-pub",
+  "q": "Compay Disco-Pub, Ciudad Real",
+  "fallback": null,
+  "city": "ciudad-real",
+  "type": "bar",
+  "name": "Compay Disco-Pub",
+  "zone": "",
+  "note": "Disco-pub para bailar"
+ },
+ {
+  "id": "cur:cuenca:la-edad-de-oro",
+  "q": "La Edad de Oro, Cuenca",
+  "fallback": null,
+  "city": "cuenca",
+  "type": "bar",
+  "name": "La Edad de Oro",
+  "zone": "",
+  "note": "Bar con decoración peculiar y música de los 70 y 80 a buen precio"
+ },
+ {
+  "id": "cur:cuenca:caotico-social-club",
+  "q": "Caótico Social Club, Cuenca",
+  "fallback": null,
+  "city": "cuenca",
+  "type": "bar",
+  "name": "Caótico Social Club",
+  "zone": "",
+  "note": "Club para bailar"
+ },
+ {
+  "id": "cur:soria:zona-la-zona-rota-de-calatanazor",
+  "q": "Calle Rota de Calatañazor, Soria",
+  "fallback": "Calle Rota de Calatañazor, Soria",
+  "city": "soria",
+  "type": "zona",
+  "name": "La Zona (Rota de Calatañazor)",
+  "zone": "Calle Rota de Calatañazor",
+  "note": "La zona de copas junto a la Plaza de Toros"
+ },
+ {
+  "id": "cur:soria:zona-real-y-zapateria",
+  "q": "Calle Zapatería, Soria",
+  "fallback": "Calle Zapatería, Soria",
+  "city": "soria",
+  "type": "zona",
+  "name": "Real y Zapatería",
+  "zone": "Calle Zapatería",
+  "note": "Bares alternativos de rock a salsa"
+ },
+ {
+  "id": "cur:segovia:zona-casco-antiguo",
+  "q": "Plaza Mayor, Segovia",
+  "fallback": "Plaza Mayor, Segovia",
+  "city": "segovia",
+  "type": "zona",
+  "name": "Casco Antiguo",
+  "zone": "Plaza Mayor",
+  "note": "Bares castellanos y discotecas modernas"
+ },
+ {
+  "id": "cur:segovia:la-guagua",
+  "q": "La Guagua, Segovia",
+  "fallback": null,
+  "city": "segovia",
+  "type": "bar",
+  "name": "La Guagua",
+  "zone": "",
+  "note": "Referente de la noche, gran oferta musical"
+ },
+ {
+  "id": "cur:palencia:zona-zona-vieja",
+  "q": "Calle Mayor Antigua, Palencia",
+  "fallback": "Calle Mayor Antigua, Palencia",
+  "city": "palencia",
+  "type": "zona",
+  "name": "Zona Vieja",
+  "zone": "Calle Mayor Antigua",
+  "note": "La zona de copas más animada"
+ },
+ {
+  "id": "cur:palencia:bar-mexico",
+  "q": "Bar México, Palencia",
+  "fallback": "Calle Mayor Antigua, Palencia",
+  "city": "palencia",
+  "type": "bar",
+  "name": "Bar México",
+  "zone": "Calle Mayor Antigua",
+  "note": "La mejor chupitería de Palencia"
+ },
+ {
+  "id": "cur:palencia:disco-bar-merlin",
+  "q": "Disco Bar Merlín, Palencia",
+  "fallback": "Zona Vieja, Palencia",
+  "city": "palencia",
+  "type": "bar",
+  "name": "Disco Bar Merlín",
+  "zone": "Zona Vieja",
+  "note": "Discobar de la Zona Vieja"
+ },
+ {
+  "id": "cur:avila:la-oca-cocktail-bar",
+  "q": "La Oca Cocktail Bar, Ávila",
+  "fallback": null,
+  "city": "avila",
+  "type": "bar",
+  "name": "La Oca Cocktail Bar",
+  "zone": "",
+  "note": "De los afterworks mejor valorados"
+ },
+ {
+  "id": "cur:avila:cafe-teatro-delicatessen",
+  "q": "Café Teatro Delicatessen, Ávila",
+  "fallback": null,
+  "city": "avila",
+  "type": "bar",
+  "name": "Café Teatro Delicatessen",
+  "zone": "",
+  "note": "Decoración original y copas a buen precio"
+ },
+ {
+  "id": "cur:huesca:monasterio",
+  "q": "Monasterio, Huesca",
+  "fallback": "Plaza de San Lorenzo, Huesca",
+  "city": "huesca",
+  "type": "bar",
+  "name": "Monasterio",
+  "zone": "Plaza de San Lorenzo",
+  "note": "Bar de copas que se llena el finde, 2x1"
+ },
+ {
+  "id": "cur:huesca:sala-street-theatre",
+  "q": "Sala Street Theatre, Huesca",
+  "fallback": "Centro, Huesca",
+  "city": "huesca",
+  "type": "bar",
+  "name": "Sala Street Theatre",
+  "zone": "Centro",
+  "note": "De los discobares más famosos"
+ },
+ {
+  "id": "cur:huesca:tarari-disco",
+  "q": "Tarari Disco, Huesca",
+  "fallback": "Plaza de los Fueros, Huesca",
+  "city": "huesca",
+  "type": "bar",
+  "name": "Tarari Disco",
+  "zone": "Plaza de los Fueros",
+  "note": "El bar de copas con mejor ambiente"
+ },
+ {
+  "id": "cur:huesca:warhol-pop",
+  "q": "Warhol Pop, Huesca",
+  "fallback": null,
+  "city": "huesca",
+  "type": "bar",
+  "name": "Warhol Pop",
+  "zone": "",
+  "note": "Discobar con música para todos"
+ },
+ {
+  "id": "cur:huesca:sala-eden",
+  "q": "Sala Edén, Huesca",
+  "fallback": null,
+  "city": "huesca",
+  "type": "sala",
+  "name": "Sala Edén",
+  "zone": "",
+  "note": "Sala de conciertos icónica con más de 20 años"
+ },
+ {
+  "id": "cur:huesca:zona-plaza-de-los-fueros",
+  "q": "Plaza de los Fueros, Huesca",
+  "fallback": "Plaza de los Fueros, Huesca",
+  "city": "huesca",
+  "type": "zona",
+  "name": "Plaza de los Fueros",
+  "zone": "Plaza de los Fueros",
+  "note": "Una de las zonas de copas de Huesca"
+ },
+ {
+  "id": "cur:lugo:zona-praza-do-campo-y-rua-nova",
+  "q": "Rúa Nova, Lugo",
+  "fallback": "Rúa Nova, Lugo",
+  "city": "lugo",
+  "type": "zona",
+  "name": "Praza do Campo y Rúa Nova",
+  "zone": "Rúa Nova",
+  "note": "Vinos y tapas gratis dentro de la muralla"
+ },
+ {
+  "id": "cur:lugo:zona-campo-castelo",
+  "q": "Campo Castelo, Lugo",
+  "fallback": "Campo Castelo, Lugo",
+  "city": "lugo",
+  "type": "zona",
+  "name": "Campo Castelo",
+  "zone": "Campo Castelo",
+  "note": "Terrazas y bares de todo tipo"
+ },
+ {
+  "id": "cur:lugo:zona-acea-de-olga",
+  "q": "Rúa Acea de Olga, Lugo",
+  "fallback": "Rúa Acea de Olga, Lugo",
+  "city": "lugo",
+  "type": "zona",
+  "name": "Acea de Olga",
+  "zone": "Rúa Acea de Olga",
+  "note": "Zona universitaria con locales hasta el amanecer"
+ },
+ {
+  "id": "cur:ourense:zona-os-vinos",
+  "q": "Rúa Lepanto, Ourense",
+  "fallback": "Rúa Lepanto, Ourense",
+  "city": "ourense",
+  "type": "zona",
+  "name": "Os Viños",
+  "zone": "Rúa Lepanto",
+  "note": "La zona de tapas y vinos por excelencia"
+ },
+ {
+  "id": "cur:elche:divine-club",
+  "q": "Divine Club, Elche",
+  "fallback": "Centro, Elche",
+  "city": "elche",
+  "type": "discoteca",
+  "name": "Divine Club",
+  "zone": "Centro",
+  "note": "De las discotecas más conocidas del centro"
+ },
+ {
+  "id": "cur:elche:zona-el-raval",
+  "q": "Carrer de Sant Josep, Elche",
+  "fallback": "Carrer de Sant Josep, Elche",
+  "city": "elche",
+  "type": "zona",
+  "name": "El Raval",
+  "zone": "Carrer de Sant Josep",
+  "note": "Bares y teterías que de noche son pubs"
+ },
+ {
+  "id": "cur:elche:zona-poligono-de-altabix",
+  "q": "Polígono Industrial Altabix, Elche",
+  "fallback": "Polígono Industrial Altabix, Elche",
+  "city": "elche",
+  "type": "zona",
+  "name": "Polígono de Altabix",
+  "zone": "Polígono Industrial Altabix",
+  "note": "La zona de clubs por excelencia"
+ },
+ {
+  "id": "cur:cartagena:the-superbar",
+  "q": "The Superbar, Cartagena",
+  "fallback": "Centro, Cartagena",
+  "city": "cartagena",
+  "type": "bar",
+  "name": "The Superbar",
+  "zone": "Centro",
+  "note": "Bar de tardeo de moda en calle peatonal"
+ },
+ {
+  "id": "cur:cartagena:cerveceria-principal",
+  "q": "Cervecería Principal, Cartagena",
+  "fallback": "Casco antiguo, Cartagena",
+  "city": "cartagena",
+  "type": "bar",
+  "name": "Cervecería Principal",
+  "zone": "Casco antiguo",
+  "note": "Ambiente animado en el casco antiguo"
+ },
+ {
+  "id": "cur:cartagena:al-borak-afterwork-gin-club",
+  "q": "Al Borak Afterwork & Gin Club, Cartagena",
+  "fallback": "Centro, Cartagena",
+  "city": "cartagena",
+  "type": "bar",
+  "name": "Al Borak Afterwork & Gin Club",
+  "zone": "Centro",
+  "note": "Copas relajadas con terraza"
+ },
+ {
+  "id": "cur:cartagena:zona-calle-del-carmen-y-mayor",
+  "q": "Calle Mayor, Cartagena",
+  "fallback": "Calle Mayor, Cartagena",
+  "city": "cartagena",
+  "type": "zona",
+  "name": "Calle del Carmen y Mayor",
+  "zone": "Calle Mayor",
+  "note": "Bares y tabernas del casco antiguo"
+ },
+ {
+  "id": "cur:cartagena:zona-paseo-alfonso-xiii",
+  "q": "Paseo Alfonso XIII, Cartagena",
+  "fallback": "Paseo Alfonso XIII, Cartagena",
+  "city": "cartagena",
+  "type": "zona",
+  "name": "Paseo Alfonso XIII",
+  "zone": "Paseo Alfonso XIII",
+  "note": "Ocio y bares"
+ },
+ {
+  "id": "cur:pontevedra:zona-paio-gomez-charino",
+  "q": "Rúa Paio Gómez Charino, Pontevedra",
+  "fallback": "Rúa Paio Gómez Charino, Pontevedra",
+  "city": "pontevedra",
+  "type": "zona",
+  "name": "Paio Gómez Charino",
+  "zone": "Rúa Paio Gómez Charino",
+  "note": "La calle principal de copas, junto a Cinco Rúas"
+ },
+ {
+  "id": "cur:pontevedra:zona-praza-do-teucro",
+  "q": "Praza do Teucro, Pontevedra",
+  "fallback": "Praza do Teucro, Pontevedra",
+  "city": "pontevedra",
+  "type": "zona",
+  "name": "Praza do Teucro",
+  "zone": "Praza do Teucro",
+  "note": "Plaza peatonal con bares y música en directo"
+ },
+ {
+  "id": "cur:pontevedra:itaca-copas",
+  "q": "Ítaca Copas, Pontevedra",
+  "fallback": "Zona Monumental, Pontevedra",
+  "city": "pontevedra",
+  "type": "bar",
+  "name": "Ítaca Copas",
+  "zone": "Zona Monumental",
+  "note": "Disco-pub con DJ"
+ },
+ {
+  "id": "cur:pontevedra:al-lio-coctel-bar",
+  "q": "Al-Lio Coctel Bar, Pontevedra",
+  "fallback": "Zona Monumental, Pontevedra",
+  "city": "pontevedra",
+  "type": "bar",
+  "name": "Al-Lio Coctel Bar",
+  "zone": "Zona Monumental",
+  "note": "Cócteles de calidad"
+ },
+ {
+  "id": "cur:gandia:falkata",
+  "q": "Falkata, Gandía",
+  "fallback": "Playa de Gandía, Gandía",
+  "city": "gandia",
+  "type": "discoteca",
+  "name": "Falkata",
+  "zone": "Playa de Gandía",
+  "note": "La más grande de la playa: 10.000 m² y seis escenarios"
+ },
+ {
+  "id": "cur:gandia:bacarra",
+  "q": "Bacarrá, Gandía",
+  "fallback": "Carrer del Navegant, Gandía",
+  "city": "gandia",
+  "type": "discoteca",
+  "name": "Bacarrá",
+  "zone": "Carrer del Navegant",
+  "note": "De las más famosas y antiguas, dos plantas y gran terraza"
+ },
+ {
+  "id": "cur:gandia:cocoloco",
+  "q": "Cocoloco, Gandía",
+  "fallback": "Playa de Gandía, Gandía",
+  "city": "gandia",
+  "type": "discoteca",
+  "name": "Cocoloco",
+  "zone": "Playa de Gandía",
+  "note": "22 años reuniendo a más de 2.000 personas cada noche"
+ },
+ {
+  "id": "cur:gandia:eclipse-gandia",
+  "q": "Eclipse Gandía, Gandía",
+  "fallback": "Playa de Gandía, Gandía",
+  "city": "gandia",
+  "type": "discoteca",
+  "name": "Eclipse Gandía",
+  "zone": "Playa de Gandía",
+  "note": "Para mayores de 25"
+ },
+ {
+  "id": "cur:gandia:zona-gandia-playa",
+  "q": "Passeig Marítim Neptú, Gandía",
+  "fallback": "Passeig Marítim Neptú, Gandía",
+  "city": "gandia",
+  "type": "zona",
+  "name": "Gandía Playa",
+  "zone": "Passeig Marítim Neptú",
+  "note": "Discotecas y chiringuitos con DJ en verano"
+ },
+ {
+  "id": "cur:sitges:zona-calle-del-pecado",
+  "q": "Carrer del Primer de Maig, Sitges",
+  "fallback": "Carrer del Primer de Maig, Sitges",
+  "city": "sitges",
+  "type": "zona",
+  "name": "Calle del Pecado",
+  "zone": "Carrer del Primer de Maig",
+  "note": "La calle de la noche de Sitges: bares y discotecas"
+ },
+ {
+  "id": "cur:sitges:pachito-sitges",
+  "q": "Pachito Sitges, Sitges",
+  "fallback": "Carrer del Primer de Maig, Sitges",
+  "city": "sitges",
+  "type": "bar",
+  "name": "Pachito Sitges",
+  "zone": "Carrer del Primer de Maig",
+  "note": "Desde 1969, referente de la noche"
+ },
+ {
+  "id": "cur:sitges:las-vegas-sitges",
+  "q": "Las Vegas Sitges, Sitges",
+  "fallback": "Carrer del Primer de Maig, Sitges",
+  "city": "sitges",
+  "type": "bar",
+  "name": "Las Vegas Sitges",
+  "zone": "Carrer del Primer de Maig",
+  "note": "Histórico desde los 50"
+ },
+ {
+  "id": "cur:sitges:everlasting-love",
+  "q": "Everlasting Love, Sitges",
+  "fallback": "Carrer del Primer de Maig, Sitges",
+  "city": "sitges",
+  "type": "bar",
+  "name": "Everlasting Love",
+  "zone": "Carrer del Primer de Maig",
+  "note": "Copas y baile en la calle del Pecado"
+ },
+ {
+  "id": "cur:maspalomas:zona-yumbo-centrum",
+  "q": "Yumbo Centrum, Maspalomas",
+  "fallback": "Yumbo Centrum, Maspalomas",
+  "city": "maspalomas",
+  "type": "zona",
+  "name": "Yumbo Centrum",
+  "zone": "Yumbo Centrum",
+  "note": "De centro comercial a epicentro LGTBI+ con más de 30 locales"
+ },
+ {
+  "id": "cur:maspalomas:zona-kasbah",
+  "q": "Centro Comercial Kasbah, Maspalomas",
+  "fallback": "Centro Comercial Kasbah, Maspalomas",
+  "city": "maspalomas",
+  "type": "zona",
+  "name": "Kasbah",
+  "zone": "Centro Comercial Kasbah",
+  "note": "Discotecas, pubs y terrazas al aire libre"
+ },
+ {
+  "id": "cur:maspalomas:pacha-gran-canaria",
+  "q": "Pachá Gran Canaria, Maspalomas",
+  "fallback": "Playa del Inglés, Maspalomas",
+  "city": "maspalomas",
+  "type": "discoteca",
+  "name": "Pachá Gran Canaria",
+  "zone": "Playa del Inglés",
+  "note": "Superclub con DJs internacionales"
+ },
+ {
+  "id": "cur:puerto-del-carmen:lanzarote-palace",
+  "q": "Lanzarote Palace, Puerto del Carmen",
+  "fallback": "Varadero, Puerto del Carmen",
+  "city": "puerto-del-carmen",
+  "type": "discoteca",
+  "name": "Lanzarote Palace",
+  "zone": "Varadero",
+  "note": "Se llena a partir de la 1"
+ },
+ {
+  "id": "cur:puerto-del-carmen:ibiza-disco-lanzarote",
+  "q": "Ibiza Disco Lanzarote, Puerto del Carmen",
+  "fallback": "Avenida de las Playas, Puerto del Carmen",
+  "city": "puerto-del-carmen",
+  "type": "discoteca",
+  "name": "Ibiza Disco Lanzarote",
+  "zone": "Avenida de las Playas",
+  "note": "De las discotecas más populares de Lanzarote"
+ },
+ {
+  "id": "cur:puerto-del-carmen:zona-avenida-de-las-playas",
+  "q": "Avenida de las Playas, Puerto del Carmen",
+  "fallback": "Avenida de las Playas, Puerto del Carmen",
+  "city": "puerto-del-carmen",
+  "type": "zona",
+  "name": "Avenida de las Playas",
+  "zone": "Avenida de las Playas",
+  "note": "Bares, clubs y música en directo junto al mar"
+ },
+ {
+  "id": "cur:corralejo:loft-fuerteventura",
+  "q": "Loft Fuerteventura, Corralejo",
+  "fallback": "Centro Comercial Atlántico, Corralejo",
+  "city": "corralejo",
+  "type": "discoteca",
+  "name": "Loft Fuerteventura",
+  "zone": "Centro Comercial Atlántico",
+  "note": "Frente a la playa, abierta todos los días hasta las 5:30"
+ },
+ {
+  "id": "cur:corralejo:zona-calle-principal-de-corralejo",
+  "q": "Avenida Nuestra Señora del Carmen, Corralejo",
+  "fallback": "Avenida Nuestra Señora del Carmen, Corralejo",
+  "city": "corralejo",
+  "type": "zona",
+  "name": "Calle Principal de Corralejo",
+  "zone": "Avenida Nuestra Señora del Carmen",
+  "note": "Bares y discotecas de Corralejo"
+ },
+ {
+  "id": "cur:merida:barocco-copas",
+  "q": "Barocco Copas, Mérida",
+  "fallback": "Plaza de la Constitución, Mérida",
+  "city": "merida",
+  "type": "bar",
+  "name": "Barocco Copas",
+  "zone": "Plaza de la Constitución",
+  "note": "Pub de copas abierto hasta las 4:30"
+ },
+ {
+  "id": "cur:merida:malamadre-the-club",
+  "q": "MalaMadre The Club, Mérida",
+  "fallback": null,
+  "city": "merida",
+  "type": "discoteca",
+  "name": "MalaMadre The Club",
+  "zone": "",
+  "note": "Discoteca muy popular (4,2)"
+ },
+ {
+  "id": "cur:merida:mamba-merida",
+  "q": "Mamba Mérida, Mérida",
+  "fallback": "Plaza de España, Mérida",
+  "city": "merida",
+  "type": "bar",
+  "name": "Mamba Mérida",
+  "zone": "Plaza de España",
+  "note": "Copas hasta las 4:30"
+ },
+ {
+  "id": "cur:ceuta:zona-parque-maritimo-y-puerto-deportivo",
+  "q": "Puerto Deportivo de Ceuta, Ceuta",
+  "fallback": "Puerto Deportivo de Ceuta, Ceuta",
+  "city": "ceuta",
+  "type": "zona",
+  "name": "Parque Marítimo y Puerto Deportivo",
+  "zone": "Puerto Deportivo de Ceuta",
+  "note": "Restaurantes, pubs y discotecas con ambiente el finde"
+ },
+ {
+  "id": "cur:conil-de-la-frontera:vintage-the-music-bar",
+  "q": "Vintage The Music Bar, Conil de la Frontera",
+  "fallback": "Plaza de la Constitución, Conil de la Frontera",
+  "city": "conil-de-la-frontera",
+  "type": "bar",
+  "name": "Vintage The Music Bar",
+  "zone": "Plaza de la Constitución",
+  "note": "Dos plantas con terraza y decoración retro"
+ },
+ {
+  "id": "cur:conil-de-la-frontera:palo-palo",
+  "q": "Palo Palo, Conil de la Frontera",
+  "fallback": "Plaza de España, Conil de la Frontera",
+  "city": "conil-de-la-frontera",
+  "type": "bar",
+  "name": "Palo Palo",
+  "zone": "Plaza de España",
+  "note": "Disco-pub muy animado"
+ },
+ {
+  "id": "cur:conil-de-la-frontera:el-cortijo-el-palmar",
+  "q": "El Cortijo El Palmar, Conil de la Frontera",
+  "fallback": "El Palmar, Conil de la Frontera",
+  "city": "conil-de-la-frontera",
+  "type": "discoteca",
+  "name": "El Cortijo El Palmar",
+  "zone": "El Palmar",
+  "note": "Discoteca al aire libre de verano hasta las 6"
+ },
+ {
+  "id": "cur:conil-de-la-frontera:icaro-conil",
+  "q": "Ícaro Conil, Conil de la Frontera",
+  "fallback": null,
+  "city": "conil-de-la-frontera",
+  "type": "discoteca",
+  "name": "Ícaro Conil",
+  "zone": "",
+  "note": "Dos salas: latino y techno-house"
+ },
+ {
+  "id": "cur:conil-de-la-frontera:zona-centro-de-conil",
+  "q": "Plaza de España, Conil de la Frontera",
+  "fallback": "Plaza de España, Conil de la Frontera",
+  "city": "conil-de-la-frontera",
+  "type": "zona",
+  "name": "Centro de Conil",
+  "zone": "Plaza de España",
+  "note": "Pubs y bares de verano"
+ },
+ {
+  "id": "cur:tarifa:cafe-central",
+  "q": "Café Central, Tarifa",
+  "fallback": "Casco antiguo, Tarifa",
+  "city": "tarifa",
+  "type": "bar",
+  "name": "Café Central",
+  "zone": "Casco antiguo",
+  "note": "El punto de encuentro, gran terraza"
+ },
+ {
+  "id": "cur:tarifa:bar-almedina",
+  "q": "Bar Almedina, Tarifa",
+  "fallback": "Castillo de Guzmán el Bueno, Tarifa",
+  "city": "tarifa",
+  "type": "bar",
+  "name": "Bar Almedina",
+  "zone": "Castillo de Guzmán el Bueno",
+  "note": "Bar precioso sobre la muralla"
+ },
+ {
+  "id": "cur:tarifa:cafe-del-mar-tarifa",
+  "q": "Café del Mar Tarifa, Tarifa",
+  "fallback": null,
+  "city": "tarifa",
+  "type": "discoteca",
+  "name": "Café del Mar Tarifa",
+  "zone": "",
+  "note": "Electrónica y house toda la noche"
+ },
+ {
+  "id": "cur:tarifa:zona-casco-antiguo-de-tarifa",
+  "q": "Calle Sancho IV El Bravo, Tarifa",
+  "fallback": "Calle Sancho IV El Bravo, Tarifa",
+  "city": "tarifa",
+  "type": "zona",
+  "name": "Casco antiguo de Tarifa",
+  "zone": "Calle Sancho IV El Bravo",
+  "note": "Bares, pubs y ambiente surfero"
+ },
+ {
+  "id": "cur:alaior:cova-d-en-xoroi",
+  "q": "Cova d'en Xoroi, Alaior",
+  "fallback": "Cala en Porter, Alaior",
+  "city": "alaior",
+  "type": "discoteca",
+  "name": "Cova d'en Xoroi",
+  "zone": "Cala en Porter",
+  "note": "Discoteca en una cueva en el acantilado, la más famosa de Menorca"
+ },
+ {
+  "id": "cur:mahon:akelarre-jazz-dance-club",
+  "q": "Akelarre Jazz & Dance Club, Mahón",
+  "fallback": "Moll de Ponent, Mahón",
+  "city": "mahon",
+  "type": "bar",
+  "name": "Akelarre Jazz & Dance Club",
+  "zone": "Moll de Ponent",
+  "note": "Música en directo en edificio histórico"
+ },
+ {
+  "id": "cur:mahon:zona-moll-de-llevant",
+  "q": "Moll de Llevant, Mahón",
+  "fallback": "Moll de Llevant, Mahón",
+  "city": "mahon",
+  "type": "zona",
+  "name": "Moll de Llevant",
+  "zone": "Moll de Llevant",
+  "note": "Bares y restaurantes en el puerto"
+ },
+ {
+  "id": "cur:ciutadella:jazzbah",
+  "q": "Jazzbah, Ciutadella de Menorca",
+  "fallback": "Puerto de Ciutadella, Ciutadella de Menorca",
+  "city": "ciutadella",
+  "type": "bar",
+  "name": "Jazzbah",
+  "zone": "Puerto de Ciutadella",
+  "note": "Sala de referencia con DJs y fiestas temáticas"
+ },
+ {
+  "id": "cur:ciutadella:kopas-club",
+  "q": "Kopas Club, Ciutadella de Menorca",
+  "fallback": "Puerto de Ciutadella, Ciutadella de Menorca",
+  "city": "ciutadella",
+  "type": "discoteca",
+  "name": "Kopas Club",
+  "zone": "Puerto de Ciutadella",
+  "note": "Club de varios niveles con terrazas"
+ },
+ {
+  "id": "cur:ciutadella:zona-puerto-de-ciutadella",
+  "q": "Port de Ciutadella, Ciutadella de Menorca",
+  "fallback": "Port de Ciutadella, Ciutadella de Menorca",
+  "city": "ciutadella",
+  "type": "zona",
+  "name": "Puerto de Ciutadella",
+  "zone": "Port de Ciutadella",
+  "note": "Bares y pequeños clubs en el puerto"
+ },
+ {
+  "id": "cur:tarragona:totem",
+  "q": "Tótem, Tarragona",
+  "fallback": "Rambla Pau Casals, Tarragona",
+  "city": "tarragona",
+  "type": "discoteca",
+  "name": "Tótem",
+  "zone": "Rambla Pau Casals",
+  "note": "De las mejores discotecas, público de más de 30"
+ },
+ {
+  "id": "cur:tarragona:hoto-lounge-club",
+  "q": "HOTO Lounge Club, Tarragona",
+  "fallback": "Carrer Major, Tarragona",
+  "city": "tarragona",
+  "type": "bar",
+  "name": "HOTO Lounge Club",
+  "zone": "Carrer Major",
+  "note": "Cócteles y shisha"
+ },
+ {
+  "id": "cur:tarragona:sala-el-cau",
+  "q": "Sala el Cau, Tarragona",
+  "fallback": "Baixada de la Misericòrdia, Tarragona",
+  "city": "tarragona",
+  "type": "bar",
+  "name": "Sala el Cau",
+  "zone": "Baixada de la Misericòrdia",
+  "note": "Dentro de una cueva del siglo I"
+ },
+ {
+  "id": "cur:tarragona:la-isla-del-mojito",
+  "q": "La Isla del Mojito, Tarragona",
+  "fallback": "Port Esportiu, Tarragona",
+  "city": "tarragona",
+  "type": "bar",
+  "name": "La Isla del Mojito",
+  "zone": "Port Esportiu",
+  "note": "Salsa, mojitos y conciertos en la marina"
+ },
+ {
+  "id": "cur:tarragona:zona-part-alta",
+  "q": "Carrer Major, Tarragona",
+  "fallback": "Carrer Major, Tarragona",
+  "city": "tarragona",
+  "type": "zona",
+  "name": "Part Alta",
+  "zone": "Carrer Major",
+  "note": "Bares de copas en el casco antiguo"
+ },
+ {
+  "id": "cur:tarragona:zona-port-esportiu",
+  "q": "Port Esportiu de Tarragona, Tarragona",
+  "fallback": "Port Esportiu de Tarragona, Tarragona",
+  "city": "tarragona",
+  "type": "zona",
+  "name": "Port Esportiu",
+  "zone": "Port Esportiu de Tarragona",
+  "note": "Bares de copas en el puerto"
+ },
+ {
+  "id": "cur:teruel:la-torre-pub",
+  "q": "La Torre Pub, Teruel",
+  "fallback": "Calle del Salvador, Teruel",
+  "city": "teruel",
+  "type": "bar",
+  "name": "La Torre Pub",
+  "zone": "Calle del Salvador",
+  "note": "Techo de cristal con la torre mudéjar dentro"
+ },
+ {
+  "id": "cur:teruel:scream-pub",
+  "q": "Scream Pub, Teruel",
+  "fallback": "Plaza Bolamar, Teruel",
+  "city": "teruel",
+  "type": "bar",
+  "name": "Scream Pub",
+  "zone": "Plaza Bolamar",
+  "note": "Pub del centro histórico"
+ },
+ {
+  "id": "cur:teruel:zona-calle-ovalo",
+  "q": "Paseo del Óvalo, Teruel",
+  "fallback": "Paseo del Óvalo, Teruel",
+  "city": "teruel",
+  "type": "zona",
+  "name": "Calle Óvalo",
+  "zone": "Paseo del Óvalo",
+  "note": "Bares y tapas"
+ },
+ {
+  "id": "cur:zamora:zona-calle-de-los-herreros",
+  "q": "Calle de los Herreros, Zamora",
+  "fallback": "Calle de los Herreros, Zamora",
+  "city": "zamora",
+  "type": "zona",
+  "name": "Calle de los Herreros",
+  "zone": "Calle de los Herreros",
+  "note": "Junto a la Plaza Mayor, famosa por sus bares de copas"
+ },
+ {
+  "id": "cur:nerja:zona-plaza-tutti-frutti",
+  "q": "Plaza Tutti Frutti, Nerja",
+  "fallback": "Plaza Tutti Frutti, Nerja",
+  "city": "nerja",
+  "type": "zona",
+  "name": "Plaza Tutti Frutti",
+  "zone": "Plaza Tutti Frutti",
+  "note": "El epicentro de la noche: pubs y discotecas hasta las 7"
+ },
+ {
+  "id": "cur:fuengirola:zona-calle-moncayo",
+  "q": "Calle Moncayo, Fuengirola",
+  "fallback": "Calle Moncayo, Fuengirola",
+  "city": "fuengirola",
+  "type": "zona",
+  "name": "Calle Moncayo",
+  "zone": "Calle Moncayo",
+  "note": "La zona de pubs de Fuengirola"
+ },
+ {
+  "id": "cur:fuengirola:zona-puerto-deportivo-de-fuengirola",
+  "q": "Puerto Deportivo de Fuengirola, Fuengirola",
+  "fallback": "Puerto Deportivo de Fuengirola, Fuengirola",
+  "city": "fuengirola",
+  "type": "zona",
+  "name": "Puerto Deportivo de Fuengirola",
+  "zone": "Puerto Deportivo de Fuengirola",
+  "note": "Ambiente más elegante"
+ }
+]

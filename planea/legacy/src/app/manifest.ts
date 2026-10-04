@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "PLANEA — ¿A dónde vas esta noche?",
+    name: "PLANEA — ¿Qué hacemos hoy?",
     short_name: "PLANEA",
-    description: "Discotecas, bares y zonas de ambiente de toda España. Di a dónde vas esta noche.",
-    start_url: "/",
+    description: "Descubre qué está pasando cerca de ti esta noche.",
+    start_url: "/ciudades",
     display: "standalone",
     background_color: "#09090d",
     theme_color: "#09090d",

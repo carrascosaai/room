@@ -1,16 +1,14 @@
 import Link from "next/link";
-import { LogoMark } from "@/components/shell/Logo";
 
 export default function NotFound() {
   return (
-    <main className="grid min-h-dvh place-items-center px-6 text-center">
-      <div>
-        <LogoMark size={48} className="mx-auto" />
-        <h1 className="mt-6 font-display text-4xl font-extrabold">Aquí no hay plan</h1>
-        <p className="mt-2 text-muted">La página que buscas no existe o ya ha terminado.</p>
-        <Link href="/ciudades" className="mt-6 inline-flex h-12 items-center rounded-full bg-lime px-6 font-semibold text-lime-ink">
-          Ver qué hay hoy
-        </Link>
+    <main className="mx-auto max-w-xl px-4 py-20 text-center">
+      <p className="text-5xl">🪩</p>
+      <h1 className="mt-4 font-display text-3xl font-extrabold">Aquí no hay fiesta</h1>
+      <p className="mt-2 text-muted">No encontramos esta página. Busca tu ciudad o mira el mapa.</p>
+      <div className="mt-6 flex justify-center gap-2">
+        <Link href="/" className="rounded-full bg-lime px-5 py-3 font-semibold text-lime-ink">Inicio</Link>
+        <Link href="/mapa" className="rounded-full border border-line-strong px-5 py-3 font-semibold">Mapa</Link>
       </div>
     </main>
   );
