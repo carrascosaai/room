@@ -2,8 +2,10 @@
 
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 import L from "leaflet";
 import "leaflet.markercluster";
+import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
 import { Layers, LocateFixed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { KINDS } from "@/lib/kinds";
@@ -119,10 +121,18 @@ export default function PlacesMap({
     for (const l of base.current) m.removeLayer(l);
     const t = BASE_STYLES[style].tiles;
     const opts = { tileSize: t.tileSize, zoomOffset: t.zoomOffset, maxZoom: 20, maxNativeZoom: t.maxNativeZoom, detectRetina: false };
-    const layers: L.Layer[] = [L.tileLayer(t.url, { ...opts, attribution: t.attribution, className: t.className ?? "" })];
+    let main: L.Layer;
+    if (t.vector) {
+      main = maplibreGL({ style: t.vector });
+      // El control de atribución de Leaflet lee getAttribution() de cada capa.
+      main.getAttribution = () => t.attribution;
+    } else {
+      main = L.tileLayer(t.url, { ...opts, attribution: t.attribution, className: t.className ?? "" });
+    }
+    const layers: L.Layer[] = [main];
     for (const url of t.labels ?? []) layers.push(L.tileLayer(url, { ...opts, pane: "overlayPane" }));
     for (const l of layers) l.addTo(m);
-    (layers[0] as L.TileLayer).bringToBack();
+    if (layers[0] instanceof L.TileLayer) layers[0].bringToBack();
     base.current = layers;
     el.current?.setAttribute("data-style", style);
     try {
