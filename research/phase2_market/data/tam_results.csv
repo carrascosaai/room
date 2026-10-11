@@ -1,0 +1,10 @@
+metrica,descripcion,formula,unidad,bajo,base,alto
+TAM_stock_UE,Estudiantes UE en F07 (stock),I1*I2,personas,2763600,2763600,2763600
+TAM_flujo_UE,Titulados UE en F07 por año (flujo),I3*I4,personas/año,597700,597700,597700
+SAM_UE_transfronterizo,"Titulados F07 de las familias objetivo que hacen prácticas en otro país UE, por año",I3*I4*I5*I6*A1,personas/año,48952,58742,68532
+SAM_ES_stock,Estudiantes en España de las familias objetivo (stock),I7*I8*A1,personas,99000,118800,151200
+SAM_ES_transfronterizo,Parte del SAM España que haría prácticas en otro país UE (aplicando I6),I7*I8*A1*I6,personas,20790,24948,31752
+SOM_ES_usuarios,Usuarios alcanzables en España en 24 meses,I7*I8*A1*A2,personas,1980,5940,15120
+SOM_ES_ingresos_B2C,Ingresos B2C anuales del SOM España,I7*I8*A1*A2*A3*A4,€/año,178,2138,14364
+Techo_B2C_UE,Ingresos B2C si se alcanzara TODO el SAM transfronterizo UE,I3*I4*I5*I6*A1*A3*A4,€/año,4406,21147,65106
+SOM_empleadores,Ingresos por publicaciones de pymes,A5*A6*A7,€/año,400,3000,23400

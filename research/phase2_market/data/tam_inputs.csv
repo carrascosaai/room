@@ -1,0 +1,16 @@
+id,descripcion,bajo,base,alto,tipo,fuente,fecha_consulta
+I1,Estudiantes de educación terciaria en la UE (2023),18800000,18800000,18800000,dato,https://ec.europa.eu/eurostat/statistics-explained/index.php/Tertiary_education_statistics,2026-10-11
+I2,Cuota de estudiantes terciarios UE en Ingeniería/Fabricación/Construcción (F07) 2023,0.147,0.147,0.147,dato,https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Tertiary_education_statistics,2026-10-11
+I3,Titulados terciarios UE por año (2022),4300000,4300000,4300000,dato secundario (resumen de terceros de Eurostat),https://studyond.com/insights/more-women-more-business-higher-education-in-the-eu,2026-10-11
+I4,Cuota de titulados UE en F07 (2024),0.139,0.139,0.139,dato,https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Tertiary_education_statistics,2026-10-11
+I5,Jóvenes 18-34 que han hecho ≥1 prácticas (Eurobarómetro 2023),0.78,0.78,0.78,dato,https://www.consilium.europa.eu/es/policies/trainee-rights/,2026-10-11
+I6,De quienes hicieron prácticas: en otro país de la UE (2023),0.21,0.21,0.21,dato,https://www.consilium.europa.eu/es/policies/trainee-rights/,2026-10-11
+I7,Estudiantes universitarios en España (2024-25 avance),1800000,1800000,1800000,"dato oficial (redondeo inferior: 'superando los 1,8 millones')",https://www.ciencia.gob.es/dam/jcr:08f45793-116d-4df2-8ddd-207662c3c6ee/PrincipalesResultadosEstudiantes2025.pdf,2026-10-11
+I8,Cuota F07 en España (se usa la de titulados 2022 como aproximación a la de matriculados),0.11,0.11,0.12,dato secundario + supuesto de aproximación,https://www.datenportal.bmbf.de/portal/en/Table-1.9.8.pdf,2026-10-11
+A1,Parte de F07 que corresponde a las familias objetivo (mecánica/industrial/eléctrica/electrónica/aeroespacial),0.5,0.6,0.7,supuesto sin fuente (F07 incluye también construcción/arquitectura y procesos),—,2026-10-11
+A2,Alcance acumulado del SAM España en 24 meses con 100-500 €,0.02,0.05,0.10,supuesto sin fuente,—,2026-10-11
+A3,Conversión de usuarios activos a pago (B2C),0.01,0.03,0.05,supuesto sin fuente (no hay datos de conversión de competidores),—,2026-10-11
+A4,Precio por temporada de 3 meses (€),9,12,19,hipótesis de precio a validar (fase 1),../business-model.md,2026-10-11
+A5,Empleadores pymes que pagarían publicar en 24 meses,20,50,150,supuesto sin fuente,—,2026-10-11
+A6,Publicaciones por empleador y año,1,2,4,supuesto sin fuente,—,2026-10-11
+A7,Precio por publicación (€) — referencia de mercado EUInternships 20-39 € e iAgora desde 23 €,20,30,39,dato de mercado (precio de competidores),https://www.euinternships.com/ ; https://www.iagora.com/careers/recruiters.html?lang=en,2026-10-11
