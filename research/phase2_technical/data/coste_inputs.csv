@@ -1,0 +1,21 @@
+id,descripcion,conservador,base,optimista,tipo,fuente
+n_empresas,Empresas cubiertas,30,30,30,decisión,muestra de esta auditoría
+frac_A,Fracción de empresas con API pública documentada (A),0.0,0.03,0.10,dato de la muestra (0–1 de 30) + supuesto,data/empresas_30.csv
+frac_B,Fracción con feed oficial XML/RSS (B),0.10,0.10,0.15,dato de la muestra (3 con patrón SuccessFactors) + supuesto,data/empresas_30.csv
+frac_C,Fracción con JSON o HTML público sin API (C),0.45,0.57,0.60,dato de la muestra (≈12 identificadas) + supuesto para ATS desconocidos,data/empresas_30.csv
+frac_M,Fracción que requiere revisión manual (PDF/bolsa/portal sin estructura),0.45,0.30,0.15,resto,—
+setup_A,Minutos de alta por empresa A,30,30,20,estimación,—
+setup_B,Minutos de alta por empresa B,90,60,45,estimación,—
+setup_C,Minutos de alta por empresa C (incluye revisión de términos y robots),180,120,90,estimación,—
+setup_M,Minutos de alta por empresa manual,45,30,20,estimación,—
+mant_A,Minutos/mes de mantenimiento por empresa A,10,5,5,estimación,—
+mant_B,Minutos/mes por empresa B,20,15,10,estimación,—
+mant_C,Minutos/mes por empresa C (roturas y bloqueos),60,40,25,estimación,—
+mant_M,Minutos/mes por empresa manual (revisión semanal),160,120,80,estimación,—
+ofertas_empresa_mes,Ofertas nuevas relevantes por empresa y mes,1,3,6,supuesto (fase 2: 93 relevantes en 57 empresas vistas por buscador; no es un censo),../phase2_market/data/offers.csv
+min_revision_oferta,"Minutos de revisión humana por oferta nueva (clasificar tipo y requisitos ✅/❌/❔)",6,4,3,estimación,—
+min_cierre_manual,Minutos/mes por oferta activa de fuente manual para confirmar vigencia,3,2,1,estimación,—
+vida_oferta_meses,Meses que una oferta permanece activa,2,2,2,supuesto,—
+euros_hora,Coste de oportunidad de la hora del fundador (€),15,15,15,supuesto,—
+infra_mes,"Infraestructura (BD; cron; email; dominio) €/mes",5,30,30,estimación,"Supabase Pro 25 $; Resend gratis/20 $ [T]"
+meses_amortizar_setup,Meses en los que se reparte el alta,12,12,12,decisión,—

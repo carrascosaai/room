@@ -1,0 +1,31 @@
+dia,semana,experimento,tarea,resultado_esperado
+1,S1,Preparar,Adaptar la landing y el formulario; crear UTM; hoja de métricas,Landing publicada
+2,S1,Datos,Seleccionar ≥20 ofertas relevantes verificadas (abrir URLs de phase2_market) para el envío n.º 1,Hoja de ofertas
+3,S1,E1,Mensaje a la red cercana y 2–3 grupos propios; pedir referidos,≥10 registros
+4,S1,E1,Agendar entrevistas (phase2_customers),≥5 entrevistas agendadas
+5,S1,E2,"Correos a AERRAAITI, IAESTE local, ESN y BEST (si existe en la ciudad)",4 correos enviados
+6,S1,Producto,Envío n.º 1 con encuesta de 1 pregunta,Envío enviado
+7,S1,Revisión,Panel semanal; aplicar criterios de parada,Panel actualizado
+8,S2,E3,Lanzar mensajes A y B con UTM distintos en el mismo canal,2 enlaces activos
+9,S2,E4,Reclutar 3 embajadores (escuelas distintas),3 embajadores
+10,S2,E5,Correos a 5 coordinadores de prácticas o COIE/ORI,5 correos
+11,S2,E9,Lista de 30 pymes con prácticas publicadas; primeros 10 contactos,10 contactos
+12,S2,Entrevistas,5 entrevistas,5 hechas
+13,S2,Producto,Envío n.º 2,Envío enviado
+14,S2,Revisión,Panel; decidir A o B; parar canales según P1–P7,Decisión registrada
+15,S3,E6,Publicación n.º 1 en LinkedIn y vídeo n.º 1,Publicados
+16,S3,E9,10 contactos con empresas más,10 contactos
+17,S3,E6,Publicación n.º 2 y vídeo n.º 2,Publicados
+18,S3,Entrevistas,5 entrevistas,5 hechas
+19,S3,E7 (condicional),"Comprobar las condiciones de anuncios; si se cumplen, preparar la campaña (≤150 €)",Decisión
+20,S3,Producto,Envío n.º 3 + encuesta de 1 pregunta,Envío enviado
+21,S3,Revisión,Panel; criterios de parada,Panel actualizado
+22,S4,E8,Escribir la página SEO de Pflichtpraktikum y convenios,Publicada e indexación pedida
+23,S4,E7,Campaña de anuncio de 5–7 días si procede,Campaña activa
+24,S4,E9,10 contactos con empresas más; pilotos gratuitos,≥3 pilotos
+25,S4,E6,Publicación n.º 3 y vídeo n.º 3,Publicados
+26,S4,Retención,Mini-encuesta '¿Qué hiciste con las ofertas?',Respuestas
+27,S4,Producto,Envío n.º 4,Envío enviado
+28,S4,Precios,Lanzar E2 del experimento de precios (phase2_customers/07) a los activados,Página de precios activa
+29,S4,Análisis,Calcular el embudo por canal; coste por usuario con valor,Panel final
+30,S4,Decisión,Criterios globales de criterios_parada.md + phase2_customers/08,Informe de 1 página

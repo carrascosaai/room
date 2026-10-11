@@ -1,0 +1,12 @@
+metrica,conservador,base,optimista
+horas_alta_inicial,55.12,42.15,32.88
+horas_mes_mantenimiento_conectores,50.5,30.23,14.5
+horas_mes_revision_ofertas,3.0,6.0,9.0
+horas_mes_verificar_cierres_manuales,1.35,1.8,0.9
+HORAS_MES_TOTAL,59.44,41.54,27.14
+ofertas_nuevas_mes,30.0,90.0,180.0
+ofertas_activas_promedio,60.0,180.0,360.0
+COSTE_MES_EUR,896.66,653.06,437.09
+coste_por_empresa_mes_eur,29.89,21.77,14.57
+coste_por_oferta_activa_mes_eur,14.94,3.63,1.21
+horas_mes_para_50_empresas,99.07,69.23,45.23

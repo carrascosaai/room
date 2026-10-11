@@ -1,0 +1,8 @@
+concepto,tipo,importe_eur,periodicidad,condicion
+Dominio (.com/.es),obligatorio,12–20,anual,Opcional el 1.er mes si se usa un subdominio gratuito
+"Landing, formulario, analítica, newsletter (capas gratuitas)",obligatorio,0,—,Revisar el uso comercial de cada plan gratuito
+Texto legal de privacidad (generador o revisión puntual),recomendado,0–60,único,—
+Vales para embajadores (3 × 30 €),opcional,0–90,único,Solo tras 15 registros por embajador
+Incentivos para entrevistas (10 × 5 €),opcional,0–50,único,Compartido con phase2_customers
+Anuncio de prueba (E7),opcional,0–150,único,Solo si se cumplen las condiciones de plan_experimentos §8; TikTok exige ≥20 $/día por grupo de anuncios
+TOTAL MÁXIMO 30 DÍAS,—,≤300 (obligatorio ~20),—,Margen hasta 1.000 € reservado para una 2.ª iteración

@@ -1,0 +1,20 @@
+actor,quien_paga,producto,precio_publicado,nivel_evidencia,fuente_url,nota,fecha_consulta
+InfoJobs,Empresa,Publicación de oferta,49 € la 1.ª oferta (pago único); packs sin precio público,T,https://internetpasoapaso.com/paginas-web-publicar-ofertas-de-empleo/,Agregador de terceros; Betterteam cita 69 €,2026-10-11
+StepStone (DE),Empresa,Anuncio,Pro 1.449 €/30 días; Pro Ultimate 2.499 €/60 días; Pro Campus 219 €/30 días (aprendices y trainees),T,https://jobjump.net/arbeitgeber/vergleich/stepstone-kosten,"Tabla de un competidor (jobjump), 06/2026",2026-10-11
+LinkedIn,Empresa,Oferta promocionada (PPC),"Mínimo ~7–10 $/día; CPC 1,5–4,5 $; ejemplo oficial: 10 $/día × 30 días ≤ 300 $",T/H,https://business.linkedin.com/hire/hiring-pro/pricing,Cifras en USD; sin precio específico para España,2026-10-11
+Indeed,Empresa,Sponsored Jobs,"Presupuesto 5–499 $/día; CPC 0,25–5 $; mínimo 25 $/día por oferta desde jul-2025 (según tercero)",T,https://hiretruffle.com/blog/indeed-pricing,EE. UU.; fuentes contradictorias sobre el modelo de cobro,2026-10-11
+iAgora,Empresa,Publicación de prácticas,Desde 23 € por oferta,C,https://www.iagora.com/careers/recruiters.html?lang=en,—,2026-10-11
+EUInternships,Empresa,Publicación 30 días,20 € (home) / 39 € (otras páginas),C,https://www.euinternships.com/,Precio contradictorio,2026-10-11
+Talentoteca (FUE),Empresa,Gestión de prácticas,400 €/año de adhesión + 12 % de la ayuda mensual (mín. 400 €/mes por 4 h/día),C,https://www.talentoteca.es/files/a/00eba616-1dad-11ef-ab18-02ad47e60269/folleto-start.pdf,Programa Start,2026-10-11
+JobTeaser,Empresa/universidad,Plataforma de carreras,Gratis para centros y estudiantes; pagan empresas (sin precio público); módulos premium para centros,C,https://helpcenter.jobteaser.com/hc/en-gb/articles/24694078058140-JobTeaser-s-Premium-Offer-Evolving-to-meet-your-needs,—,2026-10-11
+Handshake,Empresa,Plan empleador,Basic gratis; Plus ~100 $+/semana; TES mediana ~29.835 $/año,T,https://www.pin.com/blog/handshake-pricing/,EE. UU.; Vendr/Sacra vía Pin,2026-10-11
+Symplicity,Universidad,Licencia,"£12.050 por licencia (G-Cloud, producto no identificado)",T,https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/328620563073567,UK,2026-10-11
+Interstride,Universidad,Licencia,Sin precio público; acceso gratis para el estudiante vía universidad,C,https://mohr.uoregon.edu/blog/2026/03/16/job-search-as-an-international-student-with-interstride/,—,2026-10-11
+Headhunting España,Empresa,Honorario por contratación,"20–33 % del salario bruto anual (Factorial); 15–25/30 % (Manatal, general)",T,https://factorial.es/blog/headhunting-o-que-e/,No específico de perfiles junior,2026-10-11
+Simplify+,Estudiante,Suscripción,"19,99 $/semana; 39,99 $/mes; 89,99 $/trimestre; Copilot gratis",T,https://jobhire.ai/blog/simplify-jobs-review,Fase 1,2026-10-11
+Teal+,Estudiante,Suscripción,29 $/mes (semanal 9–13 $),T,https://toolradar.com/tools/teal-hq/pricing,Fase 1,2026-10-11
+Huntr Pro,Estudiante,Suscripción,"40 $/mes; 26,66 $/mes semestral; Basic gratis hasta 100 ofertas",T,https://jobshinobi.com/compare/teal-job-tracker-vs-huntr,Fase 1,2026-10-11
+Jobright,Estudiante,Suscripción,29–59 $/mes (no confirmado),T,https://atsverification.com/blog/jobright-ai-review-2026/,Fase 1,2026-10-11
+Glever Premium,Estudiante,Suscripción,10 $/mes; autofill básico gratis,C,https://glever.co/blog/apply-for-me,Fase 1,2026-10-11
+JobFill.ai / GoFillr,Estudiante,Suscripción autofill,"3,99 $/mes / 5,99 $/mes o 49 $/año",C/H,https://github.com/Jamalfox85/application-autofiller,Fase 1,2026-10-11
+workingstudentjobs.de,Estudiante,Agregador,Gratis para estudiantes; modelo de ingresos no verificado,C,https://www.workingstudentjobs.de/de/agb,—,2026-10-11

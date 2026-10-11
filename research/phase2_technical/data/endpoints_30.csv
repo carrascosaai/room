@@ -1,0 +1,8 @@
+sample_id,ats,identifier
+T01,workday,iberdrola.wd3.myworkdayjobs.com|iberdrola|iberdrola
+T02,workday,repsol.wd3.myworkdayjobs.com|repsol|Repsol
+T11,smartrecruiters,BoschGroup
+T18,workday,ag.wd3.myworkdayjobs.com|ag|Airbus
+T20,workday,thales.wd3.myworkdayjobs.com|thales|Careers
+T26,workday,asml.wd3.myworkdayjobs.com|asml|asmlext1
+T28,workday,abb.wd3.myworkdayjobs.com|abb|external_career_page
