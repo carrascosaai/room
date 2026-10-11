@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar de prácticas</title>
+<meta name="description" content="Prácticas y graduate programs de ingeniería en empresas industriales europeas, con los requisitos que de verdad pide cada empresa.">
+<!--
+  PLANTILLA DE VALIDACIÓN. No es el producto.
+  Antes de publicarla:
+    1. Sustituye FORM_URL por la URL de tu formulario (Tally / Google Forms) con consentimiento RGPD.
+    2. Sustituye PRIVACY_URL por tu política de privacidad (responsable, finalidad, base legal, conservación, derechos).
+    3. Sustituye N_EMPRESAS por el número real de empresas que revisas. No publiques cifras que no hayas medido.
+-->
+<style>
+  :root { --bg:#ffffff; --fg:#14181f; --muted:#5b6472; --card:#f4f6f9; --accent:#1f5fbf; --accent-fg:#ffffff; --border:#dde2ea; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#0f1318; --fg:#e8ecf2; --muted:#9aa4b2; --card:#181e26; --accent:#6aa3ff; --accent-fg:#0f1318; --border:#2a323d; }
+  }
+  :root[data-theme="dark"] { --bg:#0f1318; --fg:#e8ecf2; --muted:#9aa4b2; --card:#181e26; --accent:#6aa3ff; --accent-fg:#0f1318; --border:#2a323d; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:48px 16px 64px; }
+  h1 { font-size:clamp(1.7rem,4.5vw,2.4rem); line-height:1.2; margin:0 0 16px; }
+  p.lead { color:var(--muted); font-size:1.1rem; margin:0 0 28px; }
+  .cta { display:inline-block; background:var(--accent); color:var(--accent-fg); padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:600; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin:36px 0; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; }
+  .card h2 { font-size:1rem; margin:0 0 6px; }
+  .card p { margin:0; color:var(--muted); font-size:.95rem; }
+  .note { border-left:3px solid var(--accent); padding:8px 14px; color:var(--muted); margin:28px 0; }
+  .pass { border:1px dashed var(--border); border-radius:10px; padding:18px; margin-top:28px; }
+  footer { color:var(--muted); font-size:.85rem; margin-top:40px; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Prácticas y graduate programs de ingeniería en Europa, en un solo sitio.</h1>
+  <p class="lead">Revisamos cada semana los portales oficiales de N_EMPRESAS empresas industriales (energía, automoción, aeroespacial, maquinaria) y te decimos si encajas y cuándo abren las convocatorias. Tú solicitas en la web oficial de la empresa.</p>
+  <a class="cta" href="FORM_URL">Quiero entrar en la lista de espera</a>
+
+  <div class="grid">
+    <div class="card"><h2>Solo fuentes oficiales</h2><p>Cada oferta enlaza al portal de la empresa y muestra cuándo la vimos activa por última vez.</p></div>
+    <div class="card"><h2>¿Puedo optar?</h2><p>Prácticas obligatorias o voluntarias, convenio con tu universidad, idioma y residencia, señalados cuando la empresa los publica.</p></div>
+    <div class="card"><h2>Calendario de convocatorias</h2><p>Fechas de apertura de graduate programs y prácticas de verano, con aviso antes de que abran.</p></div>
+    <div class="card"><h2>Tu lista de empresas</h2><p>Elige empresas, países y titulación. Te avisamos solo de lo que encaja.</p></div>
+  </div>
+
+  <p class="note">Lo que no hacemos: no enviamos candidaturas en tu nombre ni prometemos "solicitar a todas con un clic". Las candidaturas se completan en la web de cada empresa.</p>
+
+  <div class="pass">
+    <strong>Pase de temporada: 12 € por 3 meses (próximamente)</strong>
+    <p>Alertas diarias, recordatorios de apertura y cierre, y filtros de elegibilidad avanzados. Aún no está disponible. Si te interesa, reserva tu plaza y te avisamos; no se cobra nada sin tu confirmación.</p>
+    <a href="FORM_URL?interes=pase">Reservar plaza</a>
+  </div>
+
+  <footer>
+    Proyecto en fase de validación. Tus datos solo se usan para avisarte del lanzamiento y puedes pedir su eliminación en cualquier momento.
+    <a href="PRIVACY_URL">Política de privacidad</a>.
+  </footer>
+</main>
+</body>
+</html>
