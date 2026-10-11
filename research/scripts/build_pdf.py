@@ -32,6 +32,7 @@ PARTS = [
         "protocolo_prueba.md", "elegibilidad.md", "legal_seguridad.md", "arquitectura.md", "riesgos.md"]]]),
     ("Fase 2 — Estrategia de captación", ["phase2_growth/README.md", "phase2_growth/plan_experimentos.md",
                                           "phase2_growth/mensajes.md", "phase2_growth/criterios_parada.md"]),
+    ("Estudio de nichos de mercado", ["nichos/README.md"]),
 ]
 
 # (título, csv, columnas a mostrar, filtro opcional)
@@ -63,6 +64,9 @@ ANNEXES = [
     ("A15. Calendario de 30 días", "phase2_growth/calendario_30_dias.csv", None, None),
     ("A16. Presupuesto de captación", "phase2_growth/presupuesto.csv", None, None),
     ("A17. Evidencia pública sobre el problema", "phase2_customers/evidencia_fuentes.csv", ["fuente", "nivel", "hallazgo", "url"], None),
+    ("A0. Nichos evaluados", "nichos/nichos.csv",
+     ["id", "nicho", "detonante_y_fecha", "quien_paga", "competencia_observada", "puntuacion_0_25", "veredicto"], None),
+    ("A0b. Fuentes del estudio de nichos", "nichos/fuentes.csv", None, None),
     ("A18. Fuentes de la fase 2 (mercado)", "phase2_market/data/sources.csv", ["fuente", "dato_usado", "url"], None),
 ]
 
@@ -151,7 +155,7 @@ def main():
         css.write_text(CSS, encoding="utf-8")
         before = Path(td, "cover.html")
         before.write_text('<div class="cover"><h1>Plataforma de prácticas y primer empleo de ingeniería</h1>'
-                          '<p>Informe completo de la investigación</p><p>Fases 1 y 2 · 2026-10-11</p>'
+                          '<p>Informe completo de la investigación</p><p>Fases 1 y 2 y estudio de nichos · 2026-10-11</p>'
                           '<p style="font-size:9pt;margin-top:60px">Leyenda de evidencia: [H] verificado · [S] secundario · [C] comercial · '
                           '[T] terceros · [U] usuario · [E] estimación · [Hip] hipótesis · NV no verificado</p></div>', encoding="utf-8")
         subprocess.run(["pandoc", str(src), "-f", "markdown+pipe_tables-yaml_metadata_block", "-t", "html5", "-s",
