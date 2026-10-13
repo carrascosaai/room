@@ -1,4 +1,4 @@
-import type { AppState, CategoryId, Cents, Expense, Member, Settlement } from './types';
+import type { AppState, CategoryId, Cents, Expense, Group, GroupKind, Member, OriginalAmount, Recurring, Settlement, SplitMode } from './types';
 
 /**
  * Formato que se intercambia con el servidor para un grupo compartido.
@@ -23,6 +23,18 @@ export interface RemoteExpense {
   source: Expense['source'];
   updatedAt: string;
   deleted: boolean;
+  /** Reparto y moneda original (opcional, para no perder cómo se hizo el gasto). */
+  extra?: { splitMode?: SplitMode; weights?: Record<string, number>; original?: OriginalAmount } | null;
+}
+
+/** Ajustes del grupo que se comparten (gana el cambio más reciente). */
+export interface RemoteGroupMeta {
+  name: string;
+  emoji: string;
+  kind: GroupKind | null;
+  currency: string | null;
+  meta: { weights?: Record<string, number>; budget?: Cents; trip?: Group['trip']; recurring?: Recurring[] };
+  updatedAt: string;
 }
 
 export interface RemoteSettlement {
@@ -36,13 +48,14 @@ export interface RemoteSettlement {
 }
 
 export interface GroupSnapshot {
-  group: { id: string; name: string; emoji: string; code: string };
+  group: { id: string; name: string; emoji: string; code: string } & Partial<Omit<RemoteGroupMeta, 'name' | 'emoji'>>;
   members: RemoteMember[];
   expenses: RemoteExpense[];
   settlements: RemoteSettlement[];
 }
 
 export interface GroupPush {
+  group?: RemoteGroupMeta;
   members: RemoteMember[];
   expenses: RemoteExpense[];
   settlements: RemoteSettlement[];
@@ -50,10 +63,36 @@ export interface GroupPush {
 
 const EPOCH = '1970-01-01T00:00:00.000Z';
 
+export function groupMeta(g: Group): RemoteGroupMeta {
+  return {
+    name: g.name,
+    emoji: g.emoji,
+    kind: g.kind ?? null,
+    currency: g.currency ?? null,
+    meta: { weights: g.weights, budget: g.budget, trip: g.trip, recurring: g.recurring },
+    updatedAt: g.updatedAt ?? g.createdAt,
+  };
+}
+
+/** Campos del grupo que vienen del servidor (si los trae). */
+function metaFromSnapshot(sg: GroupSnapshot['group']): Partial<Group> {
+  if (!sg.updatedAt) return {};
+  return {
+    kind: sg.kind ?? undefined,
+    currency: sg.currency ?? undefined,
+    weights: sg.meta?.weights,
+    budget: sg.meta?.budget,
+    trip: sg.meta?.trip,
+    recurring: sg.meta?.recurring,
+    updatedAt: sg.updatedAt,
+  };
+}
+
 /** Lo que este móvil envía al servidor para un grupo (incluidos los borrados pendientes). */
 export function buildPush(state: AppState, groupId: string): GroupPush {
   const group = state.groups.find((g) => g.id === groupId);
   if (!group) return { members: [], expenses: [], settlements: [] };
+  const meta = groupMeta(group);
   const members: RemoteMember[] = group.members.map((m) => ({
     id: m.id,
     name: m.name,
@@ -75,6 +114,7 @@ export function buildPush(state: AppState, groupId: string): GroupPush {
       source: e.source,
       updatedAt: e.updatedAt ?? e.date,
       deleted: false,
+      extra: e.splitMode || e.weights || e.original ? { splitMode: e.splitMode, weights: e.weights, original: e.original } : null,
     }));
   const settlements: RemoteSettlement[] = state.settlements
     .filter((s) => s.groupId === groupId)
@@ -88,7 +128,7 @@ export function buildPush(state: AppState, groupId: string): GroupPush {
       settlements.push({ ...base, from: '', to: '' });
     }
   }
-  return { members, expenses, settlements };
+  return { group: meta, members, expenses, settlements };
 }
 
 const newer = (a: string | undefined, b: string) => (a ?? EPOCH) > b;
@@ -144,6 +184,9 @@ export function applySnapshot(
       // Conservamos la nota privada de este móvil (p. ej. la tarjeta) si la había.
       note: l?.note,
       updatedAt: r.updatedAt,
+      ...(r.extra?.splitMode ? { splitMode: r.extra.splitMode } : {}),
+      ...(r.extra?.weights ? { weights: r.extra.weights } : {}),
+      ...(r.extra?.original ? { original: r.extra.original } : {}),
     });
   }
   for (const l of localExpenses.values()) {
@@ -179,8 +222,10 @@ export function applySnapshot(
       g.id === groupId
         ? {
             ...g,
-            name: snapshot.group.name,
-            emoji: snapshot.group.emoji,
+            // Los ajustes que haya cambiado yo durante la sincronización no se pisan.
+            ...(newer(g.updatedAt, syncStartedAt)
+              ? {}
+              : { name: snapshot.group.name, emoji: snapshot.group.emoji, ...metaFromSnapshot(snapshot.group) }),
             members,
             remote: { code: snapshot.group.code, lastSyncAt: now },
           }
@@ -207,6 +252,7 @@ export function groupFromSnapshot(snapshot: GroupSnapshot, meMemberId: string, n
       emoji: snapshot.group.emoji,
       createdAt: now,
       remote: { code: snapshot.group.code, lastSyncAt: now },
+      ...metaFromSnapshot(snapshot.group),
       members: snapshot.members.map((m) => ({
         id: m.id,
         name: m.name,

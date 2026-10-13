@@ -75,8 +75,38 @@ export function suggestTransfers(balance: Record<string, Cents>): Transfer[] {
   return transfers;
 }
 
-export function memberName(group: Group, memberId: string): string {
-  const m = group.members.find((x) => x.id === memberId);
-  if (!m) return '¿?';
-  return m.isMe ? 'Tú' : m.name;
+/**
+ * Reparte según pesos (pareja 60/40, una familia con 2 adultos que cuenta doble…).
+ * Usa el método del mayor resto para que la suma sea exacta.
+ */
+export function splitByWeights(amount: Cents, weights: Record<string, number>): Record<string, Cents> {
+  const entries = Object.entries(weights).filter(([, w]) => w > 0);
+  const totalW = entries.reduce((s, [, w]) => s + w, 0);
+  if (totalW === 0) return {};
+  const raw = entries.map(([id, w]) => ({ id, exact: (amount * w) / totalW }));
+  const shares: Record<string, Cents> = {};
+  let assigned = 0;
+  for (const r of raw) {
+    shares[r.id] = Math.floor(r.exact);
+    assigned += shares[r.id];
+  }
+  const order = [...raw].sort((a, b) => b.exact - Math.floor(b.exact) - (a.exact - Math.floor(a.exact)));
+  for (let i = 0; assigned < amount; i++, assigned++) shares[order[i % order.length].id] += 1;
+  return shares;
+}
+
+/** Para importes exactos por persona: cuánto falta (o sobra) para cuadrar con el total. */
+export function exactRemainder(amount: Cents, shares: Record<string, Cents>): Cents {
+  return amount - Object.values(shares).reduce((s, v) => s + v, 0);
+}
+
+/**
+ * A quién le toca pagar lo próximo: el que más debe (o el que menos ha puesto).
+ * Útil en parejas y pisos para ir equilibrando sin hacer transferencias.
+ */
+export function nextPayer(balance: Record<string, Cents>): string | null {
+  const entries = Object.entries(balance);
+  if (entries.length < 2) return null;
+  const [id, value] = entries.reduce((min, cur) => (cur[1] < min[1] ? cur : min));
+  return value < 0 ? id : null;
 }

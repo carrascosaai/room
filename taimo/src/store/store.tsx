@@ -37,6 +37,9 @@ export type Action =
   | { type: 'updateExpense'; expense: Expense }
   | { type: 'deleteExpense'; id: string }
   | { type: 'addGroup'; group: Group }
+  | { type: 'updateGroup'; groupId: string; changes: Partial<Omit<Group, 'id' | 'members' | 'remote'>> }
+  | { type: 'setFx'; fx: NonNullable<AppState['fx']> }
+  | { type: 'useCurrency'; currency: string }
   | { type: 'addMember'; groupId: string; member: Member }
   | { type: 'deleteGroup'; id: string }
   | { type: 'addSettlement'; settlement: Settlement }
@@ -80,11 +83,11 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, budgets: { ...state.budgets, [action.category]: action.amount } };
     case 'addExpense':
       return { ...state, expenses: [{ ...action.expense, updatedAt: now() }, ...state.expenses] };
-    case 'importExpenses':
-      return {
-        ...state,
-        expenses: [...action.expenses, ...state.expenses].sort((a, b) => b.date.localeCompare(a.date)),
-      };
+    case 'importExpenses': {
+      const known = new Set(state.expenses.map((e) => e.id));
+      const fresh = action.expenses.filter((e) => !known.has(e.id)).map((e) => ({ ...e, updatedAt: e.updatedAt ?? now() }));
+      return { ...state, expenses: [...fresh, ...state.expenses].sort((a, b) => b.date.localeCompare(a.date)) };
+    }
     case 'updateExpense': {
       const prev = state.expenses.find((e) => e.id === action.expense.id);
       // Si el usuario cambia la categoría, la recordamos para ese comercio.
@@ -111,7 +114,19 @@ export function reducer(state: AppState, action: Action): AppState {
       };
     }
     case 'addGroup':
-      return { ...state, groups: [...state.groups, action.group] };
+      return { ...state, groups: [...state.groups, { ...action.group, updatedAt: action.group.updatedAt ?? now() }] };
+    case 'updateGroup':
+      return {
+        ...state,
+        groups: state.groups.map((g) => (g.id === action.groupId ? { ...g, ...action.changes, updatedAt: now() } : g)),
+      };
+    case 'setFx':
+      return { ...state, fx: action.fx };
+    case 'useCurrency': {
+      // Las últimas monedas usadas, la más reciente primero (máx. 6).
+      const list = [action.currency, ...(state.recentCurrencies ?? []).filter((c) => c !== action.currency)].slice(0, 6);
+      return { ...state, recentCurrencies: list };
+    }
     case 'addMember':
       return {
         ...state,

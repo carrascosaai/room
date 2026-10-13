@@ -15,6 +15,7 @@ import { ensureNotificationPermission } from '@/notifications/local';
 import { newId, useStore } from '@/store/store';
 import { AuthButtons } from '@/ui/AuthButtons';
 import { Button, Card, CategoryBadge, Chip, H2, Input, Muted, Row, Screen, Title } from '@/ui/components';
+import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
 import { confirm } from '@/ui/confirm';
 import { colors, space } from '@/ui/theme';
 
@@ -29,6 +30,7 @@ export default function Settings() {
   const [csvMessage, setCsvMessage] = useState<string | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
+  const [pickingCurrency, setPickingCurrency] = useState(false);
 
   const pref = state.profile.language ?? 'auto';
   const langInfo = LANGUAGES.find((l) => l.code === lang)!;
@@ -131,11 +133,22 @@ export default function Settings() {
 
       <Card>
         <H2>{t('settings.currency')}</H2>
+        <Row>
+          <CurrencyButton value={i18n.currency} onPress={() => setPickingCurrency(true)} />
+          <Muted style={{ flex: 1 }}>{i18n.currencyName(i18n.currency)}</Muted>
+        </Row>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
           {CURRENCIES.map((c) => (
             <Chip key={c} label={c} selected={i18n.currency === c} onPress={() => dispatch({ type: 'setCurrency', currency: c })} />
           ))}
         </ScrollView>
+        <Button label={t('fx.open')} variant="ghost" onPress={() => router.push('/converter')} />
+        <CurrencyPicker
+          visible={pickingCurrency}
+          value={i18n.currency}
+          onClose={() => setPickingCurrency(false)}
+          onSelect={(c) => dispatch({ type: 'setCurrency', currency: c })}
+        />
       </Card>
 
       <Card>

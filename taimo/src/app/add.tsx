@@ -5,50 +5,100 @@ import { Alert, Platform, ScrollView, Text, TextInput, View } from 'react-native
 import { categoryStatus } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
 import { categorize } from '@/domain/categorize';
-import { splitEqually } from '@/domain/groups';
+import { exactRemainder, splitByWeights, splitEqually } from '@/domain/groups';
 import { parseAmount } from '@/domain/money';
-import type { CategoryId, Expense } from '@/domain/types';
+import type { CategoryId, Cents, Expense, SplitMode } from '@/domain/types';
+import { rateBetween } from '@/fx/fx';
+import { useRates } from '@/fx/useRates';
 import { useI18n } from '@/i18n';
 import { newId, reducer, useStore } from '@/store/store';
 import { Button, Chip, Input, Muted, Row, Screen } from '@/ui/components';
 import { confirm } from '@/ui/confirm';
+import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
 import { purchaseMessage } from '@/ui/messages';
 import { colors, radius, space } from '@/ui/theme';
 
+/** Pasa partes a la moneda base cuadrando céntimos con el total. */
+function scaleShares(shares: Record<string, Cents>, rate: number, total: Cents): Record<string, Cents> {
+  const out: Record<string, Cents> = {};
+  let sum = 0;
+  let biggest = '';
+  for (const [id, v] of Object.entries(shares)) {
+    out[id] = Math.round(v * rate);
+    sum += out[id];
+    if (!biggest || out[id] > out[biggest]) biggest = id;
+  }
+  if (biggest) out[biggest] += total - sum;
+  return out;
+}
+
 /**
  * Añadir o editar un gasto. Con `?id=` edita; con `?groupId=` empieza como gasto compartido.
+ * Admite cualquier moneda (se convierte a la tuya o a la del grupo) y repartos
+ * a partes iguales, por proporción o con importes exactos.
  */
 export default function AddExpense() {
   const params = useLocalSearchParams<{ id?: string; groupId?: string }>();
   const { state, dispatch } = useStore();
   const i18n = useI18n();
-  const { t, money, locale } = i18n;
+  const { t, moneyIn, number, locale } = i18n;
+  const { rates } = useRates();
   const editing = params.id ? state.expenses.find((e) => e.id === params.id) : undefined;
-
   const decimalSep = (1.5).toLocaleString(locale).includes(',') ? ',' : '.';
-  const [amountText, setAmountText] = useState(editing ? (editing.amount / 100).toFixed(2).replace('.', decimalSep) : '');
+  const fmtInput = (c: Cents) => (c / 100).toFixed(2).replace('.', decimalSep);
+
+  const [groupId, setGroupId] = useState<string | undefined>(editing?.groupId ?? params.groupId);
+  const group = state.groups.find((g) => g.id === groupId);
+  const base = group?.currency ?? i18n.currency;
+  const recentForeign = (state.recentCurrencies ?? []).find((c) => c !== base);
+  const [cur, setCur] = useState<string>(
+    editing?.original?.currency ?? (group?.kind === 'trip' && recentForeign ? recentForeign : base),
+  );
+  const [amountText, setAmountText] = useState(editing ? fmtInput(editing.original?.amount ?? editing.amount) : '');
   const [merchant, setMerchant] = useState(editing?.merchant ?? '');
   const [cat, setCat] = useState<CategoryId>(editing?.category ?? 'otros');
   const [catTouched, setCatTouched] = useState(Boolean(editing));
-  const [groupId, setGroupId] = useState<string | undefined>(editing?.groupId ?? params.groupId);
-  const group = state.groups.find((g) => g.id === groupId);
+  const [picking, setPicking] = useState(false);
+
   const me = group?.members.find((m) => m.isMe)?.id;
   const [paidBy, setPaidBy] = useState<string | undefined>(editing?.paidBy);
-  const [participants, setParticipants] = useState<string[] | undefined>(
-    editing?.shares ? Object.keys(editing.shares) : undefined,
+  const [participants, setParticipants] = useState<string[] | undefined>(editing?.shares ? Object.keys(editing.shares) : undefined);
+  const [mode, setMode] = useState<SplitMode>(editing?.splitMode ?? (group?.weights ? 'weights' : 'equal'));
+  const [weights, setWeights] = useState<Record<string, string>>(() =>
+    Object.fromEntries(Object.entries(editing?.weights ?? group?.weights ?? {}).map(([k, v]) => [k, String(v)])),
+  );
+  const [exact, setExact] = useState<Record<string, string>>(() =>
+    editing?.splitMode === 'exact' && editing.shares
+      ? Object.fromEntries(Object.entries(editing.shares).map(([k, v]) => [k, fmtInput(Math.round(v / (editing.original?.rate ?? 1)))]))
+      : {},
   );
 
   const effectivePaidBy = paidBy ?? me;
   const effectiveParticipants = participants ?? group?.members.map((m) => m.id) ?? [];
-  const amount = parseAmount(amountText) ?? 0;
-  const shares = useMemo(
-    () => (group ? splitEqually(amount, effectiveParticipants) : undefined),
-    [group, amount, effectiveParticipants],
+  const entered = parseAmount(amountText) ?? 0;
+  // Tipo de cambio: el guardado si editamos sin cambiar de moneda; si no, el del día.
+  const rate =
+    cur === base ? 1 : editing?.original?.currency === cur && editing.original.rate ? editing.original.rate : rateBetween(cur, base, rates) ?? 1;
+  const amount = Math.round(entered * rate);
+
+  const weightNums = Object.fromEntries(
+    effectiveParticipants.map((id) => [id, Number((weights[id] ?? '1').replace(',', '.')) || 0]),
   );
+  const exactNums = Object.fromEntries(effectiveParticipants.map((id) => [id, parseAmount(exact[id] ?? '') ?? 0]));
+  const exactLeft = mode === 'exact' ? exactRemainder(entered, exactNums) : 0;
+
+  const shares = useMemo(() => {
+    if (!group) return undefined;
+    if (mode === 'weights') return splitByWeights(amount, weightNums);
+    if (mode === 'exact') return scaleShares(exactNums, rate, amount);
+    return splitEqually(amount, effectiveParticipants);
+  }, [group, mode, amount, JSON.stringify(weightNums), JSON.stringify(exactNums), rate, effectiveParticipants.join()]);
 
   const suggested = merchant.trim() ? categorize(merchant, state.learnedCategories) : 'otros';
   const shownCat = catTouched ? cat : suggested;
-  const valid = amount > 0 && (!group || (effectivePaidBy && effectiveParticipants.length > 0));
+  const valid =
+    amount > 0 &&
+    (!group || (effectivePaidBy && effectiveParticipants.length > 0 && (mode !== 'exact' || exactLeft === 0)));
 
   function save() {
     if (!valid) return;
@@ -63,27 +113,34 @@ export default function AddExpense() {
       groupId: group?.id,
       paidBy: group ? effectivePaidBy : undefined,
       shares: group ? shares : undefined,
+      splitMode: group ? mode : undefined,
+      weights: group && mode === 'weights' ? weightNums : undefined,
+      original: cur !== base ? { amount: entered, currency: cur, rate } : undefined,
     };
     const action = editing ? ({ type: 'updateExpense', expense } as const) : ({ type: 'addExpense', expense } as const);
     dispatch(action);
+    dispatch({ type: 'useCurrency', currency: cur });
     if (!editing && Platform.OS !== 'web') {
       const next = reducer(state, action);
-      Alert.alert(t('add.savedTitle', { amount: money(amount) }), purchaseMessage(i18n, categoryStatus(next, expense.category)));
+      Alert.alert(t('add.savedTitle', { amount: moneyIn(amount, base) }), purchaseMessage(i18n, categoryStatus(next, expense.category)));
     }
     router.back();
   }
+
+  const name = (id: string) => {
+    const m = group?.members.find((x) => x.id === id);
+    return m?.isMe ? t('common.me') : m?.name ?? '?';
+  };
 
   return (
     <Screen>
       <Row style={{ justifyContent: 'space-between' }}>
         <Button label={t('common.cancel')} variant="ghost" onPress={() => router.back()} />
-        <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600' }}>
-          {editing ? t('add.editTitle') : t('add.newTitle')}
-        </Text>
+        <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600' }}>{editing ? t('add.editTitle') : t('add.newTitle')}</Text>
         <View style={{ width: 90 }} />
       </Row>
 
-      <View style={{ alignItems: 'center', gap: space.xs }}>
+      <View style={{ alignItems: 'center', gap: space.sm }}>
         <Muted>{t('add.amount')}</Muted>
         <Row>
           <TextInput
@@ -94,10 +151,15 @@ export default function AddExpense() {
             keyboardType="decimal-pad"
             autoFocus={!editing}
             accessibilityLabel={t('add.amount')}
-            style={{ color: colors.text, fontSize: 48, fontWeight: '800', minWidth: 120, textAlign: 'center' }}
+            style={{ color: colors.text, fontSize: 48, fontWeight: '800', width: Math.max(140, Math.min(260, (amountText.length || 4) * 30)), textAlign: 'center' }}
           />
-          <Text style={{ color: colors.textMuted, fontSize: 28 }}>{i18n.currency}</Text>
+          <CurrencyButton value={cur} onPress={() => setPicking(true)} />
         </Row>
+        {cur !== base ? (
+          <Muted style={{ textAlign: 'center' }}>
+            {t('fx.approx', { amount: moneyIn(amount, base) })} · {t('fx.rate', { from: cur, rate: number(rate, 5), to: base })}
+          </Muted>
+        ) : null}
       </View>
 
       <Input label={t('add.where')} placeholder={t('add.wherePlaceholder')} value={merchant} onChangeText={setMerchant} />
@@ -133,6 +195,8 @@ export default function AddExpense() {
                   setGroupId(g.id);
                   setPaidBy(undefined);
                   setParticipants(undefined);
+                  setMode(g.weights ? 'weights' : 'equal');
+                  setWeights(Object.fromEntries(Object.entries(g.weights ?? {}).map(([k, v]) => [k, String(v)])));
                 }}
               />
             ))}
@@ -145,26 +209,61 @@ export default function AddExpense() {
           <Muted>{t('add.paidBy')}</Muted>
           <Row style={{ flexWrap: 'wrap' }}>
             {group.members.map((m) => (
-              <Chip key={m.id} label={m.isMe ? t('common.me') : m.name} selected={effectivePaidBy === m.id} onPress={() => setPaidBy(m.id)} />
+              <Chip key={m.id} label={name(m.id)} selected={effectivePaidBy === m.id} onPress={() => setPaidBy(m.id)} />
             ))}
           </Row>
-          <Muted>{t('add.splitBetween')}</Muted>
+
           <Row style={{ flexWrap: 'wrap' }}>
-            {group.members.map((m) => {
-              const on = effectiveParticipants.includes(m.id);
-              return (
-                <Chip
-                  key={m.id}
-                  label={`${on ? '✓ ' : ''}${m.isMe ? t('common.me') : m.name}${shares?.[m.id] ? ` · ${money(shares[m.id])}` : ''}`}
-                  selected={on}
-                  onPress={() =>
-                    setParticipants(on ? effectiveParticipants.filter((x) => x !== m.id) : [...effectiveParticipants, m.id])
-                  }
-                />
-              );
-            })}
+            {(['equal', 'weights', 'exact'] as SplitMode[]).map((m) => (
+              <Chip key={m} label={t(`split.${m}`)} selected={mode === m} onPress={() => setMode(m)} />
+            ))}
           </Row>
-          {me && shares ? <Text style={{ color: colors.text }}>{t('add.myShareNote', { amount: money(shares[me] ?? 0) })}</Text> : null}
+
+          {mode === 'equal' ? (
+            <Row style={{ flexWrap: 'wrap' }}>
+              {group.members.map((m) => {
+                const on = effectiveParticipants.includes(m.id);
+                return (
+                  <Chip
+                    key={m.id}
+                    label={`${on ? '✓ ' : ''}${name(m.id)}${shares?.[m.id] ? ` · ${moneyIn(shares[m.id], base)}` : ''}`}
+                    selected={on}
+                    onPress={() =>
+                      setParticipants(on ? effectiveParticipants.filter((x) => x !== m.id) : [...effectiveParticipants, m.id])
+                    }
+                  />
+                );
+              })}
+            </Row>
+          ) : (
+            <View style={{ gap: space.sm }}>
+              {mode === 'weights' ? <Muted>{t('split.weightsHint')}</Muted> : null}
+              {group.members.map((m) => (
+                <Row key={m.id}>
+                  <Text style={{ color: colors.text, flex: 1 }}>{name(m.id)}</Text>
+                  <View style={{ width: 100 }}>
+                    <Input
+                      keyboardType="decimal-pad"
+                      value={mode === 'weights' ? weights[m.id] ?? '1' : exact[m.id] ?? ''}
+                      placeholder={mode === 'weights' ? '1' : `0${decimalSep}00`}
+                      onChangeText={(v) =>
+                        mode === 'weights' ? setWeights((w) => ({ ...w, [m.id]: v })) : setExact((e) => ({ ...e, [m.id]: v }))
+                      }
+                      style={{ textAlign: 'right', paddingVertical: 8 }}
+                    />
+                  </View>
+                  <Muted style={{ width: 90, textAlign: 'right' }}>{shares?.[m.id] !== undefined ? moneyIn(shares[m.id], base) : ''}</Muted>
+                </Row>
+              ))}
+              {mode === 'exact' && exactLeft !== 0 ? (
+                <Text style={{ color: colors.warning }}>
+                  {exactLeft > 0 ? t('split.remaining', { amount: moneyIn(exactLeft, cur) }) : t('split.over', { amount: moneyIn(-exactLeft, cur) })}
+                </Text>
+              ) : null}
+            </View>
+          )}
+
+          {me && shares ? <Text style={{ color: colors.text }}>{t('add.myShareNote', { amount: moneyIn(shares[me] ?? 0, base) })}</Text> : null}
         </View>
       ) : null}
 
@@ -182,6 +281,8 @@ export default function AddExpense() {
         />
       ) : null}
       {editing?.note ? <Muted>{editing.note}</Muted> : null}
+
+      <CurrencyPicker visible={picking} value={cur} onClose={() => setPicking(false)} onSelect={setCur} />
     </Screen>
   );
 }

@@ -41,10 +41,13 @@ export function pickLanguage(preferred: string[]): LanguageCode {
   return 'en';
 }
 
-/** Monedas que se pueden elegir. */
+import { isWorldCurrency } from '../fx/fx';
+
+/** Monedas más usadas (accesos rápidos). Se puede elegir cualquiera de las 155 del mundo. */
 export const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'NOK', 'SEK', 'DKK', 'PLN', 'CZK', 'RON', 'TRY', 'UAH', 'MXN', 'BRL', 'ARS', 'COP', 'CLP', 'CAD', 'AUD', 'JPY'] as const;
-export type CurrencyCode = (typeof CURRENCIES)[number];
+/** Código ISO 4217 de cualquier moneda del mundo. */
+export type CurrencyCode = string;
 
 export function isCurrency(v: unknown): v is CurrencyCode {
-  return CURRENCIES.includes(v as CurrencyCode);
+  return isWorldCurrency(v);
 }

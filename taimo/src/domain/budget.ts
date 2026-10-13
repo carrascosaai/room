@@ -1,5 +1,20 @@
+import { convert, FALLBACK, type Rates } from '../fx/fx';
+
 import { CATEGORIES } from './categories';
 import type { AppState, CategoryId, Cents, Expense, Group } from './types';
+
+/** Lo necesario para calcular "lo mío": grupos y, si los hay, tu moneda y tipos de cambio. */
+export type ShareState = Pick<AppState, 'expenses' | 'groups'> & Partial<Pick<AppState, 'profile' | 'fx'>>;
+
+/** Para pasar a tu moneda los gastos de grupos que llevan las cuentas en otra. */
+export interface HomeCurrency {
+  home?: string;
+  fx?: Rates;
+}
+
+export function homeOf(state: Partial<Pick<AppState, 'profile' | 'fx'>>): HomeCurrency {
+  return { home: state.profile?.currency, fx: state.fx };
+}
 
 /** Mes en formato "2026-10". */
 export function monthKey(date: Date | string): string {
@@ -20,25 +35,28 @@ function meIn(group: Group | undefined): string | undefined {
  * compartido solo cuenta mi parte, haya pagado yo o no. Así, si pago 100 € de
  * la compra del piso y me deben 50 €, mi presupuesto refleja 50 €, no 100 €.
  */
-export function myShare(expense: Expense, groups: Group[]): Cents {
+export function myShare(expense: Expense, groups: Group[], home: HomeCurrency = {}): Cents {
   if (!expense.groupId) return expense.amount;
   const group = groups.find((g) => g.id === expense.groupId);
   const me = meIn(group);
   if (!me || !expense.shares) return 0;
-  return expense.shares[me] ?? 0;
+  const share = expense.shares[me] ?? 0;
+  // Si el grupo lleva las cuentas en otra moneda, tu parte se pasa a la tuya.
+  if (group?.currency && home.home && group.currency !== home.home) {
+    return convert(share, group.currency, home.home, home.fx ?? FALLBACK) ?? share;
+  }
+  return share;
 }
 
 export function expensesInMonth(expenses: Expense[], month: string): Expense[] {
   return expenses.filter((e) => monthKey(e.date) === month);
 }
 
-export function spentByCategory(
-  state: Pick<AppState, 'expenses' | 'groups'>,
-  month: string,
-): Record<CategoryId, Cents> {
+export function spentByCategory(state: ShareState, month: string): Record<CategoryId, Cents> {
   const totals = Object.fromEntries(CATEGORIES.map((c) => [c.id, 0])) as Record<CategoryId, Cents>;
+  const home = homeOf(state);
   for (const e of expensesInMonth(state.expenses, month)) {
-    totals[e.category] += myShare(e, state.groups);
+    totals[e.category] += myShare(e, state.groups, home);
   }
   return totals;
 }
@@ -59,7 +77,7 @@ export interface MonthSummary {
 }
 
 export function monthSummary(
-  state: Pick<AppState, 'expenses' | 'groups' | 'budgets'>,
+  state: ShareState & Pick<AppState, 'budgets'>,
   today: Date = new Date(),
 ): MonthSummary {
   const month = monthKey(today);
@@ -88,7 +106,7 @@ export interface CategoryStatus {
 }
 
 export function categoryStatus(
-  state: Pick<AppState, 'expenses' | 'groups' | 'budgets'>,
+  state: ShareState & Pick<AppState, 'budgets'>,
   category: CategoryId,
   today: Date = new Date(),
 ): CategoryStatus {
@@ -101,21 +119,19 @@ export function categoryStatus(
 }
 
 /** Gasto mío por día del mes (índice 0 = día 1). */
-export function dailySpending(
-  state: Pick<AppState, 'expenses' | 'groups'>,
-  month: Date,
-): Cents[] {
+export function dailySpending(state: ShareState, month: Date): Cents[] {
   const days = new Array(daysInMonth(month)).fill(0);
   const key = monthKey(month);
+  const home = homeOf(state);
   for (const e of expensesInMonth(state.expenses, key)) {
-    days[new Date(e.date).getDate() - 1] += myShare(e, state.groups);
+    days[new Date(e.date).getDate() - 1] += myShare(e, state.groups, home);
   }
   return days;
 }
 
 /** Total mío de los últimos `count` meses, del más antiguo al actual. */
 export function monthlyTotals(
-  state: Pick<AppState, 'expenses' | 'groups'>,
+  state: ShareState,
   today: Date,
   count: number,
 ): { month: string; total: Cents }[] {
@@ -123,7 +139,7 @@ export function monthlyTotals(
   for (let i = count - 1; i >= 0; i--) {
     const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
     const key = monthKey(d);
-    const total = expensesInMonth(state.expenses, key).reduce((s, e) => s + myShare(e, state.groups), 0);
+    const total = expensesInMonth(state.expenses, key).reduce((s, e) => s + myShare(e, state.groups, homeOf(state)), 0);
     result.push({ month: key, total });
   }
   return result;

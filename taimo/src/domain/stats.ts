@@ -1,6 +1,6 @@
-import { myShare } from './budget';
+import { homeOf, myShare, type ShareState } from './budget';
 import { CATEGORIES } from './categories';
-import type { AppState, CategoryId, Cents, Expense } from './types';
+import type { CategoryId, Cents, Expense } from './types';
 
 export type Period = 'day' | 'week' | 'month' | 'year' | 'all';
 
@@ -75,19 +75,20 @@ function inRange(e: Expense, r: Range): boolean {
   return t >= r.start.getTime() && t < r.end.getTime();
 }
 
-function sum(expenses: Expense[], state: Pick<AppState, 'groups'>): Cents {
-  return expenses.reduce((s, e) => s + myShare(e, state.groups), 0);
+function sum(expenses: Expense[], state: ShareState): Cents {
+  return expenses.reduce((s, e) => s + myShare(e, state.groups, homeOf(state)), 0);
 }
 
 const DAY = 86_400_000;
 
 export function periodStats(
-  state: Pick<AppState, 'expenses' | 'groups'>,
+  state: ShareState,
   period: Period,
   anchor: Date,
   now: Date = new Date(),
 ): PeriodStats {
-  const mine = state.expenses.filter((e) => myShare(e, state.groups) > 0);
+  const home = homeOf(state);
+  const mine = state.expenses.filter((e) => myShare(e, state.groups, home) > 0);
 
   let range: Range;
   let previous: Range | null = null;
@@ -121,12 +122,12 @@ export function periodStats(
   }
 
   const byCat = new Map<CategoryId, Cents>();
-  for (const e of current) byCat.set(e.category, (byCat.get(e.category) ?? 0) + myShare(e, state.groups));
+  for (const e of current) byCat.set(e.category, (byCat.get(e.category) ?? 0) + myShare(e, state.groups, home));
   const byCategory = CATEGORIES.map((c) => ({ category: c.id, total: byCat.get(c.id) ?? 0 }))
     .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total);
 
-  const biggest = [...current].sort((a, b) => myShare(b, state.groups) - myShare(a, state.groups)).slice(0, 5);
+  const biggest = [...current].sort((a, b) => myShare(b, state.groups, home) - myShare(a, state.groups, home)).slice(0, 5);
 
   // Para la media solo cuentan los días que ya han pasado.
   const effectiveEnd = Math.min(range.end.getTime(), now.getTime() + 1);

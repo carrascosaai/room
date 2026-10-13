@@ -47,6 +47,7 @@ export function createRemoteGroup(group: { id: string; name: string; emoji: stri
     p_members: push.members,
     p_expenses: push.expenses,
     p_settlements: push.settlements,
+    p_group: push.group ?? null,
   });
 }
 
@@ -60,6 +61,7 @@ export function syncRemoteGroup(code: string, push: GroupPush) {
     p_members: push.members,
     p_expenses: push.expenses,
     p_settlements: push.settlements,
+    p_group: push.group ?? null,
   });
 }
 

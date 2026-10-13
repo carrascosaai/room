@@ -74,5 +74,18 @@ do $$ begin
 exception when no_data_found then null;
 end $$;
 
+-- v2: ajustes del grupo (tipo, moneda, presupuesto…) con "gana el más reciente".
+select public.taimo_sync(:'code', '[]', '[]', '[]',
+  '{"name":"Viaje a Japón","emoji":"✈️","kind":"trip","currency":"EUR","meta":{"budget":150000,"trip":{"start":"2026-11-01","end":"2026-11-10"}},"updatedAt":"2026-10-05T00:00:00Z"}') is not null;
+select public.taimo_sync(:'code', '[]', '[]', '[]',
+  '{"name":"viejo","emoji":"x","kind":"flat","currency":"USD","meta":{},"updatedAt":"2026-10-01T00:00:00Z"}') is not null;
+select (public.taimo_join(:'code')->'group') @> '{"name":"Viaje a Japón","kind":"trip","currency":"EUR","meta":{"budget":150000}}' as meta_ok \gset
+\if :meta_ok \else \echo 'FALLO ajustes del grupo' \quit \endif
+-- v2: el gasto conserva cómo se repartió y la moneda original.
+select (public.taimo_sync(:'code', '[]',
+  '[{"id":"e9","amount":1800,"merchant":"Ramen","category":"comer","date":"2026-11-02T10:00:00Z","paidBy":"m-ana","shares":{"m-ana":1200,"m-luis":600},"source":"manual","deleted":false,"updatedAt":"2026-11-02T10:00:00Z","extra":{"splitMode":"weights","weights":{"m-ana":2,"m-luis":1},"original":{"amount":300000,"currency":"JPY","rate":0.006}}}]')
+  -> 'expenses') @> '[{"id":"e9","extra":{"original":{"currency":"JPY"}}}]' as extra_ok \gset
+\if :extra_ok \else \echo 'FALLO extra del gasto' \quit \endif
+
 \echo 'OK: todas las pruebas de grupos pasan'
 rollback;

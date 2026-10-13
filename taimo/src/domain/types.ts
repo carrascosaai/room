@@ -14,7 +14,18 @@ export type CategoryId =
   | 'suscripciones'
   | 'otros';
 
-export type ExpenseSource = 'manual' | 'applepay' | 'notificacion' | 'csv';
+export type ExpenseSource = 'manual' | 'applepay' | 'notificacion' | 'csv' | 'fijo';
+
+/** Cómo se reparte un gasto de grupo. */
+export type SplitMode = 'equal' | 'weights' | 'exact';
+
+/** Importe original cuando se pagó en otra moneda (p. ej. 3.000 JPY en un viaje). */
+export interface OriginalAmount {
+  amount: Cents;
+  currency: string;
+  /** Unidades de la moneda base (la del grupo o la tuya) por 1 unidad de la original, fijado el día del gasto. */
+  rate: number;
+}
 
 export interface Expense {
   id: string;
@@ -32,6 +43,12 @@ export interface Expense {
   paidBy?: string;
   /** Parte de cada miembro (céntimos). La suma debe ser igual a `amount`. */
   shares?: Record<string, Cents>;
+  /** Cómo se calcularon las partes (para poder editarlo igual). */
+  splitMode?: SplitMode;
+  /** Pesos usados con splitMode 'weights' (p. ej. { ana: 60, luis: 40 }). */
+  weights?: Record<string, number>;
+  /** Si se pagó en otra moneda: importe y tipo de cambio originales. `amount` ya está convertido. */
+  original?: OriginalAmount;
   /** Última modificación (ISO). Sirve para sincronizar grupos: gana el cambio más reciente. */
   updatedAt?: string;
 }
@@ -46,12 +63,37 @@ export interface Member {
   updatedAt?: string;
 }
 
+export type GroupKind = 'couple' | 'flat' | 'trip' | 'other';
+
+/** Gasto fijo que se repite cada mes (alquiler, luz, Netflix compartido…). */
+export interface Recurring {
+  id: string;
+  name: string;
+  amount: Cents;
+  category: CategoryId;
+  paidBy: string;
+  /** Día del mes en que se apunta (1–28). */
+  day: number;
+}
+
 export interface Group {
   id: string;
   name: string;
   emoji: string;
   members: Member[];
   createdAt: string;
+  kind?: GroupKind;
+  /** Moneda en la que se llevan las cuentas del grupo (por defecto, la tuya). */
+  currency?: string;
+  /** Reparto por defecto: peso de cada miembro (pareja 60/40, familia con 2 adultos…). */
+  weights?: Record<string, number>;
+  /** Presupuesto: total del viaje, o mensual para pareja y piso. */
+  budget?: Cents;
+  /** Fechas del viaje (ISO, solo fecha). */
+  trip?: { start?: string; end?: string };
+  recurring?: Recurring[];
+  /** Última modificación de los ajustes del grupo (para sincronizar). */
+  updatedAt?: string;
   /** Si el grupo está compartido en la nube: código de invitación y última sincronización. */
   remote?: { code: string; lastSyncAt?: string };
 }
@@ -77,7 +119,7 @@ export interface Tombstone {
 
 export interface Profile {
   name: string;
-  /** Código ISO 4217 ("EUR", "NOK"…). */
+  /** Tu moneda (ISO 4217: "EUR", "NOK"…). Todo lo personal se cuenta en ella. */
   currency: string;
   /** Idioma elegido; 'auto' = el del móvil. */
   language?: 'auto' | 'es' | 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ca' | 'eu' | 'gl' | 'nl' | 'sv' | 'nb' | 'da' | 'fi' | 'pl' | 'cs' | 'ro' | 'el' | 'tr' | 'uk';
@@ -97,4 +139,8 @@ export interface AppState {
   /** Comercio normalizado -> categoría, aprendido de las correcciones del usuario. */
   learnedCategories: Record<string, CategoryId>;
   tombstones: Tombstone[];
+  /** Últimos tipos de cambio descargados (base EUR). */
+  fx?: { date: string; fetchedAt: string; rates: Record<string, number>; source: 'online' | 'fallback' };
+  /** Monedas usadas hace poco (para tenerlas a mano en viajes). */
+  recentCurrencies?: string[];
 }

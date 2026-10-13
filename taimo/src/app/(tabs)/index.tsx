@@ -60,6 +60,19 @@ export default function Home() {
           </Pressable>
         ) : null}
 
+        <Pressable onPress={() => router.push('/converter')} accessibilityRole="button">
+          <Card>
+            <Row>
+              <Text style={{ fontSize: 24 }}>💱</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>{t('fx.title')}</Text>
+                <Muted>{t('fx.openText')}</Muted>
+              </View>
+              <Text style={{ color: colors.primary, fontSize: 22 }}>›</Text>
+            </Row>
+          </Card>
+        </Pressable>
+
         {statuses.length > 0 ? (
           <Card>
             <H2>{t('home.budgets')}</H2>

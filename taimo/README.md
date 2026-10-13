@@ -9,7 +9,7 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
 
 - **20 idiomas**: español, inglés, francés, alemán, italiano, portugués, catalán, euskera, gallego, neerlandés,
   sueco, noruego, danés, finés, polaco, checo, rumano, griego, turco y ucraniano. Se elige solo según el idioma del
-  móvil y se cambia en un toque (en la bienvenida y en Ajustes). **20 monedas** con formato local.
+  móvil y se cambia en un toque (en la bienvenida y en Ajustes). **Las 155 monedas del mundo** con formato local.
 - **Inicio de sesión con Apple y Google** (opcional) con **copia de seguridad privada**: al entrar en otro móvil se
   recuperan los datos.
 - **Gráficas por día (horas), semana, mes, año y todo**, con comparación frente al periodo anterior, media,
@@ -26,9 +26,21 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
     «⚡ 12,40 € apuntados en Taimo».
   - Taimo adivina la categoría por el comercio, aprende de tus correcciones y evita duplicados.
 - **Gastos a mano** en dos toques e **importación del extracto del banco (CSV)** para tarjeta física, Bizum o recibos.
-- **Grupos compartidos** (pareja, piso, viaje): quién pagó y entre quién se reparte. **A tu presupuesto solo cuenta tu
-  parte.** Calcula quién debe a quién y cómo quedar en paz. **Invita por WhatsApp** con un enlace o un código: cada
-  miembro ve el grupo en su móvil y todo se sincroniza.
+- **Grupos compartidos, más allá de Tricount.** Cada tipo de grupo trae lo que necesita:
+  - **Pareja**: reparto por defecto aunque no vayáis al 50 % (60/40, 70/30…), presupuesto mensual común y
+    **«Le toca pagar a…»**: quién debería pagar lo siguiente para equilibraros sin hacer transferencias.
+  - **Piso**: **gastos fijos** (alquiler, luz, Netflix) que se apuntan solos el día que toca cada mes, sin
+    duplicarse aunque los tengan varios móviles.
+  - **Viaje**: moneda del grupo, fechas y presupuesto: **cuánto podéis gastar al día entre todos y por persona**,
+    coste por persona y en qué monedas se ha pagado.
+  - Tres formas de repartir cada gasto: **a partes iguales, por proporción o importes exactos**.
+  - Quién ha pagado qué, gasto por categoría, **🔔 Recordar** (manda por WhatsApp lo que debe cada uno) y cómo
+    quedar en paz con las mínimas transferencias. **Invita por WhatsApp** con un enlace o un código: todo se
+    sincroniza, también los ajustes del grupo. **A tu presupuesto solo cuenta tu parte**, convertida a tu moneda.
+- **Monedas de todo el mundo** (viajes, Erasmus): cada gasto se apunta en la moneda en la que pagaste (yenes, pesos,
+  coronas…) y Taimo lo convierte a la moneda del grupo o a la tuya, guardando el cambio de ese día. **Conversor**
+  con 155 monedas, buscador por país y las que más usas. El cambio se actualiza solo (fuentes gratuitas, sin
+  clave) y sin conexión usa el último guardado.
 - **Estadísticas**: mes, día, categoría y últimos 6 meses. **Exportar a CSV** (Excel).
 - **Resumen semanal** cada domingo a las 20:00.
 
@@ -57,7 +69,8 @@ npx eas-cli@latest build --profile development --platform ios      # o android
 ## Grupos compartidos (Supabase)
 
 1. Crea un proyecto gratuito en [supabase.com](https://supabase.com) (región `eu-west-1` o similar).
-2. Ejecuta `supabase/migrations/20261013000000_taimo_groups.sql` en el editor SQL del proyecto.
+2. Ejecuta en el editor SQL, en orden, los archivos de `supabase/migrations/` (grupos, copias de seguridad y
+   grupos v2 con tipo, moneda, presupuesto, gastos fijos y reparto por proporción).
 3. Copia `.env.example` a `.env` y pon la URL y la clave pública (anon) del proyecto.
 
 Modelo de seguridad: sin cuentas de usuario. Cada grupo tiene un código de 16 caracteres imposible de adivinar; quien
