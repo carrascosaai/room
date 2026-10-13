@@ -1,0 +1,10 @@
+{
+  "name": "taimo-capture",
+  "version": "1.0.0",
+  "description": "Captura de pagos para Taimo: App Intent en iOS y lector de notificaciones en Android",
+  "main": "src/index.ts",
+  "license": "UNLICENSED",
+  "author": "Taimo",
+  "homepage": "https://taimo.app",
+  "private": true
+}

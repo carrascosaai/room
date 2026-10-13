@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <application>
+    <!-- Lee SOLO las notificaciones de pago de Google Wallet y de los bancos de la lista
+         (ver TaimoNotificationListener.kt). El usuario tiene que activarlo a mano en Ajustes. -->
+    <service
+      android:name="app.taimo.capture.TaimoNotificationListener"
+      android:label="Taimo: registro automático de pagos"
+      android:exported="true"
+      android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+      <intent-filter>
+        <action android:name="android.service.notification.NotificationListenerService" />
+      </intent-filter>
+    </service>
+  </application>
+</manifest>

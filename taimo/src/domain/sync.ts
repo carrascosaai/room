@@ -1,0 +1,219 @@
+import type { AppState, CategoryId, Cents, Expense, Member, Settlement } from './types';
+
+/**
+ * Formato que se intercambia con el servidor para un grupo compartido.
+ * Solo viajan los gastos del grupo: los gastos personales nunca salen del móvil.
+ */
+export interface RemoteMember {
+  id: string;
+  name: string;
+  claimed: boolean;
+  updatedAt: string;
+}
+
+export interface RemoteExpense {
+  id: string;
+  amount: Cents;
+  merchant: string;
+  category: CategoryId;
+  date: string;
+  paidBy: string;
+  shares: Record<string, Cents>;
+  note: string | null;
+  source: Expense['source'];
+  updatedAt: string;
+  deleted: boolean;
+}
+
+export interface RemoteSettlement {
+  id: string;
+  from: string;
+  to: string;
+  amount: Cents;
+  date: string;
+  updatedAt: string;
+  deleted: boolean;
+}
+
+export interface GroupSnapshot {
+  group: { id: string; name: string; emoji: string; code: string };
+  members: RemoteMember[];
+  expenses: RemoteExpense[];
+  settlements: RemoteSettlement[];
+}
+
+export interface GroupPush {
+  members: RemoteMember[];
+  expenses: RemoteExpense[];
+  settlements: RemoteSettlement[];
+}
+
+const EPOCH = '1970-01-01T00:00:00.000Z';
+
+/** Lo que este móvil envía al servidor para un grupo (incluidos los borrados pendientes). */
+export function buildPush(state: AppState, groupId: string): GroupPush {
+  const group = state.groups.find((g) => g.id === groupId);
+  if (!group) return { members: [], expenses: [], settlements: [] };
+  const members: RemoteMember[] = group.members.map((m) => ({
+    id: m.id,
+    name: m.name,
+    claimed: Boolean(m.claimed || m.isMe),
+    updatedAt: m.updatedAt ?? group.createdAt,
+  }));
+  const expenses: RemoteExpense[] = state.expenses
+    .filter((e) => e.groupId === groupId && e.paidBy && e.shares)
+    .map((e) => ({
+      id: e.id,
+      amount: e.amount,
+      merchant: e.merchant,
+      category: e.category,
+      date: e.date,
+      paidBy: e.paidBy!,
+      shares: e.shares!,
+      // La nota puede llevar el nombre de tu tarjeta: no la compartimos.
+      note: null,
+      source: e.source,
+      updatedAt: e.updatedAt ?? e.date,
+      deleted: false,
+    }));
+  const settlements: RemoteSettlement[] = state.settlements
+    .filter((s) => s.groupId === groupId)
+    .map((s) => ({ id: s.id, from: s.from, to: s.to, amount: s.amount, date: s.date, updatedAt: s.updatedAt ?? s.date, deleted: false }));
+
+  for (const t of state.tombstones.filter((x) => x.groupId === groupId)) {
+    const base = { id: t.id, amount: 0, date: t.deletedAt, updatedAt: t.deletedAt, deleted: true };
+    if (t.kind === 'expense') {
+      expenses.push({ ...base, merchant: '', category: 'otros', paidBy: '', shares: {}, note: null, source: 'manual' });
+    } else {
+      settlements.push({ ...base, from: '', to: '' });
+    }
+  }
+  return { members, expenses, settlements };
+}
+
+const newer = (a: string | undefined, b: string) => (a ?? EPOCH) > b;
+
+/**
+ * Aplica lo que devuelve el servidor. El servidor ya ha resuelto los conflictos
+ * (gana el cambio más reciente), así que su versión manda, salvo lo que el
+ * usuario haya tocado en este móvil mientras la sincronización estaba en curso.
+ */
+export function applySnapshot(
+  state: AppState,
+  groupId: string,
+  snapshot: GroupSnapshot,
+  syncStartedAt: string,
+  now: string = new Date().toISOString(),
+): AppState {
+  const local = state.groups.find((g) => g.id === groupId);
+  if (!local) return state;
+
+  // Miembros
+  const localMembers = new Map(local.members.map((m) => [m.id, m]));
+  const members: Member[] = snapshot.members.map((r) => {
+    const l = localMembers.get(r.id);
+    if (l && newer(l.updatedAt, syncStartedAt)) return l;
+    return { id: r.id, name: r.name, claimed: r.claimed, updatedAt: r.updatedAt, ...(l?.isMe ? { isMe: true } : {}) };
+  });
+  for (const l of local.members) {
+    if (!snapshot.members.some((r) => r.id === l.id) && (l.isMe || newer(l.updatedAt, syncStartedAt))) members.push(l);
+  }
+
+  // Gastos del grupo
+  const localExpenses = new Map(state.expenses.filter((e) => e.groupId === groupId).map((e) => [e.id, e]));
+  const groupExpenses: Expense[] = [];
+  const seen = new Set<string>();
+  for (const r of snapshot.expenses) {
+    seen.add(r.id);
+    const l = localExpenses.get(r.id);
+    if (l && newer(l.updatedAt, syncStartedAt)) {
+      groupExpenses.push(l);
+      continue;
+    }
+    if (r.deleted) continue;
+    groupExpenses.push({
+      id: r.id,
+      amount: r.amount,
+      merchant: r.merchant,
+      category: r.category,
+      date: r.date,
+      source: r.source,
+      groupId,
+      paidBy: r.paidBy,
+      shares: r.shares,
+      // Conservamos la nota privada de este móvil (p. ej. la tarjeta) si la había.
+      note: l?.note,
+      updatedAt: r.updatedAt,
+    });
+  }
+  for (const l of localExpenses.values()) {
+    if (!seen.has(l.id) && newer(l.updatedAt, syncStartedAt)) groupExpenses.push(l);
+  }
+
+  // Liquidaciones
+  const localSettlements = new Map(state.settlements.filter((s) => s.groupId === groupId).map((s) => [s.id, s]));
+  const groupSettlements: Settlement[] = [];
+  const seenS = new Set<string>();
+  for (const r of snapshot.settlements) {
+    seenS.add(r.id);
+    const l = localSettlements.get(r.id);
+    if (l && newer(l.updatedAt, syncStartedAt)) {
+      groupSettlements.push(l);
+      continue;
+    }
+    if (r.deleted) continue;
+    groupSettlements.push({ id: r.id, groupId, from: r.from, to: r.to, amount: r.amount, date: r.date, updatedAt: r.updatedAt });
+  }
+  for (const l of localSettlements.values()) {
+    if (!seenS.has(l.id) && newer(l.updatedAt, syncStartedAt)) groupSettlements.push(l);
+  }
+
+  // Borrados hechos aquí después de empezar la sincronización siguen ocultos.
+  const pendingDeletes = new Set(
+    state.tombstones.filter((t) => t.groupId === groupId && t.deletedAt > syncStartedAt).map((t) => t.id),
+  );
+
+  return {
+    ...state,
+    groups: state.groups.map((g) =>
+      g.id === groupId
+        ? {
+            ...g,
+            name: snapshot.group.name,
+            emoji: snapshot.group.emoji,
+            members,
+            remote: { code: snapshot.group.code, lastSyncAt: now },
+          }
+        : g,
+    ),
+    expenses: [
+      ...state.expenses.filter((e) => e.groupId !== groupId),
+      ...groupExpenses.filter((e) => !pendingDeletes.has(e.id)),
+    ].sort((a, b) => b.date.localeCompare(a.date)),
+    settlements: [
+      ...state.settlements.filter((s) => s.groupId !== groupId),
+      ...groupSettlements.filter((s) => !pendingDeletes.has(s.id)),
+    ],
+    tombstones: state.tombstones.filter((t) => t.groupId !== groupId || t.deletedAt > syncStartedAt),
+  };
+}
+
+/** Crea el grupo local a partir de una invitación aceptada. */
+export function groupFromSnapshot(snapshot: GroupSnapshot, meMemberId: string, now: string = new Date().toISOString()) {
+  return {
+    group: {
+      id: snapshot.group.id,
+      name: snapshot.group.name,
+      emoji: snapshot.group.emoji,
+      createdAt: now,
+      remote: { code: snapshot.group.code, lastSyncAt: now },
+      members: snapshot.members.map((m) => ({
+        id: m.id,
+        name: m.name,
+        claimed: m.id === meMemberId ? true : m.claimed,
+        updatedAt: m.id === meMemberId ? now : m.updatedAt,
+        ...(m.id === meMemberId ? { isMe: true } : {}),
+      })),
+    },
+  };
+}

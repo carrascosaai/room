@@ -1,10 +1,13 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
-import { Alert, Platform, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Share, Text, View } from 'react-native';
 
 import { balances, memberName, suggestTransfers } from '@/domain/groups';
+import { buildPush } from '@/domain/sync';
 import { formatMoney } from '@/domain/money';
 import { newId, useStore } from '@/store/store';
+import { createRemoteGroup, inviteLink, SyncError, syncConfigured } from '@/sync/api';
 import { Button, Card, Empty, H2, Input, Muted, Row, Screen } from '@/ui/components';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { colors, space } from '@/ui/theme';
@@ -13,6 +16,8 @@ export default function GroupDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { state, dispatch } = useStore();
   const [newMember, setNewMember] = useState('');
+  const [sharing, setSharing] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
   const group = state.groups.find((g) => g.id === id);
 
   if (!group) {
@@ -35,12 +40,41 @@ export default function GroupDetail() {
     });
   }
 
+  async function invite() {
+    if (!group) return;
+    setShareError(null);
+    let code = group.remote?.code;
+    if (!code) {
+      setSharing(true);
+      try {
+        const startedAt = new Date().toISOString();
+        const snapshot = await createRemoteGroup(group, buildPush(state, group.id));
+        dispatch({ type: 'applySnapshot', groupId: group.id, snapshot, syncStartedAt: startedAt });
+        code = snapshot.group.code;
+      } catch (e) {
+        setShareError(e instanceof SyncError ? e.message : 'No se pudo compartir el grupo.');
+        return;
+      } finally {
+        setSharing(false);
+      }
+    }
+    const message = `Únete a «${group.name}» en Taimo para repartir los gastos: ${inviteLink(code)}\n\nO escribe este código en Taimo → Grupos → Unirme: ${code}`;
+    if (Platform.OS === 'web') {
+      await Clipboard.setStringAsync(message);
+      setShareError('Invitación copiada. Pégala en WhatsApp.');
+    } else {
+      await Share.share({ message });
+    }
+  }
+
   function remove() {
     const doIt = () => {
       dispatch({ type: 'deleteGroup', id: group!.id });
       router.back();
     };
-    const msg = '¿Borrar el grupo? Sus gastos se quedarán como gastos tuyos.';
+    const msg = group!.remote
+      ? '¿Salir del grupo? Desaparecerá de este móvil, pero los demás lo seguirán teniendo.'
+      : '¿Borrar el grupo? Sus gastos se quedarán como gastos tuyos.';
     if (Platform.OS === 'web') {
       if (globalThis.confirm?.(msg)) doIt();
     } else {
@@ -87,6 +121,19 @@ export default function GroupDetail() {
 
       <Button label="+ Añadir gasto compartido" onPress={() => router.push({ pathname: '/add', params: { groupId: group.id } })} />
 
+      {syncConfigured ? (
+        <Card>
+          <H2>{group.remote ? 'Grupo compartido ☁️' : 'Comparte el grupo'}</H2>
+          <Muted>
+            {group.remote
+              ? `Código: ${group.remote.code}. Todos los miembros ven los mismos gastos y saldos.`
+              : 'Invita a los demás por WhatsApp: verán el grupo en su móvil y podrán añadir gastos. Tus gastos personales no se comparten.'}
+          </Muted>
+          {sharing ? <ActivityIndicator color={colors.primary} /> : <Button label="📨 Invitar" variant="secondary" onPress={invite} />}
+          {shareError ? <Muted>{shareError}</Muted> : null}
+        </Card>
+      ) : null}
+
       <Card>
         <H2>Gastos</H2>
         {expenses.length === 0 ? (
@@ -114,7 +161,7 @@ export default function GroupDetail() {
         </Row>
       </Card>
 
-      <Button label="Borrar grupo" variant="danger" onPress={remove} />
+      <Button label={group.remote ? 'Salir del grupo' : 'Borrar grupo'} variant="danger" onPress={remove} />
     </Screen>
   );
 }

@@ -32,13 +32,18 @@ export interface Expense {
   paidBy?: string;
   /** Parte de cada miembro (céntimos). La suma debe ser igual a `amount`. */
   shares?: Record<string, Cents>;
+  /** Última modificación (ISO). Sirve para sincronizar grupos: gana el cambio más reciente. */
+  updatedAt?: string;
 }
 
 export interface Member {
   id: string;
   name: string;
-  /** El usuario de este móvil. */
+  /** El usuario de este móvil. Nunca se envía al servidor. */
   isMe?: boolean;
+  /** Alguien ya se ha unido al grupo como este miembro desde su móvil. */
+  claimed?: boolean;
+  updatedAt?: string;
 }
 
 export interface Group {
@@ -47,6 +52,8 @@ export interface Group {
   emoji: string;
   members: Member[];
   createdAt: string;
+  /** Si el grupo está compartido en la nube: código de invitación y última sincronización. */
+  remote?: { code: string; lastSyncAt?: string };
 }
 
 /** Pago entre miembros para saldar deudas ("Ana le paga 20 € a Luis"). */
@@ -57,6 +64,15 @@ export interface Settlement {
   to: string;
   amount: Cents;
   date: string;
+  updatedAt?: string;
+}
+
+/** Marca de borrado de algo de un grupo compartido, pendiente de enviar al servidor. */
+export interface Tombstone {
+  kind: 'expense' | 'settlement';
+  id: string;
+  groupId: string;
+  deletedAt: string;
 }
 
 export interface Profile {
@@ -75,4 +91,5 @@ export interface AppState {
   settlements: Settlement[];
   /** Comercio normalizado -> categoría, aprendido de las correcciones del usuario. */
   learnedCategories: Record<string, CategoryId>;
+  tombstones: Tombstone[];
 }

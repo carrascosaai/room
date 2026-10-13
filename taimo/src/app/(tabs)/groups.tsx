@@ -6,6 +6,7 @@ import { balances } from '@/domain/groups';
 import { formatMoney } from '@/domain/money';
 import type { Group } from '@/domain/types';
 import { newId, useStore } from '@/store/store';
+import { syncConfigured } from '@/sync/api';
 import { Button, Card, Chip, Empty, H2, Input, Muted, Row, Screen, Title } from '@/ui/components';
 import { colors, space } from '@/ui/theme';
 
@@ -101,15 +102,13 @@ export default function Groups() {
           <Button label="Cancelar" variant="ghost" onPress={() => setCreating(false)} />
         </Card>
       ) : (
-        <Button label="+ Crear grupo" onPress={() => setCreating(true)} />
+        <View style={{ gap: space.sm }}>
+          <Button label="+ Crear grupo" onPress={() => setCreating(true)} />
+          {syncConfigured ? (
+            <Button label="Unirme con un código" variant="secondary" onPress={() => router.push('/join')} />
+          ) : null}
+        </View>
       )}
-
-      <View style={{ paddingHorizontal: space.sm }}>
-        <Muted>
-          Pronto: invita a los demás con un enlace para que vean el grupo en su móvil y sus pagos con Apple Pay se repartan
-          solos.
-        </Muted>
-      </View>
     </Screen>
   );
 }

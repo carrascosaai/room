@@ -8,7 +8,10 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.taimo"
+      "bundleIdentifier": "app.taimo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +34,18 @@
         {
           "color": "#A855F7"
         }
-      ]
+      ],
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#0B0614",
+          "resizeMode": "contain"
+        }
+      ],
+      "./plugins/withTaimoAppIntent"
     ],
     "scheme": "taimo",
     "backgroundColor": "#0B0614",

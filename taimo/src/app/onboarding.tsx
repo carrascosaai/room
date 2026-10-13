@@ -49,7 +49,7 @@ export default function Onboarding() {
             <Row>
               <Text style={{ fontSize: 22 }}>🔒</Text>
               <Muted style={{ flex: 1 }}>
-                Tus datos se guardan en tu móvil. No pedimos las claves de tu banco, no vendemos tus datos y no te
+                Tus gastos se guardan en tu móvil. No pedimos las claves de tu banco, no vendemos tus datos y no te
                 vendemos préstamos.
               </Muted>
             </Row>

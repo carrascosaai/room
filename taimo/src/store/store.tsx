@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useS
 
 import { findDuplicate, type CapturePayload } from '@/domain/capture';
 import { normalizeMerchant } from '@/domain/categorize';
+import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
 import type { AppState, CategoryId, Cents, Expense, Group, Member, Settlement } from '@/domain/types';
 
 const STORAGE_KEY = 'taimo:state:v1';
@@ -16,6 +17,7 @@ export const initialState: AppState = {
   groups: [],
   settlements: [],
   learnedCategories: {},
+  tombstones: [],
 };
 
 export function newId(): string {
@@ -34,7 +36,13 @@ export type Action =
   | { type: 'addMember'; groupId: string; member: Member }
   | { type: 'deleteGroup'; id: string }
   | { type: 'addSettlement'; settlement: Settlement }
+  | { type: 'importExpenses'; expenses: Expense[] }
+  | { type: 'setGroupRemote'; groupId: string; code: string }
+  | { type: 'applySnapshot'; groupId: string; snapshot: GroupSnapshot; syncStartedAt: string }
+  | { type: 'joinGroup'; snapshot: GroupSnapshot; meMemberId: string; newMemberName?: string }
   | { type: 'reset' };
+
+const now = () => new Date().toISOString();
 
 function learn(state: AppState, merchant: string, category: CategoryId): AppState['learnedCategories'] {
   const key = normalizeMerchant(merchant);
@@ -53,7 +61,12 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'setBudget':
       return { ...state, budgets: { ...state.budgets, [action.category]: action.amount } };
     case 'addExpense':
-      return { ...state, expenses: [action.expense, ...state.expenses] };
+      return { ...state, expenses: [{ ...action.expense, updatedAt: now() }, ...state.expenses] };
+    case 'importExpenses':
+      return {
+        ...state,
+        expenses: [...action.expenses, ...state.expenses].sort((a, b) => b.date.localeCompare(a.date)),
+      };
     case 'updateExpense': {
       const prev = state.expenses.find((e) => e.id === action.expense.id);
       // Si el usuario cambia la categoría, la recordamos para ese comercio.
@@ -64,18 +77,28 @@ export function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         learnedCategories,
-        expenses: state.expenses.map((e) => (e.id === action.expense.id ? action.expense : e)),
+        expenses: state.expenses.map((e) => (e.id === action.expense.id ? { ...action.expense, updatedAt: now() } : e)),
       };
     }
-    case 'deleteExpense':
-      return { ...state, expenses: state.expenses.filter((e) => e.id !== action.id) };
+    case 'deleteExpense': {
+      const target = state.expenses.find((e) => e.id === action.id);
+      const shared = target?.groupId && state.groups.some((g) => g.id === target.groupId && g.remote);
+      return {
+        ...state,
+        expenses: state.expenses.filter((e) => e.id !== action.id),
+        // En un grupo compartido hay que avisar a los demás de que se ha borrado.
+        tombstones: shared
+          ? [...state.tombstones, { kind: 'expense', id: action.id, groupId: target!.groupId!, deletedAt: now() }]
+          : state.tombstones,
+      };
+    }
     case 'addGroup':
       return { ...state, groups: [...state.groups, action.group] };
     case 'addMember':
       return {
         ...state,
         groups: state.groups.map((g) =>
-          g.id === action.groupId ? { ...g, members: [...g.members, action.member] } : g,
+          g.id === action.groupId ? { ...g, members: [...g.members, { ...action.member, updatedAt: now() }] } : g,
         ),
       };
     case 'deleteGroup':
@@ -87,9 +110,27 @@ export function reducer(state: AppState, action: Action): AppState {
           e.groupId === action.id ? { ...e, groupId: undefined, paidBy: undefined, shares: undefined } : e,
         ),
         settlements: state.settlements.filter((s) => s.groupId !== action.id),
+        tombstones: state.tombstones.filter((t) => t.groupId !== action.id),
       };
     case 'addSettlement':
-      return { ...state, settlements: [...state.settlements, action.settlement] };
+      return { ...state, settlements: [...state.settlements, { ...action.settlement, updatedAt: now() }] };
+    case 'setGroupRemote':
+      return {
+        ...state,
+        groups: state.groups.map((g) => (g.id === action.groupId ? { ...g, remote: { code: action.code } } : g)),
+      };
+    case 'applySnapshot':
+      return applySnapshot(state, action.groupId, action.snapshot, action.syncStartedAt);
+    case 'joinGroup': {
+      if (state.groups.some((g) => g.id === action.snapshot.group.id)) return state;
+      const { group } = groupFromSnapshot(action.snapshot, action.meMemberId);
+      if (action.newMemberName) {
+        group.members.push({ id: action.meMemberId, name: action.newMemberName, isMe: true, claimed: true, updatedAt: now() });
+      }
+      const withGroup = { ...state, groups: [...state.groups, group] };
+      // Trae los gastos y pagos que ya tenía el grupo.
+      return applySnapshot(withGroup, group.id, action.snapshot, '1970-01-01T00:00:00.000Z');
+    }
     case 'reset':
       return { ...initialState };
   }

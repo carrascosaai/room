@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["TaimoCaptureModule"]
+  },
+  "android": {
+    "modules": ["app.taimo.capture.TaimoCaptureModule"]
+  }
+}
