@@ -77,7 +77,12 @@ export interface Tombstone {
 
 export interface Profile {
   name: string;
-  currency: 'EUR';
+  /** Código ISO 4217 ("EUR", "NOK"…). */
+  currency: string;
+  /** Idioma elegido; 'auto' = el del móvil. */
+  language?: 'auto' | 'es' | 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ca' | 'eu' | 'gl' | 'nl' | 'sv' | 'nb' | 'da' | 'fi' | 'pl' | 'cs' | 'ro' | 'el' | 'tr' | 'uk';
+  /** Si ha iniciado sesión: id y correo de la cuenta (la sesión la guarda Supabase). */
+  account?: { id: string; email?: string; provider: 'apple' | 'google' };
 }
 
 export interface AppState {

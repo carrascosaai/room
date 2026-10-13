@@ -27,10 +27,11 @@ export function parseCaptureParams(
   params: Params,
   learned: Record<string, CategoryId> = {},
   now: Date = new Date(),
+  defaultMerchant = 'Card payment',
 ): CapturePayload | null {
   const amount = parseAmount(first(params.amount));
   if (amount === null || amount === 0) return null;
-  const merchant = (first(params.merchant) ?? '').trim() || 'Pago con tarjeta';
+  const merchant = (first(params.merchant) ?? '').trim() || defaultMerchant;
   const requested = first(params.category);
   const sourceParam = first(params.source);
   return {

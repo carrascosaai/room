@@ -45,7 +45,9 @@
           "resizeMode": "contain"
         }
       ],
-      "./plugins/withTaimoAppIntent"
+      "./plugins/withTaimoAppIntent",
+      "expo-localization",
+      "expo-web-browser"
     ],
     "scheme": "taimo",
     "backgroundColor": "#0A0F0D",

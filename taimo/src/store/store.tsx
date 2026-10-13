@@ -11,7 +11,7 @@ const STORAGE_KEY = 'taimo:state:v1';
 export const initialState: AppState = {
   version: 1,
   onboarded: false,
-  profile: { name: '', currency: 'EUR' },
+  profile: { name: '', currency: 'EUR', language: 'auto' },
   budgets: {},
   expenses: [],
   groups: [],
@@ -26,8 +26,12 @@ export function newId(): string {
 
 export type Action =
   | { type: 'hydrate'; state: AppState }
-  | { type: 'completeOnboarding'; name: string; budgets: AppState['budgets'] }
+  | { type: 'completeOnboarding'; name: string; budgets: AppState['budgets']; currency?: string }
   | { type: 'setProfileName'; name: string }
+  | { type: 'setLanguage'; language: NonNullable<AppState['profile']['language']> }
+  | { type: 'setCurrency'; currency: string }
+  | { type: 'setAccount'; account: AppState['profile']['account'] }
+  | { type: 'restoreBackup'; state: AppState }
   | { type: 'setBudget'; category: CategoryId; amount: Cents }
   | { type: 'addExpense'; expense: Expense }
   | { type: 'updateExpense'; expense: Expense }
@@ -55,9 +59,23 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'hydrate':
       return { ...initialState, ...action.state };
     case 'completeOnboarding':
-      return { ...state, onboarded: true, profile: { ...state.profile, name: action.name }, budgets: action.budgets };
+      return {
+        ...state,
+        onboarded: true,
+        profile: { ...state.profile, name: action.name, currency: action.currency ?? state.profile.currency },
+        budgets: action.budgets,
+      };
     case 'setProfileName':
       return { ...state, profile: { ...state.profile, name: action.name } };
+    case 'setLanguage':
+      return { ...state, profile: { ...state.profile, language: action.language } };
+    case 'setCurrency':
+      return { ...state, profile: { ...state.profile, currency: action.currency } };
+    case 'setAccount':
+      return { ...state, profile: { ...state.profile, account: action.account } };
+    case 'restoreBackup':
+      // La copia manda, pero la cuenta con la que se ha entrado es la de ahora.
+      return { ...initialState, ...action.state, onboarded: true, profile: { ...action.state.profile, account: state.profile.account } };
     case 'setBudget':
       return { ...state, budgets: { ...state.budgets, [action.category]: action.amount } };
     case 'addExpense':

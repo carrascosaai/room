@@ -2,32 +2,22 @@ import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
 import { myShare } from '@/domain/budget';
-import { category } from '@/domain/categories';
-import { formatMoney } from '@/domain/money';
 import type { Expense, Group } from '@/domain/types';
+import { useI18n } from '@/i18n';
 
 import { CategoryBadge, Muted } from './components';
+import { formatWhen } from './messages';
 import { colors, space } from './theme';
 
-const SOURCE_LABEL: Record<Expense['source'], string> = {
+const SOURCE_BADGE: Record<Expense['source'], string> = {
   manual: '',
   applepay: ' · ⚡ Apple Pay',
-  notificacion: ' · ⚡ automático',
-  csv: ' · importado',
+  notificacion: ' · ⚡',
+  csv: ' · CSV',
 };
 
-export function formatDay(iso: string): string {
-  const d = new Date(iso);
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-  const time = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-  if (d.toDateString() === today.toDateString()) return `Hoy, ${time}`;
-  if (d.toDateString() === yesterday.toDateString()) return `Ayer, ${time}`;
-  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-}
-
 export function ExpenseRow({ expense, groups }: { expense: Expense; groups: Group[] }) {
+  const i18n = useI18n();
   const group = expense.groupId ? groups.find((g) => g.id === expense.groupId) : undefined;
   const mine = myShare(expense, groups);
   return (
@@ -41,15 +31,15 @@ export function ExpenseRow({ expense, groups }: { expense: Expense; groups: Grou
           {expense.merchant}
         </Text>
         <Muted>
-          {category(expense.category).label} · {formatDay(expense.date)}
-          {SOURCE_LABEL[expense.source]}
+          {i18n.t(`cat.${expense.category}`)} · {formatWhen(i18n, expense.date)}
+          {SOURCE_BADGE[expense.source]}
         </Muted>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
-        <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>-{formatMoney(mine)}</Text>
+        <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>-{i18n.money(mine)}</Text>
         {group ? (
           <Muted>
-            {group.emoji} de {formatMoney(expense.amount)}
+            {group.emoji} {i18n.money(expense.amount)}
           </Muted>
         ) : null}
       </View>

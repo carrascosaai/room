@@ -9,10 +9,10 @@ import { expenseFromCapture, reducer, useStore } from '@/store/store';
 
 /**
  * Convierte en gastos los pagos que el móvil ha guardado mientras Taimo estaba
- * cerrado: en iPhone los deja la acción "Registrar pago en Taimo" de Atajos, en
+ * cerrado: en iPhone los deja la acción "Log payment in Taimo" de Atajos, en
  * Android el lector de notificaciones. Se ejecuta al abrir la app y al volver.
  */
-export function useNativeCaptures(onCaptured?: (count: number) => void) {
+export function useNativeCaptures(defaultMerchant: string, onCaptured?: (count: number) => void) {
   const { state, dispatch } = useStore();
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -28,7 +28,7 @@ export function useNativeCaptures(onCaptured?: (count: number) => void) {
         payload = parsePaymentNotification(item as unknown as RawNotification, current.learnedCategories);
       } else {
         const when = item.date ? new Date(item.date) : new Date();
-        payload = parseCaptureParams(item, current.learnedCategories, Number.isNaN(when.getTime()) ? new Date() : when);
+        payload = parseCaptureParams(item, current.learnedCategories, Number.isNaN(when.getTime()) ? new Date() : when, defaultMerchant);
       }
       if (!payload) continue;
       const { expense, duplicate } = expenseFromCapture(current, payload);
@@ -39,7 +39,7 @@ export function useNativeCaptures(onCaptured?: (count: number) => void) {
       added++;
     }
     if (added > 0) onCaptured?.(added);
-  }, [dispatch, onCaptured]);
+  }, [dispatch, onCaptured, defaultMerchant]);
 
   useEffect(() => {
     drain();

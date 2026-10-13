@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import type { GroupSnapshot } from '@/domain/sync';
+import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
 import { extractCode, joinRemoteGroup, SyncError, syncConfigured } from '@/sync/api';
 import { Button, Card, Chip, Input, Muted, Row, Screen, Title } from '@/ui/components';
@@ -15,6 +16,7 @@ import { colors, space } from '@/ui/theme';
 export default function Join() {
   const params = useLocalSearchParams<{ code?: string }>();
   const { state, dispatch } = useStore();
+  const { t } = useI18n();
   const [input, setInput] = useState(params.code ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function Join() {
   async function lookup(raw: string) {
     const code = extractCode(raw);
     if (!code) {
-      setError('Ese código no parece válido. Son 16 letras y números.');
+      setError(t('join.invalid'));
       return;
     }
     setLoading(true);
@@ -37,7 +39,8 @@ export default function Join() {
       }
       setSnapshot(snap);
     } catch (e) {
-      setError(e instanceof SyncError ? e.message : 'No se pudo entrar al grupo.');
+      const kind = e instanceof SyncError ? e.kind : 'server';
+      setError(kind === 'not_found' ? t('join.notFound') : kind === 'network' ? t('join.offline') : t('join.error'));
     } finally {
       setLoading(false);
     }
@@ -49,38 +52,33 @@ export default function Join() {
 
   function joinAs(memberId: string, isNew: boolean) {
     if (!snapshot) return;
-    dispatch({
-      type: 'joinGroup',
-      snapshot,
-      meMemberId: memberId,
-      newMemberName: isNew ? newName.trim() : undefined,
-    });
+    dispatch({ type: 'joinGroup', snapshot, meMemberId: memberId, newMemberName: isNew ? newName.trim() : undefined });
     router.replace({ pathname: '/group/[id]', params: { id: snapshot.group.id } });
   }
 
   if (!syncConfigured) {
     return (
       <Screen>
-        <Title>Grupos compartidos</Title>
-        <Muted>Esta versión de Taimo todavía no tiene activados los grupos compartidos.</Muted>
-        <Button label="Volver" variant="secondary" onPress={() => router.back()} />
+        <Title>{t('join.title')}</Title>
+        <Muted>{t('join.notConfigured')}</Muted>
+        <Button label={t('common.back')} variant="secondary" onPress={() => router.back()} />
       </Screen>
     );
   }
 
   if (snapshot) {
     const free = snapshot.members.filter((m) => !m.claimed);
-    const expenseCount = snapshot.expenses.filter((e) => !e.deleted).length;
+    const count = snapshot.expenses.filter((e) => !e.deleted).length;
     return (
       <Screen>
         <Text style={{ fontSize: 48, textAlign: 'center' }}>{snapshot.group.emoji}</Text>
         <Title>{snapshot.group.name}</Title>
         <Muted>
-          {snapshot.members.map((m) => m.name).join(', ')} · {expenseCount} {expenseCount === 1 ? 'gasto' : 'gastos'}
+          {snapshot.members.map((m) => m.name).join(', ')} · {t('join.expenses', { count })}
         </Muted>
         {free.length > 0 ? (
           <Card>
-            <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>¿Quién eres?</Text>
+            <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>{t('join.who')}</Text>
             <Row style={{ flexWrap: 'wrap' }}>
               {free.map((m) => (
                 <Chip key={m.id} label={m.name} onPress={() => joinAs(m.id, false)} />
@@ -90,38 +88,30 @@ export default function Join() {
         ) : null}
         <Card>
           <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>
-            {free.length > 0 ? '¿No estás en la lista?' : 'Únete al grupo'}
+            {free.length > 0 ? t('join.notListed') : t('join.joinTitle')}
           </Text>
-          <Input placeholder="Tu nombre" value={newName} onChangeText={setNewName} />
-          <Button label="Unirme" disabled={!newName.trim()} onPress={() => joinAs(newId(), true)} />
+          <Input placeholder={t('onboarding.namePlaceholder')} value={newName} onChangeText={setNewName} />
+          <Button label={t('join.joinButton')} disabled={!newName.trim()} onPress={() => joinAs(newId(), true)} />
         </Card>
-        <Muted>
-          Los gastos de este grupo se compartirán con sus miembros. Tus gastos personales siguen solo en tu móvil.
-        </Muted>
+        <Muted>{t('join.note')}</Muted>
       </Screen>
     );
   }
 
   return (
     <Screen>
-      <Title>Unirme a un grupo</Title>
-      <Muted>Pega el enlace o el código que te han enviado.</Muted>
-      <Input
-        placeholder="Código de 16 caracteres"
-        value={input}
-        onChangeText={setInput}
-        autoCapitalize="characters"
-        autoCorrect={false}
-      />
+      <Title>{t('join.title')}</Title>
+      <Muted>{t('join.text')}</Muted>
+      <Input placeholder={t('join.placeholder')} value={input} onChangeText={setInput} autoCapitalize="characters" autoCorrect={false} />
       {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
       {loading ? (
         <View style={{ padding: space.lg }}>
           <ActivityIndicator color={colors.primary} />
         </View>
       ) : (
-        <Button label="Buscar grupo" disabled={!input.trim()} onPress={() => lookup(input)} />
+        <Button label={t('join.search')} disabled={!input.trim()} onPress={() => lookup(input)} />
       )}
-      <Button label="Cancelar" variant="ghost" onPress={() => router.back()} />
+      <Button label={t('common.cancel')} variant="ghost" onPress={() => router.back()} />
     </Screen>
   );
 }

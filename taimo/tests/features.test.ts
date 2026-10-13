@@ -50,7 +50,9 @@ describe('CSV', () => {
     const out = expensesToCsv(
       [{ id: '1', amount: 1250, merchant: 'Bar "Pepe"', category: 'comer', date: '2026-10-13T10:00:00.000Z', source: 'manual' }],
       [],
+      { header: ['Fecha', 'Comercio', 'Categoría', 'Importe total', 'Mi parte', 'Grupo', 'Origen', 'Nota'], category: () => 'Comer fuera' },
     );
+    expect(out).toContain('Fecha;Comercio;Categoría');
     expect(out).toContain('2026-10-13;"Bar ""Pepe""";Comer fuera;12,50;12,50;;manual;');
   });
 });

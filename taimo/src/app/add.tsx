@@ -2,26 +2,18 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 
-import { afterPurchaseMessage, categoryStatus } from '@/domain/budget';
-import { CATEGORIES, category as categoryInfo } from '@/domain/categories';
+import { categoryStatus } from '@/domain/budget';
+import { CATEGORIES } from '@/domain/categories';
 import { categorize } from '@/domain/categorize';
 import { splitEqually } from '@/domain/groups';
-import { formatMoney, parseAmount } from '@/domain/money';
+import { parseAmount } from '@/domain/money';
 import type { CategoryId, Expense } from '@/domain/types';
+import { useI18n } from '@/i18n';
 import { newId, reducer, useStore } from '@/store/store';
 import { Button, Chip, Input, Muted, Row, Screen } from '@/ui/components';
+import { confirm } from '@/ui/confirm';
+import { purchaseMessage } from '@/ui/messages';
 import { colors, radius, space } from '@/ui/theme';
-
-function confirm(message: string, onYes: () => void) {
-  if (Platform.OS === 'web') {
-    if (globalThis.confirm?.(message)) onYes();
-    return;
-  }
-  Alert.alert(message, undefined, [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Borrar', style: 'destructive', onPress: onYes },
-  ]);
-}
 
 /**
  * Añadir o editar un gasto. Con `?id=` edita; con `?groupId=` empieza como gasto compartido.
@@ -29,9 +21,12 @@ function confirm(message: string, onYes: () => void) {
 export default function AddExpense() {
   const params = useLocalSearchParams<{ id?: string; groupId?: string }>();
   const { state, dispatch } = useStore();
+  const i18n = useI18n();
+  const { t, money, locale } = i18n;
   const editing = params.id ? state.expenses.find((e) => e.id === params.id) : undefined;
 
-  const [amountText, setAmountText] = useState(editing ? (editing.amount / 100).toFixed(2).replace('.', ',') : '');
+  const decimalSep = (1.5).toLocaleString(locale).includes(',') ? ',' : '.';
+  const [amountText, setAmountText] = useState(editing ? (editing.amount / 100).toFixed(2).replace('.', decimalSep) : '');
   const [merchant, setMerchant] = useState(editing?.merchant ?? '');
   const [cat, setCat] = useState<CategoryId>(editing?.category ?? 'otros');
   const [catTouched, setCatTouched] = useState(Boolean(editing));
@@ -53,7 +48,6 @@ export default function AddExpense() {
 
   const suggested = merchant.trim() ? categorize(merchant, state.learnedCategories) : 'otros';
   const shownCat = catTouched ? cat : suggested;
-
   const valid = amount > 0 && (!group || (effectivePaidBy && effectiveParticipants.length > 0));
 
   function save() {
@@ -61,7 +55,7 @@ export default function AddExpense() {
     const expense: Expense = {
       id: editing?.id ?? newId(),
       amount,
-      merchant: merchant.trim() || categoryInfo(shownCat).label,
+      merchant: merchant.trim() || t(`cat.${shownCat}`),
       category: shownCat,
       date: editing?.date ?? new Date().toISOString(),
       source: editing?.source ?? 'manual',
@@ -72,11 +66,9 @@ export default function AddExpense() {
     };
     const action = editing ? ({ type: 'updateExpense', expense } as const) : ({ type: 'addExpense', expense } as const);
     dispatch(action);
-    if (!editing) {
+    if (!editing && Platform.OS !== 'web') {
       const next = reducer(state, action);
-      const status = categoryStatus(next, expense.category);
-      const msg = afterPurchaseMessage(status, categoryInfo(expense.category).label);
-      if (Platform.OS !== 'web') Alert.alert(`${formatMoney(amount)} apuntados`, msg);
+      Alert.alert(t('add.savedTitle', { amount: money(amount) }), purchaseMessage(i18n, categoryStatus(next, expense.category)));
     }
     router.back();
   }
@@ -84,38 +76,39 @@ export default function AddExpense() {
   return (
     <Screen>
       <Row style={{ justifyContent: 'space-between' }}>
-        <Button label="Cancelar" variant="ghost" onPress={() => router.back()} />
+        <Button label={t('common.cancel')} variant="ghost" onPress={() => router.back()} />
         <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600' }}>
-          {editing ? 'Editar gasto' : 'Nuevo gasto'}
+          {editing ? t('add.editTitle') : t('add.newTitle')}
         </Text>
         <View style={{ width: 90 }} />
       </Row>
 
       <View style={{ alignItems: 'center', gap: space.xs }}>
-        <Muted>Importe</Muted>
+        <Muted>{t('add.amount')}</Muted>
         <Row>
           <TextInput
             value={amountText}
             onChangeText={setAmountText}
-            placeholder="0,00"
+            placeholder={`0${decimalSep}00`}
             placeholderTextColor={colors.textFaint}
             keyboardType="decimal-pad"
             autoFocus={!editing}
+            accessibilityLabel={t('add.amount')}
             style={{ color: colors.text, fontSize: 48, fontWeight: '800', minWidth: 120, textAlign: 'center' }}
           />
-          <Text style={{ color: colors.textMuted, fontSize: 32 }}>€</Text>
+          <Text style={{ color: colors.textMuted, fontSize: 28 }}>{i18n.currency}</Text>
         </Row>
       </View>
 
-      <Input label="¿Dónde o en qué?" placeholder="Mercadona, cine, gasolina…" value={merchant} onChangeText={setMerchant} />
+      <Input label={t('add.where')} placeholder={t('add.wherePlaceholder')} value={merchant} onChangeText={setMerchant} />
 
       <View style={{ gap: space.sm }}>
-        <Muted>Categoría{!catTouched && merchant.trim() ? ' (sugerida)' : ''}</Muted>
+        <Muted>{!catTouched && merchant.trim() ? t('add.suggested') : t('add.category')}</Muted>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
           {CATEGORIES.map((c) => (
             <Chip
               key={c.id}
-              label={`${c.emoji} ${c.label}`}
+              label={`${c.emoji} ${t(`cat.${c.id}`)}`}
               selected={shownCat === c.id}
               onPress={() => {
                 setCat(c.id);
@@ -128,9 +121,9 @@ export default function AddExpense() {
 
       {state.groups.length > 0 ? (
         <View style={{ gap: space.sm }}>
-          <Muted>¿Es un gasto compartido?</Muted>
+          <Muted>{t('add.shared')}</Muted>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
-            <Chip label="👤 Solo mío" selected={!group} onPress={() => setGroupId(undefined)} />
+            <Chip label={t('add.onlyMine')} selected={!group} onPress={() => setGroupId(undefined)} />
             {state.groups.map((g) => (
               <Chip
                 key={g.id}
@@ -149,25 +142,20 @@ export default function AddExpense() {
 
       {group ? (
         <View style={{ gap: space.md, backgroundColor: colors.surface, padding: space.lg, borderRadius: radius.lg }}>
-          <Muted>¿Quién pagó?</Muted>
+          <Muted>{t('add.paidBy')}</Muted>
           <Row style={{ flexWrap: 'wrap' }}>
             {group.members.map((m) => (
-              <Chip
-                key={m.id}
-                label={m.isMe ? 'Yo' : m.name}
-                selected={effectivePaidBy === m.id}
-                onPress={() => setPaidBy(m.id)}
-              />
+              <Chip key={m.id} label={m.isMe ? t('common.me') : m.name} selected={effectivePaidBy === m.id} onPress={() => setPaidBy(m.id)} />
             ))}
           </Row>
-          <Muted>¿Entre quién se reparte? (a partes iguales)</Muted>
+          <Muted>{t('add.splitBetween')}</Muted>
           <Row style={{ flexWrap: 'wrap' }}>
             {group.members.map((m) => {
               const on = effectiveParticipants.includes(m.id);
               return (
                 <Chip
                   key={m.id}
-                  label={`${on ? '✓ ' : ''}${m.isMe ? 'Yo' : m.name}${shares?.[m.id] ? ` · ${formatMoney(shares[m.id])}` : ''}`}
+                  label={`${on ? '✓ ' : ''}${m.isMe ? t('common.me') : m.name}${shares?.[m.id] ? ` · ${money(shares[m.id])}` : ''}`}
                   selected={on}
                   onPress={() =>
                     setParticipants(on ? effectiveParticipants.filter((x) => x !== m.id) : [...effectiveParticipants, m.id])
@@ -176,21 +164,17 @@ export default function AddExpense() {
               );
             })}
           </Row>
-          {me && shares ? (
-            <Text style={{ color: colors.text }}>
-              A tu presupuesto solo cuenta tu parte: {formatMoney(shares[me] ?? 0)}
-            </Text>
-          ) : null}
+          {me && shares ? <Text style={{ color: colors.text }}>{t('add.myShareNote', { amount: money(shares[me] ?? 0) })}</Text> : null}
         </View>
       ) : null}
 
-      <Button label={editing ? 'Guardar' : 'Añadir gasto'} disabled={!valid} onPress={save} />
+      <Button label={editing ? t('common.save') : t('add.addButton')} disabled={!valid} onPress={save} />
       {editing ? (
         <Button
-          label="Borrar gasto"
+          label={t('add.deleteButton')}
           variant="danger"
           onPress={() =>
-            confirm('¿Borrar este gasto?', () => {
+            confirm(t('add.deleteConfirm'), t('common.cancel'), t('common.delete'), () => {
               dispatch({ type: 'deleteExpense', id: editing.id });
               router.back();
             })

@@ -2,6 +2,7 @@ import { Redirect } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
 import { Text } from 'react-native';
 
+import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { colors } from '@/ui/theme';
 
@@ -13,6 +14,7 @@ function icon(emoji: string) {
 
 export default function TabsLayout() {
   const { state } = useStore();
+  const { t } = useI18n();
   if (!state.onboarded) return <Redirect href="/onboarding" />;
 
   return (
@@ -25,10 +27,10 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: icon('🏠') }} />
-      <Tabs.Screen name="groups" options={{ title: 'Grupos', tabBarIcon: icon('👥') }} />
-      <Tabs.Screen name="stats" options={{ title: 'Estadísticas', tabBarIcon: icon('📊') }} />
-      <Tabs.Screen name="settings" options={{ title: 'Ajustes', tabBarIcon: icon('⚙️') }} />
+      <Tabs.Screen name="index" options={{ title: t('tabs.home'), tabBarIcon: icon('🏠') }} />
+      <Tabs.Screen name="groups" options={{ title: t('tabs.groups'), tabBarIcon: icon('👥') }} />
+      <Tabs.Screen name="stats" options={{ title: t('tabs.stats'), tabBarIcon: icon('📊') }} />
+      <Tabs.Screen name="settings" options={{ title: t('tabs.settings'), tabBarIcon: icon('⚙️') }} />
     </Tabs>
   );
 }

@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View } from 'react-native';
 
 import { categoryStatus, monthSummary } from '@/domain/budget';
 import { CATEGORIES, category } from '@/domain/categories';
-import { formatMoney } from '@/domain/money';
+import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen } from '@/ui/components';
 import { ExpenseRow } from '@/ui/ExpenseRow';
@@ -11,9 +11,10 @@ import { colors, radius, space } from '@/ui/theme';
 
 export default function Home() {
   const { state } = useStore();
+  const { t, money, date } = useI18n();
   const today = new Date();
   const summary = monthSummary(state, today);
-  const monthName = today.toLocaleDateString('es-ES', { month: 'long' });
+  const monthName = date(today, { month: 'long' });
   const statuses = CATEGORIES.map((c) => categoryStatus(state, c.id, today)).filter(
     (s) => s.budget > 0 || s.spent > 0,
   );
@@ -23,35 +24,23 @@ export default function Home() {
   return (
     <View style={{ flex: 1 }}>
       <Screen>
-        <Row style={{ justifyContent: 'space-between' }}>
-          <View>
-            <Muted>Hola, {state.profile.name || 'de nuevo'} 👋</Muted>
-            <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700' }}>Taimo</Text>
-          </View>
-        </Row>
+        <View>
+          <Muted>{state.profile.name ? t('home.hello', { name: state.profile.name }) : t('home.helloAnon')}</Muted>
+          <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700' }}>Taimo</Text>
+        </View>
 
         <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>
-          <Muted>Te queda este mes de {monthName}</Muted>
-          <Text
-            style={{
-              color: summary.remaining < 0 ? colors.danger : colors.text,
-              fontSize: 40,
-              fontWeight: '800',
-            }}
-          >
-            {formatMoney(summary.remaining)}
+          <Muted>{t('home.leftThisMonth', { month: monthName })}</Muted>
+          <Text style={{ color: summary.remaining < 0 ? colors.danger : colors.text, fontSize: 40, fontWeight: '800' }}>
+            {money(summary.remaining)}
           </Text>
           <ProgressBar progress={summary.progress} />
-          <Row style={{ justifyContent: 'space-between' }}>
-            <Muted>
-              Gastado {formatMoney(summary.spent)} de {formatMoney(summary.budget)}
-            </Muted>
-          </Row>
+          <Muted>{t('home.spentOf', { spent: money(summary.spent), budget: money(summary.budget) })}</Muted>
           <View style={{ backgroundColor: colors.bg, borderRadius: radius.md, padding: space.md }}>
             <Text style={{ color: colors.text, fontSize: 15 }}>
               {summary.remaining > 0
-                ? `Puedes gastar ${formatMoney(summary.dailyAllowance)} al día durante los ${summary.daysLeft} días que quedan.`
-                : 'Has llegado a tu límite del mes. ¡Aguanta, que queda poco! 💪'}
+                ? t('home.perDay', { amount: money(summary.dailyAllowance), days: summary.daysLeft })
+                : t('home.overLimit')}
             </Text>
           </View>
         </Card>
@@ -62,8 +51,8 @@ export default function Home() {
               <Row>
                 <Text style={{ fontSize: 24 }}>⚡</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>Activa el registro automático</Text>
-                  <Muted>Paga con Apple Pay y Taimo lo apunta solo. Se configura en 1 minuto.</Muted>
+                  <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>{t('home.autoTitle')}</Text>
+                  <Muted>{Platform.OS === 'android' ? t('home.autoTextAndroid') : t('home.autoText')}</Muted>
                 </View>
                 <Text style={{ color: colors.primary, fontSize: 22 }}>›</Text>
               </Row>
@@ -73,20 +62,20 @@ export default function Home() {
 
         {statuses.length > 0 ? (
           <Card>
-            <H2>Tus presupuestos</H2>
+            <H2>{t('home.budgets')}</H2>
             {statuses.map((s) => {
               const c = category(s.category);
               return (
                 <View key={s.category} style={{ gap: space.xs }}>
                   <Row>
                     <CategoryBadge id={s.category} size={32} />
-                    <Text style={{ color: colors.text, flex: 1, fontSize: 15 }}>{c.label}</Text>
+                    <Text style={{ color: colors.text, flex: 1, fontSize: 15 }}>{t(`cat.${s.category}`)}</Text>
                     <Muted>
                       {s.budget > 0
                         ? s.remaining >= 0
-                          ? `quedan ${formatMoney(s.remaining)}`
-                          : `+${formatMoney(-s.remaining)} pasado`
-                        : formatMoney(s.spent)}
+                          ? t('home.left', { amount: money(s.remaining) })
+                          : t('home.over', { amount: money(-s.remaining) })
+                        : money(s.spent)}
                     </Muted>
                   </Row>
                   {s.budget > 0 ? <ProgressBar progress={s.progress} color={c.color} /> : null}
@@ -97,9 +86,9 @@ export default function Home() {
         ) : null}
 
         <Card>
-          <H2>Últimos gastos</H2>
+          <H2>{t('home.recent')}</H2>
           {recent.length === 0 ? (
-            <Empty emoji="🧾" text="Todavía no hay gastos. Paga con Apple Pay o pulsa + para añadir uno." />
+            <Empty emoji="🧾" text={t('home.empty')} />
           ) : (
             recent.map((e) => <ExpenseRow key={e.id} expense={e} groups={state.groups} />)
           )}
@@ -108,7 +97,7 @@ export default function Home() {
 
       <View style={{ position: 'absolute', right: space.lg, bottom: space.lg }}>
         <Pressable
-          accessibilityLabel="Añadir gasto"
+          accessibilityLabel={t('home.add')}
           onPress={() => router.push('/add')}
           style={({ pressed }) => ({
             width: 60,

@@ -1,5 +1,4 @@
 import { myShare } from './budget';
-import { category } from './categories';
 import { categorize } from './categorize';
 import { parseAmount } from './money';
 import type { CategoryId, Cents, Expense, Group } from './types';
@@ -13,9 +12,14 @@ function euros(cents: Cents): string {
   return (cents / 100).toFixed(2).replace('.', ',');
 }
 
-/** Exporta los gastos a CSV (`;` y coma decimal, para Excel en español). */
-export function expensesToCsv(expenses: Expense[], groups: Group[]): string {
-  const header = ['Fecha', 'Comercio', 'Categoría', 'Importe total', 'Mi parte', 'Grupo', 'Origen', 'Nota'];
+export interface CsvLabels {
+  header: [string, string, string, string, string, string, string, string];
+  category: (id: CategoryId) => string;
+}
+
+/** Exporta los gastos a CSV (`;` y coma decimal, que Excel abre bien en Europa). */
+export function expensesToCsv(expenses: Expense[], groups: Group[], labels: CsvLabels): string {
+  const header = labels.header;
   const rows = [...expenses]
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((e) => {
@@ -23,7 +27,7 @@ export function expensesToCsv(expenses: Expense[], groups: Group[]): string {
       return [
         e.date.slice(0, 10),
         e.merchant,
-        category(e.category).label,
+        labels.category(e.category),
         euros(e.amount),
         euros(myShare(e, groups)),
         group?.name ?? '',

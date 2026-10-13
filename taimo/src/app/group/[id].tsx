@@ -1,20 +1,23 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Platform, Share, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Share, Text, View } from 'react-native';
 
-import { balances, memberName, suggestTransfers } from '@/domain/groups';
+import { balances, suggestTransfers } from '@/domain/groups';
 import { buildPush } from '@/domain/sync';
-import { formatMoney } from '@/domain/money';
+import type { Group } from '@/domain/types';
+import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
 import { createRemoteGroup, inviteLink, SyncError, syncConfigured } from '@/sync/api';
 import { Button, Card, Empty, H2, Input, Muted, Row, Screen } from '@/ui/components';
+import { confirm } from '@/ui/confirm';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { colors, space } from '@/ui/theme';
 
 export default function GroupDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { state, dispatch } = useStore();
+  const { t, money } = useI18n();
   const [newMember, setNewMember] = useState('');
   const [sharing, setSharing] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
@@ -23,11 +26,15 @@ export default function GroupDetail() {
   if (!group) {
     return (
       <Screen>
-        <Empty emoji="🤷" text="Este grupo ya no existe." />
+        <Empty emoji="🤷" text={t('group.missing')} />
       </Screen>
     );
   }
 
+  const name = (g: Group, memberId: string) => {
+    const m = g.members.find((x) => x.id === memberId);
+    return !m ? t('common.unknown') : m.isMe ? t('common.you') : m.name;
+  };
   const expenses = state.expenses.filter((e) => e.groupId === group.id);
   const balance = balances(group, state.expenses, state.settlements);
   const transfers = suggestTransfers(balance);
@@ -52,36 +59,18 @@ export default function GroupDetail() {
         dispatch({ type: 'applySnapshot', groupId: group.id, snapshot, syncStartedAt: startedAt });
         code = snapshot.group.code;
       } catch (e) {
-        setShareError(e instanceof SyncError ? e.message : 'No se pudo compartir el grupo.');
+        setShareError(e instanceof SyncError && e.kind === 'network' ? t('join.offline') : t('group.shareError'));
         return;
       } finally {
         setSharing(false);
       }
     }
-    const message = `Únete a «${group.name}» en Taimo para repartir los gastos: ${inviteLink(code)}\n\nO escribe este código en Taimo → Grupos → Unirme: ${code}`;
+    const message = t('group.inviteMessage', { name: group.name, link: inviteLink(code), code });
     if (Platform.OS === 'web') {
-      await Clipboard.setStringAsync(message);
-      setShareError('Invitación copiada. Pégala en WhatsApp.');
+      await Clipboard.setStringAsync(message).catch(() => {});
+      setShareError(t('group.inviteCopied'));
     } else {
       await Share.share({ message });
-    }
-  }
-
-  function remove() {
-    const doIt = () => {
-      dispatch({ type: 'deleteGroup', id: group!.id });
-      router.back();
-    };
-    const msg = group!.remote
-      ? '¿Salir del grupo? Desaparecerá de este móvil, pero los demás lo seguirán teniendo.'
-      : '¿Borrar el grupo? Sus gastos se quedarán como gastos tuyos.';
-    if (Platform.OS === 'web') {
-      if (globalThis.confirm?.(msg)) doIt();
-    } else {
-      Alert.alert(msg, undefined, [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Borrar', style: 'destructive', onPress: doIt },
-      ]);
     }
   }
 
@@ -90,15 +79,15 @@ export default function GroupDetail() {
       <Stack.Screen options={{ title: `${group.emoji} ${group.name}` }} />
 
       <Card>
-        <Muted>Gastado en total en el grupo</Muted>
-        <Text style={{ color: colors.text, fontSize: 32, fontWeight: '800' }}>{formatMoney(total)}</Text>
+        <Muted>{t('group.total')}</Muted>
+        <Text style={{ color: colors.text, fontSize: 32, fontWeight: '800' }}>{money(total)}</Text>
         {group.members.map((m) => {
           const b = balance[m.id] ?? 0;
           return (
             <Row key={m.id} style={{ justifyContent: 'space-between' }}>
-              <Text style={{ color: colors.text, fontSize: 15 }}>{m.isMe ? 'Tú' : m.name}</Text>
+              <Text style={{ color: colors.text, fontSize: 15 }}>{m.isMe ? t('common.you') : m.name}</Text>
               <Text style={{ color: b > 0 ? colors.success : b < 0 ? colors.warning : colors.textMuted }}>
-                {b === 0 ? 'al día' : b > 0 ? `le deben ${formatMoney(b)}` : `debe ${formatMoney(-b)}`}
+                {b === 0 ? t('group.settled') : b > 0 ? t('group.isOwed', { amount: money(b) }) : t('group.owes', { amount: money(-b) })}
               </Text>
             </Row>
           );
@@ -107,50 +96,46 @@ export default function GroupDetail() {
 
       {transfers.length > 0 ? (
         <Card>
-          <H2>Para quedar en paz</H2>
-          {transfers.map((t) => (
-            <View key={`${t.from}-${t.to}`} style={{ gap: space.sm }}>
+          <H2>{t('group.settleTitle')}</H2>
+          {transfers.map((tr) => (
+            <View key={`${tr.from}-${tr.to}`} style={{ gap: space.sm }}>
               <Text style={{ color: colors.text, fontSize: 15 }}>
-                {memberName(group, t.from)} → {memberName(group, t.to)}: <Text style={{ fontWeight: '700' }}>{formatMoney(t.amount)}</Text>
+                {name(group, tr.from)} → {name(group, tr.to)}: <Text style={{ fontWeight: '700' }}>{money(tr.amount)}</Text>
               </Text>
-              <Button label="Marcar como pagado (Bizum, efectivo…)" variant="secondary" onPress={() => settle(t.from, t.to, t.amount)} />
+              <Button label={t('group.markPaid')} variant="secondary" onPress={() => settle(tr.from, tr.to, tr.amount)} />
             </View>
           ))}
         </Card>
       ) : null}
 
-      <Button label="+ Añadir gasto compartido" onPress={() => router.push({ pathname: '/add', params: { groupId: group.id } })} />
+      <Button label={t('group.addShared')} onPress={() => router.push({ pathname: '/add', params: { groupId: group.id } })} />
 
       {syncConfigured ? (
         <Card>
-          <H2>{group.remote ? 'Grupo compartido ☁️' : 'Comparte el grupo'}</H2>
-          <Muted>
-            {group.remote
-              ? `Código: ${group.remote.code}. Todos los miembros ven los mismos gastos y saldos.`
-              : 'Invita a los demás por WhatsApp: verán el grupo en su móvil y podrán añadir gastos. Tus gastos personales no se comparten.'}
-          </Muted>
-          {sharing ? <ActivityIndicator color={colors.primary} /> : <Button label="📨 Invitar" variant="secondary" onPress={invite} />}
+          <H2>{group.remote ? t('group.sharedTitle') : t('group.shareTitle')}</H2>
+          <Muted>{group.remote ? t('group.sharedText', { code: group.remote.code }) : t('group.shareText')}</Muted>
+          {sharing ? <ActivityIndicator color={colors.primary} /> : <Button label={t('group.invite')} variant="secondary" onPress={invite} />}
           {shareError ? <Muted>{shareError}</Muted> : null}
         </Card>
       ) : null}
 
       <Card>
-        <H2>Gastos</H2>
+        <H2>{t('group.expenses')}</H2>
         {expenses.length === 0 ? (
-          <Empty emoji="🧾" text="Sin gastos todavía." />
+          <Empty emoji="🧾" text={t('group.noExpenses')} />
         ) : (
           expenses.map((e) => <ExpenseRow key={e.id} expense={e} groups={state.groups} />)
         )}
       </Card>
 
       <Card>
-        <H2>Miembros</H2>
+        <H2>{t('group.members')}</H2>
         <Row>
           <View style={{ flex: 1 }}>
-            <Input placeholder="Añadir a alguien" value={newMember} onChangeText={setNewMember} />
+            <Input placeholder={t('group.addMemberPlaceholder')} value={newMember} onChangeText={setNewMember} />
           </View>
           <Button
-            label="Añadir"
+            label={t('group.addMember')}
             variant="secondary"
             disabled={!newMember.trim()}
             onPress={() => {
@@ -161,7 +146,16 @@ export default function GroupDetail() {
         </Row>
       </Card>
 
-      <Button label={group.remote ? 'Salir del grupo' : 'Borrar grupo'} variant="danger" onPress={remove} />
+      <Button
+        label={group.remote ? t('group.leave') : t('group.delete')}
+        variant="danger"
+        onPress={() =>
+          confirm(group.remote ? t('group.leaveConfirm') : t('group.deleteConfirm'), t('common.cancel'), t('common.delete'), () => {
+            dispatch({ type: 'deleteGroup', id: group.id });
+            router.back();
+          })
+        }
+      />
     </Screen>
   );
 }

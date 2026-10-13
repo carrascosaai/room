@@ -7,6 +7,14 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
 
 ## Qué hace
 
+- **20 idiomas**: español, inglés, francés, alemán, italiano, portugués, catalán, euskera, gallego, neerlandés,
+  sueco, noruego, danés, finés, polaco, checo, rumano, griego, turco y ucraniano. Se elige solo según el idioma del
+  móvil y se cambia en un toque (en la bienvenida y en Ajustes). **20 monedas** con formato local.
+- **Inicio de sesión con Apple y Google** (opcional) con **copia de seguridad privada**: al entrar en otro móvil se
+  recuperan los datos.
+- **Gráficas por día (horas), semana, mes, año y todo**, con comparación frente al periodo anterior, media,
+  reparto por categoría y gastos más grandes. Toca una barra para ver su importe.
+
 - **Presupuestos por categoría** y en Inicio: lo que te queda este mes y **cuánto puedes gastar al día**.
 - **Registro automático de pagos**
   - **iPhone**: automatización de Atajos con el disparador «Transacción» de Wallet. Dos formas:
@@ -30,7 +38,7 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
 npm install
 npm start          # escanea el QR con Expo Go (sin captura nativa)
 npm run web        # en el navegador
-npm test           # 47 pruebas de la lógica
+npm test           # 76 pruebas (lógica, idiomas, gráficas)
 npm run typecheck
 ```
 
@@ -87,6 +95,26 @@ native/ios/              App Intent «Registrar pago en Taimo» (lo añade plugi
 supabase/                migración SQL y pruebas
 tests/                   pruebas con Vitest
 ```
+
+## Idiomas
+
+Los textos están en `src/i18n/locales/` (un archivo por idioma; `en.ts` define las claves). La prueba
+`tests/i18n.test.ts` comprueba que ningún idioma se deja una clave ni un `{hueco}`. Para añadir uno: copia `en.ts`,
+tradúcelo, añádelo a `src/i18n/languages.ts` y a `src/i18n/index.tsx`.
+
+## Inicio de sesión (Apple y Google)
+
+Usa Supabase Auth (las mismas variables que los grupos). Para activarlo en el proyecto de Supabase:
+
+1. Ejecuta `supabase/migrations/20261014000000_taimo_backups.sql` (tabla de copias, solo visible para su dueño).
+2. **Google**: crea un cliente OAuth en Google Cloud Console y pon su Client ID y secreto en Supabase →
+   Authentication → Providers → Google.
+3. **Apple** (requiere la cuenta de Apple Developer): crea un Services ID y una clave de Sign in with Apple, y ponlos
+   en Supabase → Authentication → Providers → Apple. Añade el bundle id `app.taimo` como Client ID para el botón
+   nativo del iPhone.
+4. En Supabase → Authentication → URL Configuration, añade `taimo://auth-callback` a las Redirect URLs.
+
+Sin esto, los botones aparecen pero avisan de que el inicio de sesión aún no está disponible.
 
 ## Pendiente de probar en un móvil real
 

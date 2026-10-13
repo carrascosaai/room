@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { balances } from '@/domain/groups';
-import { formatMoney } from '@/domain/money';
 import type { Group } from '@/domain/types';
+import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
 import { syncConfigured } from '@/sync/api';
 import { Button, Card, Chip, Empty, H2, Input, Muted, Row, Screen, Title } from '@/ui/components';
@@ -14,6 +14,7 @@ const EMOJIS = ['🏠', '❤️', '✈️', '🍻', '⚽', '🎓'];
 
 export default function Groups() {
   const { state, dispatch } = useStore();
+  const { t, money } = useI18n();
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState(EMOJIS[0]);
@@ -30,7 +31,7 @@ export default function Groups() {
       emoji,
       createdAt: new Date().toISOString(),
       members: [
-        { id: newId(), name: state.profile.name || 'Yo', isMe: true },
+        { id: newId(), name: state.profile.name || t('common.me'), isMe: true },
         ...names.map((n) => ({ id: newId(), name: n })),
       ],
     };
@@ -43,11 +44,8 @@ export default function Groups() {
 
   return (
     <Screen>
-      <Title>Grupos</Title>
-      <Muted>
-        Comparte gastos con tu pareja, tu piso o tus amigos. A tu presupuesto solo cuenta tu parte, y Taimo calcula quién
-        debe a quién.
-      </Muted>
+      <Title>{t('groups.title')}</Title>
+      <Muted>{t('groups.intro')}</Muted>
 
       {state.groups.map((g) => {
         const me = g.members.find((m) => m.isMe)?.id;
@@ -58,17 +56,20 @@ export default function Groups() {
               <Row>
                 <Text style={{ fontSize: 30 }}>{g.emoji}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>{g.name}</Text>
-                  <Muted>{g.members.map((m) => (m.isMe ? 'Tú' : m.name)).join(', ')}</Muted>
+                  <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>
+                    {g.name}
+                    {g.remote ? ' ☁️' : ''}
+                  </Text>
+                  <Muted>{g.members.map((m) => (m.isMe ? t('common.you') : m.name)).join(', ')}</Muted>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   {myBalance === 0 ? (
-                    <Muted>Al día ✓</Muted>
+                    <Muted>{t('groups.settled')}</Muted>
                   ) : (
                     <>
-                      <Muted>{myBalance > 0 ? 'Te deben' : 'Debes'}</Muted>
+                      <Muted>{myBalance > 0 ? t('groups.owedToYou') : t('groups.youOwe')}</Muted>
                       <Text style={{ color: myBalance > 0 ? colors.success : colors.warning, fontWeight: '700' }}>
-                        {formatMoney(Math.abs(myBalance))}
+                        {money(Math.abs(myBalance))}
                       </Text>
                     </>
                   )}
@@ -79,34 +80,25 @@ export default function Groups() {
         );
       })}
 
-      {state.groups.length === 0 && !creating ? (
-        <Empty emoji="👥" text="Aún no tienes grupos. Crea uno para tu piso, tu pareja o un viaje." />
-      ) : null}
+      {state.groups.length === 0 && !creating ? <Empty emoji="👥" text={t('groups.empty')} /> : null}
 
       {creating ? (
         <Card>
-          <H2>Nuevo grupo</H2>
+          <H2>{t('groups.newGroup')}</H2>
           <Row style={{ flexWrap: 'wrap' }}>
             {EMOJIS.map((e) => (
               <Chip key={e} label={e} selected={emoji === e} onPress={() => setEmoji(e)} />
             ))}
           </Row>
-          <Input label="Nombre" placeholder="Piso Lavapiés, Ana y yo, Viaje a Lisboa…" value={name} onChangeText={setName} />
-          <Input
-            label="¿Con quién? (nombres separados por comas)"
-            placeholder="Ana, Luis"
-            value={others}
-            onChangeText={setOthers}
-          />
-          <Button label="Crear grupo" disabled={!name.trim() || !others.trim()} onPress={create} />
-          <Button label="Cancelar" variant="ghost" onPress={() => setCreating(false)} />
+          <Input label={t('groups.name')} placeholder={t('groups.namePlaceholder')} value={name} onChangeText={setName} />
+          <Input label={t('groups.withWho')} placeholder={t('groups.withWhoPlaceholder')} value={others} onChangeText={setOthers} />
+          <Button label={t('groups.create')} disabled={!name.trim() || !others.trim()} onPress={create} />
+          <Button label={t('common.cancel')} variant="ghost" onPress={() => setCreating(false)} />
         </Card>
       ) : (
         <View style={{ gap: space.sm }}>
-          <Button label="+ Crear grupo" onPress={() => setCreating(true)} />
-          {syncConfigured ? (
-            <Button label="Unirme con un código" variant="secondary" onPress={() => router.push('/join')} />
-          ) : null}
+          <Button label={t('groups.createButton')} onPress={() => setCreating(true)} />
+          {syncConfigured ? <Button label={t('groups.joinButton')} variant="secondary" onPress={() => router.push('/join')} /> : null}
         </View>
       )}
     </Screen>

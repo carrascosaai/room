@@ -128,13 +128,3 @@ export function monthlyTotals(
   }
   return result;
 }
-
-/** Frase que se muestra justo después de registrar un gasto. */
-export function afterPurchaseMessage(status: CategoryStatus, label: string): string {
-  if (status.level === 'none') return `Apuntado en ${label}.`;
-  const euros = (c: number) =>
-    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Math.abs(c) / 100);
-  if (status.level === 'over') return `Te has pasado ${euros(status.remaining)} en ${label} este mes. 😬`;
-  if (status.level === 'warning') return `Ojo: te quedan ${euros(status.remaining)} en ${label} este mes.`;
-  return `Te quedan ${euros(status.remaining)} en ${label} este mes. 👌`;
-}
