@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Taimo",
+    "slug": "taimo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.taimo"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0614",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "app.taimo"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#A855F7"
+        }
+      ]
+    ],
+    "scheme": "taimo",
+    "backgroundColor": "#0B0614",
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
