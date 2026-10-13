@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 
 import { CATEGORIES } from '@/domain/categories';
 import { formatMoneyShort, parseAmount } from '@/domain/money';
@@ -39,7 +39,11 @@ export default function Onboarding() {
     return (
       <Screen scroll={false}>
         <View style={{ minHeight: 640, justifyContent: 'center', gap: space.xl }}>
-          <Text style={{ fontSize: 64, textAlign: 'center' }}>👛</Text>
+          <Image
+            source={require('../../assets/splash-icon.png')}
+            style={{ width: 96, height: 96, alignSelf: 'center' }}
+            accessibilityLabel="Taimo"
+          />
           <Title>Bienvenido a Taimo</Title>
           <Text style={{ color: colors.textMuted, fontSize: 17, lineHeight: 24 }}>
             Pagas con el móvil y Taimo lo apunta solo. Te dice cuánto te queda en cada cosa y reparte los gastos con tu

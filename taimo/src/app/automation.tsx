@@ -45,7 +45,7 @@ function Steps({ steps }: { steps: string[] }) {
               justifyContent: 'center',
             }}
           >
-            <Text style={{ color: colors.white, fontWeight: '700' }}>{i + 1}</Text>
+            <Text style={{ color: colors.onPrimary, fontWeight: '700' }}>{i + 1}</Text>
           </View>
           <Text style={{ color: colors.text, flex: 1, fontSize: 15, lineHeight: 21 }}>{s}</Text>
         </Row>

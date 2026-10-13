@@ -66,6 +66,7 @@ export function Button({
       <Text
         style={[
           styles.buttonText,
+          variant === 'primary' && { color: colors.onPrimary },
           variant === 'ghost' && { color: colors.primary },
           variant === 'danger' && { color: colors.danger },
         ]}
@@ -121,7 +122,7 @@ export function Chip({ label, selected, onPress }: { label: string; selected?: b
       onPress={onPress}
       style={[styles.chip, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
     >
-      <Text style={{ color: selected ? colors.white : colors.text, fontSize: 14 }}>{label}</Text>
+      <Text style={{ color: selected ? colors.onPrimary : colors.text, fontSize: 14, fontWeight: selected ? '600' : '400' }}>{label}</Text>
     </Pressable>
   );
 }

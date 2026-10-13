@@ -124,7 +124,7 @@ export default function Home() {
             elevation: 6,
           })}
         >
-          <Text style={{ color: colors.white, fontSize: 30, marginTop: -2 }}>+</Text>
+          <Text style={{ color: colors.onPrimary, fontSize: 30, marginTop: -2, fontWeight: '600' }}>+</Text>
         </Pressable>
       </View>
     </View>

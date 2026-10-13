@@ -81,7 +81,7 @@ src/
   sync/             cliente de Supabase y sincronización automática
   notifications/    resumen semanal
   store/            estado y guardado en el móvil
-  ui/               tema (colores del Figma) y componentes
+  ui/               tema (negro y verde menta) y componentes
 modules/taimo-capture/   módulo nativo (Swift + Kotlin): cola de pagos y lector de notificaciones
 native/ios/              App Intent «Registrar pago en Taimo» (lo añade plugins/withTaimoAppIntent.js)
 supabase/                migración SQL y pruebas
