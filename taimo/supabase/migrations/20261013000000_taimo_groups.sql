@@ -92,6 +92,14 @@ as $$
   );
 $$;
 revoke all on function public.taimo_snapshot(text) from public;
+-- Supabase da permiso de ejecución a anon/authenticated por defecto: esta función
+-- interna no lo debe tener (no exige el código del grupo).
+do $$
+begin
+  if exists (select 1 from pg_roles where rolname = 'anon') then
+    revoke all on function public.taimo_snapshot(text) from anon, authenticated;
+  end if;
+end $$;
 
 -- Sube los cambios de un móvil y devuelve el grupo actualizado.
 -- Gana el cambio con `updatedAt` más reciente. Las filas de otro grupo no se tocan.

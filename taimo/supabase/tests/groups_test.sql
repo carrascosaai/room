@@ -11,6 +11,13 @@ do $$ begin
 exception when insufficient_privilege then null;
 end $$;
 
+-- La función interna no se puede llamar sin código.
+do $$ begin
+  perform public.taimo_snapshot('g1');
+  raise exception 'FALLO: anon puede llamar a taimo_snapshot';
+exception when insufficient_privilege then null;
+end $$;
+
 -- Ana comparte su grupo con un gasto.
 select (public.taimo_create_group('g1', 'Piso', '🏠',
   '[{"id":"m-ana","name":"Ana","claimed":true,"updatedAt":"2026-10-01T10:00:00Z"},
