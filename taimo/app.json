@@ -11,6 +11,11 @@
       "bundleIdentifier": "app.taimo",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.app.taimo"
+        ]
       }
     },
     "android": {
@@ -61,7 +66,28 @@
           "photosPermission": "Taimo reads receipts from your photos. They stay on your phone.",
           "microphonePermission": false
         }
-      ]
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "TaimoWidget",
+              "label": "Taimo",
+              "description": "What you have left this month and per day",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/icon.png"
+            }
+          ]
+        }
+      ],
+      "expo-quick-actions",
+      "@bacons/apple-targets"
     ],
     "scheme": "taimo",
     "backgroundColor": "#0A0F0D",

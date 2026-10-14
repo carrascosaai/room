@@ -506,6 +506,18 @@ const it: Translation = {
     done: "Scontrino letto: controlla importo e negozio.",
     permission: "Mi serve il permesso per fotocamera o foto.",
   },
+  widget: {
+    leftTitle: "Ti resta questo mese",
+    spentTitle: "Speso questo mese",
+    perDay: "{amount} al giorno",
+    over: "Budget superato questo mese",
+    noBudget: "Imposta un budget in Taimo",
+    add: "Aggiungi",
+    scan: "📷 Scontrino",
+  },
+  qa: {
+    add: "Aggiungi spesa",
+  },
   csv: { date: 'Data', merchant: 'Esercente', category: 'Categoria', total: 'Importo totale', myShare: 'La mia parte', group: 'Gruppo', source: 'Origine', note: 'Nota' },
 };
 

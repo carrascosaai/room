@@ -530,6 +530,18 @@ const es: Translation = {
     done: "Ticket leído: revisa el importe y el comercio.",
     permission: "Necesito permiso para usar la cámara o tus fotos.",
   },
+  widget: {
+    leftTitle: "Te queda este mes",
+    spentTitle: "Gastado este mes",
+    perDay: "{amount} al día",
+    over: "Te has pasado este mes",
+    noBudget: "Pon un presupuesto en Taimo",
+    add: "Apuntar",
+    scan: "📷 Ticket",
+  },
+  qa: {
+    add: "Apuntar gasto",
+  },
   csv: {
     date: 'Fecha',
     merchant: 'Comercio',

@@ -506,6 +506,18 @@ const sv: Translation = {
     done: "Kvittot läst: kontrollera beloppet och butiken.",
     permission: "Jag behöver tillgång till kameran eller dina bilder.",
   },
+  widget: {
+    leftTitle: "Kvar den här månaden",
+    spentTitle: "Spenderat den här månaden",
+    perDay: "{amount} om dagen",
+    over: "Över budget den här månaden",
+    noBudget: "Sätt en budget i Taimo",
+    add: "Lägg till",
+    scan: "📷 Kvitto",
+  },
+  qa: {
+    add: "Lägg till utgift",
+  },
   csv: { date: 'Datum', merchant: 'Handlare', category: 'Kategori', total: 'Totalbelopp', myShare: 'Min del', group: 'Grupp', source: 'Källa', note: 'Anteckning' },
 };
 

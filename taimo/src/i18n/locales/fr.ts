@@ -506,6 +506,18 @@ const fr: Translation = {
     done: "Ticket lu : vérifie le montant et le commerce.",
     permission: "J’ai besoin d’accéder à l’appareil photo ou à tes photos.",
   },
+  widget: {
+    leftTitle: "Reste ce mois-ci",
+    spentTitle: "Dépensé ce mois-ci",
+    perDay: "{amount} par jour",
+    over: "Budget dépassé ce mois-ci",
+    noBudget: "Fixe un budget dans Taimo",
+    add: "Noter",
+    scan: "📷 Ticket",
+  },
+  qa: {
+    add: "Ajouter une dépense",
+  },
   csv: { date: 'Date', merchant: 'Commerçant', category: 'Catégorie', total: 'Montant total', myShare: 'Ma part', group: 'Groupe', source: 'Origine', note: 'Note' },
 };
 

@@ -506,6 +506,18 @@ const cs: Translation = {
     done: "Účtenka přečtena: zkontroluj částku a obchod.",
     permission: "Potřebuji přístup k fotoaparátu nebo fotkám.",
   },
+  widget: {
+    leftTitle: "Zbývá tento měsíc",
+    spentTitle: "Utraceno tento měsíc",
+    perDay: "{amount} denně",
+    over: "Rozpočet tento měsíc překročen",
+    noBudget: "Nastav si rozpočet v Taimo",
+    add: "Přidat",
+    scan: "📷 Účtenka",
+  },
+  qa: {
+    add: "Přidat výdaj",
+  },
   csv: { date: 'Datum', merchant: 'Obchodník', category: 'Kategorie', total: 'Celková částka', myShare: 'Můj podíl', group: 'Skupina', source: 'Zdroj', note: 'Poznámka' },
 };
 

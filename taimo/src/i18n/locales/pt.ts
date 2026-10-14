@@ -506,6 +506,18 @@ const pt: Translation = {
     done: "Talão lido: confirma o valor e a loja.",
     permission: "Preciso de permissão para usar a câmara ou as tuas fotos.",
   },
+  widget: {
+    leftTitle: "Resta-te este mês",
+    spentTitle: "Gasto este mês",
+    perDay: "{amount} por dia",
+    over: "Passaste do orçamento este mês",
+    noBudget: "Define um orçamento no Taimo",
+    add: "Registar",
+    scan: "📷 Talão",
+  },
+  qa: {
+    add: "Registar despesa",
+  },
   csv: { date: 'Data', merchant: 'Comerciante', category: 'Categoria', total: 'Valor total', myShare: 'A minha parte', group: 'Grupo', source: 'Origem', note: 'Nota' },
 };
 

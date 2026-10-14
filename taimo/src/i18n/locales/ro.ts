@@ -506,6 +506,18 @@ const ro: Translation = {
     done: "Bon citit: verifică suma și magazinul.",
     permission: "Am nevoie de acces la cameră sau la poze.",
   },
+  widget: {
+    leftTitle: "Îți rămân luna asta",
+    spentTitle: "Cheltuit luna asta",
+    perDay: "{amount} pe zi",
+    over: "Ai depășit bugetul luna asta",
+    noBudget: "Setează un buget în Taimo",
+    add: "Adaugă",
+    scan: "📷 Bon",
+  },
+  qa: {
+    add: "Adaugă cheltuială",
+  },
   csv: { date: 'Dată', merchant: 'Comerciant', category: 'Categorie', total: 'Sumă totală', myShare: 'Partea mea', group: 'Grup', source: 'Sursă', note: 'Notă' },
 };
 

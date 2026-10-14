@@ -506,6 +506,18 @@ const de: Translation = {
     done: "Beleg gelesen: prüf Betrag und Geschäft.",
     permission: "Ich brauche Zugriff auf Kamera oder Fotos.",
   },
+  widget: {
+    leftTitle: "Diesen Monat übrig",
+    spentTitle: "Diesen Monat ausgegeben",
+    perDay: "{amount} pro Tag",
+    over: "Budget diesen Monat überschritten",
+    noBudget: "Leg in Taimo ein Budget fest",
+    add: "Erfassen",
+    scan: "📷 Beleg",
+  },
+  qa: {
+    add: "Ausgabe erfassen",
+  },
   csv: { date: 'Datum', merchant: 'Händler', category: 'Kategorie', total: 'Gesamtbetrag', myShare: 'Mein Anteil', group: 'Gruppe', source: 'Quelle', note: 'Notiz' },
 };
 

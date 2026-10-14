@@ -6,6 +6,7 @@ interface TaimoCaptureNative {
   openNotificationAccessSettings(): void;
   setIgnoredApps?(apps: string[]): void;
   recognizeText?(uri: string): Promise<OcrLine[]>;
+  setWidgetData?(json: string): void;
 }
 
 // No existe en Expo Go ni en web: allí la app funciona sin captura nativa.
@@ -59,4 +60,13 @@ export const canRecognizeText = typeof native?.recognizeText === 'function';
 export async function recognizeText(uri: string): Promise<OcrLine[]> {
   if (!native?.recognizeText) return [];
   return native.recognizeText(uri);
+}
+
+/** iPhone: datos para el widget de la pantalla de inicio (App Group compartido). */
+export function setWidgetData(json: string): void {
+  try {
+    native?.setWidgetData?.(json);
+  } catch {
+    // Sin widget (Android, web o versiones antiguas del módulo).
+  }
 }

@@ -506,6 +506,18 @@ const tr: Translation = {
     done: "Fiş okundu: tutarı ve mağazayı kontrol et.",
     permission: "Kamera veya fotoğraflar için izin gerekiyor.",
   },
+  widget: {
+    leftTitle: "Bu ay kalan",
+    spentTitle: "Bu ay harcanan",
+    perDay: "Günde {amount}",
+    over: "Bu ay bütçeyi aştın",
+    noBudget: "Taimo'da bütçe belirle",
+    add: "Ekle",
+    scan: "📷 Fiş",
+  },
+  qa: {
+    add: "Harcama ekle",
+  },
   csv: { date: 'Tarih', merchant: 'Satıcı', category: 'Kategori', total: 'Toplam tutar', myShare: 'Benim payım', group: 'Grup', source: 'Kaynak', note: 'Not' },
 };
 

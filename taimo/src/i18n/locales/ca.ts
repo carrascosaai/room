@@ -506,6 +506,18 @@ const ca: Translation = {
     done: "Tiquet llegit: revisa l’import i el comerç.",
     permission: "Necessito permís per fer servir la càmera o les fotos.",
   },
+  widget: {
+    leftTitle: "Et queda aquest mes",
+    spentTitle: "Gastat aquest mes",
+    perDay: "{amount} al dia",
+    over: "T’has passat aquest mes",
+    noBudget: "Posa un pressupost a Taimo",
+    add: "Apuntar",
+    scan: "📷 Tiquet",
+  },
+  qa: {
+    add: "Apuntar despesa",
+  },
   csv: { date: 'Data', merchant: 'Comerç', category: 'Categoria', total: 'Import total', myShare: 'La meva part', group: 'Grup', source: 'Origen', note: 'Nota' },
 };
 

@@ -506,6 +506,18 @@ const gl: Translation = {
     done: "Tícket lido: revisa o importe e o comercio.",
     permission: "Preciso permiso para usar a cámara ou as túas fotos.",
   },
+  widget: {
+    leftTitle: "Quédache este mes",
+    spentTitle: "Gastado este mes",
+    perDay: "{amount} ao día",
+    over: "Pasácheste este mes",
+    noBudget: "Pon un orzamento en Taimo",
+    add: "Apuntar",
+    scan: "📷 Tícket",
+  },
+  qa: {
+    add: "Apuntar gasto",
+  },
   csv: { date: 'Data', merchant: 'Comercio', category: 'Categoría', total: 'Importe total', myShare: 'A miña parte', group: 'Grupo', source: 'Orixe', note: 'Nota' },
 };
 

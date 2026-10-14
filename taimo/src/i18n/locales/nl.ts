@@ -506,6 +506,18 @@ const nl: Translation = {
     done: "Bonnetje gelezen: controleer het bedrag en de winkel.",
     permission: "Ik heb toegang nodig tot de camera of je foto’s.",
   },
+  widget: {
+    leftTitle: "Over deze maand",
+    spentTitle: "Uitgegeven deze maand",
+    perDay: "{amount} per dag",
+    over: "Deze maand over budget",
+    noBudget: "Stel een budget in Taimo in",
+    add: "Noteren",
+    scan: "📷 Bonnetje",
+  },
+  qa: {
+    add: "Uitgave toevoegen",
+  },
   csv: { date: 'Datum', merchant: 'Winkel', category: 'Categorie', total: 'Totaalbedrag', myShare: 'Mijn deel', group: 'Groep', source: 'Bron', note: 'Notitie' },
 };
 

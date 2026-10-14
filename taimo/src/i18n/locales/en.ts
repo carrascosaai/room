@@ -535,6 +535,18 @@ const en = {
     done: "Receipt read: check the amount and the shop.",
     permission: "I need permission to use the camera or your photos.",
   },
+  widget: {
+    leftTitle: "Left this month",
+    spentTitle: "Spent this month",
+    perDay: "{amount} a day",
+    over: "Over budget this month",
+    noBudget: "Set a budget in Taimo",
+    add: "Add",
+    scan: "📷 Receipt",
+  },
+  qa: {
+    add: "Add expense",
+  },
   csv: {
     date: 'Date',
     merchant: 'Merchant',

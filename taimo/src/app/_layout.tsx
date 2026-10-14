@@ -13,6 +13,7 @@ import { dueRecurring } from '@/domain/groupInsights';
 import { detectSubscriptions, nextCharge } from '@/domain/insights';
 import { splitByWeights, splitEqually } from '@/domain/groups';
 import { useAutoRefreshRates } from '@/fx/useRates';
+import { useWidgetSync } from '@/widget/useWidgetSync';
 import { useI18n } from '@/i18n';
 import { scheduleSubscriptionAlerts, scheduleWeeklySummary } from '@/notifications/local';
 import { StoreProvider, useStore } from '@/store/store';
@@ -27,6 +28,7 @@ function BackgroundWork() {
   useGroupSync();
   useAccountSync();
   useAutoRefreshRates();
+  useWidgetSync(state, i18n);
 
   // Gastos fijos de grupos (alquiler, luz…): se apuntan solos cuando llega su día.
   const recurringKey = state.groups.map((g) => `${g.id}:${(g.recurring ?? []).map((r) => r.id + r.day).join()}`).join('|');

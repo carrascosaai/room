@@ -506,6 +506,18 @@ const nb: Translation = {
     done: "Kvittering lest: sjekk beløpet og butikken.",
     permission: "Jeg trenger tilgang til kameraet eller bildene dine.",
   },
+  widget: {
+    leftTitle: "Igjen denne måneden",
+    spentTitle: "Brukt denne måneden",
+    perDay: "{amount} om dagen",
+    over: "Over budsjett denne måneden",
+    noBudget: "Sett et budsjett i Taimo",
+    add: "Legg til",
+    scan: "📷 Kvittering",
+  },
+  qa: {
+    add: "Legg til utgift",
+  },
   csv: { date: 'Dato', merchant: 'Brukersted', category: 'Kategori', total: 'Totalbeløp', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Notat' },
 };
 

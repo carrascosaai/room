@@ -16,6 +16,17 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
   reparto por categoría y gastos más grandes. Toca una barra para ver su importe.
 
 - **Presupuestos por categoría** y en Inicio: lo que te queda este mes y **cuánto puedes gastar al día**.
+- **Siri** (iPhone): «Oye Siri, apunta un gasto en Taimo» → «50 euros en comida». Se apunta sin abrir la app, ideal
+  para el efectivo. Frases en los 12 idiomas de la app que tiene Siri.
+- **Escanear el ticket**: foto → importe, comercio, fecha y productos, leídos en el propio móvil (Vision en iPhone,
+  ML Kit en Android). En grupos, los productos quedan listos para repartir.
+- **Pregunta a Taimo**: «¿cuánto gasté en Glovo este año?», «¿puedo permitirme 400 € en diciembre?», «¿en qué gasto
+  más?», «¿cuánto me deben?». Las respuestas se calculan en el móvil, sin internet.
+- **Retos de ahorro** (una semana sin comer fuera, gastar menos que la semana pasada, 3 días sin gastar) y **racha** de
+  días sin pasarte de tu límite diario.
+- **Widget** en la pantalla de inicio (iPhone y Android) con lo que te queda y botones para apuntar o escanear, y
+  **accesos rápidos** al mantener pulsado el icono.
+- **Aviso el día antes de cada cobro de suscripción**: «Mañana te cobran Netflix (12,99 €). ¿Lo sigues usando?».
 - **Apuntar rápido escribiendo como hablas**: «café 2,50», «ramen ¥1200», «cena 45 con Ana y yo ayer» (importe,
   moneda, comercio, categoría, grupo y «ayer» en los 20 idiomas). Con grupo abre el formulario ya relleno.
 - **Modo viaje inteligente**: los pagos con tu tarjeta en otra moneda durante un viaje se proponen para el grupo del
@@ -63,6 +74,10 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
     duplicarse aunque los tengan varios móviles.
   - **Viaje**: moneda del grupo, fechas y presupuesto: **cuánto podéis gastar al día entre todos y por persona**,
     coste por persona y en qué monedas se ha pagado.
+  - **Bote común**: cada uno pone dinero, los gastos comunes se pagan con el bote y lo que sobra se devuelve, con
+    saldos justos aunque cada uno ponga cantidades distintas.
+  - **Pagar la deuda en un toque**: cada miembro comparte cómo cobra (Bizum, IBAN, PayPal, Revolut) y quien debe paga
+    con el importe puesto.
   - Cuatro formas de repartir cada gasto: **a partes iguales, por proporción, importes exactos o por productos del
     ticket** (cada uno paga lo suyo y la propina e impuestos van en proporción).
   - Quién ha pagado qué, gasto por categoría, **🔔 Recordar** (manda por WhatsApp lo que debe cada uno) y cómo
@@ -103,8 +118,8 @@ npx eas-cli@latest build --profile development --platform ios      # o android
 ## Grupos compartidos (Supabase)
 
 1. Crea un proyecto gratuito en [supabase.com](https://supabase.com) (región `eu-west-1` o similar).
-2. Ejecuta en el editor SQL, en orden, los archivos de `supabase/migrations/` (grupos, copias de seguridad y
-   grupos v2 con tipo, moneda, presupuesto, gastos fijos y reparto por proporción).
+2. Ejecuta en el editor SQL, en orden, los archivos de `supabase/migrations/` (grupos, copias de seguridad, grupos v2
+   con tipo, moneda, presupuesto, gastos fijos y repartos, y v3 con cómo cobra cada miembro).
 3. Copia `.env.example` a `.env` y pon la URL y la clave pública (anon) del proyecto.
 
 Modelo de seguridad: sin cuentas de usuario. Cada grupo tiene un código de 16 caracteres imposible de adivinar; quien

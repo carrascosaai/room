@@ -506,6 +506,18 @@ const fi: Translation = {
     done: "Kuitti luettu: tarkista summa ja kauppa.",
     permission: "Tarvitsen luvan kameraan tai kuviin.",
   },
+  widget: {
+    leftTitle: "Jäljellä tässä kuussa",
+    spentTitle: "Käytetty tässä kuussa",
+    perDay: "{amount} päivässä",
+    over: "Budjetti ylittyi tässä kuussa",
+    noBudget: "Aseta budjetti Taimossa",
+    add: "Lisää",
+    scan: "📷 Kuitti",
+  },
+  qa: {
+    add: "Lisää kulu",
+  },
   csv: { date: 'Päivämäärä', merchant: 'Kauppias', category: 'Luokka', total: 'Kokonaissumma', myShare: 'Oma osuus', group: 'Ryhmä', source: 'Lähde', note: 'Huomautus' },
 };
 

@@ -506,6 +506,18 @@ const pl: Translation = {
     done: "Paragon odczytany: sprawdź kwotę i sklep.",
     permission: "Potrzebuję dostępu do aparatu lub zdjęć.",
   },
+  widget: {
+    leftTitle: "Zostało w tym miesiącu",
+    spentTitle: "Wydane w tym miesiącu",
+    perDay: "{amount} dziennie",
+    over: "Budżet przekroczony w tym miesiącu",
+    noBudget: "Ustaw budżet w Taimo",
+    add: "Dodaj",
+    scan: "📷 Paragon",
+  },
+  qa: {
+    add: "Dodaj wydatek",
+  },
   csv: { date: 'Data', merchant: 'Sprzedawca', category: 'Kategoria', total: 'Kwota całkowita', myShare: 'Moja część', group: 'Grupa', source: 'Źródło', note: 'Notatka' },
 };
 

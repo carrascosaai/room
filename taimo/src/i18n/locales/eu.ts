@@ -506,6 +506,18 @@ const eu: Translation = {
     done: "Tiketa irakurrita: berrikusi zenbatekoa eta denda.",
     permission: "Kamera edo argazkiak erabiltzeko baimena behar dut.",
   },
+  widget: {
+    leftTitle: "Hilabete honetan geratzen zaizu",
+    spentTitle: "Hilabete honetan gastatua",
+    perDay: "{amount} egunean",
+    over: "Hilabete honetan pasatu zara",
+    noBudget: "Jarri aurrekontu bat Taimon",
+    add: "Apuntatu",
+    scan: "📷 Tiketa",
+  },
+  qa: {
+    add: "Apuntatu gastua",
+  },
   csv: { date: 'Data', merchant: 'Denda', category: 'Kategoria', total: 'Zenbateko osoa', myShare: 'Nire zatia', group: 'Taldea', source: 'Jatorria', note: 'Oharra' },
 };
 

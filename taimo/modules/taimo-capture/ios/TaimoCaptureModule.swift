@@ -1,6 +1,7 @@
 import ExpoModulesCore
 import UIKit
 import Vision
+import WidgetKit
 
 /// Puente con JavaScript. El App Intent (en el target de la app, ver
 /// native/ios/TaimoCaptureIntent.swift) deja los pagos en una cola de
@@ -44,6 +45,12 @@ public class TaimoCaptureModule: Module {
         let box = obs.boundingBox  // origen abajo a la izquierda
         return ["text": text, "x": box.minX, "y": 1 - box.maxY, "w": box.width, "h": box.height]
       }
+    }
+
+    /// Deja los datos del widget en el App Group compartido y le pide que se redibuje.
+    Function("setWidgetData") { (json: String) -> Void in
+      UserDefaults(suiteName: "group.app.taimo")?.set(json, forKey: "widget")
+      WidgetCenter.shared.reloadAllTimelines()
     }
 
     /// Solo tiene sentido en Android (lector de notificaciones).

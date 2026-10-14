@@ -506,6 +506,18 @@ const da: Translation = {
     done: "Kvittering læst: tjek beløbet og butikken.",
     permission: "Jeg skal have adgang til kameraet eller dine billeder.",
   },
+  widget: {
+    leftTitle: "Tilbage denne måned",
+    spentTitle: "Brugt denne måned",
+    perDay: "{amount} om dagen",
+    over: "Over budget denne måned",
+    noBudget: "Sæt et budget i Taimo",
+    add: "Tilføj",
+    scan: "📷 Kvittering",
+  },
+  qa: {
+    add: "Tilføj udgift",
+  },
   csv: { date: 'Dato', merchant: 'Forretning', category: 'Kategori', total: 'Samlet beløb', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Note' },
 };
 
