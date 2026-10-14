@@ -9,6 +9,7 @@ import { normalizeMerchant } from '@/domain/categorize';
 import { isRecurringInstanceId, withRecurringSkipped } from '@/domain/groupInsights';
 import { changeGroupCurrency, groupExpenseToPersonal } from '@/domain/currencyChange';
 import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
+import { applyTableClaim, startTable, type TableBill, type TableClaim } from '@/domain/table';
 import type { AppState, CategoryId, Cents, Expense, Goal, Group, Member, PaymentInfo, Settlement, Tombstone } from '@/domain/types';
 import { FALLBACK, rateBetween } from '@/fx/fx';
 
@@ -67,6 +68,10 @@ export type Action =
   | { type: 'deleteGroup'; id: string }
   | { type: 'addSettlement'; settlement: Settlement }
   | { type: 'deleteSettlement'; id: string }
+  /** «Paga tu parte»: convierte el gasto (nuevo o ya apuntado) en una mesa con QR. */
+  | { type: 'createTable'; bill: TableBill; expense: Expense; meId: string }
+  /** Aviso «ya he pagado» de un comensal. */
+  | { type: 'tableClaim'; claim: TableClaim }
   | { type: 'importExpenses'; expenses: Expense[] }
   | { type: 'setGroupRemote'; groupId: string; code: string }
   | { type: 'applySnapshot'; groupId: string; snapshot: GroupSnapshot; syncStartedAt: string }
@@ -279,6 +284,12 @@ export function reducer(state: AppState, action: Action): AppState {
         tombstones: shared ? [...state.tombstones, tomb] : state.tombstones,
       };
     }
+    case 'createTable': {
+      const withExpense = state.expenses.some((e) => e.id === action.expense.id) ? state : { ...state, expenses: [action.expense, ...state.expenses] };
+      return startTable(withExpense, action.expense.id, action.bill, action.meId)?.state ?? state;
+    }
+    case 'tableClaim':
+      return applyTableClaim(state, action.claim).state;
     case 'setGroupRemote':
       return {
         ...state,

@@ -190,7 +190,11 @@ export default function GroupDetail() {
         </Card>
       ) : null}
 
-      <Button label={t('group.addShared')} onPress={() => router.push({ pathname: '/add', params: { groupId: group.id } })} />
+      {group.table ? (
+        <Button label={`🍽️ ${t('mesa.seeTable')}`} onPress={() => router.push({ pathname: '/mesa-nueva', params: { groupId: group.id } })} />
+      ) : (
+        <Button label={t('group.addShared')} onPress={() => router.push({ pathname: '/add', params: { groupId: group.id } })} />
+      )}
       {expenses.length > 0 ? <Button label={`📤 ${t('pay.share')}`} variant="secondary" onPress={() => shareText(summaryText())} /> : null}
 
       {/* Saldos y cómo quedar en paz */}

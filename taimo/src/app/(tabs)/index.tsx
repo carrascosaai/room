@@ -63,6 +63,7 @@ export default function Home() {
       )}
 
       <BigButton emoji="＋" label={t('home.add')} onPress={() => router.push('/add')} />
+      <BigButton label={t('mesa.start')} variant="secondary" onPress={() => router.push('/mesa-nueva')} />
       {canRecognizeText ? <BigButton emoji="📷" label={t('scan.button').replace(/^📷\s*/, '')} variant="secondary" onPress={() => router.push({ pathname: '/add', params: { scan: '1' } })} /> : null}
 
       {oneTip()}
