@@ -47,7 +47,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:db": "psql -X -v ON_ERROR_STOP=1 -f supabase/tests/groups_test.sql"
+    "test:db": "psql -X -v ON_ERROR_STOP=1 -f supabase/tests/groups_test.sql",
+    "build:web": "expo export --platform web --output-dir dist"
   },
   "private": true
 }
