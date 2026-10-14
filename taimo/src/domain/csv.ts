@@ -98,7 +98,7 @@ export function parseDate(value: string, order: DateOrder = 'dmy'): string | nul
     y = Number(match[3]);
     if (y < 100) y += 2000;
   }
-  if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+  if (m < 1 || m > 12 || d < 1 || d > new Date(Date.UTC(y, m, 0)).getUTCDate()) return null;
   return new Date(Date.UTC(y, m - 1, d, 12)).toISOString();
 }
 

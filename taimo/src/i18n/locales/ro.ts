@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const ro: Translation = {
-  common: { cancel: 'Anulează', save: 'Salvează', delete: 'Șterge', back: 'Înapoi', continue: 'Continuă', done: 'Gata', you: 'Tu', me: 'Eu', today: 'Azi, {time}', yesterday: 'Ieri, {time}', unknown: '?' },
+  common: { cancel: 'Anulează', save: 'Salvează', delete: 'Șterge', back: 'Înapoi', continue: 'Continuă', done: 'Gata', you: 'Tu', me: 'Eu', today: 'Azi, {time}', yesterday: 'Ieri, {time}', unknown: '?', backHome: "Înapoi la început" },
   cat: { super: 'Cumpărături alimentare', comer: 'În oraș', ocio: 'Distracție', deporte: 'Sport', estudios: 'Studii', transporte: 'Transport', casa: 'Casă', compras: 'Cumpărături', salud: 'Sănătate', suscripciones: 'Abonamente', otros: 'Altele' },
   tabs: { home: 'Acasă', groups: 'Grupuri', stats: "Rezumat", settings: 'Setări', more: "Mai mult" },
   onboarding: {
@@ -37,11 +37,13 @@ const ro: Translation = {
     restoreConfirm: 'Înlocuiești datele de pe acest telefon cu copia ta?',
   },
   home: {
+    spentThisMonth: "Cheltuit luna aceasta",
+    setBudget: "Stabilește un buget lunar",
     hello: 'Salut, {name} 👋',
     helloAnon: 'Salut din nou 👋',
     leftThisMonth: 'Ți-a rămas pentru {month}',
     spentOf: 'Cheltuit {spent} din {budget}',
-    perDay: 'Poți cheltui {amount} pe zi în cele {days} zile rămase.',
+    perDay: { one: "A mai rămas {count} zi: poți cheltui {amount} pe zi.", few: "Au mai rămas {count} zile: poți cheltui {amount} pe zi.", other: "Au mai rămas {count} de zile: poți cheltui {amount} pe zi." },
     overLimit: 'Ai atins limita lunii. Rezistă, mai e puțin! 💪',
     autoTitle: 'Activează înregistrarea automată',
     autoText: 'Plătește cu Apple Pay și Taimo notează singur. Se configurează într-un minut.',
@@ -54,6 +56,8 @@ const ro: Translation = {
     add: 'Adaugă cheltuială',
   },
   add: {
+    needPayer: "Alege cine a plătit.",
+    needPeople: "Alege între cine se împarte.",
     newTitle: 'Cheltuială nouă',
     editTitle: 'Editează cheltuiala',
     amount: 'Sumă',
@@ -80,7 +84,7 @@ const ro: Translation = {
   capture: {
     auto: 'Notat automat',
     duplicate: 'Această plată era deja notată',
-    ok: 'Perfect',
+    ok: 'În regulă',
     change: 'Schimbă categoria sau împarte',
     errorTitle: 'Nu am înțeles plata',
     errorText: 'Scurtătura nu a trimis suma. Verifică dacă automatizarea transmite „Sumă” în link. O poți adăuga manual.',
@@ -116,6 +120,8 @@ const ro: Translation = {
     androidHint: 'În ecranul de setări care se deschide, caută „Taimo” și activează-l.',
   },
   groups: {
+    needName: "Dă-i un nume grupului.",
+    needMembers: "Scrie cel puțin încă o persoană. Separă numele cu virgule: Ana, Luis",
     title: 'Grupuri',
     intro: 'Împarte cheltuielile cu partenerul, colegii de apartament sau prietenii. În bugetul tău contează doar partea ta, iar Taimo calculează cine cui datorează.',
     settled: 'Achitat ✓',
@@ -132,6 +138,8 @@ const ro: Translation = {
     joinButton: 'Intră cu un cod',
   },
   group: {
+    markPaidConfirm: "Marchezi ca plătit? {from} → {to}: {amount}",
+    markPaidOk: "Marchează ca plătit",
     missing: 'Acest grup nu mai există.',
     total: 'Total cheltuit în grup',
     settled: 'achitat',
@@ -159,6 +167,7 @@ const ro: Translation = {
     deleteConfirm: 'Ștergi grupul? Cheltuielile lui rămân ca ale tale.',
   },
   join: {
+    joinAs: "Intră ca {name}",
     title: 'Intră într-un grup',
     text: 'Lipește linkul sau codul primit.',
     placeholder: 'Cod de 16 caractere',
@@ -176,6 +185,8 @@ const ro: Translation = {
     offline: 'Fără conexiune. Încercăm mai târziu.',
   },
   stats: {
+    prev: "Anterior",
+    next: "Următor",
     title: 'Statistici',
     day: 'Zi',
     week: 'Săptămână',
@@ -268,6 +279,8 @@ const ro: Translation = {
     defaultHint: "Se folosește la cheltuielile noi ale grupului. O poți schimba la fiecare cheltuială.",
   },
   gx: {
+    badDate: "Scrie data așa: 2026-11-15 sau 15/11/2026.",
+    recurringDeleteConfirm: "Ștergi cheltuiala fixă „{name}”?",
     type: "Tip de grup",
     currency: "Moneda grupului",
     budgetTrip: "Bugetul călătoriei",
@@ -311,6 +324,7 @@ const ro: Translation = {
     subsMonthly: "{amount}/lună",
   },
   history: {
+    more: "Vezi mai multe",
     title: "Toate cheltuielile",
     search: "Caută magazin, notă sau categorie",
     all: "Toate",
@@ -428,6 +442,7 @@ const ro: Translation = {
     noInfo: "{name} n-a adăugat încă cum să fie plătit. Roagă-l să adauge în Setări → Cum ești plătit.",
   },
   plink: {
+    verify: "Verifică cu {name} că aceste date sunt ale sale înainte să plătești.",
     owe: "Îi datorezi lui {name}",
     group: "Din grupul „{group}”",
     why: "De ce",
@@ -579,7 +594,7 @@ const ro: Translation = {
   ants: {
     title: "Cheltuieli mărunte",
     hint: "Cheltuieli mici care se repetă. Separat nu înseamnă nimic; împreună, da.",
-    line: "de {count} ori · {monthly} pe lună · {yearly} pe an",
+    line: { one: "{count} dată · {monthly} pe lună · {yearly} pe an", few: "de {count} ori · {monthly} pe lună · {yearly} pe an", other: "de {count} de ori · {monthly} pe lună · {yearly} pe an" },
   },
   heat: {
     title: "Harta lunii",

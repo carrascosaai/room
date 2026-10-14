@@ -4,7 +4,7 @@ import { AppState as RNAppState, Platform } from 'react-native';
 import { drainPending } from 'taimo-capture';
 
 import { categoryStatus } from '@/domain/budget';
-import { parseCaptureParams, type CapturePayload } from '@/domain/capture';
+import { parseCaptureParams, pendingKind, type CapturePayload } from '@/domain/capture';
 import { budgetCrossings } from '@/domain/insights';
 import { parseQuickAdd, quickExpense } from '@/domain/smart';
 import { FALLBACK } from '@/fx/fx';
@@ -32,8 +32,9 @@ export function useNativeCaptures(i18n: I18n, onCaptured?: (count: number) => vo
     let current = before;
     let added = 0;
     for (const item of items) {
+      const kind = pendingKind(item, Platform.OS);
       // Siri: «50 euros en comida» (sobre todo pagos en efectivo).
-      if (item.text) {
+      if (kind === 'siri') {
         const q = parseQuickAdd(item.text, current);
         if (!q) continue;
         const when = item.date ? new Date(item.date) : new Date();
@@ -50,7 +51,7 @@ export function useNativeCaptures(i18n: I18n, onCaptured?: (count: number) => vo
         continue;
       }
       let payload: CapturePayload | null;
-      if (Platform.OS === 'android') {
+      if (kind === 'notification') {
         payload = parsePaymentNotification(item as unknown as RawNotification, {
           learned: current.learnedCategories,
           home: current.profile.currency,

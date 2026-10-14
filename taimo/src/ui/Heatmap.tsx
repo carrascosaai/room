@@ -34,7 +34,7 @@ export function Heatmap({ month }: { month: Date }) {
       <View style={{ gap: 4 }}>
         <View style={{ flexDirection: 'row', gap: 4 }}>
           {weekdays.map((w, i) => (
-            <Text key={i} style={{ flex: 1, textAlign: 'center', color: colors.textFaint, fontSize: 11 }}>
+            <Text key={i} style={{ flex: 1, textAlign: 'center', color: colors.textMuted, fontSize: 13 }}>
               {w}
             </Text>
           ))}
@@ -49,6 +49,7 @@ export function Heatmap({ month }: { month: Date }) {
                 <Pressable
                   key={i}
                   onPress={() => setPicked(d)}
+                  accessibilityRole="button"
                   accessibilityLabel={`${d + 1}: ${money(days[d])}`}
                   style={{
                     flex: 1,
@@ -63,7 +64,7 @@ export function Heatmap({ month }: { month: Date }) {
                     justifyContent: 'center',
                   }}
                 >
-                  <Text style={{ fontSize: 11, fontWeight: level ? '600' : '400', color: level >= 3 ? colors.onPrimary : colors.text }}>{d + 1}</Text>
+                  <Text style={{ fontSize: 13, fontWeight: level ? '600' : '400', color: level >= 3 ? colors.onPrimary : colors.text }}>{d + 1}</Text>
                 </Pressable>
               );
             })}

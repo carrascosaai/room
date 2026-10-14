@@ -1,5 +1,6 @@
 import type { CategoryStatus } from '@/domain/budget';
 import { monthSummary } from '@/domain/budget';
+import { plainAmount } from '@/domain/money';
 import type { AppState, Cents, PaymentInfo } from '@/domain/types';
 import type { I18n } from '@/i18n';
 
@@ -47,7 +48,7 @@ export function paymentLines(payment: PaymentInfo | undefined, amount: Cents, cu
   const lines: string[] = [];
   if (payment.bizum) lines.push(`Bizum: ${payment.bizum}`);
   if (payment.iban) lines.push(`IBAN: ${payment.iban.toUpperCase().replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim()}`);
-  if (payment.paypal && handle(payment.paypal)) lines.push(`PayPal: https://paypal.me/${handle(payment.paypal)}/${(amount / 100).toFixed(2)}${currency}`);
+  if (payment.paypal && handle(payment.paypal)) lines.push(`PayPal: https://paypal.me/${handle(payment.paypal)}/${plainAmount(amount, currency)}${currency}`);
   if (payment.revolut && handle(payment.revolut)) lines.push(`Revolut: https://revolut.me/${handle(payment.revolut)}`);
   return lines;
 }

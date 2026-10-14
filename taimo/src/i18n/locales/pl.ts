@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const pl: Translation = {
-  common: { cancel: 'Anuluj', save: 'Zapisz', delete: 'Usuń', back: 'Wstecz', continue: 'Dalej', done: 'Gotowe', you: 'Ty', me: 'Ja', today: 'Dziś, {time}', yesterday: 'Wczoraj, {time}', unknown: '?' },
+  common: { cancel: 'Anuluj', save: 'Zapisz', delete: 'Usuń', back: 'Wstecz', continue: 'Dalej', done: 'Gotowe', you: 'Ty', me: 'Ja', today: 'Dziś, {time}', yesterday: 'Wczoraj, {time}', unknown: '?', backHome: "Wróć do początku" },
   cat: { super: 'Zakupy spożywcze', comer: 'Jedzenie na mieście', ocio: 'Rozrywka', deporte: 'Sport', estudios: 'Nauka', transporte: 'Transport', casa: 'Dom', compras: 'Zakupy', salud: 'Zdrowie', suscripciones: 'Subskrypcje', otros: 'Inne' },
   tabs: { home: 'Start', groups: 'Grupy', stats: "Podsumowanie", settings: 'Ustawienia', more: "Więcej" },
   onboarding: {
@@ -37,11 +37,13 @@ const pl: Translation = {
     restoreConfirm: 'Zastąpić dane na tym telefonie kopią zapasową?',
   },
   home: {
+    spentThisMonth: "Wydano w tym miesiącu",
+    setBudget: "Ustaw budżet miesięczny",
     hello: 'Cześć, {name} 👋',
     helloAnon: 'Cześć ponownie 👋',
     leftThisMonth: 'Zostało na {month}',
     spentOf: 'Wydano {spent} z {budget}',
-    perDay: 'Możesz wydawać {amount} dziennie przez pozostałe dni: {days}.',
+    perDay: { one: "Został {count} dzień: możesz wydawać {amount} dziennie.", few: "Zostały {count} dni: możesz wydawać {amount} dziennie.", many: "Zostało {count} dni: możesz wydawać {amount} dziennie.", other: "Zostało {count} dnia: możesz wydawać {amount} dziennie." },
     overLimit: 'Osiągnięto limit na ten miesiąc. Wytrzymaj, już niedługo! 💪',
     autoTitle: 'Włącz automatyczne zapisywanie',
     autoText: 'Płać przez Apple Pay, a Taimo samo to zapisze. Konfiguracja zajmuje minutę.',
@@ -54,6 +56,8 @@ const pl: Translation = {
     add: 'Dodaj wydatek',
   },
   add: {
+    needPayer: "Wybierz, kto zapłacił.",
+    needPeople: "Wybierz, między kogo podzielić.",
     newTitle: 'Nowy wydatek',
     editTitle: 'Edytuj wydatek',
     amount: 'Kwota',
@@ -116,6 +120,8 @@ const pl: Translation = {
     androidHint: 'Na otwartym ekranie ustawień znajdź „Taimo” i włącz.',
   },
   groups: {
+    needName: "Nadaj grupie nazwę.",
+    needMembers: "Wpisz co najmniej jedną inną osobę. Oddziel imiona przecinkami: Ana, Luis",
     title: 'Grupy',
     intro: 'Dziel wydatki z partnerem, współlokatorami lub znajomymi. Do twojego budżetu liczy się tylko twoja część, a Taimo wylicza, kto komu ile winien.',
     settled: 'Rozliczone ✓',
@@ -132,6 +138,8 @@ const pl: Translation = {
     joinButton: 'Dołącz za pomocą kodu',
   },
   group: {
+    markPaidConfirm: "Oznaczyć jako zapłacone? {from} → {to}: {amount}",
+    markPaidOk: "Oznacz jako zapłacone",
     missing: 'Ta grupa już nie istnieje.',
     total: 'Łącznie wydane w grupie',
     settled: 'rozliczone',
@@ -159,6 +167,7 @@ const pl: Translation = {
     deleteConfirm: 'Usunąć grupę? Jej wydatki zostaną jako twoje.',
   },
   join: {
+    joinAs: "Dołącz jako {name}",
     title: 'Dołącz do grupy',
     text: 'Wklej otrzymany link albo kod.',
     placeholder: 'Kod z 16 znaków',
@@ -176,6 +185,8 @@ const pl: Translation = {
     offline: 'Brak połączenia. Spróbujemy później.',
   },
   stats: {
+    prev: "Poprzedni",
+    next: "Następny",
     title: 'Statystyki',
     day: 'Dzień',
     week: 'Tydzień',
@@ -268,6 +279,8 @@ const pl: Translation = {
     defaultHint: "Stosowany do nowych wydatków grupy. Można go zmienić przy każdym wydatku.",
   },
   gx: {
+    badDate: "Wpisz datę tak: 2026-11-15 lub 15/11/2026.",
+    recurringDeleteConfirm: "Usunąć stały wydatek „{name}”?",
     type: "Rodzaj grupy",
     currency: "Waluta grupy",
     budgetTrip: "Budżet wyjazdu",
@@ -311,6 +324,7 @@ const pl: Translation = {
     subsMonthly: "{amount}/mies.",
   },
   history: {
+    more: "Pokaż więcej",
     title: "Wszystkie wydatki",
     search: "Szukaj sklepu, notatki lub kategorii",
     all: "Wszystkie",
@@ -428,6 +442,7 @@ const pl: Translation = {
     noInfo: "{name} nie dodał(a) jeszcze danych do płatności. Poproś o dodanie w Ustawienia → Jak ci płacą.",
   },
   plink: {
+    verify: "Zanim zapłacisz, upewnij się u osoby {name}, że to jej dane.",
     owe: "Jesteś winien {name}",
     group: "Z grupy „{group}”",
     why: "Dlaczego",
@@ -579,7 +594,7 @@ const pl: Translation = {
   ants: {
     title: "Drobne wydatki",
     hint: "Małe, powtarzające się wydatki. Osobno nic; razem sporo.",
-    line: "{count} razy · {monthly} miesięcznie · {yearly} rocznie",
+    line: { one: "{count} raz · {monthly} miesięcznie · {yearly} rocznie", few: "{count} razy · {monthly} miesięcznie · {yearly} rocznie", many: "{count} razy · {monthly} miesięcznie · {yearly} rocznie", other: "{count} razy · {monthly} miesięcznie · {yearly} rocznie" },
   },
   heat: {
     title: "Mapa miesiąca",

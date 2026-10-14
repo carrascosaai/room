@@ -1,9 +1,10 @@
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Platform, Share, Text, View } from 'react-native';
 
+import { plainAmount } from '@/domain/money';
 import { decodePayRequest } from '@/domain/paylink';
 import { useI18n } from '@/i18n';
 import { webBase } from '@/sync/api';
@@ -30,12 +31,18 @@ export default function Pay() {
       <Screen>
         <Stack.Screen options={{ headerShown: false }} />
         <Empty emoji="🔗" text={t('plink.broken')} />
+        {/* Sin callejones sin salida: en la web lleva a Taimo; en la app, al inicio. */}
+        {Platform.OS === 'web' ? (
+          <Button label={t('plink.getApp')} onPress={() => Linking.openURL(webBase() || '/')} />
+        ) : (
+          <Button label={t('common.backHome')} onPress={() => router.replace('/')} />
+        )}
       </Screen>
     );
   }
 
   const amount = moneyIn(req.a, req.c);
-  const plain = (req.a / 100).toFixed(2).replace('.', req.c === 'EUR' ? ',' : '.');
+  const plain = plainAmount(req.a, req.c).replace('.', req.c === 'EUR' ? ',' : '.');
   const paypal = req.p.paypal ? handle(req.p.paypal) : '';
   const revolut = req.p.revolut ? handle(req.p.revolut) : '';
 
@@ -84,6 +91,14 @@ export default function Pay() {
       ) : null}
 
       <H2>{t('plink.how')}</H2>
+      {/* Aviso contra estafas: el enlace lo puede haber hecho cualquiera. */}
+      <View
+        accessibilityRole="alert"
+        style={{ flexDirection: 'row', gap: space.sm, alignItems: 'flex-start', backgroundColor: colors.surface, borderColor: colors.warning, borderWidth: 1.5, borderRadius: radius.md, padding: space.md }}
+      >
+        <Text style={{ fontSize: 20 }}>🛡️</Text>
+        <Text style={{ color: colors.text, fontSize: 17, lineHeight: 24, flex: 1 }}>{t('plink.verify', { name: req.t })}</Text>
+      </View>
 
       {req.p.bizum ? (
         <Card>
@@ -95,7 +110,7 @@ export default function Pay() {
       ) : null}
 
       {paypal ? (
-        <BigButton emoji="🅿️" label={t('payx.with', { method: 'PayPal' })} onPress={() => Linking.openURL(`https://paypal.me/${paypal}/${(req.a / 100).toFixed(2)}${req.c}`)} />
+        <BigButton emoji="🅿️" label={t('payx.with', { method: 'PayPal' })} onPress={() => Linking.openURL(`https://paypal.me/${paypal}/${plainAmount(req.a, req.c)}${req.c}`)} />
       ) : null}
       {revolut ? (
         <BigButton emoji="💳" label={t('payx.with', { method: 'Revolut' })} variant="secondary" onPress={() => Linking.openURL(`https://revolut.me/${revolut}`)} />

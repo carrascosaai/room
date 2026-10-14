@@ -75,6 +75,17 @@ export default function Capture() {
         </Row>
       </Card>
       <Button label={t('capture.ok')} onPress={() => router.replace('/')} />
+      {result.duplicate ? null : (
+        // El enlace lo puede abrir cualquier app: si no era tuyo, se quita en un toque.
+        <Button
+          label={t('quick.undo')}
+          variant="secondary"
+          onPress={() => {
+            dispatch({ type: 'deleteExpense', id: expense.id });
+            router.replace('/');
+          }}
+        />
+      )}
       <Button
         label={t('capture.change')}
         variant="secondary"

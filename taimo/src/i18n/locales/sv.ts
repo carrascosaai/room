@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const sv: Translation = {
-  common: { cancel: 'Avbryt', save: 'Spara', delete: 'Radera', back: 'Tillbaka', continue: 'Fortsätt', done: 'Klar', you: 'Du', me: 'Jag', today: 'I dag, {time}', yesterday: 'I går, {time}', unknown: '?' },
+  common: { cancel: 'Avbryt', save: 'Spara', delete: 'Radera', back: 'Tillbaka', continue: 'Fortsätt', done: 'Klar', you: 'Du', me: 'Jag', today: 'I dag, {time}', yesterday: 'I går, {time}', unknown: '?', backHome: "Tillbaka till start" },
   cat: { super: 'Mat', comer: 'Äta ute', ocio: 'Nöje', deporte: 'Sport', estudios: 'Studier', transporte: 'Transport', casa: 'Boende', compras: 'Shopping', salud: 'Hälsa', suscripciones: 'Prenumerationer', otros: 'Övrigt' },
   tabs: { home: 'Hem', groups: 'Grupper', stats: "Översikt", settings: 'Inställningar', more: "Mer" },
   onboarding: {
@@ -37,11 +37,13 @@ const sv: Translation = {
     restoreConfirm: 'Ersätta datan i den här mobilen med din säkerhetskopia?',
   },
   home: {
+    spentThisMonth: "Spenderat den här månaden",
+    setBudget: "Sätt en månadsbudget",
     hello: 'Hej, {name} 👋',
     helloAnon: 'Hej igen 👋',
     leftThisMonth: 'Kvar i {month}',
     spentOf: '{spent} av {budget} spenderat',
-    perDay: 'Du kan spendera {amount} per dag under de {days} dagar som är kvar.',
+    perDay: { one: "{count} dag kvar: du kan spendera {amount} per dag.", other: "{count} dagar kvar: du kan spendera {amount} per dag." },
     overLimit: 'Du har nått månadens gräns. Håll ut, snart är det slut! 💪',
     autoTitle: 'Slå på automatisk bokföring',
     autoText: 'Betala med Apple Pay så bokför Taimo det. Tar en minut att ställa in.',
@@ -54,6 +56,8 @@ const sv: Translation = {
     add: 'Lägg till utgift',
   },
   add: {
+    needPayer: "Välj vem som betalade.",
+    needPeople: "Välj vilka som delar.",
     newTitle: 'Ny utgift',
     editTitle: 'Redigera utgift',
     amount: 'Belopp',
@@ -116,6 +120,8 @@ const sv: Translation = {
     androidHint: 'Leta upp ”Taimo” i inställningsskärmen som öppnas och slå på det.',
   },
   groups: {
+    needName: "Ge gruppen ett namn.",
+    needMembers: "Skriv minst en person till. Skilj namnen åt med kommatecken: Ana, Luis",
     title: 'Grupper',
     intro: 'Dela utgifter med din partner, dina rumskamrater eller vänner. Bara din del räknas mot din budget och Taimo räknar ut vem som är skyldig vem.',
     settled: 'Kvitt ✓',
@@ -132,6 +138,8 @@ const sv: Translation = {
     joinButton: 'Gå med med en kod',
   },
   group: {
+    markPaidConfirm: "Markera som betald? {from} → {to}: {amount}",
+    markPaidOk: "Markera som betald",
     missing: 'Den här gruppen finns inte längre.',
     total: 'Totalt spenderat i gruppen',
     settled: 'kvitt',
@@ -159,6 +167,7 @@ const sv: Translation = {
     deleteConfirm: 'Radera gruppen? Utgifterna blir kvar som dina egna.',
   },
   join: {
+    joinAs: "Gå med som {name}",
     title: 'Gå med i en grupp',
     text: 'Klistra in länken eller koden du har fått.',
     placeholder: 'Kod med 16 tecken',
@@ -176,6 +185,8 @@ const sv: Translation = {
     offline: 'Ingen anslutning. Vi försöker igen senare.',
   },
   stats: {
+    prev: "Föregående",
+    next: "Nästa",
     title: 'Statistik',
     day: 'Dag',
     week: 'Vecka',
@@ -268,6 +279,8 @@ const sv: Translation = {
     defaultHint: "Används för nya utgifter i gruppen. Kan ändras för varje utgift.",
   },
   gx: {
+    badDate: "Skriv datumet så här: 2026-11-15 eller 15/11/2026.",
+    recurringDeleteConfirm: "Ta bort den fasta utgiften ”{name}”?",
     type: "Typ av grupp",
     currency: "Gruppens valuta",
     budgetTrip: "Resebudget",
@@ -311,6 +324,7 @@ const sv: Translation = {
     subsMonthly: "{amount}/mån",
   },
   history: {
+    more: "Visa fler",
     title: "Alla utgifter",
     search: "Sök butik, anteckning eller kategori",
     all: "Alla",
@@ -428,6 +442,7 @@ const sv: Translation = {
     noInfo: "{name} har inte lagt till hur man betalar än. Be hen lägga till det under Inställningar → Hur folk betalar dig.",
   },
   plink: {
+    verify: "Kolla med {name} att uppgifterna verkligen är hens innan du betalar.",
     owe: "Du är skyldig {name}",
     group: "Från gruppen ”{group}”",
     why: "Varför",
@@ -579,7 +594,7 @@ const sv: Translation = {
   ants: {
     title: "Småutgifter",
     hint: "Små utgifter som upprepas. En och en är de inget; tillsammans blir det mycket.",
-    line: "{count} gånger · {monthly} i månaden · {yearly} om året",
+    line: { one: "{count} gång · {monthly} i månaden · {yearly} om året", other: "{count} gånger · {monthly} i månaden · {yearly} om året" },
   },
   heat: {
     title: "Månadskarta",

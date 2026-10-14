@@ -7,7 +7,7 @@ import { category as categoryInfo } from '@/domain/categories';
 import { groupBudgetPlan, groupInsights, tripDays } from '@/domain/groupInsights';
 import { monthKey } from '@/domain/budget';
 import { balances, nextPayer, POT, potContributions, potLeft, sharedMonth, suggestTransfers, withoutPot } from '@/domain/groups';
-import { parseAmount } from '@/domain/money';
+import { parseAmount, parseTripDate } from '@/domain/money';
 import { buildPayRequest, canBePaid, payLink } from '@/domain/paylink';
 import { buildPush } from '@/domain/sync';
 import type { Group, Recurring } from '@/domain/types';
@@ -38,6 +38,7 @@ export default function GroupDetail() {
     return (
       <Screen>
         <Empty emoji="🤷" text={t('group.missing')} />
+        <Button label={t('common.backHome')} onPress={() => router.replace('/')} />
       </Screen>
     );
   }
@@ -62,6 +63,9 @@ export default function GroupDetail() {
   const plan = groupBudgetPlan(group, state.expenses);
   const days = tripDays(group);
   const payer = group.kind === 'couple' || group.kind === 'flat' ? nextPayer(withoutPot(balance)) : null;
+  // i18n.date devuelve '' si la fecha guardada no es válida: así no se rompe la pantalla.
+  const tripStart = group.trip?.start ? i18n.date(group.trip.start, { day: 'numeric', month: 'short' }) : '';
+  const tripEnd = group.trip?.end ? i18n.date(group.trip.end, { day: 'numeric', month: 'short' }) : '';
   const currencies = Object.entries(insights.byCurrency).filter(([c]) => c && c !== cur);
 
   function settle(from: string, to: string, amount: number) {
@@ -148,7 +152,7 @@ export default function GroupDetail() {
         <Muted>
           {group.kind ? t(`kind.${group.kind}`) : t('group.total')}
           {days ? ` · ${t('gx.tripDays', { count: days })}` : ''}
-          {group.trip?.start ? ` · ${i18n.date(group.trip.start, { day: 'numeric', month: 'short' })}${group.trip.end ? ` – ${i18n.date(group.trip.end, { day: 'numeric', month: 'short' })}` : ''}` : ''}
+          {tripStart ? ` · ${tripStart}${tripEnd ? ` – ${tripEnd}` : ''}` : ''}
         </Muted>
         <Text style={{ color: colors.text, fontSize: 34, fontWeight: '800' }}>{money(insights.total)}</Text>
         {group.members.length > 1 && !group.weights ? (
@@ -195,8 +199,10 @@ export default function GroupDetail() {
           const b = balance[m.id] ?? 0;
           return (
             <Row key={m.id} style={{ justifyContent: 'space-between' }}>
-              <Text style={{ color: colors.text, fontSize: 15 }}>{name(m.id)}</Text>
-              <Text style={{ color: b > 0 ? colors.success : b < 0 ? colors.warning : colors.textMuted }}>
+              <Text style={{ color: colors.text, fontSize: 16, flex: 1 }} numberOfLines={2}>
+                {name(m.id)}
+              </Text>
+              <Text style={{ color: b > 0 ? colors.success : b < 0 ? colors.warning : colors.textMuted, fontSize: 16, flexShrink: 1, textAlign: 'right' }}>
                 {b === 0 ? t('group.settled') : b > 0 ? t('group.isOwed', { amount: money(b) }) : t('group.owes', { amount: money(-b) })}
               </Text>
             </Row>
@@ -211,7 +217,18 @@ export default function GroupDetail() {
             {group.members.find((m) => m.id === tr.from)?.isMe ? (
               <PayButtons name={realName(tr.to)} pay={group.members.find((m) => m.id === tr.to)?.pay} amount={tr.amount} currency={cur} />
             ) : null}
-            <Button label={t('group.markPaid')} variant="secondary" onPress={() => settle(tr.from, tr.to, tr.amount)} />
+            <Button
+              label={t('group.markPaid')}
+              variant="secondary"
+              onPress={() =>
+                confirm(
+                  t('group.markPaidConfirm', { from: name(tr.from), to: name(tr.to), amount: money(tr.amount) }),
+                  t('common.cancel'),
+                  t('group.markPaidOk'),
+                  () => settle(tr.from, tr.to, tr.amount),
+                )
+              }
+            />
             {group.members.find((m) => m.id === tr.from)?.isMe ? null : (
               group.members.find((m) => m.id === tr.to)?.isMe ? (
                 <Button label={t('plink.ask')} onPress={() => remind(tr.from, tr.to, tr.amount)} />
@@ -232,8 +249,10 @@ export default function GroupDetail() {
             return (
               <View key={m.id} style={{ gap: 4 }}>
                 <Row style={{ justifyContent: 'space-between' }}>
-                  <Text style={{ color: colors.text }}>{name(m.id)}</Text>
-                  <Muted>{t('gx.paidLine', { paid: money(paid), share: money(insights.shareOf[m.id] ?? 0) })}</Muted>
+                  <Text style={{ color: colors.text, flex: 1 }} numberOfLines={2}>
+                    {name(m.id)}
+                  </Text>
+                  <Muted style={{ flexShrink: 1, textAlign: 'right' }}>{t('gx.paidLine', { paid: money(paid), share: money(insights.shareOf[m.id] ?? 0) })}</Muted>
                 </Row>
                 <ProgressBar progress={paid / Math.max(1, insights.total)} alerts={false} />
               </View>
@@ -311,7 +330,7 @@ export default function GroupDetail() {
         label={group.remote ? t('group.leave') : t('group.delete')}
         variant="danger"
         onPress={() =>
-          confirm(group.remote ? t('group.leaveConfirm') : t('group.deleteConfirm'), t('common.cancel'), t('common.delete'), () => {
+          confirm(group.remote ? t('group.leaveConfirm') : t('group.deleteConfirm'), t('common.cancel'), group.remote ? t('group.leave') : t('common.delete'), () => {
             dispatch({ type: 'deleteGroup', id: group.id });
             router.back();
           })
@@ -393,16 +412,23 @@ function RecurringCard({ group }: { group: Group }) {
       {list.map((r) => (
         <Row key={r.id} style={{ justifyContent: 'space-between' }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.text, fontWeight: '600' }}>🔁 {r.name}</Text>
+            <Text style={{ color: colors.text, fontWeight: '600' }} numberOfLines={2}>
+              🔁 {r.name}
+            </Text>
             <Muted>{t('gx.recurringLine', { day: r.day, name: name(r.paidBy) })}</Muted>
           </View>
           <Text style={{ color: colors.text, fontWeight: '600' }}>{moneyIn(r.amount, cur)}</Text>
           <Pressable
-            hitSlop={10}
-            accessibilityLabel={t('common.delete')}
-            onPress={() => dispatch({ type: 'updateGroup', groupId: group.id, changes: { recurring: list.filter((x) => x.id !== r.id) } })}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('common.delete')}: ${r.name}`}
+            onPress={() =>
+              confirm(t('gx.recurringDeleteConfirm', { name: r.name }), t('common.cancel'), t('common.delete'), () =>
+                dispatch({ type: 'updateGroup', groupId: group.id, changes: { recurring: list.filter((x) => x.id !== r.id) } }),
+              )
+            }
+            style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
           >
-            <Text style={{ color: colors.danger, fontSize: 18, marginLeft: space.sm }}>✕</Text>
+            <Text style={{ color: colors.danger, fontSize: 20 }}>✕</Text>
           </Pressable>
         </Row>
       ))}
@@ -411,10 +437,10 @@ function RecurringCard({ group }: { group: Group }) {
           <Input placeholder={t('gx.recurringName')} value={rName} onChangeText={setRName} />
           <Row>
             <View style={{ flex: 1 }}>
-              <Input placeholder={`${t('add.amount')} (${cur})`} keyboardType="decimal-pad" value={rAmount} onChangeText={setRAmount} />
+              <Input placeholder={`${t('add.amount')} (${cur})`} accessibilityLabel={`${t('add.amount')} (${cur})`} keyboardType="decimal-pad" value={rAmount} onChangeText={setRAmount} />
             </View>
             <View style={{ width: 120 }}>
-              <Input placeholder={t('gx.recurringDay')} keyboardType="number-pad" value={rDay} onChangeText={setRDay} />
+              <Input placeholder={t('gx.recurringDay')} accessibilityLabel={t('gx.recurringDay')} keyboardType="number-pad" value={rDay} onChangeText={setRDay} />
             </View>
           </Row>
           <Muted>{t('add.paidBy')}</Muted>
@@ -447,8 +473,12 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
     Object.fromEntries(group.members.map((m) => [m.id, String(group.weights?.[m.id] ?? 1)])),
   );
   const [pot, setPot] = useState(!!group.pot);
+  const startDate = parseTripDate(start);
+  const endDate = parseTripDate(end);
+  const datesOk = group.kind !== 'trip' || (startDate !== null && endDate !== null);
 
   function save() {
+    if (!datesOk) return;
     const w = Object.fromEntries(Object.entries(weights).map(([k, v]) => [k, Number(v.replace(',', '.')) || 0]));
     const allEqual = new Set(Object.values(w)).size <= 1;
     dispatch({
@@ -458,7 +488,7 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
         name: name.trim() || group.name,
         currency,
         budget: parseAmount(budget) || undefined,
-        trip: group.kind === 'trip' ? { start: start || undefined, end: end || undefined } : group.trip,
+        trip: group.kind === 'trip' ? { start: startDate || undefined, end: endDate || undefined } : group.trip,
         weights: allEqual ? undefined : w,
         pot: pot || undefined,
       },
@@ -494,8 +524,9 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
           </View>
         </Row>
       ) : null}
+      {!datesOk ? <Text style={{ color: colors.danger, fontSize: 15 }}>{t('gx.badDate')}</Text> : null}
       <Muted>{t('split.defaultSplit')}</Muted>
-      <Muted style={{ fontSize: 12 }}>{t('split.defaultHint')}</Muted>
+      <Muted>{t('split.defaultHint')}</Muted>
       {group.kind === 'couple' && group.members.length === 2 && group.members.some((m) => m.isMe) ? (
         <IncomeSplit
           me={state.profile.name || t('common.me')}
@@ -506,9 +537,11 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
       ) : null}
       {group.members.map((m) => (
         <Row key={m.id}>
-          <Text style={{ color: colors.text, flex: 1 }}>{m.isMe ? t('common.you') : m.name}</Text>
+          <Text style={{ color: colors.text, flex: 1 }} numberOfLines={2}>
+            {m.isMe ? t('common.you') : m.name}
+          </Text>
           <View style={{ width: 90 }}>
-            <Input keyboardType="decimal-pad" value={weights[m.id]} onChangeText={(v) => setWeights((w) => ({ ...w, [m.id]: v }))} style={{ textAlign: 'right', paddingVertical: 8 }} />
+            <Input accessibilityLabel={`${t('split.weights')}: ${m.isMe ? t('common.you') : m.name}`} keyboardType="decimal-pad" value={weights[m.id]} onChangeText={(v) => setWeights((w) => ({ ...w, [m.id]: v }))} style={{ textAlign: 'right', paddingVertical: 8 }} />
           </View>
         </Row>
       ))}
@@ -517,9 +550,9 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
           <Text style={{ color: colors.text, fontWeight: '600' }}>🫙 {t('pot.enable')}</Text>
           <Muted>{t('pot.hint')}</Muted>
         </View>
-        <Switch value={pot} onValueChange={setPot} trackColor={{ true: colors.primary, false: colors.border }} />
+        <Switch accessibilityLabel={t('pot.enable')} value={pot} onValueChange={setPot} trackColor={{ true: colors.primary, false: colors.border }} />
       </Row>
-      <Button label={t('gx.saveSettings')} onPress={save} />
+      <Button label={t('gx.saveSettings')} onPress={save} disabled={!datesOk} />
       <Button label={t('common.cancel')} variant="ghost" onPress={onDone} />
       <CurrencyPicker visible={picking} value={currency} onClose={() => setPicking(false)} onSelect={setCurrency} />
     </Card>
@@ -562,7 +595,7 @@ function PotCard({ group, left, name, money }: { group: Group; left: number; nam
       </Row>
       <Row>
         <View style={{ flex: 1 }}>
-          <Input value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder={money(5000)} />
+          <Input value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder={money(5000)} accessibilityLabel={t('pot.add')} />
         </View>
         <Button label={t('pot.add')} onPress={add} disabled={!parseAmount(amount)} />
       </Row>

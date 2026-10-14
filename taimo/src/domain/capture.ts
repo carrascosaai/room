@@ -24,6 +24,13 @@ export interface CapturePayload {
 
 type Params = Record<string, string | string[] | undefined>;
 
+/** Límites para lo que llega por el enlace `taimo://capture` (lo puede abrir cualquiera). */
+export const CAPTURE_MAX_MERCHANT = 48;
+export const CAPTURE_MAX_CARD = 32;
+const CAPTURE_MAX_AMOUNT_TEXT = 40;
+/** 1.000.000,00 en céntimos (el mismo tope que el servidor de grupos). */
+export const CAPTURE_MAX_AMOUNT = 100_000_000;
+
 function first(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v;
 }
@@ -38,21 +45,37 @@ export function parseCaptureParams(
   // Wallet manda el importe ya formateado en la moneda del pago: "¥3,000", "$12.34", "12,34 €".
   const rawAmount = first(params.amount) ?? '';
   const money = findMoney(rawAmount, home);
+  if (rawAmount.length > CAPTURE_MAX_AMOUNT_TEXT) return null;
   const amount = money?.amount ?? parseAmount(rawAmount);
-  if (amount === null || amount === 0) return null;
+  // Cualquier app o web puede abrir el enlace: solo importes positivos y razonables.
+  if (amount === null || !Number.isFinite(amount) || amount <= 0 || amount > CAPTURE_MAX_AMOUNT) return null;
   const currencyParam = first(params.currency)?.trim().toUpperCase();
-  const merchant = (first(params.merchant) ?? '').trim() || defaultMerchant;
+  const merchant = (first(params.merchant) ?? '').trim().slice(0, CAPTURE_MAX_MERCHANT).trim() || defaultMerchant;
   const requested = first(params.category);
   const sourceParam = first(params.source);
   return {
     amount,
     merchant,
-    card: first(params.card)?.trim() || undefined,
+    card: first(params.card)?.trim().slice(0, CAPTURE_MAX_CARD).trim() || undefined,
     category: isCategoryId(requested) ? requested : categorize(merchant, learned),
     source: sourceParam === 'notificacion' ? 'notificacion' : 'applepay',
     date: now.toISOString(),
     currency: currencyParam && /^[A-Z]{3}$/.test(currencyParam) ? currencyParam : money?.currency ?? home,
   };
+}
+
+/**
+ * Qué es cada cosa que deja el módulo nativo en la cola de pendientes:
+ * - Android (lector de notificaciones): `{ package, title, text, postedAt }`.
+ * - iPhone, Siri «Apunta en Taimo…»: `{ text, date, source: 'siri' }`.
+ * - iPhone, Atajo de Wallet: `{ amount, merchant, card, date, source: 'applepay' }`.
+ * Ojo: las notificaciones de Android también traen `text`, así que no basta con
+ * mirar esa clave; lo que las distingue es `package`.
+ */
+export function pendingKind(item: Record<string, unknown>, platform: string): 'notification' | 'siri' | 'wallet' {
+  if (typeof item.package === 'string' && item.package !== '') return 'notification';
+  if (item.source === 'siri' && typeof item.text === 'string') return 'siri';
+  return platform === 'android' ? 'notification' : 'wallet';
 }
 
 /** Ventana para considerar que dos capturas iguales son el mismo pago. */

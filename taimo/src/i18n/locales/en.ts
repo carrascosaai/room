@@ -2,6 +2,7 @@
 // {nombre} se sustituye por un valor; { one, other } son plurales.
 const en = {
   common: {
+    backHome: "Back to home",
     cancel: 'Cancel',
     save: 'Save',
     delete: 'Delete',
@@ -67,11 +68,13 @@ const en = {
     restoreConfirm: 'Replace the data on this phone with your backup?',
   },
   home: {
+    spentThisMonth: "Spent this month",
+    setBudget: "Set a monthly budget",
     hello: 'Hi, {name} 👋',
     helloAnon: 'Hi again 👋',
     leftThisMonth: 'Left for {month}',
     spentOf: 'Spent {spent} of {budget}',
-    perDay: 'You can spend {amount} a day for the {days} days left.',
+    perDay: { one: "{count} day left: you can spend {amount} a day.", other: "{count} days left: you can spend {amount} a day." },
     overLimit: 'You’ve reached your limit for this month. Hang in there! 💪',
     autoTitle: 'Turn on automatic logging',
     autoText: 'Pay with Apple Pay and Taimo logs it. Takes one minute to set up.',
@@ -84,6 +87,8 @@ const en = {
     add: 'Add expense',
   },
   add: {
+    needPayer: "Choose who paid.",
+    needPeople: "Choose who to split it with.",
     newTitle: 'New expense',
     editTitle: 'Edit expense',
     amount: 'Amount',
@@ -146,6 +151,8 @@ const en = {
     androidHint: 'In the Settings screen that opens, find “Taimo” and turn it on.',
   },
   groups: {
+    needName: "Give the group a name.",
+    needMembers: "Write at least one more person. Separate names with commas: Ana, Luis",
     title: 'Groups',
     intro: 'Share expenses with your partner, flatmates or friends. Only your share counts towards your budget, and Taimo works out who owes whom.',
     settled: 'Settled ✓',
@@ -162,6 +169,8 @@ const en = {
     joinButton: 'Join with a code',
   },
   group: {
+    markPaidConfirm: "Mark as paid? {from} → {to}: {amount}",
+    markPaidOk: "Mark as paid",
     missing: 'This group no longer exists.',
     total: 'Total spent in the group',
     settled: 'settled',
@@ -189,6 +198,7 @@ const en = {
     deleteConfirm: 'Delete the group? Its expenses will stay as your own expenses.',
   },
   join: {
+    joinAs: "Join as {name}",
     title: 'Join a group',
     text: 'Paste the link or the code you were sent.',
     placeholder: '16-character code',
@@ -206,6 +216,8 @@ const en = {
     offline: 'No connection. We’ll try again later.',
   },
   stats: {
+    prev: "Previous",
+    next: "Next",
     title: 'Stats',
     day: 'Day',
     week: 'Week',
@@ -298,6 +310,8 @@ const en = {
     defaultHint: 'Used for new expenses in this group. You can change it in each expense.',
   },
   gx: {
+    badDate: "Write the date like 2026-11-15 or 15/11/2026.",
+    recurringDeleteConfirm: "Delete the fixed expense “{name}”?",
     type: 'Type of group',
     currency: 'Group currency',
     budgetTrip: 'Trip budget',
@@ -341,6 +355,7 @@ const en = {
     subsMonthly: "{amount}/month",
   },
   history: {
+    more: "See more",
     title: "All expenses",
     search: "Search shop, note or category",
     all: "All",
@@ -458,6 +473,7 @@ const en = {
     noInfo: "{name} hasn’t added how to get paid yet. Ask them to add it in Settings → How people pay you.",
   },
   plink: {
+    verify: "Check with {name} that these details are theirs before you pay.",
     owe: "You owe {name}",
     group: "From the group “{group}”",
     why: "Why",
@@ -609,7 +625,7 @@ const en = {
   ants: {
     title: "Small habits",
     hint: "Small repeated expenses. On their own they’re nothing; together they add up.",
-    line: "{count} times · {monthly} a month · {yearly} a year",
+    line: { one: "{count} time · {monthly} a month · {yearly} a year", other: "{count} times · {monthly} a month · {yearly} a year" },
   },
   heat: {
     title: "Month map",

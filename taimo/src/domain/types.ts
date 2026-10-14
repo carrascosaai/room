@@ -106,6 +106,13 @@ export interface Group {
   /** Fechas del viaje (ISO, solo fecha). */
   trip?: { start?: string; end?: string };
   recurring?: Recurring[];
+  /**
+   * Ids de gastos fijos de un mes (`fijo-<r>-<YYYY-MM>`) que se borraron a mano:
+   * no se vuelven a crear solos. Se sincroniza con los ajustes del grupo.
+   */
+  recurringSkipped?: string[];
+  /** «Paga tu parte»: la cuenta de la mesa cuyo QR enseñaste (los avisos de pago se casan por su id). */
+  table?: import('./table').TableBill;
   /** Bote común: cada uno pone dinero y los gastos comunes se pagan de ahí. */
   pot?: boolean;
   /** Última modificación de los ajustes del grupo (para sincronizar). */

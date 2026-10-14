@@ -59,7 +59,7 @@ export default function Converter() {
             setFrom(to);
             setTo(from);
           }}
-          style={{ alignSelf: 'center', paddingHorizontal: 16, paddingVertical: 6, borderRadius: radius.pill, backgroundColor: colors.primarySoft }}
+          style={{ alignSelf: 'center', paddingHorizontal: 16, paddingVertical: 6, minHeight: 44, justifyContent: 'center', borderRadius: radius.pill, backgroundColor: colors.primarySoft }}
         >
           <Text style={{ color: colors.primary, fontWeight: '700' }}>{t('fx.swap')}</Text>
         </Pressable>
@@ -80,11 +80,18 @@ export default function Converter() {
         {others.map((c) => {
           const v = convert(amount, from, c, rates);
           return (
-            <Pressable key={c} onPress={() => setTo(c)}>
+            <Pressable
+              key={c}
+              accessibilityRole="button"
+              accessibilityLabel={`${i18n.currencyName(c)}: ${v === null ? '—' : moneyIn(v, c)}`}
+              onPress={() => setTo(c)}
+            >
               <Row style={{ justifyContent: 'space-between', paddingVertical: 4 }}>
                 <Row>
                   <Text style={{ fontSize: 20 }}>{currencyFlag(c)}</Text>
-                  <Text style={{ color: colors.text }}>{i18n.currencyName(c)}</Text>
+                  <Text style={{ color: colors.text, flexShrink: 1 }} numberOfLines={2}>
+                    {i18n.currencyName(c)}
+                  </Text>
                 </Row>
                 <Text style={{ color: colors.text, fontWeight: '600' }}>{v === null ? '—' : moneyIn(v, c)}</Text>
               </Row>

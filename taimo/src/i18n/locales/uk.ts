@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const uk: Translation = {
-  common: { cancel: 'Скасувати', save: 'Зберегти', delete: 'Видалити', back: 'Назад', continue: 'Далі', done: 'Готово', you: 'Ви', me: 'Я', today: 'Сьогодні, {time}', yesterday: 'Учора, {time}', unknown: '?' },
+  common: { cancel: 'Скасувати', save: 'Зберегти', delete: 'Видалити', back: 'Назад', continue: 'Далі', done: 'Готово', you: 'Ви', me: 'Я', today: 'Сьогодні, {time}', yesterday: 'Учора, {time}', unknown: '?', backHome: "Повернутися на головну" },
   cat: { super: 'Продукти', comer: 'Кафе й ресторани', ocio: 'Дозвілля', deporte: 'Спорт', estudios: 'Навчання', transporte: 'Транспорт', casa: 'Житло', compras: 'Покупки', salud: 'Здоров’я', suscripciones: 'Підписки', otros: 'Інше' },
   tabs: { home: 'Головна', groups: 'Групи', stats: "Огляд", settings: 'Налаштування', more: "Більше" },
   onboarding: {
@@ -37,11 +37,13 @@ const uk: Translation = {
     restoreConfirm: 'Замінити дані на цьому телефоні вашою копією?',
   },
   home: {
+    spentThisMonth: "Витрачено цього місяця",
+    setBudget: "Встановити бюджет на місяць",
     hello: 'Привіт, {name} 👋',
     helloAnon: 'Знову привіт 👋',
     leftThisMonth: 'Залишилось на {month}',
     spentOf: 'Витрачено {spent} з {budget}',
-    perDay: 'Можна витрачати {amount} на день до кінця місяця (днів: {days}).',
+    perDay: { one: "Лишився {count} день: можна витрачати {amount} на день.", few: "Лишилося {count} дні: можна витрачати {amount} на день.", many: "Лишилося {count} днів: можна витрачати {amount} на день.", other: "Лишилося {count} дня: можна витрачати {amount} на день." },
     overLimit: 'Ліміт на місяць вичерпано. Тримайтеся, лишилося недовго! 💪',
     autoTitle: 'Увімкніть автоматичний запис',
     autoText: 'Платіть через Apple Pay, і Taimo запише сам. Налаштування займає хвилину.',
@@ -54,6 +56,8 @@ const uk: Translation = {
     add: 'Додати витрату',
   },
   add: {
+    needPayer: "Вибери, хто заплатив.",
+    needPeople: "Вибери, між ким поділити.",
     newTitle: 'Нова витрата',
     editTitle: 'Редагувати витрату',
     amount: 'Сума',
@@ -116,6 +120,8 @@ const uk: Translation = {
     androidHint: 'На екрані налаштувань, що відкриється, знайдіть «Taimo» й увімкніть.',
   },
   groups: {
+    needName: "Дай групі назву.",
+    needMembers: "Напиши щонайменше ще одну людину. Розділяй імена комами: Ana, Luis",
     title: 'Групи',
     intro: 'Діліть витрати з партнером, сусідами чи друзями. До бюджету йде лише ваша частка, а Taimo рахує, хто кому винен.',
     settled: 'Розраховано ✓',
@@ -132,6 +138,8 @@ const uk: Translation = {
     joinButton: 'Приєднатися за кодом',
   },
   group: {
+    markPaidConfirm: "Позначити як оплачене? {from} → {to}: {amount}",
+    markPaidOk: "Позначити як оплачене",
     missing: 'Цієї групи більше не існує.',
     total: 'Усього витрачено в групі',
     settled: 'розраховано',
@@ -159,6 +167,7 @@ const uk: Translation = {
     deleteConfirm: 'Видалити групу? Її витрати залишаться як ваші.',
   },
   join: {
+    joinAs: "Приєднатися як {name}",
     title: 'Приєднатися до групи',
     text: 'Вставте посилання або код, який вам надіслали.',
     placeholder: 'Код із 16 символів',
@@ -176,6 +185,8 @@ const uk: Translation = {
     offline: 'Немає з’єднання. Спробуємо пізніше.',
   },
   stats: {
+    prev: "Попередній",
+    next: "Наступний",
     title: 'Статистика',
     day: 'День',
     week: 'Тиждень',
@@ -268,6 +279,8 @@ const uk: Translation = {
     defaultHint: "Застосовується до нових витрат групи. Можна змінити в кожній витраті.",
   },
   gx: {
+    badDate: "Напиши дату так: 2026-11-15 або 15/11/2026.",
+    recurringDeleteConfirm: "Видалити постійну витрату «{name}»?",
     type: "Тип групи",
     currency: "Валюта групи",
     budgetTrip: "Бюджет подорожі",
@@ -311,6 +324,7 @@ const uk: Translation = {
     subsMonthly: "{amount}/міс.",
   },
   history: {
+    more: "Показати більше",
     title: "Усі витрати",
     search: "Шукай магазин, нотатку чи категорію",
     all: "Усі",
@@ -428,6 +442,7 @@ const uk: Translation = {
     noInfo: "{name} ще не додав(ла), як отримувати оплату. Попроси додати в Налаштуваннях → Як тобі платять.",
   },
   plink: {
+    verify: "Перш ніж платити, перевір у людини на ім’я {name}, що це справді її дані.",
     owe: "Ти винен(-на) {name}",
     group: "З групи «{group}»",
     why: "Чому",
@@ -579,7 +594,7 @@ const uk: Translation = {
   ants: {
     title: "Дрібні витрати",
     hint: "Невеликі витрати, що повторюються. Окремо — нічого, разом — чимало.",
-    line: "{count} разів · {monthly} на місяць · {yearly} на рік",
+    line: { one: "{count} раз · {monthly} на місяць · {yearly} на рік", few: "{count} рази · {monthly} на місяць · {yearly} на рік", many: "{count} разів · {monthly} на місяць · {yearly} на рік", other: "{count} раза · {monthly} на місяць · {yearly} на рік" },
   },
   heat: {
     title: "Мапа місяця",

@@ -6,6 +6,7 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
 
+import { makeCloudBackup } from '@/domain/backup';
 import type { AppState } from '@/domain/types';
 
 /**
@@ -119,7 +120,8 @@ export async function uploadBackup(state: AppState): Promise<string> {
   const user = await currentUser();
   if (!sb || !user) throw new Error('not_signed_in');
   const updatedAt = new Date().toISOString();
-  const { error } = await sb.from('taimo_backups').upsert({ user_id: user.id, data: state, updated_at: updatedAt });
+  // Sin la cuenta ni los ingresos: la app promete que los ingresos no salen del móvil.
+  const { error } = await sb.from('taimo_backups').upsert({ user_id: user.id, data: makeCloudBackup(state), updated_at: updatedAt });
   if (error) throw error;
   return updatedAt;
 }

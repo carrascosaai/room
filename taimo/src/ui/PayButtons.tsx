@@ -3,6 +3,7 @@ import * as Linking from 'expo-linking';
 import { useState } from 'react';
 import { View } from 'react-native';
 
+import { plainAmount } from '@/domain/money';
 import type { Cents, PaymentInfo } from '@/domain/types';
 import { useI18n } from '@/i18n';
 
@@ -27,7 +28,7 @@ export function PayButtons({ name, pay, amount, currency }: { name: string; pay?
   return (
     <View style={{ gap: space.sm }}>
       {paypal ? (
-        <Button label={t('payx.with', { method: 'PayPal' })} onPress={() => Linking.openURL(`https://paypal.me/${paypal}/${(amount / 100).toFixed(2)}${currency}`)} />
+        <Button label={t('payx.with', { method: 'PayPal' })} onPress={() => Linking.openURL(`https://paypal.me/${paypal}/${plainAmount(amount, currency)}${currency}`)} />
       ) : null}
       {revolut ? <Button label={t('payx.with', { method: 'Revolut' })} onPress={() => Linking.openURL(`https://revolut.me/${revolut}`)} /> : null}
       {pay?.bizum ? <Button label={t('payx.copy', { what: `Bizum ${pay.bizum}` })} variant="secondary" onPress={() => copy('Bizum', pay.bizum!)} /> : null}

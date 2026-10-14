@@ -22,6 +22,8 @@ export default function Join() {
   const [error, setError] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<GroupSnapshot | null>(null);
   const [newName, setNewName] = useState(state.profile.name);
+  // Primero eliges quién eres y después confirmas: un toque sin querer no te une al grupo.
+  const [chosen, setChosen] = useState<string | null>(null);
 
   async function lookup(raw: string) {
     const code = extractCode(raw);
@@ -69,6 +71,7 @@ export default function Join() {
   if (snapshot) {
     const free = snapshot.members.filter((m) => !m.claimed);
     const count = snapshot.expenses.filter((e) => !e.deleted).length;
+    const chosenMember = free.find((m) => m.id === chosen);
     return (
       <Screen>
         <Text style={{ fontSize: 48, textAlign: 'center' }}>{snapshot.group.emoji}</Text>
@@ -81,9 +84,15 @@ export default function Join() {
             <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>{t('join.who')}</Text>
             <Row style={{ flexWrap: 'wrap' }}>
               {free.map((m) => (
-                <Chip key={m.id} label={m.name} onPress={() => joinAs(m.id, false)} />
+                <Chip key={m.id} label={m.name} selected={chosen === m.id} onPress={() => setChosen(chosen === m.id ? null : m.id)} />
               ))}
             </Row>
+            {chosenMember ? (
+              <>
+                <Button label={t('join.joinAs', { name: chosenMember.name })} onPress={() => joinAs(chosenMember.id, false)} />
+                <Button label={t('common.cancel')} variant="ghost" onPress={() => setChosen(null)} />
+              </>
+            ) : null}
           </Card>
         ) : null}
         <Card>

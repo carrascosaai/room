@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const pt: Translation = {
-  common: { cancel: 'Cancelar', save: 'Guardar', delete: 'Apagar', back: 'Voltar', continue: 'Continuar', done: 'Concluído', you: 'Tu', me: 'Eu', today: 'Hoje, {time}', yesterday: 'Ontem, {time}', unknown: '?' },
+  common: { cancel: 'Cancelar', save: 'Guardar', delete: 'Apagar', back: 'Voltar', continue: 'Continuar', done: 'Concluído', you: 'Tu', me: 'Eu', today: 'Hoje, {time}', yesterday: 'Ontem, {time}', unknown: '?', backHome: "Voltar ao início" },
   cat: { super: 'Supermercado', comer: 'Comer fora', ocio: 'Lazer', deporte: 'Desporto', estudios: 'Estudos', transporte: 'Transportes', casa: 'Casa', compras: 'Compras', salud: 'Saúde', suscripciones: 'Subscrições', otros: 'Outros' },
   tabs: { home: 'Início', groups: 'Grupos', stats: "Resumo", settings: 'Definições', more: "Mais" },
   onboarding: {
@@ -37,11 +37,13 @@ const pt: Translation = {
     restoreConfirm: 'Substituir os dados deste telemóvel pela tua cópia?',
   },
   home: {
+    spentThisMonth: "Gasto este mês",
+    setBudget: "Definir um orçamento mensal",
     hello: 'Olá, {name} 👋',
     helloAnon: 'Olá de novo 👋',
     leftThisMonth: 'Resta-te em {month}',
     spentOf: 'Gastaste {spent} de {budget}',
-    perDay: 'Podes gastar {amount} por dia durante os {days} dias que faltam.',
+    perDay: { one: "Falta {count} dia: podes gastar {amount} por dia.", other: "Faltam {count} dias: podes gastar {amount} por dia." },
     overLimit: 'Chegaste ao limite do mês. Aguenta, falta pouco! 💪',
     autoTitle: 'Ativa o registo automático',
     autoText: 'Paga com Apple Pay e o Taimo regista sozinho. Configura-se num minuto.',
@@ -54,6 +56,8 @@ const pt: Translation = {
     add: 'Adicionar despesa',
   },
   add: {
+    needPayer: "Escolhe quem pagou.",
+    needPeople: "Escolhe entre quem dividir.",
     newTitle: 'Nova despesa',
     editTitle: 'Editar despesa',
     amount: 'Valor',
@@ -116,6 +120,8 @@ const pt: Translation = {
     androidHint: 'No ecrã de definições que se abre, procura «Taimo» e ativa-o.',
   },
   groups: {
+    needName: "Dá um nome ao grupo.",
+    needMembers: "Escreve pelo menos mais uma pessoa. Separa os nomes com vírgulas: Ana, Luis",
     title: 'Grupos',
     intro: 'Partilha despesas com o teu par, a casa ou os amigos. Para o teu orçamento só conta a tua parte e o Taimo calcula quem deve a quem.',
     settled: 'Em dia ✓',
@@ -132,6 +138,8 @@ const pt: Translation = {
     joinButton: 'Entrar com um código',
   },
   group: {
+    markPaidConfirm: "Marcar como pago? {from} → {to}: {amount}",
+    markPaidOk: "Marcar como pago",
     missing: 'Este grupo já não existe.',
     total: 'Total gasto no grupo',
     settled: 'em dia',
@@ -159,6 +167,7 @@ const pt: Translation = {
     deleteConfirm: 'Apagar o grupo? As despesas ficam como despesas tuas.',
   },
   join: {
+    joinAs: "Entrar como {name}",
     title: 'Entrar num grupo',
     text: 'Cola a ligação ou o código que te enviaram.',
     placeholder: 'Código de 16 caracteres',
@@ -176,6 +185,8 @@ const pt: Translation = {
     offline: 'Sem ligação. Tentamos mais tarde.',
   },
   stats: {
+    prev: "Anterior",
+    next: "Seguinte",
     title: 'Estatísticas',
     day: 'Dia',
     week: 'Semana',
@@ -268,6 +279,8 @@ const pt: Translation = {
     defaultHint: "Usada nas novas despesas do grupo. Podes mudar em cada despesa.",
   },
   gx: {
+    badDate: "Escreve a data assim: 2026-11-15 ou 15/11/2026.",
+    recurringDeleteConfirm: "Apagar a despesa fixa «{name}»?",
     type: "Tipo de grupo",
     currency: "Moeda do grupo",
     budgetTrip: "Orçamento da viagem",
@@ -311,6 +324,7 @@ const pt: Translation = {
     subsMonthly: "{amount}/mês",
   },
   history: {
+    more: "Ver mais",
     title: "Todas as despesas",
     search: "Procura loja, nota ou categoria",
     all: "Todas",
@@ -428,6 +442,7 @@ const pt: Translation = {
     noInfo: "{name} ainda não indicou como receber. Pede-lhe que o adicione em Definições → Como te pagam.",
   },
   plink: {
+    verify: "Confirma com {name} que estes dados são seus antes de pagar.",
     owe: "Deves a {name}",
     group: "Do grupo «{group}»",
     why: "Porquê",
@@ -579,7 +594,7 @@ const pt: Translation = {
   ants: {
     title: "Despesas formiga",
     hint: "Pequenas despesas que se repetem. Soltas não são nada; juntas, sim.",
-    line: "{count} vezes · {monthly} por mês · {yearly} por ano",
+    line: { one: "{count} vez · {monthly} por mês · {yearly} por ano", other: "{count} vezes · {monthly} por mês · {yearly} por ano" },
   },
   heat: {
     title: "Mapa do mês",

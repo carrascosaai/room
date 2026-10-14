@@ -24,12 +24,17 @@ export default function Groups() {
         const myBalance = me ? balances(g, state.expenses, state.settlements)[me] ?? 0 : 0;
         const plan = groupBudgetPlan(g, state.expenses);
         return (
-          <Pressable key={g.id} onPress={() => router.push({ pathname: '/group/[id]', params: { id: g.id } })}>
+          <Pressable
+            key={g.id}
+            accessibilityRole="button"
+            accessibilityLabel={`${g.name}, ${myBalance === 0 ? t('groups.settled') : `${myBalance > 0 ? t('groups.owedToYou') : t('groups.youOwe')} ${moneyIn(Math.abs(myBalance), cur)}`}`}
+            onPress={() => router.push({ pathname: '/group/[id]', params: { id: g.id } })}
+          >
             <Card>
               <Row>
                 <Text style={{ fontSize: 30 }}>{g.emoji}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>
+                  <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }} numberOfLines={2}>
                     {g.name}
                     {g.remote ? ' ☁️' : ''}
                   </Text>

@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const fi: Translation = {
-  common: { cancel: 'Peruuta', save: 'Tallenna', delete: 'Poista', back: 'Takaisin', continue: 'Jatka', done: 'Valmis', you: 'Sinä', me: 'Minä', today: 'Tänään {time}', yesterday: 'Eilen {time}', unknown: '?' },
+  common: { cancel: 'Peruuta', save: 'Tallenna', delete: 'Poista', back: 'Takaisin', continue: 'Jatka', done: 'Valmis', you: 'Sinä', me: 'Minä', today: 'Tänään {time}', yesterday: 'Eilen {time}', unknown: '?', backHome: "Takaisin alkuun" },
   cat: { super: 'Ruokakauppa', comer: 'Ulkona syöminen', ocio: 'Vapaa-aika', deporte: 'Urheilu', estudios: 'Opiskelu', transporte: 'Liikenne', casa: 'Asuminen', compras: 'Ostokset', salud: 'Terveys', suscripciones: 'Tilaukset', otros: 'Muut' },
   tabs: { home: 'Koti', groups: 'Ryhmät', stats: "Yhteenveto", settings: 'Asetukset', more: "Lisää" },
   onboarding: {
@@ -37,11 +37,13 @@ const fi: Translation = {
     restoreConfirm: 'Korvataanko tämän puhelimen tiedot varmuuskopiolla?',
   },
   home: {
+    spentThisMonth: "Käytetty tässä kuussa",
+    setBudget: "Aseta kuukausibudjetti",
     hello: 'Hei, {name} 👋',
     helloAnon: 'Hei taas 👋',
     leftThisMonth: 'Jäljellä ({month})',
     spentOf: 'Käytetty {spent} / {budget}',
-    perDay: 'Voit käyttää {amount} päivässä jäljellä olevina {days} päivänä.',
+    perDay: { one: "{count} päivä jäljellä: voit käyttää {amount} päivässä.", other: "{count} päivää jäljellä: voit käyttää {amount} päivässä." },
     overLimit: 'Kuukauden raja on täynnä. Sinnittele, pian se on ohi! 💪',
     autoTitle: 'Ota automaattinen kirjaus käyttöön',
     autoText: 'Maksa Apple Paylla, niin Taimo kirjaa sen. Käyttöönotto vie minuutin.',
@@ -54,6 +56,8 @@ const fi: Translation = {
     add: 'Lisää kulu',
   },
   add: {
+    needPayer: "Valitse, kuka maksoi.",
+    needPeople: "Valitse, keiden kesken jaetaan.",
     newTitle: 'Uusi kulu',
     editTitle: 'Muokkaa kulua',
     amount: 'Summa',
@@ -116,6 +120,8 @@ const fi: Translation = {
     androidHint: 'Etsi avautuvasta asetusnäkymästä ”Taimo” ja ota se käyttöön.',
   },
   groups: {
+    needName: "Anna ryhmälle nimi.",
+    needMembers: "Kirjoita vähintään yksi muu henkilö. Erota nimet pilkuilla: Ana, Luis",
     title: 'Ryhmät',
     intro: 'Jaa kulut kumppanin, kämppisten tai kavereiden kanssa. Budjettiisi lasketaan vain osuutesi, ja Taimo laskee, kuka on velkaa kenelle.',
     settled: 'Tasan ✓',
@@ -132,6 +138,8 @@ const fi: Translation = {
     joinButton: 'Liity koodilla',
   },
   group: {
+    markPaidConfirm: "Merkitäänkö maksetuksi? {from} → {to}: {amount}",
+    markPaidOk: "Merkitse maksetuksi",
     missing: 'Tätä ryhmää ei enää ole.',
     total: 'Ryhmässä käytetty yhteensä',
     settled: 'tasan',
@@ -159,6 +167,7 @@ const fi: Translation = {
     deleteConfirm: 'Poistetaanko ryhmä? Sen kulut jäävät omiksi kuluiksesi.',
   },
   join: {
+    joinAs: "Liity nimellä {name}",
     title: 'Liity ryhmään',
     text: 'Liitä saamasi linkki tai koodi.',
     placeholder: '16 merkin koodi',
@@ -176,6 +185,8 @@ const fi: Translation = {
     offline: 'Ei yhteyttä. Yritämme myöhemmin uudelleen.',
   },
   stats: {
+    prev: "Edellinen",
+    next: "Seuraava",
     title: 'Tilastot',
     day: 'Päivä',
     week: 'Viikko',
@@ -268,6 +279,8 @@ const fi: Translation = {
     defaultHint: "Käytetään ryhmän uusissa kuluissa. Voit muuttaa sitä jokaisessa kulussa.",
   },
   gx: {
+    badDate: "Kirjoita päivämäärä näin: 2026-11-15 tai 15/11/2026.",
+    recurringDeleteConfirm: "Poistetaanko kiinteä meno ”{name}”?",
     type: "Ryhmän tyyppi",
     currency: "Ryhmän valuutta",
     budgetTrip: "Matkabudjetti",
@@ -311,6 +324,7 @@ const fi: Translation = {
     subsMonthly: "{amount}/kk",
   },
   history: {
+    more: "Näytä lisää",
     title: "Kaikki kulut",
     search: "Hae kauppaa, muistiinpanoa tai luokkaa",
     all: "Kaikki",
@@ -428,6 +442,7 @@ const fi: Translation = {
     noInfo: "{name} ei ole vielä lisännyt maksutietoja. Pyydä lisäämään ne kohtaan Asetukset → Miten sinulle maksetaan.",
   },
   plink: {
+    verify: "Varmista ennen maksamista, että nämä tiedot ovat varmasti henkilön {name}.",
     owe: "Olet velkaa: {name}",
     group: "Ryhmästä ”{group}”",
     why: "Miksi",
@@ -579,7 +594,7 @@ const fi: Translation = {
   ants: {
     title: "Pienet menot",
     hint: "Pieniä toistuvia kuluja. Yksin ei mitään, yhdessä paljon.",
-    line: "{count} kertaa · {monthly} kuussa · {yearly} vuodessa",
+    line: { one: "{count} kerta · {monthly} kuussa · {yearly} vuodessa", other: "{count} kertaa · {monthly} kuussa · {yearly} vuodessa" },
   },
   heat: {
     title: "Kuukausikartta",

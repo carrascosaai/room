@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const nb: Translation = {
-  common: { cancel: 'Avbryt', save: 'Lagre', delete: 'Slett', back: 'Tilbake', continue: 'Fortsett', done: 'Ferdig', you: 'Du', me: 'Meg', today: 'I dag, {time}', yesterday: 'I går, {time}', unknown: '?' },
+  common: { cancel: 'Avbryt', save: 'Lagre', delete: 'Slett', back: 'Tilbake', continue: 'Fortsett', done: 'Ferdig', you: 'Du', me: 'Meg', today: 'I dag, {time}', yesterday: 'I går, {time}', unknown: '?', backHome: "Tilbake til start" },
   cat: { super: 'Dagligvarer', comer: 'Spise ute', ocio: 'Fritid', deporte: 'Sport', estudios: 'Studier', transporte: 'Transport', casa: 'Bolig', compras: 'Shopping', salud: 'Helse', suscripciones: 'Abonnementer', otros: 'Annet' },
   tabs: { home: 'Hjem', groups: 'Grupper', stats: "Oversikt", settings: 'Innstillinger', more: "Mer" },
   onboarding: {
@@ -37,11 +37,13 @@ const nb: Translation = {
     restoreConfirm: 'Erstatte dataene på denne mobilen med sikkerhetskopien?',
   },
   home: {
+    spentThisMonth: "Brukt denne måneden",
+    setBudget: "Sett et månedsbudsjett",
     hello: 'Hei, {name} 👋',
     helloAnon: 'Hei igjen 👋',
     leftThisMonth: 'Igjen i {month}',
     spentOf: 'Brukt {spent} av {budget}',
-    perDay: 'Du kan bruke {amount} per dag de {days} dagene som er igjen.',
+    perDay: { one: "{count} dag igjen: du kan bruke {amount} per dag.", other: "{count} dager igjen: du kan bruke {amount} per dag." },
     overLimit: 'Du har nådd grensen for måneden. Hold ut, snart er den over! 💪',
     autoTitle: 'Slå på automatisk føring',
     autoText: 'Betal med Apple Pay, så fører Taimo det opp. Tar ett minutt å sette opp.',
@@ -54,6 +56,8 @@ const nb: Translation = {
     add: 'Legg til utgift',
   },
   add: {
+    needPayer: "Velg hvem som betalte.",
+    needPeople: "Velg hvem som skal dele.",
     newTitle: 'Ny utgift',
     editTitle: 'Rediger utgift',
     amount: 'Beløp',
@@ -116,6 +120,8 @@ const nb: Translation = {
     androidHint: 'Finn «Taimo» i innstillingsskjermen som åpnes, og slå det på.',
   },
   groups: {
+    needName: "Gi gruppen et navn.",
+    needMembers: "Skriv minst én person til. Skill navnene med komma: Ana, Luis",
     title: 'Grupper',
     intro: 'Del utgifter med partneren, de du bor med eller venner. Bare din del teller mot budsjettet ditt, og Taimo regner ut hvem som skylder hvem.',
     settled: 'Skuls ✓',
@@ -132,6 +138,8 @@ const nb: Translation = {
     joinButton: 'Bli med med kode',
   },
   group: {
+    markPaidConfirm: "Merke som betalt? {from} → {to}: {amount}",
+    markPaidOk: "Merk som betalt",
     missing: 'Denne gruppen finnes ikke lenger.',
     total: 'Totalt brukt i gruppen',
     settled: 'skuls',
@@ -159,6 +167,7 @@ const nb: Translation = {
     deleteConfirm: 'Slette gruppen? Utgiftene blir værende som dine egne.',
   },
   join: {
+    joinAs: "Bli med som {name}",
     title: 'Bli med i en gruppe',
     text: 'Lim inn lenken eller koden du fikk.',
     placeholder: 'Kode på 16 tegn',
@@ -176,6 +185,8 @@ const nb: Translation = {
     offline: 'Ingen forbindelse. Vi prøver igjen senere.',
   },
   stats: {
+    prev: "Forrige",
+    next: "Neste",
     title: 'Statistikk',
     day: 'Dag',
     week: 'Uke',
@@ -268,6 +279,8 @@ const nb: Translation = {
     defaultHint: "Brukes for nye utgifter i gruppen. Kan endres for hver utgift.",
   },
   gx: {
+    badDate: "Skriv datoen slik: 2026-11-15 eller 15/11/2026.",
+    recurringDeleteConfirm: "Slette den faste utgiften «{name}»?",
     type: "Type gruppe",
     currency: "Gruppens valuta",
     budgetTrip: "Reisebudsjett",
@@ -311,6 +324,7 @@ const nb: Translation = {
     subsMonthly: "{amount}/mnd",
   },
   history: {
+    more: "Vis flere",
     title: "Alle utgifter",
     search: "Søk etter butikk, notat eller kategori",
     all: "Alle",
@@ -428,6 +442,7 @@ const nb: Translation = {
     noInfo: "{name} har ikke lagt inn hvordan man betaler ennå. Be vedkommende legge det til under Innstillinger → Hvordan folk betaler deg.",
   },
   plink: {
+    verify: "Sjekk med {name} at disse opplysningene er deres før du betaler.",
     owe: "Du skylder {name}",
     group: "Fra gruppen «{group}»",
     why: "Hvorfor",
@@ -579,7 +594,7 @@ const nb: Translation = {
   ants: {
     title: "Småutgifter",
     hint: "Små utgifter som gjentar seg. Hver for seg ingenting; sammen mye.",
-    line: "{count} ganger · {monthly} i måneden · {yearly} i året",
+    line: { one: "{count} gang · {monthly} i måneden · {yearly} i året", other: "{count} ganger · {monthly} i måneden · {yearly} i året" },
   },
   heat: {
     title: "Månedskart",

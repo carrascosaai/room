@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const eu: Translation = {
-  common: { cancel: 'Utzi', save: 'Gorde', delete: 'Ezabatu', back: 'Atzera', continue: 'Jarraitu', done: 'Eginda', you: 'Zu', me: 'Ni', today: 'Gaur, {time}', yesterday: 'Atzo, {time}', unknown: '?' },
+  common: { cancel: 'Utzi', save: 'Gorde', delete: 'Ezabatu', back: 'Atzera', continue: 'Jarraitu', done: 'Eginda', you: 'Zu', me: 'Ni', today: 'Gaur, {time}', yesterday: 'Atzo, {time}', unknown: '?', backHome: "Itzuli hasierara" },
   cat: { super: 'Supermerkatua', comer: 'Kanpoan jan', ocio: 'Aisia', deporte: 'Kirola', estudios: 'Ikasketak', transporte: 'Garraioa', casa: 'Etxea', compras: 'Erosketak', salud: 'Osasuna', suscripciones: 'Harpidetzak', otros: 'Besteak' },
   tabs: { home: 'Hasiera', groups: 'Taldeak', stats: "Laburpena", settings: 'Ezarpenak', more: "Gehiago" },
   onboarding: {
@@ -37,11 +37,13 @@ const eu: Translation = {
     restoreConfirm: 'Mugikor honetako datuak zure kopiakoekin ordezkatu?',
   },
   home: {
+    spentThisMonth: "Hilabete honetan gastatua",
+    setBudget: "Ezarri hileko aurrekontua",
     hello: 'Kaixo, {name} 👋',
     helloAnon: 'Kaixo berriro 👋',
     leftThisMonth: 'Geratzen zaizuna ({month})',
     spentOf: '{budget}(e)tik {spent} gastatuta',
-    perDay: 'Egunean {amount} gasta ditzakezu geratzen diren {days} egunetan.',
+    perDay: { one: "Egun {count} geratzen da: egunean {amount} gasta ditzakezu.", other: "{count} egun geratzen dira: egunean {amount} gasta ditzakezu." },
     overLimit: 'Hileko mugara iritsi zara. Eutsi, gutxi falta da! 💪',
     autoTitle: 'Aktibatu erregistro automatikoa',
     autoText: 'Ordaindu Apple Payrekin eta Taimok berak idatziko du. Minutu batean konfiguratzen da.',
@@ -54,6 +56,8 @@ const eu: Translation = {
     add: 'Gehitu gastua',
   },
   add: {
+    needPayer: "Aukeratu nork ordaindu duen.",
+    needPeople: "Aukeratu noren artean banatu.",
     newTitle: 'Gastu berria',
     editTitle: 'Editatu gastua',
     amount: 'Zenbatekoa',
@@ -116,6 +120,8 @@ const eu: Translation = {
     androidHint: 'Irekitzen den Ezarpenak pantailan, bilatu «Taimo» eta aktibatu.',
   },
   groups: {
+    needName: "Eman izen bat taldeari.",
+    needMembers: "Idatzi beste pertsona bat gutxienez. Bereizi izenak komaz: Ana, Luis",
     title: 'Taldeak',
     intro: 'Partekatu gastuak bikotearekin, pisukideekin edo lagunekin. Zure aurrekontuan zure zatia bakarrik zenbatzen da, eta Taimok kalkulatzen du nork zor dion nori.',
     settled: 'Egunean ✓',
@@ -132,6 +138,8 @@ const eu: Translation = {
     joinButton: 'Batu kode batekin',
   },
   group: {
+    markPaidConfirm: "Ordainduta gisa markatu? {from} → {to}: {amount}",
+    markPaidOk: "Markatu ordainduta",
     missing: 'Talde hau jada ez dago.',
     total: 'Taldean guztira gastatua',
     settled: 'egunean',
@@ -159,6 +167,7 @@ const eu: Translation = {
     deleteConfirm: 'Taldea ezabatu? Bere gastuak zure gastu gisa geratuko dira.',
   },
   join: {
+    joinAs: "Sartu {name} gisa",
     title: 'Batu talde batera',
     text: 'Itsatsi bidali dizuten esteka edo kodea.',
     placeholder: '16 karaktereko kodea',
@@ -176,6 +185,8 @@ const eu: Translation = {
     offline: 'Konexiorik ez. Geroago saiatuko gara.',
   },
   stats: {
+    prev: "Aurrekoa",
+    next: "Hurrengoa",
     title: 'Estatistikak',
     day: 'Eguna',
     week: 'Astea',
@@ -268,6 +279,8 @@ const eu: Translation = {
     defaultHint: "Taldeko gastu berrietan erabiltzen da. Gastu bakoitzean alda dezakezu.",
   },
   gx: {
+    badDate: "Idatzi data honela: 2026-11-15 edo 15/11/2026.",
+    recurringDeleteConfirm: "«{name}» gastu finkoa ezabatu?",
     type: "Talde mota",
     currency: "Taldearen txanpona",
     budgetTrip: "Bidaiaren aurrekontua",
@@ -311,6 +324,7 @@ const eu: Translation = {
     subsMonthly: "{amount}/hil",
   },
   history: {
+    more: "Ikusi gehiago",
     title: "Gastu guztiak",
     search: "Bilatu dendan, oharrean edo kategorian",
     all: "Guztiak",
@@ -428,6 +442,7 @@ const eu: Translation = {
     noInfo: "{name}-(e)k ez du oraindik jarri nola kobratu. Eskatu Ezarpenak → Nola ordaintzen dizute atalean gehitzeko.",
   },
   plink: {
+    verify: "Ordaindu aurretik, egiaztatu {name}(r)ekin datu hauek bereak direla.",
     owe: "{name}(r)i zor diozu",
     group: "«{group}» taldetik",
     why: "Zergatik",
@@ -579,7 +594,7 @@ const eu: Translation = {
   ants: {
     title: "Inurri-gastuak",
     hint: "Errepikatzen diren gastu txikiak. Bakarka ez dira ezer; batera, bai.",
-    line: "{count} aldiz · {monthly} hilean · {yearly} urtean",
+    line: { one: "{count} aldiz · {monthly} hilean · {yearly} urtean", other: "{count} aldiz · {monthly} hilean · {yearly} urtean" },
   },
   heat: {
     title: "Hilabeteko mapa",

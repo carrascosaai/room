@@ -1,12 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 
+import { restoredState } from '@/domain/backup';
 import { findDuplicate, type CapturePayload } from '@/domain/capture';
 import type { Challenge } from '@/domain/challenges';
 import type { Wish } from '@/domain/habits';
 import { normalizeMerchant } from '@/domain/categorize';
+import { isRecurringInstanceId, withRecurringSkipped } from '@/domain/groupInsights';
+import { changeGroupCurrency, groupExpenseToPersonal } from '@/domain/currencyChange';
 import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
-import type { AppState, CategoryId, Cents, Expense, Goal, Group, Member, PaymentInfo, Settlement } from '@/domain/types';
+import type { AppState, CategoryId, Cents, Expense, Goal, Group, Member, PaymentInfo, Settlement, Tombstone } from '@/domain/types';
 import { FALLBACK, rateBetween } from '@/fx/fx';
 
 const STORAGE_KEY = 'taimo:state:v1';
@@ -63,6 +66,7 @@ export type Action =
   | { type: 'addMember'; groupId: string; member: Member }
   | { type: 'deleteGroup'; id: string }
   | { type: 'addSettlement'; settlement: Settlement }
+  | { type: 'deleteSettlement'; id: string }
   | { type: 'importExpenses'; expenses: Expense[] }
   | { type: 'setGroupRemote'; groupId: string; code: string }
   | { type: 'applySnapshot'; groupId: string; snapshot: GroupSnapshot; syncStartedAt: string }
@@ -80,7 +84,7 @@ function learn(state: AppState, merchant: string, category: CategoryId): AppStat
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'hydrate':
-      return { ...initialState, ...action.state };
+      return migrate(action.state);
     case 'completeOnboarding':
       return {
         ...state,
@@ -129,13 +133,24 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, profile: { ...state.profile, payment: action.payment, paymentAt: now() } };
     case 'setLanguage':
       return { ...state, profile: { ...state.profile, language: action.language } };
-    case 'setCurrency':
-      return { ...state, profile: { ...state.profile, currency: action.currency } };
+    case 'setCurrency': {
+      const old = state.profile.currency;
+      if (!action.currency || action.currency === old) return state;
+      // Los gastos personales no se convierten (se quedan con su número), pero los grupos
+      // sin moneda propia llevaban las cuentas en la tuya: les fijamos la de antes para
+      // que sus importes no cambien de moneda de golpe.
+      const stamp = now();
+      return {
+        ...state,
+        profile: { ...state.profile, currency: action.currency },
+        groups: state.groups.map((g) => (g.currency || !old ? g : { ...g, currency: old, updatedAt: stamp })),
+      };
+    }
     case 'setAccount':
       return { ...state, profile: { ...state.profile, account: action.account } };
     case 'restoreBackup':
-      // La copia manda, pero la cuenta con la que se ha entrado es la de ahora.
-      return { ...initialState, ...action.state, onboarded: true, profile: { ...action.state.profile, account: state.profile.account } };
+      // La copia manda, pero la cuenta y el bloqueo son de este móvil (nunca se importan).
+      return migrate(restoredState(state, action.state));
     case 'setBudget':
       return { ...state, budgets: { ...state.budgets, [action.category]: action.amount } };
     case 'addExpense':
@@ -152,17 +167,41 @@ export function reducer(state: AppState, action: Action): AppState {
         prev && prev.category !== action.expense.category
           ? learn(state, action.expense.merchant, action.expense.category)
           : state.learnedCategories;
+      const stamp = now();
+      let next: Expense = { ...action.expense, updatedAt: stamp };
+      let tombstones = state.tombstones;
+      let groups = state.groups;
+      const moved = prev?.groupId && prev.groupId !== action.expense.groupId ? prev.groupId : undefined;
+      if (moved) {
+        const oldGroup = state.groups.find((g) => g.id === moved);
+        // Sale de un grupo compartido: hay que borrarlo allí o volverá en la siguiente sincronización.
+        if (oldGroup?.remote) tombstones = [...tombstones, { kind: 'expense', id: prev!.id, groupId: moved, deletedAt: stamp }];
+        // Un fijo que se saca del grupo no debe volver a crearse este mes.
+        if (oldGroup && isRecurringInstanceId(prev!.id)) {
+          groups = groups.map((g) => (g.id === moved ? { ...g, recurringSkipped: withRecurringSkipped(g, prev!.id), updatedAt: stamp } : g));
+        }
+        // Al pasar a otro grupo es un gasto nuevo allí (el id viejo queda borrado en el otro).
+        if (action.expense.groupId) next = { ...next, id: newId() };
+      }
       return {
         ...state,
         learnedCategories,
-        expenses: byDate(state.expenses.map((e) => (e.id === action.expense.id ? { ...action.expense, updatedAt: now() } : e))),
+        groups,
+        tombstones,
+        expenses: byDate(state.expenses.map((e) => (e.id === action.expense.id ? next : e))),
       };
     }
     case 'deleteExpense': {
       const target = state.expenses.find((e) => e.id === action.id);
       const shared = target?.groupId && state.groups.some((g) => g.id === target.groupId && g.remote);
+      // Si es un gasto fijo de un mes, lo recordamos para no volver a crearlo solo.
+      const skip = target?.groupId && isRecurringInstanceId(target.id) ? target.groupId : undefined;
+      const stamp = now();
       return {
         ...state,
+        groups: skip
+          ? state.groups.map((g) => (g.id === skip ? { ...g, recurringSkipped: withRecurringSkipped(g, target!.id), updatedAt: stamp } : g))
+          : state.groups,
         expenses: state.expenses.filter((e) => e.id !== action.id),
         // En un grupo compartido hay que avisar a los demás de que se ha borrado.
         tombstones: shared
@@ -172,11 +211,24 @@ export function reducer(state: AppState, action: Action): AppState {
     }
     case 'addGroup':
       return { ...state, groups: [...state.groups, { ...action.group, updatedAt: action.group.updatedAt ?? now() }] };
-    case 'updateGroup':
+    case 'updateGroup': {
+      const group = state.groups.find((g) => g.id === action.groupId);
+      if (!group) return state;
+      const from = group.currency ?? state.profile.currency;
+      const to = action.changes.currency ?? state.profile.currency;
+      if ('currency' in action.changes && from && to && from !== to) {
+        // Cambiar la moneda del grupo convierte lo apuntado (no solo cambia la etiqueta).
+        const converted = changeGroupCurrency(state, group, from, to, action.changes);
+        if (converted) return converted;
+      }
+      // Sin tipo de cambio no se puede convertir: mejor no cambiar la moneda que reetiquetar importes.
+      const { currency: _c, ...rest } = action.changes;
+      const changes = 'currency' in action.changes && from !== to ? rest : action.changes;
       return {
         ...state,
-        groups: state.groups.map((g) => (g.id === action.groupId ? { ...g, ...action.changes, updatedAt: now() } : g)),
+        groups: state.groups.map((g) => (g.id === action.groupId ? { ...g, ...changes, updatedAt: now() } : g)),
       };
+    }
     case 'setFx':
       return { ...state, fx: action.fx };
     case 'useCurrency': {
@@ -188,22 +240,45 @@ export function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         groups: state.groups.map((g) =>
-          g.id === action.groupId ? { ...g, members: [...g.members, { ...action.member, updatedAt: now() }] } : g,
+          g.id === action.groupId
+            ? { ...g, ...withMemberWeight(g, action.member.id), members: [...g.members, { ...action.member, updatedAt: now() }] }
+            : g,
         ),
       };
-    case 'deleteGroup':
+    case 'deleteGroup': {
+      const group = state.groups.find((g) => g.id === action.id);
+      // De los gastos del grupo se queda solo lo que me tocaba pagar a mí, ya en mi moneda,
+      // como gasto personal (para no perder el histórico). Lo que no era mío se va.
+      const kept: Expense[] = [];
+      for (const e of state.expenses) {
+        if (e.groupId !== action.id) kept.push(e);
+        else if (group) {
+          const personal = groupExpenseToPersonal(e, group, state.profile.currency, state.fx ?? FALLBACK);
+          if (personal) kept.push(personal);
+        }
+      }
       return {
         ...state,
         groups: state.groups.filter((g) => g.id !== action.id),
-        // Los gastos del grupo pasan a ser personales para no perder el histórico.
-        expenses: state.expenses.map((e) =>
-          e.groupId === action.id ? { ...e, groupId: undefined, paidBy: undefined, shares: undefined } : e,
-        ),
+        expenses: kept,
         settlements: state.settlements.filter((s) => s.groupId !== action.id),
         tombstones: state.tombstones.filter((t) => t.groupId !== action.id),
       };
+    }
     case 'addSettlement':
       return { ...state, settlements: [...state.settlements, { ...action.settlement, updatedAt: now() }] };
+    case 'deleteSettlement': {
+      const target = state.settlements.find((s) => s.id === action.id);
+      if (!target) return state;
+      const shared = state.groups.some((g) => g.id === target.groupId && g.remote);
+      const tomb: Tombstone = { kind: 'settlement', id: target.id, groupId: target.groupId, deletedAt: now() };
+      return {
+        ...state,
+        settlements: state.settlements.filter((s) => s.id !== action.id),
+        // En un grupo compartido hay que avisar a los demás de que se ha deshecho.
+        tombstones: shared ? [...state.tombstones, tomb] : state.tombstones,
+      };
+    }
     case 'setGroupRemote':
       return {
         ...state,
@@ -215,6 +290,7 @@ export function reducer(state: AppState, action: Action): AppState {
       if (state.groups.some((g) => g.id === action.snapshot.group.id)) return state;
       const { group } = groupFromSnapshot(action.snapshot, action.meMemberId);
       if (action.newMemberName) {
+        Object.assign(group, withMemberWeight(group, action.meMemberId));
         group.members.push({ id: action.meMemberId, name: action.newMemberName, isMe: true, claimed: true, updatedAt: now() });
       }
       const withGroup = { ...state, groups: [...state.groups, group] };
@@ -224,6 +300,34 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'reset':
       return { ...initialState };
   }
+}
+
+/**
+ * Peso de reparto para un miembro nuevo cuando el grupo ya usa pesos: la media de los
+ * que hay (redondeada, mínimo 1). Así no se queda con 1 frente a 60/40 ni con 0.
+ */
+function withMemberWeight(g: Group, memberId: string): Partial<Group> {
+  if (!g.weights || g.weights[memberId] !== undefined) return {};
+  const values = Object.values(g.weights).filter((w) => w > 0);
+  const avg = values.length ? Math.max(1, Math.round(values.reduce((a, b) => a + b, 0) / values.length)) : 1;
+  return { weights: { ...g.weights, [memberId]: avg }, updatedAt: now() };
+}
+
+/** Pone al día un estado guardado por una versión anterior (campos que faltan). */
+export function migrate(saved: Partial<AppState> | null | undefined): AppState {
+  const s = (saved ?? {}) as Partial<AppState>;
+  const arr = <T,>(v: T[] | undefined): T[] => (Array.isArray(v) ? v : []);
+  return {
+    ...initialState,
+    ...s,
+    profile: { ...initialState.profile, ...(s.profile ?? {}), currency: s.profile?.currency || 'EUR' },
+    budgets: s.budgets && typeof s.budgets === 'object' ? s.budgets : {},
+    expenses: arr(s.expenses),
+    groups: arr(s.groups).map((g) => ({ ...g, members: arr(g.members) })),
+    settlements: arr(s.settlements),
+    tombstones: arr(s.tombstones),
+    learnedCategories: s.learnedCategories && typeof s.learnedCategories === 'object' ? s.learnedCategories : {},
+  };
 }
 
 /** Crea el gasto a partir de una captura, o devuelve el que ya existía si es un duplicado. */

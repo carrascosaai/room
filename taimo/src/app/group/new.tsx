@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import { parseAmount } from '@/domain/money';
+import { parseAmount, parseTripDate } from '@/domain/money';
 import type { Group, GroupKind } from '@/domain/types';
 import { useI18n, type TKey } from '@/i18n';
 import { newId, useStore } from '@/store/store';
@@ -71,7 +71,13 @@ export default function NewGroup() {
   }
 
   const names = others.split(',').map((n) => n.trim()).filter(Boolean);
-  const valid = name.trim() && names.length > 0;
+  // Fechas: vale 2026-11-15 y también 15/11/2026; si no, se avisa y no se crea.
+  const startDate = parseTripDate(start);
+  const endDate = parseTripDate(end);
+  const datesOk = kind !== 'trip' || (startDate !== null && endDate !== null);
+  const valid = !!name.trim() && names.length > 0 && datesOk;
+  // Por qué no se puede crear todavía (botón desactivado sin explicación no ayuda a nadie).
+  const missing = !name.trim() ? t('groups.needName') : names.length === 0 ? t('groups.needMembers') : null;
 
   function create() {
     const meId = newId();
@@ -86,7 +92,7 @@ export default function NewGroup() {
       createdAt: new Date().toISOString(),
       members,
       budget: budgetCents || undefined,
-      trip: kind === 'trip' && (start || end) ? { start: start || undefined, end: end || undefined } : undefined,
+      trip: kind === 'trip' && (startDate || endDate) ? { start: startDate || undefined, end: endDate || undefined } : undefined,
       // Pareja con reparto distinto de 50/50: se guarda como pesos por defecto.
       weights: kind === 'couple' && members.length === 2 && ratio[0] !== ratio[1] ? { [members[0].id]: ratio[0], [members[1].id]: ratio[1] } : undefined,
     };
@@ -144,6 +150,7 @@ export default function NewGroup() {
           </View>
         </Row>
       ) : null}
+      {kind === 'trip' && !datesOk ? <Text style={{ color: colors.danger, fontSize: 15 }}>{t('gx.badDate')}</Text> : null}
 
       {kind !== 'other' ? (
         <Input
@@ -155,6 +162,7 @@ export default function NewGroup() {
         />
       ) : null}
 
+      {missing ? <Muted>{missing}</Muted> : null}
       <Button label={t('groups.create')} disabled={!valid} onPress={create} />
       <Button label={t('common.back')} variant="ghost" onPress={() => setKind(null)} />
       <CurrencyPicker visible={picking} value={currency} onClose={() => setPicking(false)} onSelect={setCurrency} />

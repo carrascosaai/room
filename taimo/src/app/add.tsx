@@ -2,13 +2,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { canRecognizeText, recognizeText } from 'taimo-capture';
-import { Alert, Platform, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, Text, TextInput, View } from 'react-native';
 
 import { categoryStatus } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
 import { categorize } from '@/domain/categorize';
 import { exactRemainder, POT, splitByItems, splitByWeights, splitEqually } from '@/domain/groups';
-import { parseAmount } from '@/domain/money';
+import { currencyDecimals, parseAmount } from '@/domain/money';
 import { parseReceipt } from '@/domain/receipt';
 import type { CategoryId, Cents, Expense, ReceiptItem, SplitMode } from '@/domain/types';
 import { convert, rateBetween } from '@/fx/fx';
@@ -49,7 +49,8 @@ export default function AddExpense() {
   const { rates } = useRates();
   const editing = params.id ? state.expenses.find((e) => e.id === params.id) : undefined;
   const decimalSep = (1.5).toLocaleString(locale).includes(',') ? ',' : '.';
-  const fmtInput = (c: Cents) => (c / 100).toFixed(2).replace('.', decimalSep);
+  // Con los decimales de la moneda: "12,50" en euros, "3000" en yenes.
+  const fmtIn = (c: Cents, code: string) => (c / 100).toFixed(currencyDecimals(code)).replace('.', decimalSep);
 
   const [groupId, setGroupId] = useState<string | undefined>(editing?.groupId ?? params.groupId);
   const group = state.groups.find((g) => g.id === groupId);
@@ -58,6 +59,8 @@ export default function AddExpense() {
   const [cur, setCur] = useState<string>(
     editing?.original?.currency ?? params.currency ?? (group?.kind === 'trip' && recentForeign ? recentForeign : base),
   );
+  const fmtInput = (c: Cents) => fmtIn(c, cur);
+  const zeroPlaceholder = currencyDecimals(cur) > 0 ? `0${decimalSep}${'0'.repeat(currencyDecimals(cur))}` : '0';
   const [amountText, setAmountText] = useState(
     editing ? fmtInput(editing.original?.amount ?? editing.amount) : params.amount ? fmtInput(Number(params.amount)) : '',
   );
@@ -130,13 +133,13 @@ export default function AddExpense() {
       setScanMessage(t('scan.failed'));
       return;
     }
-    setAmountText(fmtInput(r.total));
+    setAmountText(fmtIn(r.total, r.currency));
     if (r.merchant) setMerchant(r.merchant.charAt(0) + r.merchant.slice(1).toLowerCase());
     if (r.currency !== cur) setCur(r.currency);
     if (r.date) setDay(new Date(r.date).toDateString());
     if (group && r.items.length > 1) {
       setMode('items');
-      setItems(r.items.map((it, i) => ({ key: `scan-${i}`, name: it.name, amount: fmtInput(it.amount), who: me ? [me] : [] })));
+      setItems(r.items.map((it, i) => ({ key: `scan-${i}`, name: it.name, amount: fmtIn(it.amount, r.currency), who: me ? [me] : [] })));
     }
     setScanMessage(t('scan.done'));
   }
@@ -192,6 +195,15 @@ export default function AddExpense() {
     amount > 0 &&
     (!group || (effectivePaidBy && effectiveParticipants.length > 0 && (mode !== 'exact' || exactLeft === 0) && (mode !== 'items' || !!itemsSplit)));
 
+  // Por qué no se puede guardar todavía (en grupos): se dice en una línea encima del botón.
+  const missing = !group
+    ? null
+    : !effectivePaidBy
+      ? t('add.needPayer')
+      : effectiveParticipants.length === 0
+        ? t('add.needPeople')
+        : null;
+
   function save() {
     if (!valid) return;
     const expense: Expense = {
@@ -240,7 +252,7 @@ export default function AddExpense() {
           <TextInput
             value={amountText}
             onChangeText={setAmountText}
-            placeholder={`0${decimalSep}00`}
+            placeholder={zeroPlaceholder}
             placeholderTextColor={colors.textFaint}
             keyboardType="decimal-pad"
             autoFocus={!editing}
@@ -345,20 +357,21 @@ export default function AddExpense() {
                     <View style={{ width: 96 }}>
                       <Input
                         value={it.amount}
+                        accessibilityLabel={`${t('add.amount')}: ${it.name || t('ticket.itemName')}`}
                         keyboardType="decimal-pad"
-                        placeholder={`0${decimalSep}00`}
+                        placeholder={zeroPlaceholder}
                         onChangeText={(v) => setItems((list) => list.map((x, i) => (i === idx ? { ...x, amount: v } : x)))}
                         style={{ textAlign: 'right', paddingVertical: 8 }}
                       />
                     </View>
-                    <Text
+                    <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel={t('common.delete')}
+                      accessibilityLabel={`${t('common.delete')}: ${it.name || t('ticket.itemName')}`}
                       onPress={() => setItems((list) => list.filter((_, i) => i !== idx))}
-                      style={{ color: colors.textMuted, fontSize: 20, paddingHorizontal: 4 }}
+                      style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
                     >
-                      ✕
-                    </Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 20 }}>✕</Text>
+                    </Pressable>
                   </Row>
                   <Row style={{ flexWrap: 'wrap' }}>
                     {group.members.map((m) => {
@@ -420,12 +433,15 @@ export default function AddExpense() {
               {mode === 'weights' ? <Muted>{t('split.weightsHint')}</Muted> : null}
               {group.members.map((m) => (
                 <Row key={m.id}>
-                  <Text style={{ color: colors.text, flex: 1 }}>{name(m.id)}</Text>
+                  <Text style={{ color: colors.text, flex: 1 }} numberOfLines={2}>
+                    {name(m.id)}
+                  </Text>
                   <View style={{ width: 100 }}>
                     <Input
                       keyboardType="decimal-pad"
+                      accessibilityLabel={`${t(mode === 'weights' ? 'split.weights' : 'split.exact')}: ${name(m.id)}`}
                       value={mode === 'weights' ? weights[m.id] ?? '1' : exact[m.id] ?? ''}
-                      placeholder={mode === 'weights' ? '1' : `0${decimalSep}00`}
+                      placeholder={mode === 'weights' ? '1' : zeroPlaceholder}
                       onChangeText={(v) =>
                         mode === 'weights' ? setWeights((w) => ({ ...w, [m.id]: v })) : setExact((e) => ({ ...e, [m.id]: v }))
                       }
@@ -450,6 +466,7 @@ export default function AddExpense() {
       {!editing ? (
         <Button label={showMore ? t('easy.lessOptions') : t('easy.moreOptions')} variant="ghost" onPress={() => setShowMore((v) => !v)} />
       ) : null}
+      {missing ? <Muted style={{ textAlign: 'center' }}>{missing}</Muted> : null}
       <Button label={editing ? t('common.save') : t('add.addButton')} disabled={!valid} onPress={save} />
       {editing ? (
         <Button

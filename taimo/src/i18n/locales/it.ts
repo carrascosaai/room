@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const it: Translation = {
-  common: { cancel: 'Annulla', save: 'Salva', delete: 'Elimina', back: 'Indietro', continue: 'Continua', done: 'Fatto', you: 'Tu', me: 'Io', today: 'Oggi, {time}', yesterday: 'Ieri, {time}', unknown: '?' },
+  common: { cancel: 'Annulla', save: 'Salva', delete: 'Elimina', back: 'Indietro', continue: 'Continua', done: 'Fatto', you: 'Tu', me: 'Io', today: 'Oggi, {time}', yesterday: 'Ieri, {time}', unknown: '?', backHome: "Torna all’inizio" },
   cat: { super: 'Spesa', comer: 'Mangiare fuori', ocio: 'Tempo libero', deporte: 'Sport', estudios: 'Studio', transporte: 'Trasporti', casa: 'Casa', compras: 'Shopping', salud: 'Salute', suscripciones: 'Abbonamenti', otros: 'Altro' },
   tabs: { home: 'Home', groups: 'Gruppi', stats: "Riepilogo", settings: 'Impostazioni', more: "Altro" },
   onboarding: {
@@ -37,11 +37,13 @@ const it: Translation = {
     restoreConfirm: 'Sostituire i dati di questo telefono con il tuo backup?',
   },
   home: {
+    spentThisMonth: "Speso questo mese",
+    setBudget: "Imposta un budget mensile",
     hello: 'Ciao, {name} 👋',
     helloAnon: 'Ciao di nuovo 👋',
     leftThisMonth: 'Ti resta per {month}',
     spentOf: 'Speso {spent} su {budget}',
-    perDay: 'Puoi spendere {amount} al giorno per i {days} giorni rimasti.',
+    perDay: { one: "Resta {count} giorno: puoi spendere {amount} al giorno.", other: "Restano {count} giorni: puoi spendere {amount} al giorno." },
     overLimit: 'Hai raggiunto il limite del mese. Tieni duro, manca poco! 💪',
     autoTitle: 'Attiva la registrazione automatica',
     autoText: 'Paga con Apple Pay e Taimo lo registra da solo. Si configura in un minuto.',
@@ -54,6 +56,8 @@ const it: Translation = {
     add: 'Aggiungi spesa',
   },
   add: {
+    needPayer: "Scegli chi ha pagato.",
+    needPeople: "Scegli tra chi dividere.",
     newTitle: 'Nuova spesa',
     editTitle: 'Modifica spesa',
     amount: 'Importo',
@@ -116,6 +120,8 @@ const it: Translation = {
     androidHint: 'Nella schermata delle impostazioni che si apre, cerca «Taimo» e attivalo.',
   },
   groups: {
+    needName: "Dai un nome al gruppo.",
+    needMembers: "Scrivi almeno un’altra persona. Separa i nomi con virgole: Ana, Luis",
     title: 'Gruppi',
     intro: 'Condividi le spese con il partner, i coinquilini o gli amici. Al tuo budget conta solo la tua parte e Taimo calcola chi deve cosa a chi.',
     settled: 'In pari ✓',
@@ -132,6 +138,8 @@ const it: Translation = {
     joinButton: 'Unisciti con un codice',
   },
   group: {
+    markPaidConfirm: "Segnare come pagato? {from} → {to}: {amount}",
+    markPaidOk: "Segna come pagato",
     missing: 'Questo gruppo non esiste più.',
     total: 'Totale speso nel gruppo',
     settled: 'in pari',
@@ -159,6 +167,7 @@ const it: Translation = {
     deleteConfirm: 'Eliminare il gruppo? Le sue spese resteranno come spese tue.',
   },
   join: {
+    joinAs: "Entra come {name}",
     title: 'Unisciti a un gruppo',
     text: 'Incolla il link o il codice che ti hanno mandato.',
     placeholder: 'Codice di 16 caratteri',
@@ -176,6 +185,8 @@ const it: Translation = {
     offline: 'Nessuna connessione. Riproveremo più tardi.',
   },
   stats: {
+    prev: "Precedente",
+    next: "Successivo",
     title: 'Statistiche',
     day: 'Giorno',
     week: 'Settimana',
@@ -268,6 +279,8 @@ const it: Translation = {
     defaultHint: "Si usa per le nuove spese del gruppo. Puoi cambiarla in ogni spesa.",
   },
   gx: {
+    badDate: "Scrivi la data così: 2026-11-15 o 15/11/2026.",
+    recurringDeleteConfirm: "Eliminare la spesa fissa «{name}»?",
     type: "Tipo di gruppo",
     currency: "Valuta del gruppo",
     budgetTrip: "Budget del viaggio",
@@ -311,6 +324,7 @@ const it: Translation = {
     subsMonthly: "{amount}/mese",
   },
   history: {
+    more: "Mostra altro",
     title: "Tutte le spese",
     search: "Cerca negozio, nota o categoria",
     all: "Tutte",
@@ -428,6 +442,7 @@ const it: Translation = {
     noInfo: "{name} non ha ancora indicato come farsi pagare. Chiedigli di aggiungerlo in Impostazioni → Come ti pagano.",
   },
   plink: {
+    verify: "Verifica con {name} che questi dati siano suoi prima di pagare.",
     owe: "Devi a {name}",
     group: "Dal gruppo «{group}»",
     why: "Perché",
@@ -579,7 +594,7 @@ const it: Translation = {
   ants: {
     title: "Spese formica",
     hint: "Piccole spese che si ripetono. Da sole sono niente; insieme no.",
-    line: "{count} volte · {monthly} al mese · {yearly} all’anno",
+    line: { one: "{count} volta · {monthly} al mese · {yearly} all’anno", other: "{count} volte · {monthly} al mese · {yearly} all’anno" },
   },
   heat: {
     title: "Mappa del mese",

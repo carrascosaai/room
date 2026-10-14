@@ -110,7 +110,13 @@ export function Input(props: TextInputProps & { label?: string }) {
   return (
     <View style={{ gap: space.xs }}>
       {label ? <Muted>{label}</Muted> : null}
-      <TextInput placeholderTextColor={colors.textFaint} style={[st().input, style]} {...rest} />
+      {/* Sin etiqueta propia, el lector de pantalla lee la etiqueta visible o el ejemplo. */}
+      <TextInput
+        placeholderTextColor={colors.textFaint}
+        style={[st().input, style]}
+        {...rest}
+        accessibilityLabel={rest.accessibilityLabel ?? label ?? rest.placeholder}
+      />
     </View>
   );
 }
@@ -147,6 +153,8 @@ export function CategoryBadge({ id, size = 40 }: { id: CategoryId; size?: number
 export function Chip({ label, selected, onPress }: { label: string; selected?: boolean; onPress: () => void }) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: !!selected }}
       onPress={onPress}
       style={[st().chip, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
     >

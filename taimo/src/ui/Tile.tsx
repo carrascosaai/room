@@ -21,11 +21,11 @@ export function Tile({ emoji, label, hint, onPress }: { emoji: string; label: st
       })}
     >
       <Text style={{ fontSize: 22 }}>{emoji}</Text>
-      <Text style={{ color: colors.text, fontWeight: '700', fontSize: 14 }} numberOfLines={2}>
+      <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }} numberOfLines={2}>
         {label}
       </Text>
       {hint ? (
-        <Text style={{ color: colors.textMuted, fontSize: 12 }} numberOfLines={1}>
+        <Text style={{ color: colors.textMuted, fontSize: 15 }} numberOfLines={2}>
           {hint}
         </Text>
       ) : null}

@@ -34,7 +34,7 @@ export function IncomeSplit({ me, myIncome, other, onApply }: { me: string; myIn
           setOpen(false);
         }}
       />
-      <Muted style={{ fontSize: 13 }}>{t('couple.incomeNote')}</Muted>
+      <Muted>{t('couple.incomeNote')}</Muted>
     </View>
   );
 }

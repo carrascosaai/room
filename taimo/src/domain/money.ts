@@ -59,3 +59,44 @@ export function formatMoney(cents: Cents): string {
 export function formatMoneyShort(cents: Cents): string {
   return compactFormatter.format(Math.round(cents / 100));
 }
+
+const decimalsCache = new Map<string, number>();
+
+/** Decimales que usa una moneda: 2 para EUR/USD, 0 para JPY/CLP… (2 si no se sabe). */
+export function currencyDecimals(code: string): number {
+  if (decimalsCache.has(code)) return decimalsCache.get(code)!;
+  let digits = 2;
+  try {
+    digits = new Intl.NumberFormat('en', { style: 'currency', currency: code }).resolvedOptions().maximumFractionDigits ?? 2;
+  } catch {
+    digits = 2;
+  }
+  decimalsCache.set(code, digits);
+  return digits;
+}
+
+/** Importe sin símbolo con los decimales de su moneda: 1250 EUR -> "12.50"; 300000 JPY -> "3000". */
+export function plainAmount(cents: Cents, code: string): string {
+  return (cents / 100).toFixed(currencyDecimals(code));
+}
+
+/**
+ * Fecha de viaje escrita a mano: acepta "2026-11-15" y "15/11/2026" (también con - o .).
+ * Devuelve "YYYY-MM-DD", '' si está vacía, o null si no es una fecha válida.
+ */
+export function parseTripDate(input: string): string | null {
+  const s = input.trim();
+  if (!s) return '';
+  let y: number, m: number, d: number;
+  let match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
+  if (match) {
+    [y, m, d] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  } else {
+    match = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/.exec(s);
+    if (!match) return null;
+    [d, m, y] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  }
+  const date = new Date(Date.UTC(y, m - 1, d));
+  if (date.getUTCFullYear() !== y || date.getUTCMonth() !== m - 1 || date.getUTCDate() !== d) return null;
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}

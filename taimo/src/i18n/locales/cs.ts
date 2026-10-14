@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const cs: Translation = {
-  common: { cancel: 'Zrušit', save: 'Uložit', delete: 'Smazat', back: 'Zpět', continue: 'Pokračovat', done: 'Hotovo', you: 'Ty', me: 'Já', today: 'Dnes, {time}', yesterday: 'Včera, {time}', unknown: '?' },
+  common: { cancel: 'Zrušit', save: 'Uložit', delete: 'Smazat', back: 'Zpět', continue: 'Pokračovat', done: 'Hotovo', you: 'Ty', me: 'Já', today: 'Dnes, {time}', yesterday: 'Včera, {time}', unknown: '?', backHome: "Zpět na úvod" },
   cat: { super: 'Potraviny', comer: 'Jídlo venku', ocio: 'Zábava', deporte: 'Sport', estudios: 'Vzdělání', transporte: 'Doprava', casa: 'Bydlení', compras: 'Nákupy', salud: 'Zdraví', suscripciones: 'Předplatné', otros: 'Ostatní' },
   tabs: { home: 'Domů', groups: 'Skupiny', stats: "Přehled", settings: 'Nastavení', more: "Více" },
   onboarding: {
@@ -37,11 +37,13 @@ const cs: Translation = {
     restoreConfirm: 'Nahradit data v tomto mobilu zálohou?',
   },
   home: {
+    spentThisMonth: "Utraceno tento měsíc",
+    setBudget: "Nastavit měsíční rozpočet",
     hello: 'Ahoj, {name} 👋',
     helloAnon: 'Ahoj znovu 👋',
     leftThisMonth: 'Zbývá na {month}',
     spentOf: 'Utraceno {spent} z {budget}',
-    perDay: 'Můžeš utratit {amount} denně po zbývající dny: {days}.',
+    perDay: { one: "Zbývá {count} den: můžeš utratit {amount} denně.", few: "Zbývají {count} dny: můžeš utratit {amount} denně.", many: "Zbývá {count} dne: můžeš utratit {amount} denně.", other: "Zbývá {count} dní: můžeš utratit {amount} denně." },
     overLimit: 'Dosáhl jsi měsíčního limitu. Vydrž, už to nebude dlouho! 💪',
     autoTitle: 'Zapni automatické zapisování',
     autoText: 'Plať přes Apple Pay a Taimo to zapíše samo. Nastavení zabere minutu.',
@@ -54,6 +56,8 @@ const cs: Translation = {
     add: 'Přidat výdaj',
   },
   add: {
+    needPayer: "Vyber, kdo platil.",
+    needPeople: "Vyber, mezi koho se to rozdělí.",
     newTitle: 'Nový výdaj',
     editTitle: 'Upravit výdaj',
     amount: 'Částka',
@@ -116,6 +120,8 @@ const cs: Translation = {
     androidHint: 'Na otevřené obrazovce nastavení najdi „Taimo“ a zapni ho.',
   },
   groups: {
+    needName: "Pojmenuj skupinu.",
+    needMembers: "Napiš aspoň jednoho dalšího člověka. Jména odděl čárkami: Ana, Luis",
     title: 'Skupiny',
     intro: 'Sdílej výdaje s partnerem, spolubydlícími nebo kamarády. Do rozpočtu se počítá jen tvůj podíl a Taimo spočítá, kdo komu dluží.',
     settled: 'Vyrovnáno ✓',
@@ -132,6 +138,8 @@ const cs: Translation = {
     joinButton: 'Připojit se kódem',
   },
   group: {
+    markPaidConfirm: "Označit jako zaplacené? {from} → {to}: {amount}",
+    markPaidOk: "Označit jako zaplacené",
     missing: 'Tato skupina už neexistuje.',
     total: 'Ve skupině celkem utraceno',
     settled: 'vyrovnáno',
@@ -159,6 +167,7 @@ const cs: Translation = {
     deleteConfirm: 'Smazat skupinu? Její výdaje zůstanou jako tvoje.',
   },
   join: {
+    joinAs: "Připojit se jako {name}",
     title: 'Připojit se ke skupině',
     text: 'Vlož odkaz nebo kód, který ti poslali.',
     placeholder: 'Kód o 16 znacích',
@@ -176,6 +185,8 @@ const cs: Translation = {
     offline: 'Bez připojení. Zkusíme to později.',
   },
   stats: {
+    prev: "Předchozí",
+    next: "Další",
     title: 'Statistiky',
     day: 'Den',
     week: 'Týden',
@@ -268,6 +279,8 @@ const cs: Translation = {
     defaultHint: "Použije se u nových výdajů skupiny. U každého výdaje ho můžeš změnit.",
   },
   gx: {
+    badDate: "Napiš datum takto: 2026-11-15 nebo 15/11/2026.",
+    recurringDeleteConfirm: "Smazat pravidelný výdaj „{name}“?",
     type: "Typ skupiny",
     currency: "Měna skupiny",
     budgetTrip: "Rozpočet výletu",
@@ -311,6 +324,7 @@ const cs: Translation = {
     subsMonthly: "{amount}/měs.",
   },
   history: {
+    more: "Zobrazit další",
     title: "Všechny výdaje",
     search: "Hledej obchod, poznámku nebo kategorii",
     all: "Vše",
@@ -428,6 +442,7 @@ const cs: Translation = {
     noInfo: "{name} zatím nepřidal(a), jak mu zaplatit. Požádej o doplnění v Nastavení → Jak ti platí.",
   },
   plink: {
+    verify: "Než zaplatíš, ověř si u osoby {name}, že jsou to opravdu její údaje.",
     owe: "Dlužíš {name}",
     group: "Ze skupiny „{group}“",
     why: "Proč",
@@ -579,7 +594,7 @@ const cs: Translation = {
   ants: {
     title: "Drobné výdaje",
     hint: "Malé opakované výdaje. Jednotlivě nic; dohromady hodně.",
-    line: "{count}× · {monthly} měsíčně · {yearly} ročně",
+    line: { one: "{count}× · {monthly} měsíčně · {yearly} ročně", few: "{count}× · {monthly} měsíčně · {yearly} ročně", many: "{count}× · {monthly} měsíčně · {yearly} ročně", other: "{count}× · {monthly} měsíčně · {yearly} ročně" },
   },
   heat: {
     title: "Mapa měsíce",

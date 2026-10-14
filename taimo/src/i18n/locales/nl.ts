@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const nl: Translation = {
-  common: { cancel: 'Annuleren', save: 'Opslaan', delete: 'Verwijderen', back: 'Terug', continue: 'Doorgaan', done: 'Klaar', you: 'Jij', me: 'Ik', today: 'Vandaag, {time}', yesterday: 'Gisteren, {time}', unknown: '?' },
+  common: { cancel: 'Annuleren', save: 'Opslaan', delete: 'Verwijderen', back: 'Terug', continue: 'Doorgaan', done: 'Klaar', you: 'Jij', me: 'Ik', today: 'Vandaag, {time}', yesterday: 'Gisteren, {time}', unknown: '?', backHome: "Terug naar start" },
   cat: { super: 'Boodschappen', comer: 'Uit eten', ocio: 'Vrije tijd', deporte: 'Sport', estudios: 'Studie', transporte: 'Vervoer', casa: 'Wonen', compras: 'Shoppen', salud: 'Gezondheid', suscripciones: 'Abonnementen', otros: 'Overig' },
   tabs: { home: 'Home', groups: 'Groepen', stats: "Overzicht", settings: 'Instellingen', more: "Meer" },
   onboarding: {
@@ -37,11 +37,13 @@ const nl: Translation = {
     restoreConfirm: 'De gegevens op deze telefoon vervangen door je back-up?',
   },
   home: {
+    spentThisMonth: "Uitgegeven deze maand",
+    setBudget: "Stel een maandbudget in",
     hello: 'Hoi, {name} 👋',
     helloAnon: 'Hoi weer 👋',
     leftThisMonth: 'Nog over in {month}',
     spentOf: '{spent} van {budget} uitgegeven',
-    perDay: 'Je kunt {amount} per dag uitgeven in de {days} resterende dagen.',
+    perDay: { one: "Nog {count} dag: je kunt {amount} per dag uitgeven.", other: "Nog {count} dagen: je kunt {amount} per dag uitgeven." },
     overLimit: 'Je hebt je limiet voor deze maand bereikt. Volhouden, bijna klaar! 💪',
     autoTitle: 'Automatisch noteren aanzetten',
     autoText: 'Betaal met Apple Pay en Taimo noteert het. In een minuut ingesteld.',
@@ -54,6 +56,8 @@ const nl: Translation = {
     add: 'Uitgave toevoegen',
   },
   add: {
+    needPayer: "Kies wie heeft betaald.",
+    needPeople: "Kies tussen wie je het verdeelt.",
     newTitle: 'Nieuwe uitgave',
     editTitle: 'Uitgave bewerken',
     amount: 'Bedrag',
@@ -116,6 +120,8 @@ const nl: Translation = {
     androidHint: 'Zoek in het instellingenscherm dat opent “Taimo” en zet het aan.',
   },
   groups: {
+    needName: "Geef de groep een naam.",
+    needMembers: "Schrijf minstens één andere persoon. Scheid namen met komma’s: Ana, Luis",
     title: 'Groepen',
     intro: 'Deel uitgaven met je partner, huisgenoten of vrienden. Alleen jouw deel telt mee voor je budget en Taimo rekent uit wie wie wat schuldig is.',
     settled: 'Quitte ✓',
@@ -132,6 +138,8 @@ const nl: Translation = {
     joinButton: 'Deelnemen met een code',
   },
   group: {
+    markPaidConfirm: "Markeren als betaald? {from} → {to}: {amount}",
+    markPaidOk: "Markeren als betaald",
     missing: 'Deze groep bestaat niet meer.',
     total: 'Totaal uitgegeven in de groep',
     settled: 'quitte',
@@ -159,6 +167,7 @@ const nl: Translation = {
     deleteConfirm: 'Groep verwijderen? De uitgaven blijven als je eigen uitgaven bewaard.',
   },
   join: {
+    joinAs: "Meedoen als {name}",
     title: 'Deelnemen aan een groep',
     text: 'Plak de link of code die je hebt gekregen.',
     placeholder: 'Code van 16 tekens',
@@ -176,6 +185,8 @@ const nl: Translation = {
     offline: 'Geen verbinding. We proberen het later opnieuw.',
   },
   stats: {
+    prev: "Vorige",
+    next: "Volgende",
     title: 'Statistieken',
     day: 'Dag',
     week: 'Week',
@@ -268,6 +279,8 @@ const nl: Translation = {
     defaultHint: "Geldt voor nieuwe uitgaven in de groep. Per uitgave aan te passen.",
   },
   gx: {
+    badDate: "Schrijf de datum zo: 2026-11-15 of 15/11/2026.",
+    recurringDeleteConfirm: "Vaste uitgave ‘{name}’ verwijderen?",
     type: "Soort groep",
     currency: "Valuta van de groep",
     budgetTrip: "Reisbudget",
@@ -311,6 +324,7 @@ const nl: Translation = {
     subsMonthly: "{amount}/maand",
   },
   history: {
+    more: "Meer tonen",
     title: "Alle uitgaven",
     search: "Zoek winkel, notitie of categorie",
     all: "Alle",
@@ -428,6 +442,7 @@ const nl: Translation = {
     noInfo: "{name} heeft nog niet ingesteld hoe je betaalt. Vraag het toe te voegen in Instellingen → Hoe mensen je betalen.",
   },
   plink: {
+    verify: "Controleer met {name} of deze gegevens echt van hem of haar zijn voordat je betaalt.",
     owe: "Je bent {name} geld schuldig",
     group: "Uit de groep ‘{group}’",
     why: "Waarom",
@@ -579,7 +594,7 @@ const nl: Translation = {
   ants: {
     title: "Kleine gewoontes",
     hint: "Kleine uitgaven die terugkomen. Los niks; samen wel.",
-    line: "{count} keer · {monthly} per maand · {yearly} per jaar",
+    line: { one: "{count} keer · {monthly} per maand · {yearly} per jaar", other: "{count} keer · {monthly} per maand · {yearly} per jaar" },
   },
   heat: {
     title: "Maandkaart",

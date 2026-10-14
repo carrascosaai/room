@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const tr: Translation = {
-  common: { cancel: 'İptal', save: 'Kaydet', delete: 'Sil', back: 'Geri', continue: 'Devam', done: 'Tamam', you: 'Sen', me: 'Ben', today: 'Bugün, {time}', yesterday: 'Dün, {time}', unknown: '?' },
+  common: { cancel: 'İptal', save: 'Kaydet', delete: 'Sil', back: 'Geri', continue: 'Devam', done: 'Tamam', you: 'Sen', me: 'Ben', today: 'Bugün, {time}', yesterday: 'Dün, {time}', unknown: '?', backHome: "Ana sayfaya dön" },
   cat: { super: 'Market', comer: 'Dışarıda yemek', ocio: 'Eğlence', deporte: 'Spor', estudios: 'Eğitim', transporte: 'Ulaşım', casa: 'Ev', compras: 'Alışveriş', salud: 'Sağlık', suscripciones: 'Abonelikler', otros: 'Diğer' },
   tabs: { home: 'Ana sayfa', groups: 'Gruplar', stats: "Özet", settings: 'Ayarlar', more: "Daha fazla" },
   onboarding: {
@@ -37,11 +37,13 @@ const tr: Translation = {
     restoreConfirm: 'Bu telefondaki veriler yedeğinle değiştirilsin mi?',
   },
   home: {
+    spentThisMonth: "Bu ay harcanan",
+    setBudget: "Aylık bütçe belirle",
     hello: 'Merhaba, {name} 👋',
     helloAnon: 'Tekrar merhaba 👋',
     leftThisMonth: '{month} ayında kalan',
     spentOf: '{budget} bütçenin {spent} kadarı harcandı',
-    perDay: 'Kalan {days} gün boyunca günde {amount} harcayabilirsin.',
+    perDay: { one: "{count} gün kaldı: günde {amount} harcayabilirsin.", other: "{count} gün kaldı: günde {amount} harcayabilirsin." },
     overLimit: 'Bu ayın limitine ulaştın. Dayan, az kaldı! 💪',
     autoTitle: 'Otomatik kaydı aç',
     autoText: 'Apple Pay ile öde, Taimo kendisi kaydetsin. Kurulumu bir dakika sürer.',
@@ -54,6 +56,8 @@ const tr: Translation = {
     add: 'Harcama ekle',
   },
   add: {
+    needPayer: "Kimin ödediğini seç.",
+    needPeople: "Kimler arasında bölüneceğini seç.",
     newTitle: 'Yeni harcama',
     editTitle: 'Harcamayı düzenle',
     amount: 'Tutar',
@@ -116,6 +120,8 @@ const tr: Translation = {
     androidHint: 'Açılan ayarlar ekranında “Taimo”yu bul ve aç.',
   },
   groups: {
+    needName: "Gruba bir ad ver.",
+    needMembers: "En az bir kişi daha yaz. İsimleri virgülle ayır: Ana, Luis",
     title: 'Gruplar',
     intro: 'Harcamaları partnerinle, ev arkadaşlarınla ya da arkadaşlarınla paylaş. Bütçene yalnızca senin payın sayılır ve Taimo kimin kime borçlu olduğunu hesaplar.',
     settled: 'Ödeşildi ✓',
@@ -132,6 +138,8 @@ const tr: Translation = {
     joinButton: 'Kodla katıl',
   },
   group: {
+    markPaidConfirm: "Ödendi olarak işaretlensin mi? {from} → {to}: {amount}",
+    markPaidOk: "Ödendi olarak işaretle",
     missing: 'Bu grup artık yok.',
     total: 'Grupta toplam harcanan',
     settled: 'ödeşildi',
@@ -159,6 +167,7 @@ const tr: Translation = {
     deleteConfirm: 'Grup silinsin mi? Harcamaları senin harcamaların olarak kalır.',
   },
   join: {
+    joinAs: "{name} olarak katıl",
     title: 'Bir gruba katıl',
     text: 'Sana gönderilen bağlantıyı ya da kodu yapıştır.',
     placeholder: '16 karakterlik kod',
@@ -176,6 +185,8 @@ const tr: Translation = {
     offline: 'Bağlantı yok. Daha sonra tekrar deneyeceğiz.',
   },
   stats: {
+    prev: "Önceki",
+    next: "Sonraki",
     title: 'İstatistikler',
     day: 'Gün',
     week: 'Hafta',
@@ -268,6 +279,8 @@ const tr: Translation = {
     defaultHint: "Gruptaki yeni harcamalarda kullanılır. Her harcamada değiştirebilirsin.",
   },
   gx: {
+    badDate: "Tarihi şöyle yaz: 2026-11-15 veya 15/11/2026.",
+    recurringDeleteConfirm: "“{name}” sabit gideri silinsin mi?",
     type: "Grup türü",
     currency: "Grubun para birimi",
     budgetTrip: "Gezi bütçesi",
@@ -311,6 +324,7 @@ const tr: Translation = {
     subsMonthly: "{amount}/ay",
   },
   history: {
+    more: "Daha fazla gör",
     title: "Tüm harcamalar",
     search: "Mağaza, not veya kategori ara",
     all: "Tümü",
@@ -428,6 +442,7 @@ const tr: Translation = {
     noInfo: "{name} henüz nasıl ödeme alacağını eklemedi. Ayarlar → Sana nasıl ödenir bölümüne eklemesini iste.",
   },
   plink: {
+    verify: "Ödemeden önce bu bilgilerin {name} adlı kişiye ait olduğunu kendisiyle teyit et.",
     owe: "{name} kişisine borcun var",
     group: "“{group}” grubundan",
     why: "Neden",
@@ -579,7 +594,7 @@ const tr: Translation = {
   ants: {
     title: "Küçük harcamalar",
     hint: "Tekrarlanan küçük harcamalar. Tek başına bir şey değil; toplamda öyle.",
-    line: "{count} kez · ayda {monthly} · yılda {yearly}",
+    line: { one: "{count} kez · ayda {monthly} · yılda {yearly}", other: "{count} kez · ayda {monthly} · yılda {yearly}" },
   },
   heat: {
     title: "Ay haritası",

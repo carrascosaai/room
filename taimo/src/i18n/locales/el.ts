@@ -1,7 +1,7 @@
 import type { Translation } from '../core';
 
 const el: Translation = {
-  common: { cancel: 'Άκυρο', save: 'Αποθήκευση', delete: 'Διαγραφή', back: 'Πίσω', continue: 'Συνέχεια', done: 'Τέλος', you: 'Εσύ', me: 'Εγώ', today: 'Σήμερα, {time}', yesterday: 'Χθες, {time}', unknown: ';' },
+  common: { cancel: 'Άκυρο', save: 'Αποθήκευση', delete: 'Διαγραφή', back: 'Πίσω', continue: 'Συνέχεια', done: 'Τέλος', you: 'Εσύ', me: 'Εγώ', today: 'Σήμερα, {time}', yesterday: 'Χθες, {time}', unknown: ';', backHome: "Πίσω στην αρχή" },
   cat: { super: 'Σούπερ μάρκετ', comer: 'Φαγητό έξω', ocio: 'Ψυχαγωγία', deporte: 'Αθλητισμός', estudios: 'Σπουδές', transporte: 'Μετακινήσεις', casa: 'Σπίτι', compras: 'Ψώνια', salud: 'Υγεία', suscripciones: 'Συνδρομές', otros: 'Άλλα' },
   tabs: { home: 'Αρχική', groups: 'Ομάδες', stats: "Σύνοψη", settings: 'Ρυθμίσεις', more: "Περισσότερα" },
   onboarding: {
@@ -37,11 +37,13 @@ const el: Translation = {
     restoreConfirm: 'Αντικατάσταση των δεδομένων αυτού του κινητού με το αντίγραφό σου;',
   },
   home: {
+    spentThisMonth: "Ξοδεύτηκαν αυτόν τον μήνα",
+    setBudget: "Όρισε μηνιαίο προϋπολογισμό",
     hello: 'Γεια, {name} 👋',
     helloAnon: 'Γεια ξανά 👋',
     leftThisMonth: 'Σου μένουν για {month}',
     spentOf: 'Ξόδεψες {spent} από {budget}',
-    perDay: 'Μπορείς να ξοδεύεις {amount} την ημέρα για τις {days} μέρες που μένουν.',
+    perDay: { one: "Μένει {count} μέρα: μπορείς να ξοδεύεις {amount} τη μέρα.", other: "Μένουν {count} μέρες: μπορείς να ξοδεύεις {amount} τη μέρα." },
     overLimit: 'Έφτασες το όριο του μήνα. Κάνε υπομονή, λίγο έμεινε! 💪',
     autoTitle: 'Ενεργοποίησε την αυτόματη καταγραφή',
     autoText: 'Πλήρωσε με Apple Pay και το Taimo το καταγράφει μόνο του. Ρυθμίζεται σε ένα λεπτό.',
@@ -54,6 +56,8 @@ const el: Translation = {
     add: 'Προσθήκη εξόδου',
   },
   add: {
+    needPayer: "Διάλεξε ποιος πλήρωσε.",
+    needPeople: "Διάλεξε μεταξύ ποιων μοιράζεται.",
     newTitle: 'Νέο έξοδο',
     editTitle: 'Επεξεργασία εξόδου',
     amount: 'Ποσό',
@@ -116,6 +120,8 @@ const el: Translation = {
     androidHint: 'Στην οθόνη ρυθμίσεων που ανοίγει, βρες το «Taimo» και ενεργοποίησέ το.',
   },
   groups: {
+    needName: "Δώσε ένα όνομα στην ομάδα.",
+    needMembers: "Γράψε τουλάχιστον ένα ακόμη άτομο. Χώρισε τα ονόματα με κόμματα: Ana, Luis",
     title: 'Ομάδες',
     intro: 'Μοιράσου έξοδα με τον σύντροφο, τους συγκατοίκους ή φίλους. Στον προϋπολογισμό σου μετράει μόνο το μερίδιό σου και το Taimo υπολογίζει ποιος χρωστάει σε ποιον.',
     settled: 'Εξοφλημένο ✓',
@@ -132,6 +138,8 @@ const el: Translation = {
     joinButton: 'Μπες με κωδικό',
   },
   group: {
+    markPaidConfirm: "Σήμανση ως πληρωμένο; {from} → {to}: {amount}",
+    markPaidOk: "Σήμανση ως πληρωμένο",
     missing: 'Αυτή η ομάδα δεν υπάρχει πια.',
     total: 'Σύνολο εξόδων στην ομάδα',
     settled: 'εξοφλημένο',
@@ -159,6 +167,7 @@ const el: Translation = {
     deleteConfirm: 'Διαγραφή της ομάδας; Τα έξοδά της θα μείνουν ως δικά σου.',
   },
   join: {
+    joinAs: "Συμμετοχή ως {name}",
     title: 'Είσοδος σε ομάδα',
     text: 'Επικόλλησε τον σύνδεσμο ή τον κωδικό που σου έστειλαν.',
     placeholder: 'Κωδικός 16 χαρακτήρων',
@@ -176,6 +185,8 @@ const el: Translation = {
     offline: 'Χωρίς σύνδεση. Θα ξαναδοκιμάσουμε αργότερα.',
   },
   stats: {
+    prev: "Προηγούμενο",
+    next: "Επόμενο",
     title: 'Στατιστικά',
     day: 'Ημέρα',
     week: 'Εβδομάδα',
@@ -268,6 +279,8 @@ const el: Translation = {
     defaultHint: "Χρησιμοποιείται στα νέα έξοδα της ομάδας. Αλλάζει σε κάθε έξοδο.",
   },
   gx: {
+    badDate: "Γράψε την ημερομηνία έτσι: 2026-11-15 ή 15/11/2026.",
+    recurringDeleteConfirm: "Διαγραφή του πάγιου εξόδου «{name}»;",
     type: "Τύπος ομάδας",
     currency: "Νόμισμα ομάδας",
     budgetTrip: "Προϋπολογισμός ταξιδιού",
@@ -311,6 +324,7 @@ const el: Translation = {
     subsMonthly: "{amount}/μήνα",
   },
   history: {
+    more: "Δες περισσότερα",
     title: "Όλα τα έξοδα",
     search: "Αναζήτηση καταστήματος, σημείωσης ή κατηγορίας",
     all: "Όλες",
@@ -428,6 +442,7 @@ const el: Translation = {
     noInfo: "Ο/Η {name} δεν έχει προσθέσει ακόμα πώς πληρώνεται. Ζήτα να το προσθέσει στις Ρυθμίσεις → Πώς σε πληρώνουν.",
   },
   plink: {
+    verify: "Πριν πληρώσεις, έλεγξε με τον/την {name} ότι αυτά τα στοιχεία είναι δικά του/της.",
     owe: "Χρωστάς στον/στην {name}",
     group: "Από την ομάδα «{group}»",
     why: "Γιατί",
@@ -579,7 +594,7 @@ const el: Translation = {
   ants: {
     title: "Μικροέξοδα",
     hint: "Μικρά έξοδα που επαναλαμβάνονται. Μόνα τους τίποτα· μαζί πολλά.",
-    line: "{count} φορές · {monthly} τον μήνα · {yearly} τον χρόνο",
+    line: { one: "{count} φορά · {monthly} τον μήνα · {yearly} τον χρόνο", other: "{count} φορές · {monthly} τον μήνα · {yearly} τον χρόνο" },
   },
   heat: {
     title: "Χάρτης του μήνα",

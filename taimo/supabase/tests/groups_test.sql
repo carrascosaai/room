@@ -97,5 +97,36 @@ select (public.taimo_sync(:'code', '[]', '[]',
   -> 'settlements') @> '[{"id":"p1","to":"__pot__"}]' as pot_ok \gset
 \if :pot_ok \else \echo 'FALLO aportación al bote' \quit \endif
 
+-- v4: una fecha en el futuro (2099) se recorta a "ahora + 5 min" y no congela la fila.
+select (public.taimo_sync(:'code', '[]',
+  '[{"id":"e-fut","amount":100,"merchant":"futuro","category":"otros","date":"2026-10-05T10:00:00Z",
+     "paidBy":"m-ana","shares":{},"source":"manual","deleted":false,"updatedAt":"2099-01-01T00:00:00Z"}]')
+  -> 'expenses') @> '[{"id":"e-fut"}]' as fut_insertado \gset
+\if :fut_insertado \else \echo 'FALLO gasto con fecha futura' \quit \endif
+select (select (e ->> 'updatedAt')::timestamptz <= now() + interval '5 minutes'
+        from jsonb_array_elements(public.taimo_join(:'code') -> 'expenses') e where e ->> 'id' = 'e-fut') as fut_recortado \gset
+\if :fut_recortado \else \echo 'FALLO fecha futura no recortada' \quit \endif
+select public.taimo_sync(:'code', '[]', '[]', '[]',
+  '{"name":"congelado","emoji":"x","kind":"flat","currency":"USD","meta":{},"updatedAt":"2099-01-01T00:00:00Z"}') is not null;
+select (public.taimo_join(:'code') -> 'group' ->> 'updatedAt')::timestamptz <= now() + interval '5 minutes' as meta_recortado \gset
+\if :meta_recortado \else \echo 'FALLO fecha futura de ajustes no recortada' \quit \endif
+
+-- v4: datos de cobro de un miembro reclamado: una fila "no reclamada" no los cambia; campos raros fuera.
+select public.taimo_sync(:'code',
+  '[{"id":"m-luis","name":"Luis","claimed":false,"updatedAt":"2026-10-06T00:00:00Z","pay":{"bizum":"666000666"}}]') is not null;
+select (public.taimo_join(:'code') -> 'members') @> '[{"id":"m-luis","pay":{"bizum":"666000666"}}]' = false as pay_protegido \gset
+\if :pay_protegido \else \echo 'FALLO pay de miembro reclamado sobrescrito' \quit \endif
+select (select m -> 'pay' from jsonb_array_elements(public.taimo_sync(:'code',
+  '[{"id":"m-new","name":"Eva","claimed":false,"updatedAt":"2026-10-06T00:00:00Z","pay":{"bizum":"600","evil":"x","iban":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}}]')
+  -> 'members') m where m ->> 'id' = 'm-new') = '{"bizum":"600"}'::jsonb as pay_limpio \gset
+\if :pay_limpio \else \echo 'FALLO limpieza de datos de cobro' \quit \endif
+
+-- v4: ids demasiado largos se ignoran.
+select jsonb_array_length(public.taimo_sync(:'code', '[]',
+  format('[{"id":"%s","amount":1,"merchant":"x","category":"otros","date":"2026-10-05T10:00:00Z","paidBy":"m-ana","shares":{},"source":"manual","deleted":false,"updatedAt":"2026-10-05T10:00:00Z"}]', repeat('x', 65))::jsonb)
+  -> 'expenses') = (select count(*) from jsonb_array_elements(public.taimo_join(:'code') -> 'expenses') e
+                     where char_length(e ->> 'id') <= 64) as id_largo \gset
+\if :id_largo \else \echo 'FALLO id demasiado largo aceptado' \quit \endif
+
 \echo 'OK: todas las pruebas de grupos pasan'
 rollback;

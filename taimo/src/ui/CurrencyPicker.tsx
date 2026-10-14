@@ -21,8 +21,10 @@ export function CurrencyButton({ value, onPress }: { value: string; onPress: () 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={`${value} ▾`}
       onPress={onPress}
       style={{
+        minHeight: 44,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
@@ -88,14 +90,20 @@ export function CurrencyPicker({
         <View style={{ padding: space.lg, gap: space.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700' }}>{t('fx.choose')}</Text>
-            <Pressable onPress={onClose} hitSlop={12}>
-              <Text style={{ color: colors.primary, fontSize: 16 }}>{t('common.cancel')}</Text>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel')}
+              style={{ minHeight: 44, minWidth: 44, justifyContent: 'center', paddingHorizontal: space.sm }}
+            >
+              <Text style={{ color: colors.primary, fontSize: 17 }}>{t('common.cancel')}</Text>
             </Pressable>
           </View>
           <TextInput
             value={query}
             onChangeText={setQuery}
             placeholder={t('fx.search')}
+            accessibilityLabel={t('fx.search')}
             placeholderTextColor={colors.textFaint}
             autoCorrect={false}
             style={{
@@ -117,12 +125,14 @@ export function CurrencyPicker({
           contentContainerStyle={{ paddingHorizontal: space.lg, paddingBottom: 40 }}
           renderItem={({ item }) =>
             item.type === 'header' ? (
-              <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: space.md, marginBottom: space.xs, textTransform: 'uppercase' }}>
+              <Text style={{ color: colors.textMuted, fontSize: 15, marginTop: space.md, marginBottom: space.xs, textTransform: 'uppercase' }}>
                 {item.title}
               </Text>
             ) : (
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel={`${item.code}, ${currencyName(item.code)}`}
+                accessibilityState={{ selected: value === item.code }}
                 onPress={() => {
                   dispatch({ type: 'useCurrency', currency: item.code });
                   onSelect(item.code);

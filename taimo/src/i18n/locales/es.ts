@@ -2,6 +2,7 @@ import type { Translation } from '../core';
 
 const es: Translation = {
   common: {
+    backHome: "Volver al inicio",
     cancel: 'Cancelar',
     save: 'Guardar',
     delete: 'Borrar',
@@ -61,11 +62,13 @@ const es: Translation = {
     restoreConfirm: '¿Cambiar los datos de este móvil por los de tu copia?',
   },
   home: {
+    spentThisMonth: "Gastado este mes",
+    setBudget: "Poner un presupuesto al mes",
     hello: 'Hola, {name} 👋',
     helloAnon: 'Hola de nuevo 👋',
     leftThisMonth: 'Te queda este mes de {month}',
     spentOf: 'Gastado {spent} de {budget}',
-    perDay: 'Puedes gastar {amount} al día durante los {days} días que quedan.',
+    perDay: { one: "Te queda {count} día: puedes gastar {amount} al día.", other: "Te quedan {count} días: puedes gastar {amount} al día." },
     overLimit: 'Has llegado a tu límite del mes. ¡Aguanta, que queda poco! 💪',
     autoTitle: 'Activa el registro automático',
     autoText: 'Paga con Apple Pay y Taimo lo apunta solo. Se configura en 1 minuto.',
@@ -78,6 +81,8 @@ const es: Translation = {
     add: 'Añadir gasto',
   },
   add: {
+    needPayer: "Elige quién ha pagado.",
+    needPeople: "Elige entre quién se reparte.",
     newTitle: 'Nuevo gasto',
     editTitle: 'Editar gasto',
     amount: 'Importe',
@@ -140,6 +145,8 @@ const es: Translation = {
     androidHint: 'En la pantalla de Ajustes que se abre, busca «Taimo» y actívalo.',
   },
   groups: {
+    needName: "Ponle un nombre al grupo.",
+    needMembers: "Escribe al menos a otra persona. Separa los nombres con comas: Ana, Luis",
     title: 'Grupos',
     intro: 'Comparte gastos con tu pareja, tu piso o tus amigos. A tu presupuesto solo cuenta tu parte, y Taimo calcula quién debe a quién.',
     settled: 'Al día ✓',
@@ -156,6 +163,8 @@ const es: Translation = {
     joinButton: 'Unirme con un código',
   },
   group: {
+    markPaidConfirm: "¿Marcar como pagado? {from} → {to}: {amount}",
+    markPaidOk: "Marcar como pagado",
     missing: 'Este grupo ya no existe.',
     total: 'Gastado en total en el grupo',
     settled: 'al día',
@@ -183,6 +192,7 @@ const es: Translation = {
     deleteConfirm: '¿Borrar el grupo? Sus gastos se quedarán como gastos tuyos.',
   },
   join: {
+    joinAs: "Unirme como {name}",
     title: 'Unirme a un grupo',
     text: 'Pega el enlace o el código que te han enviado.',
     placeholder: 'Código de 16 caracteres',
@@ -200,6 +210,8 @@ const es: Translation = {
     offline: 'Sin conexión. Lo intentaremos más tarde.',
   },
   stats: {
+    prev: "Anterior",
+    next: "Siguiente",
     title: 'Estadísticas',
     day: 'Día',
     week: 'Semana',
@@ -292,6 +304,8 @@ const es: Translation = {
     defaultHint: "Se usa en los gastos nuevos del grupo. Puedes cambiarlo en cada gasto.",
   },
   gx: {
+    badDate: "Escribe la fecha así: 2026-11-15 o 15/11/2026.",
+    recurringDeleteConfirm: "¿Borrar el gasto fijo «{name}»?",
     type: "Tipo de grupo",
     currency: "Moneda del grupo",
     budgetTrip: "Presupuesto del viaje",
@@ -335,6 +349,7 @@ const es: Translation = {
     subsMonthly: "{amount}/mes",
   },
   history: {
+    more: "Ver más",
     title: "Todos los gastos",
     search: "Busca comercio, nota o categoría",
     all: "Todas",
@@ -452,6 +467,7 @@ const es: Translation = {
     noInfo: "{name} aún no ha puesto cómo cobrar. Pídele que lo añada en Ajustes → Cómo te pagan.",
   },
   plink: {
+    verify: "Comprueba con {name} que estos datos son suyos antes de pagar.",
     owe: "Le debes a {name}",
     group: "Del grupo «{group}»",
     why: "Por qué",
@@ -603,7 +619,7 @@ const es: Translation = {
   ants: {
     title: "Gastos hormiga",
     hint: "Pequeños gastos que se repiten. Sueltos no parecen nada; juntos, sí.",
-    line: "{count} veces · {monthly} al mes · {yearly} al año",
+    line: { one: "{count} vez · {monthly} al mes · {yearly} al año", other: "{count} veces · {monthly} al mes · {yearly} al año" },
   },
   heat: {
     title: "Mapa del mes",

@@ -1,18 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 
 import { downloadBackup, type SignedIn } from '@/auth/auth';
 import { CATEGORIES } from '@/domain/categories';
 import { parseAmount } from '@/domain/money';
 import type { AppState, CategoryId } from '@/domain/types';
-import { CURRENCIES, deviceCurrency, LANGUAGES, useI18n, type CurrencyCode } from '@/i18n';
+import { rateBetween } from '@/fx/fx';
+import { deviceCurrency, LANGUAGES, useI18n, type CurrencyCode } from '@/i18n';
 import { useStore } from '@/store/store';
 import { AuthButtons } from '@/ui/AuthButtons';
-import { Button, Card, CategoryBadge, Chip, Input, Muted, Row, Screen, Title } from '@/ui/components';
+import { Button, Card, CategoryBadge, Input, Muted, Row, Screen, Title } from '@/ui/components';
+import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
 import { colors, radius, space } from '@/ui/theme';
 
-// Valores de partida (en la moneda elegida); se pueden cambiar.
+// Valores de partida en euros; se pasan a la moneda elegida y se pueden cambiar.
 const SUGGESTED: Partial<Record<CategoryId, number>> = {
   super: 200,
   comer: 100,
@@ -22,6 +24,19 @@ const SUGGESTED: Partial<Record<CategoryId, number>> = {
   suscripciones: 25,
   compras: 60,
 };
+
+/**
+ * Sugerencia en la moneda elegida: el importe en euros convertido con los tipos
+ * de cambio guardados y redondeado a 2 cifras (200 € -> 32 000 ¥, 220 $…).
+ * Si no hay tipo de cambio para esa moneda, se deja en blanco.
+ */
+function suggestedFor(category: CategoryId, currency: string): string {
+  const eur = SUGGESTED[category];
+  if (!eur) return '';
+  const rate = rateBetween('EUR', currency);
+  if (!rate) return '';
+  return String(Number((eur * rate).toPrecision(2)));
+}
 
 function LanguageChip() {
   const { lang } = useI18n();
@@ -52,13 +67,21 @@ function LanguageChip() {
 
 export default function Onboarding() {
   const { dispatch } = useStore();
-  const { t, locale } = useI18n();
+  const { t, locale, currencyName } = useI18n();
   const [step, setStep] = useState<'welcome' | 'account' | 'name' | 'budget'>('welcome');
   const [name, setName] = useState('');
   const [currency, setCurrency] = useState<CurrencyCode>(deviceCurrency());
-  const [values, setValues] = useState<Record<string, string>>(
-    Object.fromEntries(CATEGORIES.map((c) => [c.id, SUGGESTED[c.id] ? String(SUGGESTED[c.id]) : ''])),
+  const [picking, setPicking] = useState(false);
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(CATEGORIES.map((c) => [c.id, suggestedFor(c.id, currency)])),
   );
+  // Los importes que la persona ya ha cambiado no se tocan al cambiar de moneda.
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  function changeCurrency(code: CurrencyCode) {
+    setCurrency(code);
+    setValues((prev) => Object.fromEntries(CATEGORIES.map((c) => [c.id, touched[c.id] ? prev[c.id] : suggestedFor(c.id, code)])));
+  }
 
   const budgets: AppState['budgets'] = {};
   for (const c of CATEGORIES) {
@@ -82,9 +105,10 @@ export default function Onboarding() {
 
   if (step === 'welcome') {
     return (
-      <Screen scroll={false}>
+      <Screen>
         <LanguageChip />
-        <View style={{ minHeight: 600, justifyContent: 'center', gap: space.xl }}>
+        {/* Con scroll: con letra grande el botón nunca queda fuera de la pantalla. */}
+        <View style={{ justifyContent: 'center', gap: space.xl, paddingTop: space.xl }}>
           <Image source={require('../../assets/splash-icon.png')} style={{ width: 96, height: 96, alignSelf: 'center' }} accessibilityLabel="Taimo" />
           <Title>{t('onboarding.welcomeTitle')}</Title>
           <Text style={{ color: colors.textMuted, fontSize: 17, lineHeight: 24 }}>{t('onboarding.welcomeText')}</Text>
@@ -108,6 +132,7 @@ export default function Onboarding() {
           <Muted style={{ fontSize: 16, lineHeight: 22 }}>{t('auth.text')}</Muted>
           <AuthButtons onSignedIn={afterSignIn} />
           <Button label={t('auth.skip')} variant="ghost" onPress={() => setStep('name')} />
+          <Button label={t('common.back')} variant="ghost" onPress={() => setStep('welcome')} />
         </View>
       </Screen>
     );
@@ -119,6 +144,7 @@ export default function Onboarding() {
         <Title>{t('onboarding.nameTitle')}</Title>
         <Input placeholder={t('onboarding.namePlaceholder')} value={name} onChangeText={setName} autoFocus autoCapitalize="words" />
         <Button label={t('common.continue')} disabled={!name.trim()} onPress={() => setStep('budget')} />
+        <Button label={t('common.back')} variant="ghost" onPress={() => setStep('account')} />
       </Screen>
     );
   }
@@ -129,11 +155,10 @@ export default function Onboarding() {
       <Muted>{t('onboarding.budgetText')}</Muted>
       <View style={{ gap: space.sm }}>
         <Muted>{t('onboarding.currency')}</Muted>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
-          {CURRENCIES.map((c) => (
-            <Chip key={c} label={c} selected={currency === c} onPress={() => setCurrency(c)} />
-          ))}
-        </ScrollView>
+        <Row>
+          <CurrencyButton value={currency} onPress={() => setPicking(true)} />
+          <Muted style={{ flex: 1 }}>{currencyName(currency)}</Muted>
+        </Row>
       </View>
       <Card>
         {CATEGORIES.map((c) => (
@@ -143,13 +168,17 @@ export default function Onboarding() {
             <View style={{ width: 110 }}>
               <Input
                 value={values[c.id]}
-                onChangeText={(v) => setValues((prev) => ({ ...prev, [c.id]: v }))}
+                onChangeText={(v) => {
+                  setValues((prev) => ({ ...prev, [c.id]: v }));
+                  setTouched((prev) => ({ ...prev, [c.id]: true }));
+                }}
+                accessibilityLabel={`${t(`cat.${c.id}`)} (${currency})`}
                 keyboardType="decimal-pad"
                 placeholder="—"
                 style={{ textAlign: 'right', paddingVertical: 10 }}
               />
             </View>
-            <Muted style={{ width: 34 }}>{currency}</Muted>
+            <Muted style={{ width: 40 }}>{currency}</Muted>
           </Row>
         ))}
       </Card>
@@ -161,6 +190,8 @@ export default function Onboarding() {
           router.replace('/');
         }}
       />
+      <Button label={t('common.back')} variant="ghost" onPress={() => setStep('name')} />
+      <CurrencyPicker visible={picking} value={currency} onClose={() => setPicking(false)} onSelect={changeCurrency} />
     </Screen>
   );
 }

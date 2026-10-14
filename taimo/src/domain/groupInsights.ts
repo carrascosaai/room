@@ -70,6 +70,8 @@ export function groupBudgetPlan(group: Group, expenses: Expense[], today = new D
     const start = group.trip?.start ? new Date(`${group.trip.start}T00:00:00`) : null;
     const from = start && start > today ? start : today;
     daysLeft = end ? Math.max(1, Math.ceil((end.getTime() - from.getTime()) / DAY)) : 1;
+    // Fecha mal guardada (de versiones antiguas): como si no hubiera fecha de fin.
+    if (!Number.isFinite(daysLeft)) daysLeft = 1;
   } else {
     const key = monthKey(today);
     spent = mine.filter((e) => monthKey(e.date) === key).reduce((s, e) => s + e.amount, 0);
@@ -84,7 +86,8 @@ export function groupBudgetPlan(group: Group, expenses: Expense[], today = new D
 /** Días de viaje (incluidos ida y vuelta), o null si no hay fechas. */
 export function tripDays(group: Group): number | null {
   if (!group.trip?.start || !group.trip?.end) return null;
-  return Math.round((new Date(group.trip.end).getTime() - new Date(group.trip.start).getTime()) / DAY) + 1;
+  const days = Math.round((new Date(group.trip.end).getTime() - new Date(group.trip.start).getTime()) / DAY) + 1;
+  return Number.isFinite(days) ? days : null;
 }
 
 /** Id fijo por gasto fijo y mes: así dos móviles no crean el mismo gasto dos veces. */
@@ -103,7 +106,8 @@ export function dueRecurring(
   split: (amount: Cents) => Record<string, Cents>,
 ): Expense[] {
   const month = monthKey(today);
-  const existing = new Set(expenses.map((e) => e.id));
+  // Los que ya existen y los que se borraron a mano (no se vuelven a crear).
+  const existing = new Set([...expenses.map((e) => e.id), ...(group.recurringSkipped ?? [])]);
   const out: Expense[] = [];
   for (const r of group.recurring ?? []) {
     if (today.getDate() < r.day) continue;
@@ -125,4 +129,18 @@ export function dueRecurring(
     });
   }
   return out;
+}
+
+/** Si `id` es el de un gasto fijo mensual creado solo (`fijo-<r>-<YYYY-MM>`). */
+export function isRecurringInstanceId(id: string): boolean {
+  return /^fijo-.+-\d{4}-\d{2}$/.test(id);
+}
+
+/** Máximo de borrados de fijos que se recuerdan por grupo (viaja en los ajustes del grupo). */
+export const MAX_RECURRING_SKIPPED = 200;
+
+/** Añade `id` a los fijos saltados del grupo (sin repetir y con tope). */
+export function withRecurringSkipped(group: Group, id: string): string[] {
+  const list = group.recurringSkipped ?? [];
+  return list.includes(id) ? list : [...list, id].slice(-MAX_RECURRING_SKIPPED);
 }

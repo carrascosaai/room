@@ -80,7 +80,7 @@ export default function History() {
         </View>
       ))}
 
-      {filtered.length > limit ? <Button label="…" variant="secondary" onPress={() => setLimit((l) => l + PAGE)} /> : null}
+      {filtered.length > limit ? <Button label={t('history.more')} variant="secondary" onPress={() => setLimit((l) => l + PAGE)} /> : null}
     </Screen>
   );
 }

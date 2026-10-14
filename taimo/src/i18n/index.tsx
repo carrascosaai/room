@@ -109,7 +109,12 @@ export function makeI18n(lang: LanguageCode, currency: CurrencyCode): I18n {
       return english.get(code) ?? code;
     },
     number: (n, digits = 4) => new Intl.NumberFormat(locale, { maximumSignificantDigits: digits }).format(n),
-    date: (d, opts) => new Intl.DateTimeFormat(locale, opts).format(typeof d === 'string' ? new Date(d) : d),
+    date: (d, opts) => {
+      const value = typeof d === 'string' ? new Date(d) : d;
+      // Fecha mal escrita o corrupta: mejor nada que romper la pantalla.
+      if (!(value instanceof Date) || Number.isNaN(value.getTime())) return '';
+      return new Intl.DateTimeFormat(locale, opts).format(value);
+    },
   };
 }
 

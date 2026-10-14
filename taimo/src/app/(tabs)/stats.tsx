@@ -119,7 +119,7 @@ function BarChart({ buckets, selected, onSelect }: { buckets: Bucket[]; selected
       </View>
       <View style={{ height: 1, backgroundColor: colors.border }} />
       {/* Etiquetas colocadas en su columna pero sin recortarse aunque las barras sean finas. */}
-      <View style={{ height: 14 }}>
+      <View style={{ height: 18 }}>
         {buckets.map((b, i) => {
           const label = axisLabel(i18n, b, i, buckets.length);
           if (!label) return null;
@@ -131,8 +131,8 @@ function BarChart({ buckets, selected, onSelect }: { buckets: Bucket[]; selected
                 left: `${((i + 0.5) / buckets.length) * 100}%`,
                 width: 40,
                 marginLeft: -20,
-                color: i === selected ? colors.text : colors.textFaint,
-                fontSize: 10,
+                color: i === selected ? colors.text : colors.textMuted,
+                fontSize: 12,
                 textAlign: 'center',
                 fontWeight: i === selected ? '700' : '400',
               }}
@@ -167,6 +167,8 @@ export default function Stats() {
         ? null
         : t('stats.avgPerDay', { amount: money(Math.round(stats.total / stats.days)) });
 
+  const periodLabel = PERIODS.find((p) => p.id === period)!.label;
+
   function go(steps: number) {
     setAnchor((a) => shiftAnchor(period, a, steps));
     setPicked(null);
@@ -190,9 +192,9 @@ export default function Stats() {
                 setAnchor(new Date());
                 setPicked(null);
               }}
-              style={{ flex: 1, paddingVertical: 8, borderRadius: radius.pill, backgroundColor: on ? colors.primary : 'transparent' }}
+              style={{ flex: 1, minHeight: 44, justifyContent: 'center', paddingVertical: 8, borderRadius: radius.pill, backgroundColor: on ? colors.primary : 'transparent' }}
             >
-              <Text numberOfLines={1} style={{ textAlign: 'center', fontSize: 13, fontWeight: '600', color: on ? colors.onPrimary : colors.textMuted }}>
+              <Text numberOfLines={1} adjustsFontSizeToFit style={{ textAlign: 'center', fontSize: 15, fontWeight: '600', color: on ? colors.onPrimary : colors.textMuted }}>
                 {t(p.label)}
               </Text>
             </Pressable>
@@ -202,11 +204,23 @@ export default function Stats() {
 
       {period !== 'all' ? (
         <Row style={{ justifyContent: 'space-between' }}>
-          <Pressable onPress={() => go(-1)} hitSlop={14} accessibilityLabel="‹">
+          <Pressable
+            onPress={() => go(-1)}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('stats.prev')} (${t(periodLabel)})`}
+            style={{ minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' }}
+          >
             <Text style={{ color: colors.primary, fontSize: 28 }}>‹</Text>
           </Pressable>
-          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>{periodTitle(i18n, period, stats.range.start)}</Text>
-          <Pressable onPress={() => !isCurrent && go(1)} hitSlop={14} disabled={isCurrent} accessibilityLabel="›">
+          <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600', flex: 1, textAlign: 'center' }}>{periodTitle(i18n, period, stats.range.start)}</Text>
+          <Pressable
+            onPress={() => !isCurrent && go(1)}
+            disabled={isCurrent}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isCurrent }}
+            accessibilityLabel={`${t('stats.next')} (${t(periodLabel)})`}
+            style={{ minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' }}
+          >
             <Text style={{ color: isCurrent ? colors.textFaint : colors.primary, fontSize: 28 }}>›</Text>
           </Pressable>
         </Row>
@@ -216,7 +230,7 @@ export default function Stats() {
         <Muted>{t('stats.total')}</Muted>
         <Text style={{ color: colors.text, fontSize: 36, fontWeight: '800' }}>{money(stats.total)}</Text>
         {period !== 'all' ? (
-          <Text style={{ color: change === null ? colors.textMuted : change > 0 ? colors.warning : colors.success, fontSize: 14 }}>
+          <Text style={{ color: change === null ? colors.textMuted : change > 0 ? colors.warning : colors.success, fontSize: 15 }}>
             {change === null
               ? t('stats.noPrevious')
               : t('ins.vsRange', { change: `${change > 0 ? '▲ +' : '▼ '}${change}%`, range: rangeLabel(i18n, period, stats.previousRange!, stats.partial) })}
@@ -239,7 +253,7 @@ export default function Stats() {
               <Text style={{ color: colors.text, fontWeight: '700' }}>{sel ? money(sel.total) : ''}</Text>
             </View>
             <BarChart buckets={stats.buckets} selected={selected} onSelect={setPicked} />
-            <Muted style={{ fontSize: 11, textAlign: 'center' }}>{t('stats.tapBar')}</Muted>
+            <Muted style={{ textAlign: 'center' }}>{t('stats.tapBar')}</Muted>
           </>
         ) : (
           <Empty emoji="📭" text={t('stats.empty')} />

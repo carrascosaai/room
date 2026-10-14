@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ActivityIndicator, AppState as RNAppState, Platform, Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
@@ -74,48 +75,54 @@ function RootStack() {
     );
   }
   return (
-    <LockGate>
+    <>
+      {/* Las tareas de fondo siguen aunque la app esté bloqueada (no enseñan nada). */}
       <BackgroundWork />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.bg },
-          headerStyle: { backgroundColor: colors.bg },
-          headerTintColor: colors.text,
-        }}
-      >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="add" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="join" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="pay" />
-        <Stack.Screen name="language" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="settings" options={{ headerShown: true, title: t('settings.title') }} />
-        <Stack.Screen name="wishlist" options={{ headerShown: true, title: t('wish.title') }} />
-        <Stack.Screen name="assistant" options={{ headerShown: true, title: t('asst.title') }} />
-        <Stack.Screen name="challenges" options={{ headerShown: true, title: t('ch.title') }} />
-        <Stack.Screen name="recap" options={{ headerShown: true, title: '' }} />
-        <Stack.Screen name="goals" options={{ headerShown: true, title: t('goal.title') }} />
-        <Stack.Screen name="history" options={{ headerShown: true, title: t('history.title') }} />
-        <Stack.Screen name="converter" options={{ headerShown: true, title: t('fx.title') }} />
-        <Stack.Screen name="group/new" options={{ headerShown: true, title: t('groups.newGroup') }} />
-        <Stack.Screen name="automation" options={{ headerShown: true, title: t('automation.screenTitle') }} />
-        <Stack.Screen name="group/[id]" options={{ headerShown: true, title: '' }} />
-      </Stack>
-    </LockGate>
+      <LockGate>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.bg },
+            headerStyle: { backgroundColor: colors.bg },
+            headerTintColor: colors.text,
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="add" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="join" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="pay" />
+          <Stack.Screen name="language" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="settings" options={{ headerShown: true, title: t('settings.title') }} />
+          <Stack.Screen name="wishlist" options={{ headerShown: true, title: t('wish.title') }} />
+          <Stack.Screen name="assistant" options={{ headerShown: true, title: t('asst.title') }} />
+          <Stack.Screen name="challenges" options={{ headerShown: true, title: t('ch.title') }} />
+          <Stack.Screen name="recap" options={{ headerShown: true, title: '' }} />
+          <Stack.Screen name="goals" options={{ headerShown: true, title: t('goal.title') }} />
+          <Stack.Screen name="history" options={{ headerShown: true, title: t('history.title') }} />
+          <Stack.Screen name="converter" options={{ headerShown: true, title: t('fx.title') }} />
+          <Stack.Screen name="group/new" options={{ headerShown: true, title: t('groups.newGroup') }} />
+          <Stack.Screen name="automation" options={{ headerShown: true, title: t('automation.screenTitle') }} />
+          <Stack.Screen name="group/[id]" options={{ headerShown: true, title: '' }} />
+        </Stack>
+      </LockGate>
+    </>
   );
 }
 
 /**
  * Bloqueo con Face ID / huella / código: al abrir la app y al volver tras más
- * de un minuto fuera. Tapa todo hasta que se desbloquea.
+ * de un minuto fuera. Mientras está bloqueada no se monta la navegación (así
+ * ninguna pantalla modal nativa puede quedar por encima del bloqueo), y al
+ * salir de la app se tapa el contenido para que no se vea en el selector de apps.
  */
 function LockGate({ children }: { children: ReactNode }) {
   const { state } = useStore();
   const { t } = useI18n();
   const enabled = !!state.profile.lock && Platform.OS !== 'web';
   const [locked, setLocked] = useState(enabled);
+  const [covered, setCovered] = useState(false);
   const leftAt = useRef<number | null>(null);
   const tryUnlock = useCallback(async () => {
     if (await unlock(t('lock.reason'))) setLocked(false);
@@ -128,33 +135,52 @@ function LockGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!enabled) {
       setLocked(false);
+      setCovered(false);
       return;
     }
     const sub = RNAppState.addEventListener('change', (s) => {
+      // «inactive» también llega con el aviso de Face ID: solo tapamos, no bloqueamos.
+      if (s !== 'active') setCovered(true);
       if (s === 'background') leftAt.current = Date.now();
-      if (s === 'active' && leftAt.current && Date.now() - leftAt.current > 60_000) {
+      if (s === 'active') {
+        setCovered(false);
+        if (leftAt.current && Date.now() - leftAt.current > 60_000) {
+          setLocked(true);
+          tryUnlock();
+        }
         leftAt.current = null;
-        setLocked(true);
-        tryUnlock();
       }
     });
     return () => sub.remove();
   }, [enabled, tryUnlock]);
 
+  // Sin navegación montada, la pantalla de carga no se quita sola.
+  useEffect(() => {
+    if (enabled && locked) SplashScreen.hideAsync().catch(() => {});
+  }, [enabled, locked]);
+
+  if (enabled && locked) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 }}>
+        <Text style={{ fontSize: 48 }}>🔒</Text>
+        <Text style={{ color: colors.text, fontSize: 20, fontWeight: '700' }}>{t('lock.locked')}</Text>
+        <Pressable
+          onPress={tryUnlock}
+          accessibilityRole="button"
+          style={{ backgroundColor: colors.primary, borderRadius: 999, paddingHorizontal: 28, paddingVertical: 14 }}
+        >
+          <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 16 }}>{t('lock.unlock')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <>
       {children}
-      {enabled && locked ? (
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 }]}>
+      {enabled && covered ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }]}>
           <Text style={{ fontSize: 48 }}>🔒</Text>
-          <Text style={{ color: colors.text, fontSize: 20, fontWeight: '700' }}>{t('lock.locked')}</Text>
-          <Pressable
-            onPress={tryUnlock}
-            accessibilityRole="button"
-            style={{ backgroundColor: colors.primary, borderRadius: 999, paddingHorizontal: 28, paddingVertical: 14 }}
-          >
-            <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 16 }}>{t('lock.unlock')}</Text>
-          </Pressable>
         </View>
       ) : null}
     </>

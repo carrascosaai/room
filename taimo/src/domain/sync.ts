@@ -34,7 +34,15 @@ export interface RemoteGroupMeta {
   emoji: string;
   kind: GroupKind | null;
   currency: string | null;
-  meta: { weights?: Record<string, number>; budget?: Cents; trip?: Group['trip']; recurring?: Recurring[]; pot?: boolean };
+  meta: {
+    weights?: Record<string, number>;
+    budget?: Cents;
+    trip?: Group['trip'];
+    recurring?: Recurring[];
+    pot?: boolean;
+    /** Gastos fijos de un mes borrados a mano (no se vuelven a crear). */
+    recurringSkipped?: string[];
+  };
   updatedAt: string;
 }
 
@@ -70,7 +78,14 @@ export function groupMeta(g: Group): RemoteGroupMeta {
     emoji: g.emoji,
     kind: g.kind ?? null,
     currency: g.currency ?? null,
-    meta: { weights: g.weights, budget: g.budget, trip: g.trip, recurring: g.recurring, pot: g.pot },
+    meta: {
+      weights: g.weights,
+      budget: g.budget,
+      trip: g.trip,
+      recurring: g.recurring,
+      pot: g.pot,
+      ...(g.recurringSkipped?.length ? { recurringSkipped: g.recurringSkipped } : {}),
+    },
     updatedAt: g.updatedAt ?? g.createdAt,
   };
 }
@@ -86,8 +101,15 @@ function metaFromSnapshot(sg: GroupSnapshot['group']): Partial<Group> {
     trip: sg.meta?.trip,
     recurring: sg.meta?.recurring,
     pot: sg.meta?.pot,
+    ...(Array.isArray(sg.meta?.recurringSkipped) ? { recurringSkipped: sg.meta.recurringSkipped.filter((x) => typeof x === 'string') } : {}),
     updatedAt: sg.updatedAt,
   };
+}
+
+function mergedSkipped(local: Group, sg: GroupSnapshot['group']): Pick<Group, 'recurringSkipped'> {
+  const remote = Array.isArray(sg.meta?.recurringSkipped) ? sg.meta.recurringSkipped.filter((x) => typeof x === 'string') : [];
+  const all = [...new Set([...(local.recurringSkipped ?? []), ...remote])];
+  return all.length ? { recurringSkipped: all.slice(-200) } : {};
 }
 
 /** Lo que este móvil envía al servidor para un grupo (incluidos los borrados pendientes). */
@@ -128,7 +150,15 @@ export function buildPush(state: AppState, groupId: string): GroupPush {
     .filter((s) => s.groupId === groupId)
     .map((s) => ({ id: s.id, from: s.from, to: s.to, amount: s.amount, date: s.date, updatedAt: s.updatedAt ?? s.date, deleted: false }));
 
+  // Nunca mandamos el mismo id vivo y borrado a la vez (el servidor no sabría cuál aplicar).
+  const liveExpenses = new Set(expenses.map((e) => e.id));
+  const liveSettlements = new Set(settlements.map((s) => s.id));
+  const sentTombstones = new Set<string>();
   for (const t of state.tombstones.filter((x) => x.groupId === groupId)) {
+    if ((t.kind === 'expense' ? liveExpenses : liveSettlements).has(t.id)) continue;
+    const key = `${t.kind}:${t.id}`;
+    if (sentTombstones.has(key)) continue;
+    sentTombstones.add(key);
     const base = { id: t.id, amount: 0, date: t.deletedAt, updatedAt: t.deletedAt, deleted: true };
     if (t.kind === 'expense') {
       expenses.push({ ...base, merchant: '', category: 'otros', paidBy: '', shares: {}, note: null, source: 'manual' });
@@ -235,6 +265,8 @@ export function applySnapshot(
             ...(newer(g.updatedAt, syncStartedAt)
               ? {}
               : { name: snapshot.group.name, emoji: snapshot.group.emoji, ...metaFromSnapshot(snapshot.group) }),
+            // Los fijos borrados se suman siempre (de aquí y de los demás), para que no reaparezcan.
+            ...mergedSkipped(g, snapshot.group),
             members,
             remote: { code: snapshot.group.code, lastSyncAt: now },
           }

@@ -53,6 +53,8 @@ export function ExpenseRow({
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${expense.merchant}, ${main}, ${i18n.t(`cat.${expense.category}`)}`}
       onPress={() => router.push({ pathname: '/add', params: { id: expense.id } })}
       style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: space.md, opacity: pressed ? 0.7 : 1 })}
     >

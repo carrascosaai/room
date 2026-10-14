@@ -94,7 +94,7 @@ export default function Challenges() {
               }}
             >
               <Text style={{ fontSize: 28 }}>{on ? a.emoji : '🔒'}</Text>
-              <Text style={{ color: colors.text, fontSize: 12, textAlign: 'center' }} numberOfLines={2}>
+              <Text style={{ color: colors.text, fontSize: 15, textAlign: 'center' }} numberOfLines={3}>
                 {t(`ach.${a.id}`)}
               </Text>
             </View>

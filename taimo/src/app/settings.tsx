@@ -83,17 +83,27 @@ export default function Settings() {
 
   async function restoreFile() {
     setBackupMessage(null);
-    const picked = await DocumentPicker.getDocumentAsync({ type: ['application/json', '*/*'], copyToCacheDirectory: true });
-    if (picked.canceled) return;
-    const asset = picked.assets[0];
-    const text = Platform.OS === 'web' ? await (await fetch(asset.uri)).text() : await new File(asset.uri).text();
-    const backup = readBackup(text);
+    let backup: ReturnType<typeof readBackup> = null;
+    try {
+      const picked = await DocumentPicker.getDocumentAsync({ type: ['application/json', '*/*'], copyToCacheDirectory: true });
+      if (picked.canceled) return;
+      const asset = picked.assets[0];
+      const text = Platform.OS === 'web' ? await (await fetch(asset.uri)).text() : await new File(asset.uri).text();
+      backup = readBackup(text);
+    } catch {
+      setBackupMessage(t('settings.importError'));
+      return;
+    }
     if (!backup) {
       setBackupMessage(t('backup.invalid'));
       return;
     }
-    confirm(t('backup.confirm', { date: i18n.date(backup.exportedAt, { dateStyle: 'medium' }) }), t('common.cancel'), t('backup.import'), () => {
-      dispatch({ type: 'restoreBackup', state: backup.state });
+    const restored = backup;
+    // Fecha de la copia: si viene rota, se dice "?" en vez de romper la pantalla.
+    const exported = new Date(restored.exportedAt);
+    const when = Number.isNaN(exported.getTime()) ? t('common.unknown') : i18n.date(exported, { dateStyle: 'medium' });
+    confirm(t('backup.confirm', { date: when }), t('common.cancel'), t('backup.import'), () => {
+      dispatch({ type: 'restoreBackup', state: restored.state });
       setBackupMessage(t('auth.restored'));
     });
   }
@@ -145,15 +155,22 @@ export default function Settings() {
 
   async function importCsv() {
     setCsvMessage(null);
-    const picked = await DocumentPicker.getDocumentAsync({
-      // CSV, OFX/QFX, QIF, CAMT.053 (XML) y MT940 (.sta/.mt940/.txt): los extractos de cualquier banco.
-      type: ['*/*'],
-      copyToCacheDirectory: true,
-    });
-    if (picked.canceled) return;
-    const asset = picked.assets[0];
-    const text = Platform.OS === 'web' ? await (await fetch(asset.uri)).text() : await new File(asset.uri).text();
-    const { rows, skipped } = parseBankFile(text);
+    let parsed: ReturnType<typeof parseBankFile>;
+    try {
+      const picked = await DocumentPicker.getDocumentAsync({
+        // CSV, OFX/QFX, QIF, CAMT.053 (XML) y MT940 (.sta/.mt940/.txt): los extractos de cualquier banco.
+        type: ['*/*'],
+        copyToCacheDirectory: true,
+      });
+      if (picked.canceled) return;
+      const asset = picked.assets[0];
+      const text = Platform.OS === 'web' ? await (await fetch(asset.uri)).text() : await new File(asset.uri).text();
+      parsed = parseBankFile(text);
+    } catch {
+      setCsvMessage(t('settings.importError'));
+      return;
+    }
+    const { rows, skipped } = parsed;
     const home = state.profile.currency;
     const rates = state.fx ?? FALLBACK;
     const expenses = rowsToExpenses(rows, state.learnedCategories, t('capture.defaultMerchant')).map((e, i) => {
@@ -255,6 +272,7 @@ export default function Settings() {
             <View style={{ width: 100 }}>
               <Input
                 value={values[c.id]}
+                accessibilityLabel={`${t(`cat.${c.id}`)} (${i18n.currency})`}
                 keyboardType="decimal-pad"
                 placeholder="—"
                 style={{ textAlign: 'right', paddingVertical: 8 }}
@@ -262,7 +280,7 @@ export default function Settings() {
                 onBlur={() => dispatch({ type: 'setBudget', category: c.id, amount: parseAmount(values[c.id]) ?? 0 })}
               />
             </View>
-            <Muted style={{ width: 34 }}>{i18n.currency}</Muted>
+            <Muted style={{ width: 40 }}>{i18n.currency}</Muted>
           </Row>
         ))}
       </Card>
@@ -289,7 +307,7 @@ export default function Settings() {
               <H2>🔒 {t('lock.title')}</H2>
               <Muted>{t('lock.text')}</Muted>
             </View>
-            <Switch value={!!state.profile.lock} onValueChange={() => toggleLock().catch(() => {})} trackColor={{ true: colors.primary, false: colors.border }} />
+            <Switch accessibilityLabel={t('lock.title')} value={!!state.profile.lock} onValueChange={() => toggleLock().catch(() => {})} trackColor={{ true: colors.primary, false: colors.border }} />
           </Row>
           {lockMessage ? <Muted>{lockMessage}</Muted> : null}
         </Card>

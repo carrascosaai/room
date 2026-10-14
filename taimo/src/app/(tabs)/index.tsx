@@ -33,26 +33,34 @@ export default function Home() {
         {state.profile.name ? t('home.hello', { name: state.profile.name }) : t('home.helloAnon')}
       </Text>
 
-      {/* Lo único que hay que mirar: cuánto te queda */}
-      <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>
-        <Text style={{ color: colors.textMuted, fontSize: 17 }}>{t('home.leftThisMonth', { month: monthName })}</Text>
-        <Text
-          style={{ color: summary.remaining < 0 ? colors.danger : colors.text, fontSize: 46, fontWeight: '800' }}
-          accessibilityRole="header"
-          adjustsFontSizeToFit
-          numberOfLines={1}
-        >
-          {money(summary.remaining)}
-        </Text>
-        <ProgressBar progress={summary.progress} />
-        <Text style={{ color: colors.text, fontSize: 18, lineHeight: 25 }}>
-          {summary.budget === 0
-            ? t('home.spentOf', { spent: money(summary.spent), budget: money(0) })
-            : summary.remaining > 0
-              ? t('home.perDay', { amount: money(summary.dailyAllowance), days: summary.daysLeft })
+      {/* Lo único que hay que mirar: cuánto te queda (o, sin presupuesto, cuánto llevas) */}
+      {summary.budget === 0 ? (
+        <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>
+          <Text style={{ color: colors.textMuted, fontSize: 17 }}>{t('home.spentThisMonth')}</Text>
+          <Text style={{ color: colors.text, fontSize: 46, fontWeight: '800' }} accessibilityRole="header" adjustsFontSizeToFit numberOfLines={1}>
+            {money(summary.spent)}
+          </Text>
+          <BigButton emoji="🎯" label={t('home.setBudget')} variant="secondary" onPress={() => router.push('/settings')} />
+        </Card>
+      ) : (
+        <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>
+          <Text style={{ color: colors.textMuted, fontSize: 17 }}>{t('home.leftThisMonth', { month: monthName })}</Text>
+          <Text
+            style={{ color: summary.remaining < 0 ? colors.danger : colors.text, fontSize: 46, fontWeight: '800' }}
+            accessibilityRole="header"
+            adjustsFontSizeToFit
+            numberOfLines={1}
+          >
+            {money(summary.remaining)}
+          </Text>
+          <ProgressBar progress={summary.progress} />
+          <Text style={{ color: colors.text, fontSize: 18, lineHeight: 25 }}>
+            {summary.remaining > 0
+              ? t('home.perDay', { amount: money(summary.dailyAllowance), count: summary.daysLeft })
               : t('home.overLimit')}
-        </Text>
-      </Card>
+          </Text>
+        </Card>
+      )}
 
       <BigButton emoji="＋" label={t('home.add')} onPress={() => router.push('/add')} />
       {canRecognizeText ? <BigButton emoji="📷" label={t('scan.button').replace(/^📷\s*/, '')} variant="secondary" onPress={() => router.push({ pathname: '/add', params: { scan: '1' } })} /> : null}
