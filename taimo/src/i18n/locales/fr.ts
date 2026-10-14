@@ -558,6 +558,18 @@ const fr: Translation = {
     hide: "Masquer",
     privacy: "🔒 Taimo calcule tout ça sur ton téléphone à partir de tes paiements. Rien n’est envoyé nulle part.",
   },
+  paste: {
+    button: "📋 Coller l’avis de la banque",
+    done: "C’est fait : on a rempli la dépense avec l’avis que tu as copié. Vérifie et enregistre.",
+    none: "On n’a trouvé aucun montant dans ce que tu as copié. Copie l’avis ou le SMS de la banque et réessaie.",
+  },
+  nightly: {
+    cardTitle: "Tu paies parfois avec ta carte en plastique ?",
+    cardText: "L’iPhone ne voit pas ces paiements (seulement ceux d’Apple Pay). Pour n’en rater aucun : copie l’avis de ta banque et touche « Coller l’avis de la banque » en ajoutant une dépense, ou active le rappel du soir.",
+    toggle: "Me le rappeler chaque soir à 21h30",
+    title: "Quelque chose à noter aujourd’hui ?",
+    body: "Si tu as payé avec ta carte en plastique, note-le en un geste.",
+  },
   pot: {
     name: "Cagnotte",
     title: "Cagnotte commune",

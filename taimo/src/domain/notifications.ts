@@ -98,7 +98,7 @@ export function findMoney(text: string, home = 'EUR'): Money | null {
 
 const MERCHANT_PATTERNS = [
   // "en MERCADONA", "at Starbucks", "chez Carrefour", "bei REWE", "presso Esselunga", "em Pingo Doce", "bij Albert Heijn"…
-  /(?:^|\s)(?:en|at|chez|bei|presso|em|bij|hos|w|u|в|στο|στην|to VPA|towards|merchant:?|info:?)\s+([^\n.,;·|]+?)(?=\s+(?:con|com|with|avec|mit|on|am|op|på|dnia|el día|using|via|por|para|par|per|pour|für|for|was|is|in|has|have|using|del|from|kl|um|à|à las|a las|at \d)\b|\s+\d|\s*[.,;·|]|\s*$)/imu,
+  /(?:^|\s)(?:en|at|chez|bei|presso|em|bij|hos|w|u|в|στο|στην|to VPA|towards|merchant:?|info:?)\s+([^\n,;·|]+?)(?=\s+(?:con|com|with|avec|mit|on|am|op|på|dnia|el día|using|via\s+(?:apple|google|samsung|garmin|fitbit|paypal|nfc)|por|para|par|per|pour|für|for|was|is|in|has|have|using|del|from|kl|um|à|à las|a las|at \d)\b|\s+\d|\s*[,;·|]|\.(?=\s|$)|\s*$)/gimu,
   // "Starbucks · 4,50 €" / "MERCADONA - 12,40 €"
   /^([^\n·|]+?)\s*[·|–-]\s*(?=\S*\d)/mu,
 ];
@@ -107,9 +107,13 @@ const MERCHANT_PATTERNS = [
 function extractMerchant(title: string, text: string, raw: string): string | null {
   const full = `${title}\n${text}`.replace(raw, ' ');
   for (const re of MERCHANT_PATTERNS) {
-    const candidate = full.match(re)?.[1]?.trim();
-    if (candidate && candidate.length >= 2 && /\p{L}/u.test(candidate) && !CARD_HINT.test(candidate) && !PURCHASE.test(candidate)) {
-      return candidate.slice(0, 48);
+    // Puede haber varios «en …» («terminada en 2222 … en BAR PEPE»): vale el primero que sea un nombre.
+    const matches = re.global ? [...full.matchAll(re)] : [full.match(re)];
+    for (const m of matches) {
+      const candidate = m?.[1]?.trim();
+      if (candidate && candidate.length >= 2 && /\p{L}/u.test(candidate) && !CARD_HINT.test(candidate) && !PURCHASE.test(candidate)) {
+        return candidate.slice(0, 48);
+      }
     }
   }
   // En Google Wallet el título suele ser el comercio y el texto el importe.

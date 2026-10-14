@@ -558,6 +558,18 @@ const gl: Translation = {
     hide: "Ocultar",
     privacy: "🔒 Taimo calcúlao no teu móbil cos teus pagamentos. Non se envía nada a ningures.",
   },
+  paste: {
+    button: "📋 Pegar aviso do banco",
+    done: "Feito: enchemos o gasto co aviso que copiaches. Revísao e garda.",
+    none: "Non atopamos ningún importe no que copiaches. Copia o aviso ou o SMS do banco e volve probar.",
+  },
+  nightly: {
+    cardTitle: "Pagas ás veces coa tarxeta de plástico?",
+    cardText: "O iPhone non se decata deses pagamentos (só dos de Apple Pay). Para non perder ningún: copia o aviso do teu banco e toca «Pegar aviso do banco» ao engadir un gasto, ou activa o recordatorio de cada noite.",
+    toggle: "Lembrarmo cada noite ás 21:30",
+    title: "Algo que apuntar de hoxe?",
+    body: "Se pagaches coa tarxeta de plástico, apúntao nun toque.",
+  },
   pot: {
     name: "Bote",
     title: "Bote común",

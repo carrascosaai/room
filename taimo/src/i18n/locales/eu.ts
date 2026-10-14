@@ -558,6 +558,18 @@ const eu: Translation = {
     hide: "Ezkutatu",
     privacy: "🔒 Taimok zure mugikorrean kalkulatzen du zure ordainketekin. Ez da ezer inora bidaltzen.",
   },
+  paste: {
+    button: "📋 Itsatsi bankuaren abisua",
+    done: "Eginda: kopiatu duzun abisuarekin bete dugu gastua. Berrikusi eta gorde.",
+    none: "Ez dugu zenbatekorik aurkitu kopiatu duzunean. Kopiatu bankuaren abisua edo SMSa eta saiatu berriro.",
+  },
+  nightly: {
+    cardTitle: "Plastikozko txartelarekin ordaintzen duzu batzuetan?",
+    cardText: "iPhoneak ez ditu ordainketa horiek ikusten (Apple Payekoak bakarrik). Bat ere ez galtzeko: kopiatu zure bankuaren abisua eta sakatu «Itsatsi bankuaren abisua» gastu bat gehitzean, edo aktibatu gaueroko oroigarria.",
+    toggle: "Gogorarazi gauero 21:30ean",
+    title: "Gaurko zerbait apuntatzeko?",
+    body: "Plastikozko txartelarekin ordaindu baduzu, apuntatu ukitu batean.",
+  },
   pot: {
     name: "Poltsa",
     title: "Poltsa komuna",

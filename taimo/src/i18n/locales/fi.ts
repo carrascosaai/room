@@ -558,6 +558,18 @@ const fi: Translation = {
     hide: "Piilota",
     privacy: "🔒 Taimo laskee tämän puhelimessasi maksujesi perusteella. Mitään ei lähetetä minnekään.",
   },
+  paste: {
+    button: "📋 Liitä pankin ilmoitus",
+    done: "Valmista: täytimme kulun kopioimasi ilmoituksen perusteella. Tarkista se ja tallenna.",
+    none: "Emme löytäneet summaa kopioimastasi tekstistä. Kopioi pankin ilmoitus tai tekstiviesti ja yritä uudelleen.",
+  },
+  nightly: {
+    cardTitle: "Maksatko joskus muovikortilla?",
+    cardText: "iPhone ei näe niitä maksuja (vain Apple Pay -maksut). Jotta mikään ei unohdu: kopioi pankkisi ilmoitus ja napauta ”Liitä pankin ilmoitus” kun lisäät kulun, tai laita iltamuistutus päälle.",
+    toggle: "Muistuta minua joka ilta klo 21.30",
+    title: "Onko tältä päivältä jotain kirjattavaa?",
+    body: "Jos maksoit muovikortilla, kirjaa se yhdellä napautuksella.",
+  },
   pot: {
     name: "Kassa",
     title: "Yhteinen kassa",

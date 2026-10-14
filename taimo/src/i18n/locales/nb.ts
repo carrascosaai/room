@@ -558,6 +558,18 @@ const nb: Translation = {
     hide: "Skjul",
     privacy: "🔒 Taimo regner ut dette på telefonen din fra betalingene dine. Ingenting sendes noe sted.",
   },
+  paste: {
+    button: "📋 Lim inn bankvarsel",
+    done: "Ferdig: vi har fylt ut utgiften med varselet du kopierte. Sjekk den og lagre.",
+    none: "Vi fant ikke noe beløp i det du kopierte. Kopier varselet eller SMS-en fra banken og prøv igjen.",
+  },
+  nightly: {
+    cardTitle: "Betaler du noen ganger med plastkortet?",
+    cardText: "iPhone ser ikke de betalingene (bare de med Apple Pay). Så du ikke går glipp av noen: kopier varselet fra banken din og trykk på «Lim inn bankvarsel» når du legger til en utgift, eller slå på kveldspåminnelsen.",
+    toggle: "Minn meg på det hver kveld kl. 21.30",
+    title: "Noe å føre opp fra i dag?",
+    body: "Hvis du betalte med plastkortet, før det opp med ett trykk.",
+  },
   pot: {
     name: "Pott",
     title: "Felles pott",

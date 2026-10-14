@@ -558,6 +558,18 @@ const nl: Translation = {
     hide: "Verbergen",
     privacy: "🔒 Taimo berekent dit op je telefoon op basis van je betalingen. Er wordt niets verstuurd.",
   },
+  paste: {
+    button: "📋 Bankmelding plakken",
+    done: "Klaar: we hebben de uitgave ingevuld met de melding die je hebt gekopieerd. Check hem en sla op.",
+    none: "We hebben geen bedrag gevonden in wat je hebt gekopieerd. Kopieer de melding of sms van de bank en probeer het opnieuw.",
+  },
+  nightly: {
+    cardTitle: "Betaal je soms met je bankpas?",
+    cardText: "De iPhone ziet die betalingen niet (alleen die met Apple Pay). Zo mis je er geen: kopieer de melding van je bank en tik op ‘Bankmelding plakken’ als je een uitgave toevoegt, of zet de avondherinnering aan.",
+    toggle: "Herinner me elke avond om 21:30",
+    title: "Nog iets te noteren van vandaag?",
+    body: "Als je met je bankpas hebt betaald, noteer het met één tik.",
+  },
   pot: {
     name: "Pot",
     title: "Gezamenlijke pot",

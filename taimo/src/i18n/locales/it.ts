@@ -558,6 +558,18 @@ const it: Translation = {
     hide: "Nascondi",
     privacy: "🔒 Taimo lo calcola sul tuo telefono a partire dai tuoi pagamenti. Non viene inviato niente da nessuna parte.",
   },
+  paste: {
+    button: "📋 Incolla avviso della banca",
+    done: "Fatto: abbiamo compilato la spesa con l’avviso che hai copiato. Controllala e salva.",
+    none: "Non abbiamo trovato un importo in quello che hai copiato. Copia l’avviso o l’SMS della banca e riprova.",
+  },
+  nightly: {
+    cardTitle: "A volte paghi con la carta di plastica?",
+    cardText: "L’iPhone non vede quei pagamenti (solo quelli con Apple Pay). Per non perderne nessuno: copia l’avviso della tua banca e tocca «Incolla avviso della banca» quando aggiungi una spesa, oppure attiva il promemoria serale.",
+    toggle: "Ricordamelo ogni sera alle 21:30",
+    title: "Qualcosa da segnare oggi?",
+    body: "Se hai pagato con la carta di plastica, segnalo con un tocco.",
+  },
   pot: {
     name: "Cassa",
     title: "Cassa comune",

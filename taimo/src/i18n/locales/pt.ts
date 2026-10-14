@@ -558,6 +558,18 @@ const pt: Translation = {
     hide: "Ocultar",
     privacy: "🔒 O Taimo calcula isto no teu telemóvel com os teus pagamentos. Nada é enviado para lado nenhum.",
   },
+  paste: {
+    button: "📋 Colar aviso do banco",
+    done: "Pronto: preenchemos a despesa com o aviso que copiaste. Revê e guarda.",
+    none: "Não encontrámos um valor no que copiaste. Copia o aviso ou a SMS do banco e tenta de novo.",
+  },
+  nightly: {
+    cardTitle: "Às vezes pagas com o cartão físico?",
+    cardText: "O iPhone não vê esses pagamentos (só os de Apple Pay). Para não perderes nenhum: copia o aviso do teu banco e toca em «Colar aviso do banco» ao adicionar uma despesa, ou ativa o lembrete de todas as noites.",
+    toggle: "Lembrar-me todas as noites às 21:30",
+    title: "Algo para registar hoje?",
+    body: "Se pagaste com o cartão físico, regista-o num toque.",
+  },
   pot: {
     name: "Fundo",
     title: "Fundo comum",

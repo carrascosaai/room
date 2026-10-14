@@ -558,6 +558,18 @@ const sv: Translation = {
     hide: "Dölj",
     privacy: "🔒 Taimo räknar ut det här på din telefon utifrån dina betalningar. Inget skickas någonstans.",
   },
+  paste: {
+    button: "📋 Klistra in banknotis",
+    done: "Klart: vi har fyllt i utgiften med notisen du kopierade. Kolla den och spara.",
+    none: "Vi hittade inget belopp i det du kopierade. Kopiera notisen eller sms:et från banken och försök igen.",
+  },
+  nightly: {
+    cardTitle: "Betalar du ibland med plastkortet?",
+    cardText: "iPhone ser inte de betalningarna (bara de med Apple Pay). Så att du inte missar någon: kopiera notisen från din bank och tryck på ”Klistra in banknotis” när du lägger till en utgift, eller slå på kvällspåminnelsen.",
+    toggle: "Påminn mig varje kväll kl. 21.30",
+    title: "Något att föra in från idag?",
+    body: "Om du har betalat med plastkortet, för in det med ett tryck.",
+  },
   pot: {
     name: "Pott",
     title: "Gemensam pott",

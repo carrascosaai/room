@@ -558,6 +558,18 @@ const da: Translation = {
     hide: "Skjul",
     privacy: "🔒 Taimo regner det ud på din telefon ud fra dine betalinger. Intet sendes nogen steder hen.",
   },
+  paste: {
+    button: "📋 Indsæt bankbesked",
+    done: "Færdig: vi har udfyldt udgiften med beskeden, du kopierede. Tjek den, og gem.",
+    none: "Vi fandt ikke noget beløb i det, du kopierede. Kopiér beskeden eller sms’en fra banken, og prøv igen.",
+  },
+  nightly: {
+    cardTitle: "Betaler du nogle gange med plastikkortet?",
+    cardText: "iPhone kan ikke se de betalinger (kun dem med Apple Pay). Så du ikke går glip af nogen: kopiér beskeden fra din bank, og tryk på »Indsæt bankbesked«, når du tilføjer en udgift, eller slå aftenpåmindelsen til.",
+    toggle: "Mind mig om det hver aften kl. 21.30",
+    title: "Noget at skrive ned fra i dag?",
+    body: "Hvis du har betalt med plastikkortet, så skriv det ned med ét tryk.",
+  },
   pot: {
     name: "Pulje",
     title: "Fælles pulje",

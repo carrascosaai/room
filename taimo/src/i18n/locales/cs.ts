@@ -558,6 +558,18 @@ const cs: Translation = {
     hide: "Skrýt",
     privacy: "🔒 Taimo to počítá ve tvém telefonu z tvých plateb. Nic se nikam neposílá.",
   },
+  paste: {
+    button: "📋 Vložit oznámení z banky",
+    done: "Hotovo: výdaj jsme vyplnili podle oznámení, které sis zkopíroval. Zkontroluj ho a ulož.",
+    none: "V tom, co sis zkopíroval, jsme nenašli žádnou částku. Zkopíruj oznámení nebo SMS z banky a zkus to znovu.",
+  },
+  nightly: {
+    cardTitle: "Platíš někdy plastovou kartou?",
+    cardText: "iPhone tyto platby nevidí (jen ty přes Apple Pay). Aby ti žádná neutekla: zkopíruj oznámení z banky a při přidávání výdaje klepni na „Vložit oznámení z banky“, nebo zapni večerní připomínku.",
+    toggle: "Připomeň mi to každý večer ve 21:30",
+    title: "Něco k zapsání za dnešek?",
+    body: "Pokud jsi platil plastovou kartou, zapiš to jedním klepnutím.",
+  },
   pot: {
     name: "Kasička",
     title: "Společná kasička",

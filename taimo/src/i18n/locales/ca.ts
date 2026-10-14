@@ -558,6 +558,18 @@ const ca: Translation = {
     hide: "Amaga",
     privacy: "🔒 El Taimo ho calcula al teu mòbil amb els teus pagaments. No s’envia res enlloc.",
   },
+  paste: {
+    button: "📋 Enganxa l’avís del banc",
+    done: "Fet: hem omplert la despesa amb l’avís que has copiat. Revisa-la i desa.",
+    none: "No hem trobat cap import en el que has copiat. Copia l’avís o l’SMS del banc i torna-ho a provar.",
+  },
+  nightly: {
+    cardTitle: "De vegades pagues amb la targeta de plàstic?",
+    cardText: "L’iPhone no s’assabenta d’aquests pagaments (només dels d’Apple Pay). Per no perdre’n cap: copia l’avís del teu banc i toca «Enganxa l’avís del banc» en afegir una despesa, o activa el recordatori de cada nit.",
+    toggle: "Recorda-m’ho cada nit a les 21:30",
+    title: "Res a apuntar d’avui?",
+    body: "Si has pagat amb la targeta de plàstic, apunta-ho amb un toc.",
+  },
   pot: {
     name: "Pot",
     title: "Pot comú",

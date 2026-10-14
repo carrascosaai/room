@@ -558,6 +558,18 @@ const tr: Translation = {
     hide: "Gizle",
     privacy: "🔒 Taimo bunu ödemelerinden telefonunda hesaplar. Hiçbir yere hiçbir şey gönderilmez.",
   },
+  paste: {
+    button: "📋 Banka bildirimini yapıştır",
+    done: "Tamam: kopyaladığın bildirimle harcamayı doldurduk. Kontrol et ve kaydet.",
+    none: "Kopyaladığın metinde bir tutar bulamadık. Bankanın bildirimini veya SMS’ini kopyala ve tekrar dene.",
+  },
+  nightly: {
+    cardTitle: "Bazen plastik kartla mı ödüyorsun?",
+    cardText: "iPhone bu ödemeleri görmez (sadece Apple Pay ile yapılanları görür). Hiçbirini kaçırmamak için: bankanın bildirimini kopyala ve harcama eklerken “Banka bildirimini yapıştır” düğmesine dokun ya da akşam hatırlatıcısını aç.",
+    toggle: "Bana her akşam 21.30’da hatırlat",
+    title: "Bugünden kaydedecek bir şey var mı?",
+    body: "Plastik kartla ödediysen tek dokunuşla kaydet.",
+  },
   pot: {
     name: "Kumbara",
     title: "Ortak kumbara",

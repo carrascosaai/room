@@ -558,6 +558,18 @@ const de: Translation = {
     hide: "Ausblenden",
     privacy: "🔒 Taimo berechnet das auf deinem Handy aus deinen Zahlungen. Nichts wird irgendwohin geschickt.",
   },
+  paste: {
+    button: "📋 Bankmitteilung einfügen",
+    done: "Fertig: Wir haben die Ausgabe mit der kopierten Mitteilung ausgefüllt. Prüf sie und speichere.",
+    none: "Wir haben in dem, was du kopiert hast, keinen Betrag gefunden. Kopiere die Mitteilung oder SMS der Bank und versuch es nochmal.",
+  },
+  nightly: {
+    cardTitle: "Zahlst du manchmal mit der Plastikkarte?",
+    cardText: "Das iPhone sieht diese Zahlungen nicht (nur die mit Apple Pay). Damit dir keine entgeht: Kopiere die Mitteilung deiner Bank und tippe beim Hinzufügen einer Ausgabe auf „Bankmitteilung einfügen“ oder schalte die abendliche Erinnerung ein.",
+    toggle: "Erinnere mich jeden Abend um 21:30 Uhr",
+    title: "Gibt’s heute was einzutragen?",
+    body: "Wenn du mit der Plastikkarte bezahlt hast, trag es mit einem Tipp ein.",
+  },
   pot: {
     name: "Kasse",
     title: "Gemeinsame Kasse",

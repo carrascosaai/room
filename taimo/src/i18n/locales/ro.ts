@@ -558,6 +558,18 @@ const ro: Translation = {
     hide: "Ascunde",
     privacy: "🔒 Taimo calculează asta pe telefonul tău din plățile tale. Nu se trimite nimic nicăieri.",
   },
+  paste: {
+    button: "📋 Lipește notificarea băncii",
+    done: "Gata: am completat cheltuiala cu notificarea pe care ai copiat-o. Verific-o și salvează.",
+    none: "Nu am găsit nicio sumă în ce ai copiat. Copiază notificarea sau SMS-ul de la bancă și încearcă din nou.",
+  },
+  nightly: {
+    cardTitle: "Plătești uneori cu cardul fizic?",
+    cardText: "iPhone-ul nu vede aceste plăți (doar pe cele cu Apple Pay). Ca să nu pierzi niciuna: copiază notificarea băncii și atinge „Lipește notificarea băncii” când adaugi o cheltuială, sau activează memento-ul de seară.",
+    toggle: "Amintește-mi în fiecare seară la 21:30",
+    title: "Ai ceva de notat de azi?",
+    body: "Dacă ai plătit cu cardul fizic, notează-l dintr-o atingere.",
+  },
   pot: {
     name: "Pușculiță",
     title: "Pușculiță comună",

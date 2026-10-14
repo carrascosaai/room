@@ -558,6 +558,18 @@ const pl: Translation = {
     hide: "Ukryj",
     privacy: "🔒 Taimo liczy to na twoim telefonie na podstawie twoich płatności. Nic nie jest nigdzie wysyłane.",
   },
+  paste: {
+    button: "📋 Wklej powiadomienie z banku",
+    done: "Gotowe: uzupełniliśmy wydatek na podstawie skopiowanego powiadomienia. Sprawdź i zapisz.",
+    none: "Nie znaleźliśmy kwoty w tym, co skopiowałeś. Skopiuj powiadomienie lub SMS z banku i spróbuj ponownie.",
+  },
+  nightly: {
+    cardTitle: "Płacisz czasem plastikową kartą?",
+    cardText: "iPhone nie widzi tych płatności (tylko te przez Apple Pay). Żeby żadnej nie przegapić: skopiuj powiadomienie z banku i dotknij „Wklej powiadomienie z banku” przy dodawaniu wydatku albo włącz wieczorne przypomnienie.",
+    toggle: "Przypominaj mi codziennie o 21:30",
+    title: "Coś do zapisania z dzisiaj?",
+    body: "Jeśli płaciłeś plastikową kartą, zapisz to jednym dotknięciem.",
+  },
   pot: {
     name: "Skarbonka",
     title: "Wspólna skarbonka",
