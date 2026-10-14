@@ -1,6 +1,6 @@
 import type { CategoryStatus } from '@/domain/budget';
 import { monthSummary } from '@/domain/budget';
-import type { AppState } from '@/domain/types';
+import type { AppState, Cents, PaymentInfo } from '@/domain/types';
 import type { I18n } from '@/i18n';
 
 /** Frase que se muestra justo después de apuntar un gasto. */
@@ -34,4 +34,20 @@ export function formatWhen(i18n: I18n, iso: string, now = new Date()): string {
   if (d.toDateString() === now.toDateString()) return i18n.t('common.today', { time });
   if (d.toDateString() === yesterday.toDateString()) return i18n.t('common.yesterday', { time });
   return i18n.date(d, { day: 'numeric', month: 'short' });
+}
+
+/** Usuario limpio a partir de lo que pegue la gente: "@ana", "paypal.me/ana", "https://revolut.me/ana". */
+export function handle(value: string): string {
+  return value.trim().replace(/^https?:\/\//, '').replace(/^(www\.)?(paypal\.me|revolut\.me)\//i, '').replace(/^@/, '').split(/[/?\s]/)[0];
+}
+
+/** Líneas para que te paguen: Bizum, IBAN y enlaces de PayPal y Revolut con el importe. */
+export function paymentLines(payment: PaymentInfo | undefined, amount: Cents, currency: string): string[] {
+  if (!payment) return [];
+  const lines: string[] = [];
+  if (payment.bizum) lines.push(`Bizum: ${payment.bizum}`);
+  if (payment.iban) lines.push(`IBAN: ${payment.iban.toUpperCase().replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim()}`);
+  if (payment.paypal && handle(payment.paypal)) lines.push(`PayPal: https://paypal.me/${handle(payment.paypal)}/${(amount / 100).toFixed(2)}${currency}`);
+  if (payment.revolut && handle(payment.revolut)) lines.push(`Revolut: https://revolut.me/${handle(payment.revolut)}`);
+  return lines;
 }

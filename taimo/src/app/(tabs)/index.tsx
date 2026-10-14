@@ -3,6 +3,7 @@ import { Platform, Pressable, Text, View } from 'react-native';
 
 import { categoryStatus, monthSummary } from '@/domain/budget';
 import { CATEGORIES, category } from '@/domain/categories';
+import { categoryTrend, monthForecast } from '@/domain/insights';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen } from '@/ui/components';
@@ -19,6 +20,8 @@ export default function Home() {
     (s) => s.budget > 0 || s.spent > 0,
   );
   const recent = state.expenses.slice(0, 8);
+  const forecast = monthForecast(state, today);
+  const trend = categoryTrend(state, today);
   const hasAuto = state.expenses.some((e) => e.source === 'applepay' || e.source === 'notificacion');
 
   return (
@@ -43,7 +46,27 @@ export default function Home() {
                 : t('home.overLimit')}
             </Text>
           </View>
+          {forecast ? (
+            <Muted>
+              {forecast.budget === 0
+                ? t('ins.forecastNoBudget', { amount: money(forecast.projected) })
+                : forecast.projected > forecast.budget
+                  ? t('ins.forecastOver', { amount: money(forecast.projected), over: money(forecast.projected - forecast.budget) })
+                  : t('ins.forecastUnder', { amount: money(forecast.projected), left: money(forecast.budget - forecast.projected) })}
+            </Muted>
+          ) : null}
         </Card>
+
+        {trend ? (
+          <Card style={{ borderColor: colors.warning }}>
+            <Row>
+              <Text style={{ fontSize: 24 }}>{category(trend.category).emoji}</Text>
+              <Text style={{ color: colors.text, flex: 1, fontSize: 15 }}>
+                {t('ins.trend', { category: t(`cat.${trend.category}`), pct: trend.pct, spent: money(trend.spent), usual: money(trend.usual) })}
+              </Text>
+            </Row>
+          </Card>
+        ) : null}
 
         {!hasAuto ? (
           <Pressable onPress={() => router.push('/automation')}>
@@ -99,7 +122,14 @@ export default function Home() {
         ) : null}
 
         <Card>
-          <H2>{t('home.recent')}</H2>
+          <Row style={{ justifyContent: 'space-between' }}>
+            <H2>{t('home.recent')}</H2>
+            {state.expenses.length > 0 ? (
+              <Pressable onPress={() => router.push('/history')} hitSlop={10} accessibilityRole="button">
+                <Text style={{ color: colors.primary, fontWeight: '600' }}>{t('ins.seeAll')} ›</Text>
+              </Pressable>
+            ) : null}
+          </Row>
           {recent.length === 0 ? (
             <Empty emoji="🧾" text={t('home.empty')} />
           ) : (

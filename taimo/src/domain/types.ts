@@ -125,6 +125,17 @@ export interface Profile {
   language?: 'auto' | 'es' | 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ca' | 'eu' | 'gl' | 'nl' | 'sv' | 'nb' | 'da' | 'fi' | 'pl' | 'cs' | 'ro' | 'el' | 'tr' | 'uk';
   /** Si ha iniciado sesión: id y correo de la cuenta (la sesión la guarda Supabase). */
   account?: { id: string; email?: string; provider: 'apple' | 'google' };
+  /** Cómo te pagan los demás: se añade a los recordatorios de deudas. */
+  payment?: PaymentInfo;
+}
+
+export interface PaymentInfo {
+  bizum?: string;
+  iban?: string;
+  /** Usuario de paypal.me */
+  paypal?: string;
+  /** Usuario de revolut.me */
+  revolut?: string;
 }
 
 export interface AppState {

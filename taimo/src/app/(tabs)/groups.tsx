@@ -54,7 +54,11 @@ export default function Groups() {
               {plan ? (
                 <View style={{ gap: space.xs }}>
                   <ProgressBar progress={plan.spent / plan.budget} />
-                  <Muted>{t('gx.budgetLeft', { amount: moneyIn(Math.max(0, plan.remaining), cur), budget: moneyIn(plan.budget, cur) })}</Muted>
+                  <Muted style={plan.remaining < 0 ? { color: colors.danger } : undefined}>
+                    {plan.remaining < 0
+                      ? t('pay.budgetOver', { amount: moneyIn(-plan.remaining, cur), budget: moneyIn(plan.budget, cur) })
+                      : t('gx.budgetLeft', { amount: moneyIn(plan.remaining, cur), budget: moneyIn(plan.budget, cur) })}
+                  </Muted>
                 </View>
               ) : null}
             </Card>

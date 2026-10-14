@@ -4,9 +4,12 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useS
 import { findDuplicate, type CapturePayload } from '@/domain/capture';
 import { normalizeMerchant } from '@/domain/categorize';
 import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
-import type { AppState, CategoryId, Cents, Expense, Group, Member, Settlement } from '@/domain/types';
+import type { AppState, CategoryId, Cents, Expense, Group, Member, PaymentInfo, Settlement } from '@/domain/types';
 
 const STORAGE_KEY = 'taimo:state:v1';
+
+/** Los gastos siempre van del más reciente al más antiguo (sort estable: empates quedan igual). */
+const byDate = (list: Expense[]) => [...list].sort((a, b) => b.date.localeCompare(a.date));
 
 export const initialState: AppState = {
   version: 1,
@@ -28,6 +31,7 @@ export type Action =
   | { type: 'hydrate'; state: AppState }
   | { type: 'completeOnboarding'; name: string; budgets: AppState['budgets']; currency?: string }
   | { type: 'setProfileName'; name: string }
+  | { type: 'setPayment'; payment: PaymentInfo }
   | { type: 'setLanguage'; language: NonNullable<AppState['profile']['language']> }
   | { type: 'setCurrency'; currency: string }
   | { type: 'setAccount'; account: AppState['profile']['account'] }
@@ -70,6 +74,8 @@ export function reducer(state: AppState, action: Action): AppState {
       };
     case 'setProfileName':
       return { ...state, profile: { ...state.profile, name: action.name } };
+    case 'setPayment':
+      return { ...state, profile: { ...state.profile, payment: action.payment } };
     case 'setLanguage':
       return { ...state, profile: { ...state.profile, language: action.language } };
     case 'setCurrency':
@@ -82,7 +88,7 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'setBudget':
       return { ...state, budgets: { ...state.budgets, [action.category]: action.amount } };
     case 'addExpense':
-      return { ...state, expenses: [{ ...action.expense, updatedAt: now() }, ...state.expenses] };
+      return { ...state, expenses: byDate([{ ...action.expense, updatedAt: now() }, ...state.expenses]) };
     case 'importExpenses': {
       const known = new Set(state.expenses.map((e) => e.id));
       const fresh = action.expenses.filter((e) => !known.has(e.id)).map((e) => ({ ...e, updatedAt: e.updatedAt ?? now() }));
@@ -98,7 +104,7 @@ export function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         learnedCategories,
-        expenses: state.expenses.map((e) => (e.id === action.expense.id ? { ...action.expense, updatedAt: now() } : e)),
+        expenses: byDate(state.expenses.map((e) => (e.id === action.expense.id ? { ...action.expense, updatedAt: now() } : e))),
       };
     }
     case 'deleteExpense': {

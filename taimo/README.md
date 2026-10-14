@@ -16,6 +16,13 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
   reparto por categoría y gastos más grandes. Toca una barra para ver su importe.
 
 - **Presupuestos por categoría** y en Inicio: lo que te queda este mes y **cuánto puedes gastar al día**.
+- **Previsión de fin de mes**: «a este ritmo acabarás el mes en 1105 €: te pasarás 465 €» (los gastos fijos se
+  cuentan una vez, el resto al ritmo que llevas) y aviso cuando una categoría va disparada frente a lo que sueles
+  llevar a esas alturas del mes.
+- **Suscripciones detectadas solas**: cobros que se repiten cada mes (Netflix, Spotify, gimnasio…) con lo que
+  cuestan al mes y al año.
+- **Historial completo** agrupado por días con buscador (sin tildes) y filtros por categoría o grupo.
+- **Fecha del gasto**: hoy, ayer o cualquier día de la última semana.
 - **Registro automático de pagos**
   - **iPhone**: automatización de Atajos con el disparador «Transacción» de Wallet. Dos formas:
     - Acción **«Registrar pago en Taimo»** (App Intent nativo): apunta el pago **sin abrir la app** y muestra un aviso
@@ -37,11 +44,14 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
   - Quién ha pagado qué, gasto por categoría, **🔔 Recordar** (manda por WhatsApp lo que debe cada uno) y cómo
     quedar en paz con las mínimas transferencias. **Invita por WhatsApp** con un enlace o un código: todo se
     sincroniza, también los ajustes del grupo. **A tu presupuesto solo cuenta tu parte**, convertida a tu moneda.
+- **Cobrar sin perseguir a nadie**: pon tu Bizum, IBAN, PayPal.me o Revolut en Ajustes y cada recordatorio lleva
+  cómo pagarte (con enlace de PayPal con el importe ya puesto). **Compartir resumen** del grupo o del viaje por
+  WhatsApp: total, por categoría, quién debe a quién y cómo pagarte.
 - **Monedas de todo el mundo** (viajes, Erasmus): cada gasto se apunta en la moneda en la que pagaste (yenes, pesos,
   coronas…) y Taimo lo convierte a la moneda del grupo o a la tuya, guardando el cambio de ese día. **Conversor**
   con 155 monedas, buscador por país y las que más usas. El cambio se actualiza solo (fuentes gratuitas, sin
   clave) y sin conexión usa el último guardado.
-- **Estadísticas**: mes, día, categoría y últimos 6 meses. **Exportar a CSV** (Excel).
+- **Estadísticas**: día, semana, mes, año y todo; la comparación es justa (del 1 al 14 contra del 1 al 14). **Exportar a CSV** (Excel).
 - **Resumen semanal** cada domingo a las 20:00.
 
 ## Probarla

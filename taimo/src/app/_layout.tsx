@@ -73,6 +73,7 @@ function RootStack() {
         <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
         <Stack.Screen name="join" options={{ presentation: 'modal' }} />
         <Stack.Screen name="language" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="history" options={{ headerShown: true, title: t('history.title') }} />
         <Stack.Screen name="converter" options={{ headerShown: true, title: t('fx.title') }} />
         <Stack.Screen name="group/new" options={{ headerShown: true, title: t('groups.newGroup') }} />
         <Stack.Screen name="automation" options={{ headerShown: true, title: t('automation.screenTitle') }} />

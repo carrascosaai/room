@@ -22,7 +22,18 @@ const SOURCE_BADGE: Record<Expense['source'], string> = {
  * Un gasto en una lista. `perspective="group"` enseña el total del grupo y
  * quién pagó; por defecto enseña lo que te cuesta a ti, en tu moneda.
  */
-export function ExpenseRow({ expense, groups, perspective = 'me' }: { expense: Expense; groups: Group[]; perspective?: 'me' | 'group' }) {
+export function ExpenseRow({
+  expense,
+  groups,
+  perspective = 'me',
+  timeOnly = false,
+}: {
+  expense: Expense;
+  groups: Group[];
+  perspective?: 'me' | 'group';
+  /** En listas ya agrupadas por día solo hace falta la hora. */
+  timeOnly?: boolean;
+}) {
   const i18n = useI18n();
   const { state } = useStore();
   const group = expense.groupId ? groups.find((g) => g.id === expense.groupId) : undefined;
@@ -51,7 +62,7 @@ export function ExpenseRow({ expense, groups, perspective = 'me' }: { expense: E
           {expense.merchant}
         </Text>
         <Muted>
-          {i18n.t(`cat.${expense.category}`)} · {formatWhen(i18n, expense.date)}
+          {i18n.t(`cat.${expense.category}`)} · {timeOnly ? i18n.date(expense.date, { hour: '2-digit', minute: '2-digit' }) : formatWhen(i18n, expense.date)}
           {SOURCE_BADGE[expense.source]}
         </Muted>
       </View>

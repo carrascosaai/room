@@ -2,10 +2,11 @@ import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { category } from '@/domain/categories';
-import { changePct, periodStats, shiftAnchor, type Bucket, type Period } from '@/domain/stats';
+import { detectSubscriptions } from '@/domain/insights';
+import { changePct, periodStats, shiftAnchor, type Bucket, type Period, type Range } from '@/domain/stats';
 import { useI18n, type I18n, type TKey } from '@/i18n';
 import { useStore } from '@/store/store';
-import { Card, Empty, H2, Muted, ProgressBar, Row, Screen, Title } from '@/ui/components';
+import { Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen, Title } from '@/ui/components';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { colors, radius, space } from '@/ui/theme';
 
@@ -211,7 +212,9 @@ export default function Stats() {
         <Text style={{ color: colors.text, fontSize: 36, fontWeight: '800' }}>{money(stats.total)}</Text>
         {period !== 'all' ? (
           <Text style={{ color: change === null ? colors.textMuted : change > 0 ? colors.warning : colors.success, fontSize: 14 }}>
-            {change === null ? t('stats.noPrevious') : t('stats.vsPrevious', { change: `${change > 0 ? '▲ +' : '▼ '}${change}%` })}
+            {change === null
+              ? t('stats.noPrevious')
+              : t('ins.vsRange', { change: `${change > 0 ? '▲ +' : '▼ '}${change}%`, range: rangeLabel(i18n, period, stats.previousRange!, stats.partial) })}
           </Text>
         ) : null}
         {avg ? <Muted>{avg}</Muted> : null}
@@ -249,6 +252,8 @@ export default function Stats() {
         </Card>
       ) : null}
 
+      <SubscriptionsCard />
+
       {stats.biggest.length > 0 ? (
         <Card>
           <H2>{t('stats.biggest')}</H2>
@@ -258,5 +263,45 @@ export default function Stats() {
         </Card>
       ) : null}
     </Screen>
+  );
+}
+
+/** "1–14 sept", "septiembre", "lun 12" … para decir con qué se compara. */
+function rangeLabel(i18n: I18n, period: Period, r: Range, partial: boolean): string {
+  const last = new Date(r.end.getTime() - 1);
+  const dm = (d: Date) => i18n.date(d, { day: 'numeric', month: 'short' });
+  if (period === 'day') {
+    const day = i18n.date(r.start, { weekday: 'short', day: 'numeric' });
+    return partial ? `${day} 00:00–${i18n.date(r.end, { hour: '2-digit', minute: '2-digit' })}` : day;
+  }
+  if (!partial && period === 'month') return i18n.date(r.start, { month: 'long' });
+  if (!partial && period === 'year') return String(r.start.getFullYear());
+  return `${dm(r.start)}–${dm(last)}`;
+}
+
+/** Cobros que se repiten cada mes: lo que cuestan al mes y al año. */
+function SubscriptionsCard() {
+  const { state } = useStore();
+  const { t, money } = useI18n();
+  const subs = useMemo(() => detectSubscriptions(state.expenses), [state.expenses]);
+  if (subs.length === 0) return null;
+  const monthly = subs.reduce((s, x) => s + x.monthly, 0);
+  return (
+    <Card>
+      <H2>{t('ins.subsTitle')}</H2>
+      <Muted>{t('ins.subsHint')}</Muted>
+      <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>
+        {t('ins.subsTotal', { month: money(monthly), year: money(monthly * 12) })}
+      </Text>
+      {subs.map((s) => (
+        <Row key={s.merchant}>
+          <CategoryBadge id={s.category} size={32} />
+          <Text style={{ color: colors.text, flex: 1, fontSize: 15 }} numberOfLines={1}>
+            {s.merchant}
+          </Text>
+          <Text style={{ color: colors.text, fontWeight: '600' }}>{t('ins.subsMonthly', { amount: money(s.monthly) })}</Text>
+        </Row>
+      ))}
+    </Card>
   );
 }

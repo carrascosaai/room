@@ -16,6 +16,7 @@ import { Button, Card, Chip, Empty, H2, Input, Muted, ProgressBar, Row, Screen }
 import { confirm } from '@/ui/confirm';
 import { CurrencyButton, CurrencyPicker, currencyFlag } from '@/ui/CurrencyPicker';
 import { ExpenseRow } from '@/ui/ExpenseRow';
+import { paymentLines } from '@/ui/messages';
 import { colors, radius, space } from '@/ui/theme';
 
 export default function GroupDetail() {
@@ -43,6 +44,11 @@ export default function GroupDetail() {
     const m = group.members.find((x) => x.id === memberId);
     return !m ? t('common.unknown') : m.isMe ? t('common.you') : m.name;
   };
+  // En los mensajes que se mandan a otros, cada uno con su nombre (nunca "Tú").
+  const realName = (memberId: string) => {
+    const m = group.members.find((x) => x.id === memberId);
+    return !m ? t('common.unknown') : m.isMe ? state.profile.name || m.name : m.name;
+  };
   const expenses = state.expenses.filter((e) => e.groupId === group.id);
   const balance = balances(group, state.expenses, state.settlements);
   const transfers = suggestTransfers(balance);
@@ -57,9 +63,38 @@ export default function GroupDetail() {
   }
 
   async function remind(from: string, to: string, amount: number) {
-    const message = t('gx.remindMessage', { name: name(from), amount: money(amount), to: name(to), group: group!.name });
-    if (Platform.OS === 'web') await Clipboard.setStringAsync(message).catch(() => {});
-    else await Share.share({ message });
+    const toMe = group!.members.find((m) => m.id === to)?.isMe;
+    const pay = toMe ? paymentLines(state.profile.payment, amount, cur) : [];
+    const message = [t('gx.remindMessage', { name: realName(from), amount: money(amount), to: realName(to), group: group!.name }), ...(pay.length ? ['', t('pay.payMe'), ...pay] : [])].join('\n');
+    await shareText(message);
+  }
+
+  async function shareText(message: string) {
+    if (Platform.OS === 'web') {
+      await Clipboard.setStringAsync(message).catch(() => {});
+      setShareError(t('group.inviteCopied'));
+    } else await Share.share({ message });
+  }
+
+  /** Resumen para mandar al grupo: total, por persona, quién debe a quién y cómo pagarte. */
+  function summaryText(): string {
+    const lines = [
+      `${group!.emoji} ${group!.name}`,
+      group!.weights
+        ? t('settings.total', { amount: money(insights.total) })
+        : t('pay.summaryTotal', { total: money(insights.total), perPerson: money(Math.round(insights.total / Math.max(1, group!.members.length))) }),
+    ];
+    if (group!.weights) lines.push(group!.members.map((m) => `${realName(m.id)}: ${money(insights.shareOf[m.id] ?? 0)}`).join(' · '));
+    for (const c of insights.byCategory.slice(0, 5)) lines.push(`${categoryInfo(c.category).emoji} ${t(`cat.${c.category}`)}: ${money(c.total)}`);
+    if (transfers.length) {
+      lines.push('', `${t('group.settleTitle')}:`);
+      for (const tr of transfers) lines.push(`• ${realName(tr.from)} → ${realName(tr.to)}: ${money(tr.amount)}`);
+      const owedToMe = transfers.filter((tr) => group!.members.find((m) => m.id === tr.to)?.isMe).reduce((a, tr) => a + tr.amount, 0);
+      const pay = owedToMe ? paymentLines(state.profile.payment, owedToMe, cur) : [];
+      if (pay.length) lines.push('', t('pay.payMe'), ...pay);
+    }
+    lines.push('', t('pay.madeWith'));
+    return lines.join('\n');
   }
 
   async function invite() {
@@ -101,13 +136,17 @@ export default function GroupDetail() {
           {group.trip?.start ? ` · ${i18n.date(group.trip.start, { day: 'numeric', month: 'short' })}${group.trip.end ? ` – ${i18n.date(group.trip.end, { day: 'numeric', month: 'short' })}` : ''}` : ''}
         </Muted>
         <Text style={{ color: colors.text, fontSize: 34, fontWeight: '800' }}>{money(insights.total)}</Text>
-        {group.members.length > 1 ? (
+        {group.members.length > 1 && !group.weights ? (
           <Muted>{t('gx.costPerPerson', { amount: money(Math.round(insights.total / group.members.length)) })}</Muted>
         ) : null}
         {plan ? (
           <View style={{ gap: space.xs }}>
             <ProgressBar progress={plan.spent / plan.budget} />
-            <Text style={{ color: colors.text }}>{t('gx.budgetLeft', { amount: money(Math.max(0, plan.remaining)), budget: money(plan.budget) })}</Text>
+            <Text style={{ color: plan.remaining < 0 ? colors.danger : colors.text }}>
+              {plan.remaining < 0
+                ? t('pay.budgetOver', { amount: money(-plan.remaining), budget: money(plan.budget) })
+                : t('gx.budgetLeft', { amount: money(plan.remaining), budget: money(plan.budget) })}
+            </Text>
             {plan.remaining > 0 ? (
               <View style={{ backgroundColor: colors.bg, borderRadius: radius.md, padding: space.md, gap: 2 }}>
                 <Text style={{ color: colors.text }}>{t('gx.perDayAll', { amount: money(plan.perDay) })}</Text>
@@ -130,11 +169,8 @@ export default function GroupDetail() {
         </Card>
       ) : null}
 
-      <Row>
-        <View style={{ flex: 1 }}>
-          <Button label={t('group.addShared')} onPress={() => router.push({ pathname: '/add', params: { groupId: group.id } })} />
-        </View>
-      </Row>
+      <Button label={t('group.addShared')} onPress={() => router.push({ pathname: '/add', params: { groupId: group.id } })} />
+      {expenses.length > 0 ? <Button label={`📤 ${t('pay.share')}`} variant="secondary" onPress={() => shareText(summaryText())} /> : null}
 
       {/* Saldos y cómo quedar en paz */}
       <Card>

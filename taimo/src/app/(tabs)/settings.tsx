@@ -31,6 +31,12 @@ export default function Settings() {
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [pickingCurrency, setPickingCurrency] = useState(false);
+  const [payment, setPayment] = useState(state.profile.payment ?? {});
+  const savePayment = () =>
+    dispatch({
+      type: 'setPayment',
+      payment: Object.fromEntries(Object.entries(payment).map(([k, v]) => [k, (v ?? '').trim()]).filter(([, v]) => v)),
+    });
 
   const pref = state.profile.language ?? 'auto';
   const langInfo = LANGUAGES.find((l) => l.code === lang)!;
@@ -149,6 +155,15 @@ export default function Settings() {
           onClose={() => setPickingCurrency(false)}
           onSelect={(c) => dispatch({ type: 'setCurrency', currency: c })}
         />
+      </Card>
+
+      <Card>
+        <H2>{t('pay.title')}</H2>
+        <Muted>{t('pay.hint')}</Muted>
+        <Input label={t('pay.bizum')} value={payment.bizum ?? ''} keyboardType="phone-pad" placeholder="600 000 000" onChangeText={(v) => setPayment((p) => ({ ...p, bizum: v }))} onBlur={savePayment} />
+        <Input label={t('pay.iban')} value={payment.iban ?? ''} autoCapitalize="characters" autoCorrect={false} placeholder="ES00 0000 0000 0000 0000 0000" onChangeText={(v) => setPayment((p) => ({ ...p, iban: v }))} onBlur={savePayment} />
+        <Input label={t('pay.paypal')} value={payment.paypal ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="paypal.me/…" onChangeText={(v) => setPayment((p) => ({ ...p, paypal: v }))} onBlur={savePayment} />
+        <Input label={t('pay.revolut')} value={payment.revolut ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="@…" onChangeText={(v) => setPayment((p) => ({ ...p, revolut: v }))} onBlur={savePayment} />
       </Card>
 
       <Card>

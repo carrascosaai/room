@@ -62,6 +62,9 @@ export interface PeriodStats {
   total: Cents;
   /** Mismo periodo justo anterior (null en "todo"). */
   previousTotal: Cents | null;
+  /** El periodo está en curso y la comparación es con el mismo punto del anterior. */
+  partial: boolean;
+  previousRange: Range | null;
   buckets: Bucket[];
   byCategory: { category: CategoryId; total: Cents }[];
   biggest: Expense[];
@@ -98,6 +101,12 @@ export function periodStats(
   } else {
     range = rangeOf(period, anchor);
     previous = rangeOf(period, shiftAnchor(period, anchor, -1));
+  }
+  // Periodo en curso: se compara con el mismo tramo del anterior (del 1 al 14 contra del 1 al 14).
+  const partial = previous !== null && now >= range.start && now < range.end;
+  if (partial && previous) {
+    const elapsed = now.getTime() - range.start.getTime();
+    previous = { start: previous.start, end: new Date(Math.min(previous.end.getTime(), previous.start.getTime() + elapsed)) };
   }
 
   const current = mine.filter((e) => inRange(e, range));
@@ -138,6 +147,8 @@ export function periodStats(
     range,
     total,
     previousTotal: previous ? sum(mine.filter((e) => inRange(e, previous!)), state) : null,
+    partial,
+    previousRange: previous,
     buckets,
     byCategory,
     biggest,

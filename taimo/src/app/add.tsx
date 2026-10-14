@@ -59,6 +59,18 @@ export default function AddExpense() {
   const [cat, setCat] = useState<CategoryId>(editing?.category ?? 'otros');
   const [catTouched, setCatTouched] = useState(Boolean(editing));
   const [picking, setPicking] = useState(false);
+  const [day, setDay] = useState(() => new Date(editing?.date ?? Date.now()).toDateString());
+  const dayOptions = useMemo(() => {
+    const rel = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    const now = new Date();
+    const list = Array.from({ length: 7 }, (_, n) => {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - n, 12);
+      const label = n < 2 ? rel.format(-n, 'day') : i18n.date(d, { weekday: 'short', day: 'numeric' });
+      return { key: d.toDateString(), label: label.charAt(0).toUpperCase() + label.slice(1) };
+    });
+    if (editing && !list.some((o) => o.key === day)) list.push({ key: day, label: i18n.date(editing.date, { day: 'numeric', month: 'short' }) });
+    return list;
+  }, [locale]);
 
   const me = group?.members.find((m) => m.isMe)?.id;
   const [paidBy, setPaidBy] = useState<string | undefined>(editing?.paidBy);
@@ -107,7 +119,7 @@ export default function AddExpense() {
       amount,
       merchant: merchant.trim() || t(`cat.${shownCat}`),
       category: shownCat,
-      date: editing?.date ?? new Date().toISOString(),
+      date: dateFor(day, editing?.date),
       source: editing?.source ?? 'manual',
       note: editing?.note,
       groupId: group?.id,
@@ -160,6 +172,15 @@ export default function AddExpense() {
             {t('fx.approx', { amount: moneyIn(amount, base) })} · {t('fx.rate', { from: cur, rate: number(rate, 5), to: base })}
           </Muted>
         ) : null}
+      </View>
+
+      <View style={{ gap: space.xs }}>
+        <Muted>{t('ins.when')}</Muted>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+          {dayOptions.map((o) => (
+            <Chip key={o.key} label={o.label} selected={day === o.key} onPress={() => setDay(o.key)} />
+          ))}
+        </ScrollView>
       </View>
 
       <Input label={t('add.where')} placeholder={t('add.wherePlaceholder')} value={merchant} onChangeText={setMerchant} />
@@ -285,4 +306,15 @@ export default function AddExpense() {
       <CurrencyPicker visible={picking} value={cur} onClose={() => setPicking(false)} onSelect={setCur} />
     </Screen>
   );
+}
+
+/** Fecha del gasto: hoy a la hora de ahora; otro día, a la hora original o a mediodía. */
+function dateFor(dayKey: string, original?: string): string {
+  if (original && new Date(original).toDateString() === dayKey) return original;
+  const now = new Date();
+  if (now.toDateString() === dayKey) return now.toISOString();
+  const d = new Date(dayKey);
+  const t = original ? new Date(original) : null;
+  d.setHours(t ? t.getHours() : 12, t ? t.getMinutes() : 0);
+  return d.toISOString();
 }

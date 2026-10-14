@@ -38,8 +38,10 @@ describe('estadísticas por periodo', () => {
     expect(s.total).toBe(2000);
     expect(s.buckets[9].total).toBe(500);
     expect(s.buckets[13].total).toBe(1500);
-    expect(s.previousTotal).toBe(2000); // ayer
-    expect(changePct(s.total, s.previousTotal)).toBe(0);
+    // Hoy va por las 18:00: se compara con ayer hasta las 18:00 (el gasto de las 20:00 no cuenta).
+    expect(s.partial).toBe(true);
+    expect(s.previousTotal).toBe(0);
+    expect(changePct(s.total, s.previousTotal)).toBeNull();
   });
 
   it('semana: 7 días', () => {
@@ -51,8 +53,16 @@ describe('estadísticas por periodo', () => {
     const s = periodStats(state, 'month', now, now);
     expect(s.buckets).toHaveLength(31);
     expect(s.total).toBe(5000);
-    expect(s.previousTotal).toBe(3000);
-    expect(changePct(s.total, s.previousTotal)).toBe(67);
+    // Del 1 al 14 de octubre contra del 1 al 14 de septiembre: el gasto del 20 de septiembre no cuenta.
+    expect(s.previousTotal).toBe(0);
+    const withEarly = { ...state, expenses: [...state.expenses, e(new Date(2026, 8, 3, 12), 2500)] };
+    const s2 = periodStats(withEarly, 'month', now, now);
+    expect(s2.previousTotal).toBe(2500);
+    expect(changePct(s2.total, s2.previousTotal)).toBe(100);
+    // Un mes ya cerrado se compara entero con el anterior.
+    const sept = periodStats(withEarly, 'month', new Date(2026, 8, 10), now);
+    expect(sept.partial).toBe(false);
+    expect(sept.total).toBe(5500);
     expect(s.byCategory.map((c) => c.category)).toEqual(['ocio', 'super', 'comer']);
     expect(s.biggest[0].amount).toBe(2000);
     expect(s.days).toBe(14); // la media cuenta solo los días que han pasado
