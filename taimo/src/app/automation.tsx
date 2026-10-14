@@ -1,7 +1,7 @@
 import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { AppState as RNAppState, Platform, Text, View } from 'react-native';
+import { AppState as RNAppState, Platform, Switch, Text, View } from 'react-native';
 
 import { hasNotificationAccess, nativeCaptureAvailable, openNotificationAccessSettings } from 'taimo-capture';
 
@@ -123,6 +123,36 @@ function CaptureApps() {
   );
 }
 
+/** iPhone: lo que pasa con la tarjeta de plástico y cómo no perder esos pagos. */
+function PlasticCard() {
+  const { state, dispatch } = useStore();
+  const { t } = useI18n();
+  const on = !!state.profile.nightly;
+  return (
+    <Card style={{ borderColor: colors.warning }}>
+      <Row style={{ alignItems: 'flex-start' }}>
+        <Text style={{ fontSize: 22 }}>💳</Text>
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={{ color: colors.text, fontWeight: '700', fontSize: 17 }}>{t('nightly.cardTitle')}</Text>
+          <Text style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}>{t('nightly.cardText')}</Text>
+        </View>
+      </Row>
+      <Row>
+        <Text style={{ color: colors.text, flex: 1, fontSize: 16 }}>{t('nightly.toggle')}</Text>
+        <Switch
+          accessibilityLabel={t('nightly.toggle')}
+          value={on}
+          onValueChange={async (v) => {
+            if (v) await ensureNotificationPermission().catch(() => false);
+            dispatch({ type: 'setNightly', on: v });
+          }}
+          trackColor={{ true: colors.primary, false: colors.border }}
+        />
+      </Row>
+    </Card>
+  );
+}
+
 export default function Automation() {
   const { t } = useI18n();
   const isAndroid = Platform.OS === 'android';
@@ -152,6 +182,7 @@ export default function Automation() {
               <Text style={{ color: colors.text, flex: 1, fontSize: 15, lineHeight: 21 }}>{t('cap.iosWorld')}</Text>
             </Row>
           </Card>
+          <PlasticCard />
           {nativeCaptureAvailable ? <Steps steps={STEPS_INTENT} /> : null}
           {nativeCaptureAvailable ? <H2>{t('automation.fallbackTitle')}</H2> : null}
           <Steps steps={STEPS_URL} />

@@ -589,6 +589,18 @@ const en = {
     hide: "Hide",
     privacy: "🔒 Taimo works this out on your phone from your payments. Nothing is sent anywhere.",
   },
+  paste: {
+    button: "📋 Paste bank notice",
+    done: "Done: we filled in the expense from the notice you copied. Check it and save.",
+    none: "We couldn't find an amount in what you copied. Copy the bank notice or text message and try again.",
+  },
+  nightly: {
+    cardTitle: "Do you sometimes pay with the plastic card?",
+    cardText: "iPhone doesn't see those payments (only Apple Pay ones). So you don't miss any: copy your bank's notice and tap «Paste bank notice» when adding an expense, or turn on the nightly reminder.",
+    toggle: "Remind me every night at 21:30",
+    title: "Anything to log from today?",
+    body: "If you paid with your plastic card, log it in one tap.",
+  },
   pot: {
     name: "Pot",
     title: "Shared pot",

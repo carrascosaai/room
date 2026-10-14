@@ -10,6 +10,8 @@ import { categorize } from '@/domain/categorize';
 import { exactRemainder, POT, splitByItems, splitByWeights, splitEqually } from '@/domain/groups';
 import { currencyDecimals, parseAmount } from '@/domain/money';
 import { parseReceipt } from '@/domain/receipt';
+import { parsePastedPayment } from '@/domain/notifications';
+import * as Clipboard from 'expo-clipboard';
 import type { CategoryId, Cents, Expense, ReceiptItem, SplitMode } from '@/domain/types';
 import { convert, rateBetween } from '@/fx/fx';
 import { useRates } from '@/fx/useRates';
@@ -144,6 +146,20 @@ export default function AddExpense() {
     setScanMessage(t('scan.done'));
   }
 
+  /** Pegar el aviso del banco (o un SMS, o un correo): se rellena importe, comercio y moneda. */
+  async function pasteNotice() {
+    const text = await Clipboard.getStringAsync().catch(() => '');
+    const r = parsePastedPayment(text ?? '', { home: base, learned: state.learnedCategories });
+    if (!r) {
+      setScanMessage(t('paste.none'));
+      return;
+    }
+    setAmountText(fmtIn(r.amount, r.currency));
+    if (r.merchant) setMerchant(r.merchant.charAt(0) + r.merchant.slice(1).toLowerCase());
+    if (r.currency !== cur) setCur(r.currency);
+    setScanMessage(t('paste.done'));
+  }
+
   function askScan() {
     if (Platform.OS === 'web') return scan('library');
     Alert.alert(t('scan.button'), undefined, [
@@ -268,6 +284,8 @@ export default function AddExpense() {
           </Muted>
         ) : null}
       </View>
+
+      {!editing ? <Button label={t('paste.button')} variant="secondary" onPress={() => pasteNotice().catch(() => {})} /> : null}
 
       {showMore ? (
         <View style={{ gap: space.md }}>

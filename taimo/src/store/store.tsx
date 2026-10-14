@@ -73,6 +73,7 @@ export type Action =
   /** Aviso «ya he pagado» de un comensal. */
   | { type: 'tableClaim'; claim: TableClaim }
   /** «Taimo te devuelve dinero»: «no es nada» o «ya lo he recuperado». */
+  | { type: 'setNightly'; on: boolean }
   | { type: 'moneyBackDismiss'; id: string }
   | { type: 'moneyBackRecovered'; id: string; amount: Cents }
   | { type: 'importExpenses'; expenses: Expense[] }
@@ -135,6 +136,8 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, goals: (state.goals ?? []).filter((g) => g.id !== action.id) };
     case 'setTheme':
       return { ...state, profile: { ...state.profile, theme: action.theme } };
+    case 'setNightly':
+      return { ...state, profile: { ...state.profile, nightly: action.on } };
     case 'setLock':
       return { ...state, profile: { ...state.profile, lock: action.lock } };
     case 'setPayment':

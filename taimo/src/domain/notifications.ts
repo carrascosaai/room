@@ -158,3 +158,20 @@ export function parsePaymentNotification(n: RawNotification, opts: ParseOptions 
     app: n.package,
   };
 }
+
+/**
+ * Texto pegado por el usuario (el aviso del banco, un SMS, un correo): como lo
+ * pega a propósito, basta con encontrar un importe. Si además parece un pago
+ * con tarjeta, se saca también el comercio y la categoría.
+ */
+export function parsePastedPayment(text: string, opts: ParseOptions = {}): { amount: number; currency: string; merchant: string | null; category?: CategoryId } | null {
+  const clean = text.trim().slice(0, 600);
+  if (!clean) return null;
+  const strict = parsePaymentNotification({ package: 'clipboard', title: '', text: clean, postedAt: new Date().toISOString() }, { ...opts, defaultMerchant: '' });
+  if (strict) return { amount: strict.amount, currency: strict.currency, merchant: strict.merchant || null, category: strict.category };
+  const money = findMoney(clean, opts.home);
+  if (!money) return null;
+  const [first, ...rest] = clean.split('\n');
+  const merchant = extractMerchant(first, rest.join('\n'), money.raw);
+  return { amount: money.amount, currency: money.currency, merchant, category: merchant ? categorize(merchant, opts.learned ?? {}) : undefined };
+}

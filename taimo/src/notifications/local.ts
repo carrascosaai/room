@@ -6,6 +6,7 @@ import type { I18n } from '@/i18n';
 import { weeklySummaryText } from '@/ui/messages';
 
 const WEEKLY_ID = 'taimo-weekly-summary';
+const NIGHTLY_ID = 'taimo-nightly';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -89,4 +90,31 @@ export async function scheduleWishReminder(wish: { id: string; name: string; amo
     content: { title: i18n.t('wish.notifTitle', { name: wish.name }), body: i18n.t('wish.notifBody', { amount: i18n.money(wish.amount) }), data: { url: 'taimo://wishlist' } },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
   });
+}
+
+/**
+ * iPhone no ve los pagos con la tarjeta de plástico: un aviso cada noche a las
+ * 21:30 para apuntarlos en un toque (abre «Añadir gasto»).
+ */
+export async function scheduleNightlyReminder(on: boolean, i18n: I18n) {
+  if (Platform.OS === 'web') return;
+  await Notifications.cancelScheduledNotificationAsync(NIGHTLY_ID).catch(() => {});
+  if (!on) return;
+  const perm = await Notifications.getPermissionsAsync();
+  if (!perm.granted) return;
+  await Notifications.scheduleNotificationAsync({
+    identifier: NIGHTLY_ID,
+    content: { title: i18n.t('nightly.title'), body: i18n.t('nightly.body'), data: { url: '/add' } },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: 21, minute: 30 },
+  });
+}
+
+/** Al tocar un aviso con `data.url`, abre esa pantalla. */
+export function onNotificationOpen(open: (url: string) => void): () => void {
+  if (Platform.OS === 'web') return () => {};
+  const sub = Notifications.addNotificationResponseReceivedListener((r) => {
+    const url = r.notification.request.content.data?.url;
+    if (typeof url === 'string' && url.startsWith('/')) open(url);
+  });
+  return () => sub.remove();
 }

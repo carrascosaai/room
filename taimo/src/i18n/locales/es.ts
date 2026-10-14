@@ -583,6 +583,18 @@ const es: Translation = {
     hide: "Ocultar",
     privacy: "🔒 Taimo lo calcula en tu móvil con tus pagos. No se envía nada a ningún sitio.",
   },
+  paste: {
+    button: "📋 Pegar aviso del banco",
+    done: "Listo: hemos rellenado el gasto con el aviso que copiaste. Revísalo y guarda.",
+    none: "No hemos encontrado un importe en lo que copiaste. Copia el aviso o el SMS del banco y vuelve a probar.",
+  },
+  nightly: {
+    cardTitle: "¿Pagas a veces con la tarjeta de plástico?",
+    cardText: "El iPhone no se entera de esos pagos (solo de los de Apple Pay). Para no perder ninguno: copia el aviso de tu banco y pulsa «Pegar aviso del banco» al añadir un gasto, o activa el recordatorio de cada noche.",
+    toggle: "Recordármelo cada noche a las 21:30",
+    title: "¿Algo que apuntar de hoy?",
+    body: "Si has pagado con la tarjeta de plástico, apúntalo en un toque.",
+  },
   pot: {
     name: "Bote",
     title: "Bote común",

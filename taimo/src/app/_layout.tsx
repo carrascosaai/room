@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
@@ -16,7 +16,7 @@ import { splitByWeights, splitEqually } from '@/domain/groups';
 import { useAutoRefreshRates } from '@/fx/useRates';
 import { useWidgetSync } from '@/widget/useWidgetSync';
 import { useI18n } from '@/i18n';
-import { scheduleSubscriptionAlerts, scheduleWeeklySummary } from '@/notifications/local';
+import { onNotificationOpen, scheduleNightlyReminder, scheduleSubscriptionAlerts, scheduleWeeklySummary } from '@/notifications/local';
 import { StoreProvider, useStore } from '@/store/store';
 import { useGroupSync } from '@/sync/useGroupSync';
 import { applyTheme, colors } from '@/ui/theme';
@@ -61,6 +61,12 @@ function BackgroundWork() {
   useEffect(() => {
     if (state.onboarded) scheduleWeeklySummary(state, i18n).catch(() => {});
   }, [summaryKey, state.onboarded]);
+
+  // Recordatorio de cada noche (iPhone, tarjeta de plástico) y abrir la pantalla al tocar un aviso.
+  useEffect(() => {
+    if (state.onboarded) scheduleNightlyReminder(!!state.profile.nightly, i18n).catch(() => {});
+  }, [state.profile.nightly, state.onboarded, i18n.lang]);
+  useEffect(() => onNotificationOpen((url) => router.push(url as never)), []);
   return null;
 }
 

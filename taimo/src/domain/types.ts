@@ -154,6 +154,8 @@ export interface Profile {
   paymentAt?: string;
   /** Pedir Face ID / huella / código al abrir la app. */
   lock?: boolean;
+  /** iPhone: recordatorio cada noche para apuntar lo pagado con la tarjeta de plástico. */
+  nightly?: boolean;
   /** Apariencia: la del móvil, clara u oscura. */
   theme?: 'auto' | 'light' | 'dark';
   /** Para traducir gastos a horas de trabajo (opcional, solo en tu móvil). */
