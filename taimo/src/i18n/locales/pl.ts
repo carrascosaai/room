@@ -355,6 +355,27 @@ const pl: Translation = {
     resume: "Zapisuj znowu",
     iosWorld: "Działa z każdą kartą w Wallet, z dowolnego banku i kraju, w każdej walucie: jeśli płacisz w jenach, Taimo przelicza na twoją walutę.",
   },
+  backup: {
+    title: "Kopia w pliku",
+    text: "Zapisz wszystkie dane w pliku (Drive, iCloud, e-mail…) i przywróć je na innym telefonie, bez konta.",
+    export: "💾 Zapisz kopię",
+    import: "Przywróć z pliku",
+    invalid: "Ten plik nie jest kopią Taimo.",
+    confirm: "Dane na tym telefonie zostaną zastąpione kopią z {date}. Kontynuować?",
+  },
+  lock: {
+    title: "Zablokuj Taimo",
+    text: "Wymagaj Face ID, odcisku palca lub kodu telefonu przy otwieraniu.",
+    locked: "Taimo jest zablokowane",
+    unlock: "Odblokuj",
+    reason: "Odblokuj Taimo",
+    unavailable: "Skonfiguruj Face ID, odcisk palca lub blokadę ekranu w telefonie, aby z tego korzystać.",
+  },
+  smart: {
+    suggest: "✨ Zaproponuj na podstawie moich wydatków",
+    text: "Średnia z ostatnich miesięcy, zaokrąglona w górę. Zmień dowolną kwotę.",
+    none: "Za mało wydatków: zaimportuj wyciąg lub używaj Taimo przez kilka tygodni.",
+  },
   csv: { date: 'Data', merchant: 'Sprzedawca', category: 'Kategoria', total: 'Kwota całkowita', myShare: 'Moja część', group: 'Grupa', source: 'Źródło', note: 'Notatka' },
 };
 

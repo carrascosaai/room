@@ -355,6 +355,27 @@ const fi: Translation = {
     resume: "Kirjaa taas",
     iosWorld: "Toimii minkä tahansa Walletin kortin kanssa, mistä tahansa pankista ja maasta, millä tahansa valuutalla: jos maksat jeneissä, Taimo muuntaa sen omaan valuuttaasi.",
   },
+  backup: {
+    title: "Varmuuskopio tiedostoon",
+    text: "Tallenna kaikki tietosi tiedostoon (Drive, iCloud, sähköposti…) ja palauta ne toiseen puhelimeen ilman tiliä.",
+    export: "💾 Tallenna varmuuskopio",
+    import: "Palauta tiedostosta",
+    invalid: "Tiedosto ei ole Taimon varmuuskopio.",
+    confirm: "Tämän puhelimen tiedot korvataan varmuuskopiolla ({date}). Jatketaanko?",
+  },
+  lock: {
+    title: "Lukitse Taimo",
+    text: "Pyydä Face ID, sormenjälki tai puhelimen koodi, kun sovellus avataan.",
+    locked: "Taimo on lukittu",
+    unlock: "Avaa",
+    reason: "Avaa Taimo",
+    unavailable: "Ota puhelimessa käyttöön Face ID, sormenjälki tai näytön lukitus käyttääksesi tätä.",
+  },
+  smart: {
+    suggest: "✨ Ehdota kulutukseni mukaan",
+    text: "Viime kuukausiesi keskiarvo ylöspäin pyöristettynä. Muuta mitä tahansa lukua.",
+    none: "Kuluja ei ole vielä tarpeeksi: tuo tiliote tai käytä Taimoa pari viikkoa.",
+  },
   csv: { date: 'Päivämäärä', merchant: 'Kauppias', category: 'Luokka', total: 'Kokonaissumma', myShare: 'Oma osuus', group: 'Ryhmä', source: 'Lähde', note: 'Huomautus' },
 };
 

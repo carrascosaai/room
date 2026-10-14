@@ -355,6 +355,27 @@ const sv: Translation = {
     resume: "Bokför igen",
     iosWorld: "Fungerar med alla kort i din Wallet, från alla banker och länder, i alla valutor: betalar du i yen räknar Taimo om till din valuta.",
   },
+  backup: {
+    title: "Säkerhetskopia i en fil",
+    text: "Spara all din data i en fil (Drive, iCloud, mejl…) och hämta den på en annan mobil, utan konto.",
+    export: "💾 Spara kopia",
+    import: "Återställ från fil",
+    invalid: "Den filen är ingen Taimo-kopia.",
+    confirm: "Datan på den här mobilen ersätts med kopian från {date}. Fortsätta?",
+  },
+  lock: {
+    title: "Lås Taimo",
+    text: "Kräv Face ID, fingeravtryck eller mobilens kod när appen öppnas.",
+    locked: "Taimo är låst",
+    unlock: "Lås upp",
+    reason: "Lås upp Taimo",
+    unavailable: "Ställ in Face ID, fingeravtryck eller skärmlås på mobilen för att använda detta.",
+  },
+  smart: {
+    suggest: "✨ Föreslå utifrån det jag spenderar",
+    text: "Snittet för dina senaste månader, avrundat uppåt. Ändra vilken siffra du vill.",
+    none: "Inte tillräckligt med utgifter än: importera ett kontoutdrag eller använd Taimo några veckor.",
+  },
   csv: { date: 'Datum', merchant: 'Handlare', category: 'Kategori', total: 'Totalbelopp', myShare: 'Min del', group: 'Grupp', source: 'Källa', note: 'Anteckning' },
 };
 

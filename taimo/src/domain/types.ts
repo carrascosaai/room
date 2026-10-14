@@ -129,6 +129,8 @@ export interface Profile {
   account?: { id: string; email?: string; provider: 'apple' | 'google' };
   /** Cómo te pagan los demás: se añade a los recordatorios de deudas. */
   payment?: PaymentInfo;
+  /** Pedir Face ID / huella / código al abrir la app. */
+  lock?: boolean;
 }
 
 export interface PaymentInfo {

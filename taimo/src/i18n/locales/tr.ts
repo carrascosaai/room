@@ -355,6 +355,27 @@ const tr: Translation = {
     resume: "Yeniden kaydet",
     iosWorld: "Wallet'taki her kartla, her bankadan ve ülkeden, her para biriminde çalışır: yen ile ödersen Taimo senin para birimine çevirir.",
   },
+  backup: {
+    title: "Dosyaya yedek",
+    text: "Tüm verilerini bir dosyaya kaydet (Drive, iCloud, e-posta…) ve hesap olmadan başka bir telefonda geri yükle.",
+    export: "💾 Yedeği kaydet",
+    import: "Dosyadan geri yükle",
+    invalid: "Bu dosya bir Taimo yedeği değil.",
+    confirm: "Bu telefondaki veriler {date} tarihli yedekle değiştirilecek. Devam edilsin mi?",
+  },
+  lock: {
+    title: "Taimo'yu kilitle",
+    text: "Açılışta Face ID, parmak izi veya telefon kodunu iste.",
+    locked: "Taimo kilitli",
+    unlock: "Kilidi aç",
+    reason: "Taimo'nun kilidini aç",
+    unavailable: "Bunu kullanmak için telefonunda Face ID, parmak izi veya ekran kilidi ayarla.",
+  },
+  smart: {
+    suggest: "✨ Harcamalarıma göre öner",
+    text: "Son aylarının ortalaması, yukarı yuvarlanmış. İstediğin tutarı değiştir.",
+    none: "Henüz yeterli harcama yok: bir ekstre içe aktar veya Taimo'yu birkaç hafta kullan.",
+  },
   csv: { date: 'Tarih', merchant: 'Satıcı', category: 'Kategori', total: 'Toplam tutar', myShare: 'Benim payım', group: 'Grup', source: 'Kaynak', note: 'Not' },
 };
 

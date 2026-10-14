@@ -355,6 +355,27 @@ const da: Translation = {
     resume: "Notér igen",
     iosWorld: "Virker med alle kort i din Wallet, fra alle banker og lande, i alle valutaer: betaler du i yen, omregner Taimo til din valuta.",
   },
+  backup: {
+    title: "Backup i en fil",
+    text: "Gem alle dine data i en fil (Drive, iCloud, mail…) og hent dem på en anden telefon, uden konto.",
+    export: "💾 Gem backup",
+    import: "Gendan fra fil",
+    invalid: "Den fil er ikke en Taimo-backup.",
+    confirm: "Dataene på denne telefon erstattes med backuppen fra {date}. Fortsæt?",
+  },
+  lock: {
+    title: "Lås Taimo",
+    text: "Kræv Face ID, fingeraftryk eller telefonens kode, når appen åbnes.",
+    locked: "Taimo er låst",
+    unlock: "Lås op",
+    reason: "Lås Taimo op",
+    unavailable: "Opsæt Face ID, fingeraftryk eller skærmlås på telefonen for at bruge dette.",
+  },
+  smart: {
+    suggest: "✨ Foreslå ud fra mit forbrug",
+    text: "Gennemsnittet af dine seneste måneder, rundet op. Ret det tal, du vil.",
+    none: "Ikke nok udgifter endnu: importér et kontoudtog eller brug Taimo et par uger.",
+  },
   csv: { date: 'Dato', merchant: 'Forretning', category: 'Kategori', total: 'Samlet beløb', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Note' },
 };
 

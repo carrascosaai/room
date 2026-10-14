@@ -47,7 +47,13 @@
       ],
       "./plugins/withTaimoAppIntent",
       "expo-localization",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Taimo uses Face ID to keep your spending private."
+        }
+      ]
     ],
     "scheme": "taimo",
     "backgroundColor": "#0A0F0D",

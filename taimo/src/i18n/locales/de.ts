@@ -355,6 +355,27 @@ const de: Translation = {
     resume: "Wieder erfassen",
     iosWorld: "Funktioniert mit jeder Karte in deinem Wallet, von jeder Bank und aus jedem Land, in jeder Währung: Zahlst du in Yen, rechnet Taimo in deine Währung um.",
   },
+  backup: {
+    title: "Sicherung als Datei",
+    text: "Speichere alle Daten in einer Datei (Drive, iCloud, E-Mail…) und hol sie auf einem anderen Handy zurück, ganz ohne Konto.",
+    export: "💾 Sicherung speichern",
+    import: "Aus Datei wiederherstellen",
+    invalid: "Diese Datei ist keine Taimo-Sicherung.",
+    confirm: "Die Daten auf diesem Handy werden durch die Sicherung vom {date} ersetzt. Weiter?",
+  },
+  lock: {
+    title: "Taimo sperren",
+    text: "Beim Öffnen Face ID, Fingerabdruck oder den Handy-Code verlangen.",
+    locked: "Taimo ist gesperrt",
+    unlock: "Entsperren",
+    reason: "Taimo entsperren",
+    unavailable: "Richte Face ID, einen Fingerabdruck oder eine Displaysperre ein, um das zu nutzen.",
+  },
+  smart: {
+    suggest: "✨ Aus meinen Ausgaben vorschlagen",
+    text: "Der Durchschnitt deiner letzten Monate, aufgerundet. Ändere jede Zahl, wie du willst.",
+    none: "Noch zu wenige Ausgaben: Importiere einen Kontoauszug oder nutze Taimo ein paar Wochen.",
+  },
   csv: { date: 'Datum', merchant: 'Händler', category: 'Kategorie', total: 'Gesamtbetrag', myShare: 'Mein Anteil', group: 'Gruppe', source: 'Quelle', note: 'Notiz' },
 };
 

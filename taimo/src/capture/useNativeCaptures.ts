@@ -3,16 +3,22 @@ import { AppState as RNAppState, Platform } from 'react-native';
 
 import { drainPending } from 'taimo-capture';
 
+import { categoryStatus } from '@/domain/budget';
 import { parseCaptureParams, type CapturePayload } from '@/domain/capture';
+import { budgetCrossings } from '@/domain/insights';
 import { parsePaymentNotification, type RawNotification } from '@/domain/notifications';
+import type { I18n } from '@/i18n';
+import { notifyNow } from '@/notifications/local';
 import { expenseFromCapture, reducer, useStore } from '@/store/store';
+import { purchaseMessage } from '@/ui/messages';
 
 /**
  * Convierte en gastos los pagos que el móvil ha guardado mientras Taimo estaba
  * cerrado: en iPhone los deja la acción "Log payment in Taimo" de Atajos, en
  * Android el lector de notificaciones. Se ejecuta al abrir la app y al volver.
  */
-export function useNativeCaptures(defaultMerchant: string, onCaptured?: (count: number) => void) {
+export function useNativeCaptures(i18n: I18n, onCaptured?: (count: number) => void) {
+  const defaultMerchant = i18n.t('capture.defaultMerchant');
   const { state, dispatch } = useStore();
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -20,7 +26,8 @@ export function useNativeCaptures(defaultMerchant: string, onCaptured?: (count: 
   const drain = useCallback(() => {
     const items = drainPending();
     if (items.length === 0) return;
-    let current = stateRef.current;
+    const before = stateRef.current;
+    let current = before;
     let added = 0;
     for (const item of items) {
       let payload: CapturePayload | null;
@@ -43,8 +50,13 @@ export function useNativeCaptures(defaultMerchant: string, onCaptured?: (count: 
       current = reducer(current, action);
       added++;
     }
-    if (added > 0) onCaptured?.(added);
-  }, [dispatch, onCaptured, defaultMerchant]);
+    if (added === 0) return;
+    onCaptured?.(added);
+    // Si estos pagos te han hecho llegar al 80 % o pasarte en alguna categoría, avisa.
+    for (const alert of budgetCrossings(before, current)) {
+      notifyNow('Taimo', purchaseMessage(i18n, categoryStatus(current, alert.category))).catch(() => {});
+    }
+  }, [dispatch, onCaptured, defaultMerchant, i18n]);
 
   useEffect(() => {
     drain();

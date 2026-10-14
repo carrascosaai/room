@@ -1,11 +1,12 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { ActivityIndicator, AppState as RNAppState, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { setIgnoredApps } from 'taimo-capture';
 
+import { unlock } from '@/auth/lock';
 import { useAccountSync } from '@/auth/useAccountSync';
 import { useNativeCaptures } from '@/capture/useNativeCaptures';
 import { dueRecurring } from '@/domain/groupInsights';
@@ -21,7 +22,7 @@ import { colors } from '@/ui/theme';
 function BackgroundWork() {
   const { state, dispatch } = useStore();
   const i18n = useI18n();
-  useNativeCaptures(i18n.t('capture.defaultMerchant'));
+  useNativeCaptures(i18n);
   useGroupSync();
   useAccountSync();
   useAutoRefreshRates();
@@ -63,7 +64,7 @@ function RootStack() {
     );
   }
   return (
-    <>
+    <LockGate>
       <BackgroundWork />
       <Stack
         screenOptions={{
@@ -86,6 +87,60 @@ function RootStack() {
         <Stack.Screen name="automation" options={{ headerShown: true, title: t('automation.screenTitle') }} />
         <Stack.Screen name="group/[id]" options={{ headerShown: true, title: '' }} />
       </Stack>
+    </LockGate>
+  );
+}
+
+/**
+ * Bloqueo con Face ID / huella / código: al abrir la app y al volver tras más
+ * de un minuto fuera. Tapa todo hasta que se desbloquea.
+ */
+function LockGate({ children }: { children: ReactNode }) {
+  const { state } = useStore();
+  const { t } = useI18n();
+  const enabled = !!state.profile.lock && Platform.OS !== 'web';
+  const [locked, setLocked] = useState(enabled);
+  const leftAt = useRef<number | null>(null);
+  const tryUnlock = useCallback(async () => {
+    if (await unlock(t('lock.reason'))) setLocked(false);
+  }, [t]);
+
+  useEffect(() => {
+    if (enabled && locked) tryUnlock();
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) {
+      setLocked(false);
+      return;
+    }
+    const sub = RNAppState.addEventListener('change', (s) => {
+      if (s === 'background') leftAt.current = Date.now();
+      if (s === 'active' && leftAt.current && Date.now() - leftAt.current > 60_000) {
+        leftAt.current = null;
+        setLocked(true);
+        tryUnlock();
+      }
+    });
+    return () => sub.remove();
+  }, [enabled, tryUnlock]);
+
+  return (
+    <>
+      {children}
+      {enabled && locked ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 }]}>
+          <Text style={{ fontSize: 48 }}>🔒</Text>
+          <Text style={{ color: colors.text, fontSize: 20, fontWeight: '700' }}>{t('lock.locked')}</Text>
+          <Pressable
+            onPress={tryUnlock}
+            accessibilityRole="button"
+            style={{ backgroundColor: colors.primary, borderRadius: 999, paddingHorizontal: 28, paddingVertical: 14 }}
+          >
+            <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 16 }}>{t('lock.unlock')}</Text>
+          </Pressable>
+        </View>
+      ) : null}
     </>
   );
 }

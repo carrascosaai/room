@@ -355,6 +355,27 @@ const pt: Translation = {
     resume: "Voltar a registar",
     iosWorld: "Funciona com qualquer cartão na tua Wallet, de qualquer banco e país, em qualquer moeda: se pagares em ienes, o Taimo converte para a tua moeda.",
   },
+  backup: {
+    title: "Cópia num ficheiro",
+    text: "Guarda todos os teus dados num ficheiro (Drive, iCloud, email…) e recupera-os noutro telemóvel, sem conta.",
+    export: "💾 Guardar cópia",
+    import: "Recuperar de um ficheiro",
+    invalid: "Esse ficheiro não é uma cópia do Taimo.",
+    confirm: "Os dados deste telemóvel serão substituídos pela cópia de {date}. Continuar?",
+  },
+  lock: {
+    title: "Bloquear o Taimo",
+    text: "Pedir Face ID, impressão digital ou o código do telemóvel ao abrir.",
+    locked: "O Taimo está bloqueado",
+    unlock: "Desbloquear",
+    reason: "Desbloqueia o Taimo",
+    unavailable: "Configura Face ID, uma impressão digital ou um bloqueio de ecrã para usar isto.",
+  },
+  smart: {
+    suggest: "✨ Propor segundo o que gasto",
+    text: "A média dos teus últimos meses, arredondada para cima. Muda o valor que quiseres.",
+    none: "Ainda não há despesas suficientes: importa um extrato ou usa o Taimo umas semanas.",
+  },
   csv: { date: 'Data', merchant: 'Comerciante', category: 'Categoria', total: 'Valor total', myShare: 'A minha parte', group: 'Grupo', source: 'Origem', note: 'Nota' },
 };
 

@@ -355,6 +355,27 @@ const eu: Translation = {
     resume: "Berriz apuntatu",
     iosWorld: "Wallet-eko edozein txartelekin dabil, edozein banku eta herrialdetakoa, edozein dibisatan: yenetan ordaintzen baduzu, Taimok zure dibisara pasatzen du.",
   },
+  backup: {
+    title: "Kopia fitxategi batean",
+    text: "Gorde datu guztiak fitxategi batean (Drive, iCloud, posta…) eta berreskuratu beste mugikor batean, konturik gabe.",
+    export: "💾 Gorde kopia",
+    import: "Berreskuratu fitxategitik",
+    invalid: "Fitxategi hori ez da Taimoren kopia.",
+    confirm: "Mugikor honetako datuak {date}(e)ko kopiarekin ordeztuko dira. Jarraitu?",
+  },
+  lock: {
+    title: "Blokeatu Taimo",
+    text: "Eskatu Face ID, hatz-marka edo mugikorraren kodea aplikazioa irekitzean.",
+    locked: "Taimo blokeatuta dago",
+    unlock: "Desblokeatu",
+    reason: "Desblokeatu Taimo",
+    unavailable: "Konfiguratu Face ID, hatz-marka edo pantaila-blokeoa mugikorrean hau erabiltzeko.",
+  },
+  smart: {
+    suggest: "✨ Proposatu gastatzen dudanaren arabera",
+    text: "Azken hilabeteetako batez bestekoa, gorantz biribilduta. Aldatu nahi duzun zenbakia.",
+    none: "Oraindik ez dago gastu nahikorik: inportatu laburpen bat edo erabili Taimo aste batzuetan.",
+  },
   csv: { date: 'Data', merchant: 'Denda', category: 'Kategoria', total: 'Zenbateko osoa', myShare: 'Nire zatia', group: 'Taldea', source: 'Jatorria', note: 'Oharra' },
 };
 

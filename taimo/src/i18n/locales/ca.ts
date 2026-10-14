@@ -355,6 +355,27 @@ const ca: Translation = {
     resume: "Tornar a apuntar",
     iosWorld: "Funciona amb qualsevol targeta que tinguis a Wallet, de qualsevol banc i país, i en qualsevol moneda: si pagues en iens, Taimo ho passa a la teva moneda.",
   },
+  backup: {
+    title: "Còpia en un fitxer",
+    text: "Desa totes les dades en un fitxer (Drive, iCloud, correu…) i recupera-les en un altre mòbil, sense compte.",
+    export: "💾 Desar còpia",
+    import: "Recuperar d’un fitxer",
+    invalid: "Aquest fitxer no és una còpia de Taimo.",
+    confirm: "Les dades d’aquest mòbil se substituiran per la còpia del {date}. Continuar?",
+  },
+  lock: {
+    title: "Bloquejar Taimo",
+    text: "Demana Face ID, empremta o el codi del mòbil en obrir l’app.",
+    locked: "Taimo està bloquejat",
+    unlock: "Desbloquejar",
+    reason: "Desbloqueja Taimo",
+    unavailable: "Configura Face ID, una empremta o un bloqueig de pantalla al mòbil per fer-ho servir.",
+  },
+  smart: {
+    suggest: "✨ Proposar segons el que gasto",
+    text: "La mitjana dels darrers mesos, arrodonida cap amunt. Canvia la xifra que vulguis.",
+    none: "Encara no hi ha prou despeses: importa un extracte o fes servir Taimo un parell de setmanes.",
+  },
   csv: { date: 'Data', merchant: 'Comerç', category: 'Categoria', total: 'Import total', myShare: 'La meva part', group: 'Grup', source: 'Origen', note: 'Nota' },
 };
 

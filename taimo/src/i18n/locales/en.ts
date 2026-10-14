@@ -384,6 +384,27 @@ const en = {
     resume: "Log again",
     iosWorld: "Works with every card in your Wallet, from any bank and country, in any currency: if you pay in yen, Taimo converts it to your currency.",
   },
+  backup: {
+    title: "Backup file",
+    text: "Save all your data to a file (Drive, iCloud, email…) and bring it back on another phone, no account needed.",
+    export: "💾 Save backup",
+    import: "Restore from file",
+    invalid: "That file isn’t a Taimo backup.",
+    confirm: "This phone’s data will be replaced with the backup from {date}. Continue?",
+  },
+  lock: {
+    title: "Lock Taimo",
+    text: "Ask for Face ID, fingerprint or your phone’s code when opening the app.",
+    locked: "Taimo is locked",
+    unlock: "Unlock",
+    reason: "Unlock Taimo",
+    unavailable: "Set up Face ID, a fingerprint or a screen lock on your phone to use this.",
+  },
+  smart: {
+    suggest: "✨ Suggest from my spending",
+    text: "The average of your last months, rounded up. Change any number you like.",
+    none: "Not enough spending yet: import a bank statement or use Taimo for a couple of weeks.",
+  },
   csv: {
     date: 'Date',
     merchant: 'Merchant',

@@ -33,6 +33,7 @@ export type Action =
   | { type: 'completeOnboarding'; name: string; budgets: AppState['budgets']; currency?: string }
   | { type: 'setProfileName'; name: string }
   | { type: 'setPayment'; payment: PaymentInfo }
+  | { type: 'setLock'; lock: boolean }
   | { type: 'addGoal'; goal: Goal }
   | { type: 'saveToGoal'; id: string; amount: Cents; leftoverMonth?: string }
   | { type: 'deleteGoal'; id: string }
@@ -93,6 +94,8 @@ export function reducer(state: AppState, action: Action): AppState {
     }
     case 'deleteGoal':
       return { ...state, goals: (state.goals ?? []).filter((g) => g.id !== action.id) };
+    case 'setLock':
+      return { ...state, profile: { ...state.profile, lock: action.lock } };
     case 'setPayment':
       return { ...state, profile: { ...state.profile, payment: action.payment } };
     case 'setLanguage':

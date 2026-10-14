@@ -355,6 +355,27 @@ const it: Translation = {
     resume: "Riattiva",
     iosWorld: "Funziona con qualsiasi carta nel tuo Wallet, di qualsiasi banca e paese, in qualsiasi valuta: se paghi in yen, Taimo converte nella tua valuta.",
   },
+  backup: {
+    title: "Backup in un file",
+    text: "Salva tutti i dati in un file (Drive, iCloud, email…) e recuperali su un altro telefono, senza account.",
+    export: "💾 Salva backup",
+    import: "Ripristina da file",
+    invalid: "Questo file non è un backup di Taimo.",
+    confirm: "I dati di questo telefono verranno sostituiti dal backup del {date}. Continuare?",
+  },
+  lock: {
+    title: "Blocca Taimo",
+    text: "Chiedi Face ID, impronta o il codice del telefono all’apertura.",
+    locked: "Taimo è bloccato",
+    unlock: "Sblocca",
+    reason: "Sblocca Taimo",
+    unavailable: "Configura Face ID, un’impronta o un blocco schermo sul telefono per usarlo.",
+  },
+  smart: {
+    suggest: "✨ Proponi in base alle mie spese",
+    text: "La media degli ultimi mesi, arrotondata per eccesso. Cambia qualsiasi cifra.",
+    none: "Non ci sono ancora abbastanza spese: importa un estratto conto o usa Taimo per qualche settimana.",
+  },
   csv: { date: 'Data', merchant: 'Esercente', category: 'Categoria', total: 'Importo totale', myShare: 'La mia parte', group: 'Gruppo', source: 'Origine', note: 'Nota' },
 };
 

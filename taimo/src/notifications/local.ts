@@ -39,3 +39,11 @@ export async function scheduleWeeklySummary(state: Pick<AppState, 'expenses' | '
     trigger: { type: Notifications.SchedulableTriggerInputTypes.WEEKLY, weekday: 1, hour: 20, minute: 0 },
   });
 }
+
+/** Aviso inmediato (p. ej. "Te has pasado en Comer fuera") si hay permiso. */
+export async function notifyNow(title: string, body: string) {
+  if (Platform.OS === 'web') return;
+  const perm = await Notifications.getPermissionsAsync();
+  if (!perm.granted) return;
+  await Notifications.scheduleNotificationAsync({ content: { title, body }, trigger: null });
+}

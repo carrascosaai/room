@@ -1,4 +1,5 @@
-import { daysInMonth, homeOf, myShare, type ShareState } from './budget';
+import { categoryStatus, daysInMonth, homeOf, myShare, type ShareState } from './budget';
+import { CATEGORIES } from './categories';
 import { normalizeMerchant } from './categorize';
 import type { AppState, Cents, CategoryId, Expense, Goal } from './types';
 
@@ -170,3 +171,67 @@ export function expectedLeftover(forecast: Forecast | null): Cents {
   // Redondeado a la baja de 5 en 5 para que sea una cifra cómoda.
   return left >= 1000 ? Math.floor(left / 500) * 500 : 0;
 }
+
+export interface BudgetSuggestion {
+  budgets: Partial<Record<CategoryId, Cents>>;
+  /** Meses completos en los que se basa (0 = solo este mes, extrapolado). */
+  months: number;
+}
+
+/**
+ * Presupuesto automático: la media de lo que gastas en cada categoría en tus
+ * últimos meses completos (hasta 3), redondeada hacia arriba de 5 en 5. Si aún
+ * no hay un mes completo pero llevas 10 días o más, extrapola este mes.
+ */
+export function suggestBudgets(state: ShareState, today: Date = new Date()): BudgetSuggestion | null {
+  const home = homeOf(state);
+  const totalsFor = (y: number, m: number, untilDay?: number) => {
+    const start = new Date(y, m, 1).getTime();
+    const end = untilDay ? new Date(y, m, untilDay + 1).getTime() : new Date(y, m + 1, 1).getTime();
+    const totals = new Map<CategoryId, Cents>();
+    for (const e of state.expenses) {
+      const t = new Date(e.date).getTime();
+      if (t >= start && t < end) totals.set(e.category, (totals.get(e.category) ?? 0) + myShare(e, state.groups, home));
+    }
+    return totals;
+  };
+  let months = [1, 2, 3].map((k) => totalsFor(today.getFullYear(), today.getMonth() - k)).filter((m) => m.size > 0);
+  let scale = 1;
+  if (months.length === 0) {
+    if (today.getDate() < 10) return null;
+    const current = totalsFor(today.getFullYear(), today.getMonth(), today.getDate());
+    if (current.size === 0) return null;
+    months = [current];
+    scale = daysInMonth(today) / today.getDate();
+  }
+  const budgets: Partial<Record<CategoryId, Cents>> = {};
+  for (const c of CATEGORIES) {
+    const avg = (months.reduce((s, m) => s + (m.get(c.id) ?? 0), 0) / months.length) * scale;
+    if (avg >= 100) budgets[c.id] = Math.ceil(avg / 500) * 500;
+  }
+  return Object.keys(budgets).length ? { budgets, months: scale === 1 ? months.length : 0 } : null;
+}
+
+export interface BudgetAlert {
+  category: CategoryId;
+  level: 'warning' | 'over';
+}
+
+/**
+ * Categorías que acaban de cruzar el 80 % o el 100 % de su presupuesto al pasar
+ * de `before` a `after` (p. ej. tras apuntar pagos automáticos), para avisar.
+ */
+export function budgetCrossings(before: ShareState & Pick<AppState, 'budgets'>, after: ShareState & Pick<AppState, 'budgets'>, today: Date = new Date()): BudgetAlert[] {
+  const alerts: BudgetAlert[] = [];
+  for (const c of CATEGORIES) {
+    const budget = after.budgets[c.id];
+    if (!budget) continue;
+    const prev = categoryStatus(before, c.id, today);
+    const next = categoryStatus(after, c.id, today);
+    if (next.spent <= prev.spent) continue;
+    if (prev.spent <= budget && next.spent > budget) alerts.push({ category: c.id, level: 'over' });
+    else if (prev.spent < budget * 0.8 && next.spent >= budget * 0.8) alerts.push({ category: c.id, level: 'warning' });
+  }
+  return alerts;
+}
+

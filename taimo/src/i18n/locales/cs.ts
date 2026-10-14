@@ -355,6 +355,27 @@ const cs: Translation = {
     resume: "Znovu zapisovat",
     iosWorld: "Funguje s každou kartou ve Walletu, z jakékoli banky a země, v jakékoli měně: když platíš v jenech, Taimo to přepočítá na tvou měnu.",
   },
+  backup: {
+    title: "Záloha do souboru",
+    text: "Ulož všechna data do souboru (Drive, iCloud, e-mail…) a obnov je v jiném telefonu, bez účtu.",
+    export: "💾 Uložit zálohu",
+    import: "Obnovit ze souboru",
+    invalid: "Ten soubor není záloha Taimo.",
+    confirm: "Data v tomto telefonu se nahradí zálohou z {date}. Pokračovat?",
+  },
+  lock: {
+    title: "Zamknout Taimo",
+    text: "Při otevření vyžadovat Face ID, otisk prstu nebo kód telefonu.",
+    locked: "Taimo je zamčené",
+    unlock: "Odemknout",
+    reason: "Odemknout Taimo",
+    unavailable: "Nastav si v telefonu Face ID, otisk prstu nebo zámek obrazovky, abys to mohl použít.",
+  },
+  smart: {
+    suggest: "✨ Navrhnout podle mých výdajů",
+    text: "Průměr tvých posledních měsíců, zaokrouhlený nahoru. Změň libovolnou částku.",
+    none: "Zatím málo výdajů: importuj výpis nebo používej Taimo pár týdnů.",
+  },
   csv: { date: 'Datum', merchant: 'Obchodník', category: 'Kategorie', total: 'Celková částka', myShare: 'Můj podíl', group: 'Skupina', source: 'Zdroj', note: 'Poznámka' },
 };
 

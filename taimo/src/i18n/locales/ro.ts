@@ -355,6 +355,27 @@ const ro: Translation = {
     resume: "Înregistrează din nou",
     iosWorld: "Funcționează cu orice card din Wallet, de la orice bancă și din orice țară, în orice monedă: dacă plătești în yeni, Taimo convertește în moneda ta.",
   },
+  backup: {
+    title: "Copie într-un fișier",
+    text: "Salvează toate datele într-un fișier (Drive, iCloud, e-mail…) și recuperează-le pe alt telefon, fără cont.",
+    export: "💾 Salvează copia",
+    import: "Restaurează din fișier",
+    invalid: "Fișierul nu este o copie Taimo.",
+    confirm: "Datele de pe acest telefon vor fi înlocuite cu copia din {date}. Continui?",
+  },
+  lock: {
+    title: "Blochează Taimo",
+    text: "Cere Face ID, amprentă sau codul telefonului la deschidere.",
+    locked: "Taimo este blocat",
+    unlock: "Deblochează",
+    reason: "Deblochează Taimo",
+    unavailable: "Configurează Face ID, o amprentă sau o blocare a ecranului ca să folosești asta.",
+  },
+  smart: {
+    suggest: "✨ Propune după cât cheltui",
+    text: "Media ultimelor luni, rotunjită în sus. Schimbă orice sumă.",
+    none: "Încă nu sunt destule cheltuieli: importă un extras sau folosește Taimo câteva săptămâni.",
+  },
   csv: { date: 'Dată', merchant: 'Comerciant', category: 'Categorie', total: 'Sumă totală', myShare: 'Partea mea', group: 'Grup', source: 'Sursă', note: 'Notă' },
 };
 

@@ -3,18 +3,22 @@ import { File, Paths } from 'expo-file-system';
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 
 import { downloadBackup, signOut, uploadBackup } from '@/auth/auth';
+import { makeBackup, readBackup } from '@/domain/backup';
 import { totalBudget } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
 import { parseBankFile } from '@/domain/bankfiles';
 import { expensesToCsv, isAlreadyImported, rowsToExpenses } from '@/domain/csv';
+import { suggestBudgets } from '@/domain/insights';
 import { parseAmount } from '@/domain/money';
+import type { CategoryId } from '@/domain/types';
 import { FALLBACK, rateBetween } from '@/fx/fx';
 import { CURRENCIES, LANGUAGES, useI18n } from '@/i18n';
 import { ensureNotificationPermission } from '@/notifications/local';
 import { newId, useStore } from '@/store/store';
+import { canLock, unlock } from '@/auth/lock';
 import { AuthButtons } from '@/ui/AuthButtons';
 import { Button, Card, CategoryBadge, Chip, H2, Input, Muted, Row, Screen, Title } from '@/ui/components';
 import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
@@ -33,6 +37,72 @@ export default function Settings() {
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [pickingCurrency, setPickingCurrency] = useState(false);
+  const [budgetMessage, setBudgetMessage] = useState<string | null>(null);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
+  const [lockMessage, setLockMessage] = useState<string | null>(null);
+
+  function suggest() {
+    const s = suggestBudgets(state);
+    if (!s) {
+      setBudgetMessage(t('smart.none'));
+      return;
+    }
+    for (const [category, amount] of Object.entries(s.budgets)) dispatch({ type: 'setBudget', category: category as CategoryId, amount: amount! });
+    setValues(Object.fromEntries(CATEGORIES.map((c) => {
+      const v = s.budgets[c.id] ?? state.budgets[c.id];
+      return [c.id, v ? String(Math.round(v / 100)) : ''];
+    })));
+    setBudgetMessage(t('smart.text'));
+  }
+
+  async function saveBackup() {
+    const json = JSON.stringify(makeBackup(state));
+    const fileName = `taimo-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    if (Platform.OS === 'web') {
+      const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+    const file = new File(Paths.cache, fileName);
+    if (file.exists) file.delete();
+    file.create();
+    file.write(json);
+    await Sharing.shareAsync(file.uri, { mimeType: 'application/json', dialogTitle: t('backup.export') });
+  }
+
+  async function restoreFile() {
+    setBackupMessage(null);
+    const picked = await DocumentPicker.getDocumentAsync({ type: ['application/json', '*/*'], copyToCacheDirectory: true });
+    if (picked.canceled) return;
+    const asset = picked.assets[0];
+    const text = Platform.OS === 'web' ? await (await fetch(asset.uri)).text() : await new File(asset.uri).text();
+    const backup = readBackup(text);
+    if (!backup) {
+      setBackupMessage(t('backup.invalid'));
+      return;
+    }
+    confirm(t('backup.confirm', { date: i18n.date(backup.exportedAt, { dateStyle: 'medium' }) }), t('common.cancel'), t('backup.import'), () => {
+      dispatch({ type: 'restoreBackup', state: backup.state });
+      setBackupMessage(t('auth.restored'));
+    });
+  }
+
+  async function toggleLock() {
+    setLockMessage(null);
+    if (state.profile.lock) {
+      dispatch({ type: 'setLock', lock: false });
+      return;
+    }
+    if (!(await canLock())) {
+      setLockMessage(t('lock.unavailable'));
+      return;
+    }
+    if (await unlock(t('lock.reason'))) dispatch({ type: 'setLock', lock: true });
+  }
   const [payment, setPayment] = useState(state.profile.payment ?? {});
   const savePayment = () =>
     dispatch({
@@ -205,6 +275,8 @@ export default function Settings() {
       <Card>
         <H2>{t('settings.budget')}</H2>
         <Muted>{t('settings.total', { amount: money(totalBudget(state.budgets)) })}</Muted>
+        <Button label={t('smart.suggest')} variant="secondary" onPress={suggest} />
+        {budgetMessage ? <Muted>{budgetMessage}</Muted> : null}
         {CATEGORIES.map((c) => (
           <Row key={c.id}>
             <CategoryBadge id={c.id} size={32} />
@@ -243,6 +315,27 @@ export default function Settings() {
         <Button label={t('settings.export')} variant="secondary" onPress={() => exportCsv().catch(() => {})} />
         {csvMessage ? <Muted>{csvMessage}</Muted> : null}
       </Card>
+
+      <Card>
+        <H2>{t('backup.title')}</H2>
+        <Muted>{t('backup.text')}</Muted>
+        <Button label={t('backup.export')} variant="secondary" onPress={() => saveBackup().catch(() => {})} />
+        <Button label={t('backup.import')} variant="ghost" onPress={() => restoreFile().catch(() => setBackupMessage(t('backup.invalid')))} />
+        {backupMessage ? <Muted>{backupMessage}</Muted> : null}
+      </Card>
+
+      {Platform.OS !== 'web' ? (
+        <Card>
+          <Row>
+            <View style={{ flex: 1, gap: 2 }}>
+              <H2>🔒 {t('lock.title')}</H2>
+              <Muted>{t('lock.text')}</Muted>
+            </View>
+            <Switch value={!!state.profile.lock} onValueChange={() => toggleLock().catch(() => {})} trackColor={{ true: colors.primary, false: colors.border }} />
+          </Row>
+          {lockMessage ? <Muted>{lockMessage}</Muted> : null}
+        </Card>
+      ) : null}
 
       <Card>
         <H2>{t('settings.privacy')}</H2>

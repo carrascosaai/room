@@ -355,6 +355,27 @@ const nl: Translation = {
     resume: "Weer noteren",
     iosWorld: "Werkt met elke kaart in je Wallet, van elke bank en elk land, in elke munt: betaal je in yen, dan rekent Taimo om naar jouw munt.",
   },
+  backup: {
+    title: "Back-up in een bestand",
+    text: "Bewaar al je gegevens in een bestand (Drive, iCloud, e-mail…) en zet ze terug op een andere telefoon, zonder account.",
+    export: "💾 Back-up opslaan",
+    import: "Terugzetten uit bestand",
+    invalid: "Dat bestand is geen Taimo-back-up.",
+    confirm: "De gegevens op deze telefoon worden vervangen door de back-up van {date}. Doorgaan?",
+  },
+  lock: {
+    title: "Taimo vergrendelen",
+    text: "Vraag om Face ID, vingerafdruk of de code van je telefoon bij het openen.",
+    locked: "Taimo is vergrendeld",
+    unlock: "Ontgrendelen",
+    reason: "Ontgrendel Taimo",
+    unavailable: "Stel Face ID, een vingerafdruk of een schermvergrendeling in om dit te gebruiken.",
+  },
+  smart: {
+    suggest: "✨ Voorstellen op basis van mijn uitgaven",
+    text: "Het gemiddelde van je laatste maanden, naar boven afgerond. Pas elk bedrag aan.",
+    none: "Nog niet genoeg uitgaven: importeer een afschrift of gebruik Taimo een paar weken.",
+  },
   csv: { date: 'Datum', merchant: 'Winkel', category: 'Categorie', total: 'Totaalbedrag', myShare: 'Mijn deel', group: 'Groep', source: 'Bron', note: 'Notitie' },
 };
 

@@ -355,6 +355,27 @@ const nb: Translation = {
     resume: "Før igjen",
     iosWorld: "Fungerer med alle kort i Wallet, fra alle banker og land, i alle valutaer: betaler du i yen, regner Taimo om til din valuta.",
   },
+  backup: {
+    title: "Sikkerhetskopi i en fil",
+    text: "Lagre alle dataene i en fil (Drive, iCloud, e-post…) og hent dem på en annen mobil, uten konto.",
+    export: "💾 Lagre kopi",
+    import: "Gjenopprett fra fil",
+    invalid: "Den filen er ikke en Taimo-kopi.",
+    confirm: "Dataene på denne mobilen erstattes med kopien fra {date}. Fortsette?",
+  },
+  lock: {
+    title: "Lås Taimo",
+    text: "Krev Face ID, fingeravtrykk eller mobilens kode når appen åpnes.",
+    locked: "Taimo er låst",
+    unlock: "Lås opp",
+    reason: "Lås opp Taimo",
+    unavailable: "Sett opp Face ID, fingeravtrykk eller skjermlås på mobilen for å bruke dette.",
+  },
+  smart: {
+    suggest: "✨ Foreslå ut fra det jeg bruker",
+    text: "Snittet av de siste månedene dine, rundet opp. Endre hvilket tall du vil.",
+    none: "Ikke nok utgifter ennå: importer en kontoutskrift eller bruk Taimo noen uker.",
+  },
   csv: { date: 'Dato', merchant: 'Brukersted', category: 'Kategori', total: 'Totalbeløp', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Notat' },
 };
 
