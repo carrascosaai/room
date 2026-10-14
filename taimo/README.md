@@ -7,6 +7,11 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
 
 ## Qué hace
 
+**Fácil para cualquier edad.** Inicio enseña solo lo esencial: cuánto te queda, un botón grande para añadir un gasto,
+como mucho un aviso a la vez y tus últimos gastos. Todo lo demás está en la pestaña **Más**, con una línea que explica
+cada cosa. Al añadir un gasto solo se ve importe, en qué y categoría; fecha, moneda y ticket están en «Más opciones».
+Letra y botones grandes, y la letra crece con el tamaño de letra del móvil.
+
 - **20 idiomas**: español, inglés, francés, alemán, italiano, portugués, catalán, euskera, gallego, neerlandés,
   sueco, noruego, danés, finés, polaco, checo, rumano, griego, turco y ucraniano. Se elige solo según el idioma del
   móvil y se cambia en un toque (en la bienvenida y en Ajustes). **Las 155 monedas del mundo** con formato local.

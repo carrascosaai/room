@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const uk: Translation = {
   common: { cancel: 'Скасувати', save: 'Зберегти', delete: 'Видалити', back: 'Назад', continue: 'Далі', done: 'Готово', you: 'Ви', me: 'Я', today: 'Сьогодні, {time}', yesterday: 'Учора, {time}', unknown: '?' },
   cat: { super: 'Продукти', comer: 'Кафе й ресторани', ocio: 'Дозвілля', deporte: 'Спорт', estudios: 'Навчання', transporte: 'Транспорт', casa: 'Житло', compras: 'Покупки', salud: 'Здоров’я', suscripciones: 'Підписки', otros: 'Інше' },
-  tabs: { home: 'Головна', groups: 'Групи', stats: 'Статистика', settings: 'Налаштування' },
+  tabs: { home: 'Головна', groups: 'Групи', stats: "Огляд", settings: 'Налаштування', more: "Більше" },
   onboarding: {
     welcomeTitle: 'Вітаємо в Taimo',
     welcomeText: 'Ви платите телефоном, а Taimo сам це записує. Показує, скільки лишилося на кожну статтю, і ділить витрати з партнером чи сусідами.',
@@ -570,6 +570,21 @@ const uk: Translation = {
     goal: "Ціль досягнуто",
     impulse: "Ти відмовився від імпульсивної покупки",
     hundred: "100 записаних витрат",
+  },
+  more: {
+    askDesc: "Запитуй що завгодно про свої витрати",
+    goalsDesc: "Заощаджуй на те, що хочеш",
+    chDesc: "Невеликі виклики, щоб витрачати менше",
+    wishDesc: "Почекай 48 годин перед імпульсивною покупкою",
+    historyDesc: "Усі витрати, з пошуком",
+    fxDesc: "Перерахуй будь-яку валюту у свою",
+    autoDesc: "Платежі записуються самі",
+    settingsDesc: "Ім’я, мова, валюта, бюджет…",
+  },
+  easy: {
+    moreOptions: "Більше параметрів (дата, валюта, чек)",
+    lessOptions: "Менше параметрів",
+    recent: "Твої останні витрати",
   },
   csv: { date: 'Дата', merchant: 'Продавець', category: 'Категорія', total: 'Загальна сума', myShare: 'Моя частка', group: 'Група', source: 'Джерело', note: 'Примітка' },
 };

@@ -30,8 +30,9 @@ const en = {
   tabs: {
     home: 'Home',
     groups: 'Groups',
-    stats: 'Stats',
+    stats: "Summary",
     settings: 'Settings',
+    more: "More",
   },
   onboarding: {
     welcomeTitle: 'Welcome to Taimo',
@@ -599,6 +600,21 @@ const en = {
     goal: "Goal reached",
     impulse: "Said no to an impulse buy",
     hundred: "100 expenses logged",
+  },
+  more: {
+    askDesc: "Ask anything about your spending",
+    goalsDesc: "Save up for something you want",
+    chDesc: "Small challenges to spend less",
+    wishDesc: "Wait 48 hours before an impulse buy",
+    historyDesc: "All your expenses, with search",
+    fxDesc: "Convert any currency to yours",
+    autoDesc: "Have your payments logged automatically",
+    settingsDesc: "Name, language, currency, budget…",
+  },
+  easy: {
+    moreOptions: "More options (date, currency, receipt)",
+    lessOptions: "Fewer options",
+    recent: "Your latest expenses",
   },
   csv: {
     date: 'Date',

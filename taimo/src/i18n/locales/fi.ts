@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const fi: Translation = {
   common: { cancel: 'Peruuta', save: 'Tallenna', delete: 'Poista', back: 'Takaisin', continue: 'Jatka', done: 'Valmis', you: 'Sinä', me: 'Minä', today: 'Tänään {time}', yesterday: 'Eilen {time}', unknown: '?' },
   cat: { super: 'Ruokakauppa', comer: 'Ulkona syöminen', ocio: 'Vapaa-aika', deporte: 'Urheilu', estudios: 'Opiskelu', transporte: 'Liikenne', casa: 'Asuminen', compras: 'Ostokset', salud: 'Terveys', suscripciones: 'Tilaukset', otros: 'Muut' },
-  tabs: { home: 'Koti', groups: 'Ryhmät', stats: 'Tilastot', settings: 'Asetukset' },
+  tabs: { home: 'Koti', groups: 'Ryhmät', stats: "Yhteenveto", settings: 'Asetukset', more: "Lisää" },
   onboarding: {
     welcomeTitle: 'Tervetuloa Taimoon',
     welcomeText: 'Maksa puhelimella, niin Taimo kirjaa sen puolestasi. Näet, paljonko kuhunkin on vielä jäljellä, ja voit jakaa kulut kumppanin tai kämppisten kanssa.',
@@ -570,6 +570,21 @@ const fi: Translation = {
     goal: "Tavoite saavutettu",
     impulse: "Sanoit ei heräteostokselle",
     hundred: "100 kulua kirjattu",
+  },
+  more: {
+    askDesc: "Kysy mitä vain kuluistasi",
+    goalsDesc: "Säästä johonkin, mitä haluat",
+    chDesc: "Pieniä haasteita kuluttaa vähemmän",
+    wishDesc: "Odota 48 tuntia ennen heräteostosta",
+    historyDesc: "Kaikki kulut, haulla",
+    fxDesc: "Muunna mikä tahansa valuutta omaasi",
+    autoDesc: "Maksut kirjautuvat itsestään",
+    settingsDesc: "Nimi, kieli, valuutta, budjetti…",
+  },
+  easy: {
+    moreOptions: "Lisää valintoja (päivä, valuutta, kuitti)",
+    lessOptions: "Vähemmän valintoja",
+    recent: "Viimeisimmät kulusi",
   },
   csv: { date: 'Päivämäärä', merchant: 'Kauppias', category: 'Luokka', total: 'Kokonaissumma', myShare: 'Oma osuus', group: 'Ryhmä', source: 'Lähde', note: 'Huomautus' },
 };

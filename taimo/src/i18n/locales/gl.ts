@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const gl: Translation = {
   common: { cancel: 'Cancelar', save: 'Gardar', delete: 'Borrar', back: 'Volver', continue: 'Continuar', done: 'Feito', you: 'Ti', me: 'Eu', today: 'Hoxe, {time}', yesterday: 'Onte, {time}', unknown: '?' },
   cat: { super: 'Supermercado', comer: 'Comer fóra', ocio: 'Lecer', deporte: 'Deporte', estudios: 'Estudos', transporte: 'Transporte', casa: 'Casa', compras: 'Compras', salud: 'Saúde', suscripciones: 'Subscricións', otros: 'Outros' },
-  tabs: { home: 'Inicio', groups: 'Grupos', stats: 'Estatísticas', settings: 'Axustes' },
+  tabs: { home: 'Inicio', groups: 'Grupos', stats: "Resumo", settings: 'Axustes', more: "Máis" },
   onboarding: {
     welcomeTitle: 'Benvido a Taimo',
     welcomeText: 'Pagas co móbil e Taimo apúntao só. Dite canto che queda en cada cousa e reparte os gastos coa túa parella ou o teu piso.',
@@ -570,6 +570,21 @@ const gl: Translation = {
     goal: "Meta cumprida",
     impulse: "Dixeches non a un capricho",
     hundred: "100 gastos apuntados",
+  },
+  more: {
+    askDesc: "Pregunta o que queiras sobre os teus gastos",
+    goalsDesc: "Aforra para algo que queiras",
+    chDesc: "Pequenos retos para gastar menos",
+    wishDesc: "Agarda 48 horas antes dun capricho",
+    historyDesc: "Todos os gastos, con buscador",
+    fxDesc: "Pasa calquera moeda á túa",
+    autoDesc: "Que os pagamentos se apunten sós",
+    settingsDesc: "Nome, idioma, moeda, orzamento…",
+  },
+  easy: {
+    moreOptions: "Máis opcións (data, moeda, tícket)",
+    lessOptions: "Menos opcións",
+    recent: "Os teus últimos gastos",
   },
   csv: { date: 'Data', merchant: 'Comercio', category: 'Categoría', total: 'Importe total', myShare: 'A miña parte', group: 'Grupo', source: 'Orixe', note: 'Nota' },
 };

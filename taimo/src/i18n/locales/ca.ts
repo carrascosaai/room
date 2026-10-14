@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const ca: Translation = {
   common: { cancel: 'Cancel·la', save: 'Desa', delete: 'Esborra', back: 'Torna', continue: 'Continua', done: 'Fet', you: 'Tu', me: 'Jo', today: 'Avui, {time}', yesterday: 'Ahir, {time}', unknown: '?' },
   cat: { super: 'Supermercat', comer: 'Menjar fora', ocio: 'Oci', deporte: 'Esport', estudios: 'Estudis', transporte: 'Transport', casa: 'Casa', compras: 'Compres', salud: 'Salut', suscripciones: 'Subscripcions', otros: 'Altres' },
-  tabs: { home: 'Inici', groups: 'Grups', stats: 'Estadístiques', settings: 'Ajustos' },
+  tabs: { home: 'Inici', groups: 'Grups', stats: "Resum", settings: 'Ajustos', more: "Més" },
   onboarding: {
     welcomeTitle: 'Benvingut a Taimo',
     welcomeText: 'Pagues amb el mòbil i Taimo ho apunta sol. Et diu quant et queda per a cada cosa i reparteix les despeses amb la parella o el pis.',
@@ -570,6 +570,21 @@ const ca: Translation = {
     goal: "Objectiu complert",
     impulse: "Vas dir no a un caprici",
     hundred: "100 despeses apuntades",
+  },
+  more: {
+    askDesc: "Pregunta el que vulguis sobre les despeses",
+    goalsDesc: "Estalvia per a alguna cosa que vulguis",
+    chDesc: "Petits reptes per gastar menys",
+    wishDesc: "Espera 48 hores abans d’un caprici",
+    historyDesc: "Totes les despeses, amb cercador",
+    fxDesc: "Passa qualsevol moneda a la teva",
+    autoDesc: "Que els pagaments s’apuntin sols",
+    settingsDesc: "Nom, idioma, moneda, pressupost…",
+  },
+  easy: {
+    moreOptions: "Més opcions (data, moneda, tiquet)",
+    lessOptions: "Menys opcions",
+    recent: "Les teves últimes despeses",
   },
   csv: { date: 'Data', merchant: 'Comerç', category: 'Categoria', total: 'Import total', myShare: 'La meva part', group: 'Grup', source: 'Origen', note: 'Nota' },
 };

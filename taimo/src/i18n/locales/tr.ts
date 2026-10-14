@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const tr: Translation = {
   common: { cancel: 'İptal', save: 'Kaydet', delete: 'Sil', back: 'Geri', continue: 'Devam', done: 'Tamam', you: 'Sen', me: 'Ben', today: 'Bugün, {time}', yesterday: 'Dün, {time}', unknown: '?' },
   cat: { super: 'Market', comer: 'Dışarıda yemek', ocio: 'Eğlence', deporte: 'Spor', estudios: 'Eğitim', transporte: 'Ulaşım', casa: 'Ev', compras: 'Alışveriş', salud: 'Sağlık', suscripciones: 'Abonelikler', otros: 'Diğer' },
-  tabs: { home: 'Ana sayfa', groups: 'Gruplar', stats: 'İstatistikler', settings: 'Ayarlar' },
+  tabs: { home: 'Ana sayfa', groups: 'Gruplar', stats: "Özet", settings: 'Ayarlar', more: "Daha fazla" },
   onboarding: {
     welcomeTitle: 'Taimo’ya hoş geldin',
     welcomeText: 'Telefonla ödersin, Taimo kendisi kaydeder. Her şey için ne kadar kaldığını söyler ve masrafları partnerinle ya da ev arkadaşlarınla paylaştırır.',
@@ -570,6 +570,21 @@ const tr: Translation = {
     goal: "Hedefe ulaşıldı",
     impulse: "Anlık alışverişe hayır dedin",
     hundred: "100 harcama kaydedildi",
+  },
+  more: {
+    askDesc: "Harcamalarınla ilgili her şeyi sor",
+    goalsDesc: "İstediğin bir şey için biriktir",
+    chDesc: "Daha az harcamak için küçük meydan okumalar",
+    wishDesc: "Anlık alışverişten önce 48 saat bekle",
+    historyDesc: "Tüm harcamalar, aramayla",
+    fxDesc: "Her para birimini kendininkine çevir",
+    autoDesc: "Ödemeler kendiliğinden kaydedilsin",
+    settingsDesc: "Ad, dil, para birimi, bütçe…",
+  },
+  easy: {
+    moreOptions: "Daha fazla seçenek (tarih, para birimi, fiş)",
+    lessOptions: "Daha az seçenek",
+    recent: "Son harcamaların",
   },
   csv: { date: 'Tarih', merchant: 'Satıcı', category: 'Kategori', total: 'Toplam tutar', myShare: 'Benim payım', group: 'Grup', source: 'Kaynak', note: 'Not' },
 };

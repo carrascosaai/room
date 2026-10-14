@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const cs: Translation = {
   common: { cancel: 'Zrušit', save: 'Uložit', delete: 'Smazat', back: 'Zpět', continue: 'Pokračovat', done: 'Hotovo', you: 'Ty', me: 'Já', today: 'Dnes, {time}', yesterday: 'Včera, {time}', unknown: '?' },
   cat: { super: 'Potraviny', comer: 'Jídlo venku', ocio: 'Zábava', deporte: 'Sport', estudios: 'Vzdělání', transporte: 'Doprava', casa: 'Bydlení', compras: 'Nákupy', salud: 'Zdraví', suscripciones: 'Předplatné', otros: 'Ostatní' },
-  tabs: { home: 'Domů', groups: 'Skupiny', stats: 'Statistiky', settings: 'Nastavení' },
+  tabs: { home: 'Domů', groups: 'Skupiny', stats: "Přehled", settings: 'Nastavení', more: "Více" },
   onboarding: {
     welcomeTitle: 'Vítej v Taimo',
     welcomeText: 'Platíš mobilem a Taimo si to samo zapíše. Ukáže ti, kolik ti na co zbývá, a rozdělí výdaje s partnerem nebo spolubydlícími.',
@@ -570,6 +570,21 @@ const cs: Translation = {
     goal: "Cíl splněn",
     impulse: "Odmítl jsi impulzivní nákup",
     hundred: "100 zapsaných výdajů",
+  },
+  more: {
+    askDesc: "Zeptej se na cokoli o svých výdajích",
+    goalsDesc: "Spoř na něco, co chceš",
+    chDesc: "Malé výzvy, jak utrácet méně",
+    wishDesc: "Počkej 48 hodin před impulzivním nákupem",
+    historyDesc: "Všechny výdaje, s hledáním",
+    fxDesc: "Převeď jakoukoli měnu na svou",
+    autoDesc: "Platby se zapíšou samy",
+    settingsDesc: "Jméno, jazyk, měna, rozpočet…",
+  },
+  easy: {
+    moreOptions: "Další možnosti (datum, měna, účtenka)",
+    lessOptions: "Méně možností",
+    recent: "Tvoje poslední výdaje",
   },
   csv: { date: 'Datum', merchant: 'Obchodník', category: 'Kategorie', total: 'Celková částka', myShare: 'Můj podíl', group: 'Skupina', source: 'Zdroj', note: 'Poznámka' },
 };

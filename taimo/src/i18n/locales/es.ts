@@ -27,7 +27,7 @@ const es: Translation = {
     suscripciones: 'Suscripciones',
     otros: 'Otros',
   },
-  tabs: { home: 'Inicio', groups: 'Grupos', stats: 'Estadísticas', settings: 'Ajustes' },
+  tabs: { home: 'Inicio', groups: 'Grupos', stats: "Resumen", settings: 'Ajustes', more: "Más" },
   onboarding: {
     welcomeTitle: 'Bienvenido a Taimo',
     welcomeText: 'Pagas con el móvil y Taimo lo apunta solo. Te dice cuánto te queda en cada cosa y reparte los gastos con tu pareja o tu piso.',
@@ -594,6 +594,21 @@ const es: Translation = {
     goal: "Meta cumplida",
     impulse: "Dijiste no a un capricho",
     hundred: "100 gastos apuntados",
+  },
+  more: {
+    askDesc: "Pregunta lo que quieras sobre tus gastos",
+    goalsDesc: "Ahorra para algo que quieras",
+    chDesc: "Pequeños retos para gastar menos",
+    wishDesc: "Espera 48 horas antes de un capricho",
+    historyDesc: "Todos tus gastos, con buscador",
+    fxDesc: "Pasa cualquier moneda a la tuya",
+    autoDesc: "Que tus pagos se apunten solos",
+    settingsDesc: "Nombre, idioma, moneda, presupuesto…",
+  },
+  easy: {
+    moreOptions: "Más opciones (fecha, moneda, ticket)",
+    lessOptions: "Menos opciones",
+    recent: "Tus últimos gastos",
   },
   csv: {
     date: 'Fecha',

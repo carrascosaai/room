@@ -54,11 +54,12 @@ export const scheme = () => current;
 export const radius = { sm: 10, md: 16, lg: 22, pill: 999 } as const;
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
 
+// Letra cómoda para cualquier edad (y crece con el tamaño de letra del móvil).
 export const font = {
-  title: { fontSize: 28, fontWeight: '700' as const, color: colors.text },
-  h2: { fontSize: 20, fontWeight: '700' as const, color: colors.text },
-  body: { fontSize: 16, color: colors.text },
-  small: { fontSize: 13, color: colors.textMuted },
+  title: { fontSize: 30, fontWeight: '800' as const, color: colors.text },
+  h2: { fontSize: 21, fontWeight: '700' as const, color: colors.text },
+  body: { fontSize: 17, color: colors.text },
+  small: { fontSize: 15, lineHeight: 21, color: colors.textMuted },
 };
 
 export function applyTheme(next: Scheme) {

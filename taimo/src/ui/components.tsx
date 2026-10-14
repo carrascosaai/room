@@ -77,6 +77,34 @@ export function Button({
   );
 }
 
+/** Botón grande y claro para las acciones principales (Inicio). */
+export function BigButton({ label, emoji, onPress, variant = 'primary' }: { label: string; emoji?: string; onPress: () => void; variant?: 'primary' | 'secondary' }) {
+  const primary = variant === 'primary';
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: space.sm,
+        minHeight: primary ? 64 : 56,
+        borderRadius: radius.lg,
+        paddingHorizontal: space.lg,
+        backgroundColor: primary ? colors.primary : colors.surfaceAlt,
+        borderWidth: primary ? 0 : 1,
+        borderColor: colors.border,
+        opacity: pressed ? 0.8 : 1,
+      })}
+    >
+      {emoji ? <Text style={{ fontSize: primary ? 26 : 22, color: primary ? colors.onPrimary : colors.text, fontWeight: '800' }}>{emoji}</Text> : null}
+      <Text style={{ fontSize: primary ? 20 : 18, fontWeight: '800', color: primary ? colors.onPrimary : colors.text }}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export function Input(props: TextInputProps & { label?: string }) {
   const { label, style, ...rest } = props;
   return (
@@ -122,7 +150,7 @@ export function Chip({ label, selected, onPress }: { label: string; selected?: b
       onPress={onPress}
       style={[st().chip, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
     >
-      <Text style={{ color: selected ? colors.onPrimary : colors.text, fontSize: 14, fontWeight: selected ? '600' : '400' }}>{label}</Text>
+      <Text style={{ color: selected ? colors.onPrimary : colors.text, fontSize: 16, fontWeight: selected ? '700' : '400' }}>{label}</Text>
     </Pressable>
   );
 }
@@ -160,26 +188,31 @@ const makeStyles = () => StyleSheet.create({
   },
   button: {
     borderRadius: radius.pill,
-    paddingVertical: 15,
+    paddingVertical: 16,
     paddingHorizontal: space.xl,
+    minHeight: 54,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  buttonText: { color: colors.text, fontSize: 16, fontWeight: '600' },
+  buttonText: { color: colors.text, fontSize: 17, fontWeight: '700', textAlign: 'center' },
   input: {
     backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     paddingHorizontal: space.lg,
-    paddingVertical: 14,
+    paddingVertical: 15,
+    minHeight: 52,
     color: colors.text,
-    fontSize: 16,
+    fontSize: 17,
     borderWidth: 1,
     borderColor: colors.border,
   },
   track: { height: 8, borderRadius: 4, backgroundColor: colors.surfaceAlt, overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 4 },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,

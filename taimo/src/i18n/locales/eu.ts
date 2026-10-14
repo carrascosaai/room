@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const eu: Translation = {
   common: { cancel: 'Utzi', save: 'Gorde', delete: 'Ezabatu', back: 'Atzera', continue: 'Jarraitu', done: 'Eginda', you: 'Zu', me: 'Ni', today: 'Gaur, {time}', yesterday: 'Atzo, {time}', unknown: '?' },
   cat: { super: 'Supermerkatua', comer: 'Kanpoan jan', ocio: 'Aisia', deporte: 'Kirola', estudios: 'Ikasketak', transporte: 'Garraioa', casa: 'Etxea', compras: 'Erosketak', salud: 'Osasuna', suscripciones: 'Harpidetzak', otros: 'Besteak' },
-  tabs: { home: 'Hasiera', groups: 'Taldeak', stats: 'Estatistikak', settings: 'Ezarpenak' },
+  tabs: { home: 'Hasiera', groups: 'Taldeak', stats: "Laburpena", settings: 'Ezarpenak', more: "Gehiago" },
   onboarding: {
     welcomeTitle: 'Ongi etorri Taimora',
     welcomeText: 'Mugikorrarekin ordaintzen duzu eta Taimok berak idazten du. Gauza bakoitzean zenbat geratzen zaizun esaten dizu eta gastuak bikotearekin edo pisukideekin banatzen ditu.',
@@ -570,6 +570,21 @@ const eu: Translation = {
     goal: "Helburua beteta",
     impulse: "Gogo bati ezetz esan zenion",
     hundred: "100 gastu apuntatuta",
+  },
+  more: {
+    askDesc: "Galdetu nahi duzuna zure gastuei buruz",
+    goalsDesc: "Aurreztu nahi duzun zerbaitetarako",
+    chDesc: "Erronka txikiak gutxiago gastatzeko",
+    wishDesc: "Itxaron 48 ordu gogo baten aurretik",
+    historyDesc: "Gastu guztiak, bilatzailearekin",
+    fxDesc: "Pasatu edozein dibisa zurera",
+    autoDesc: "Ordainketak bakarrik apuntatzea",
+    settingsDesc: "Izena, hizkuntza, dibisa, aurrekontua…",
+  },
+  easy: {
+    moreOptions: "Aukera gehiago (data, dibisa, tiketa)",
+    lessOptions: "Aukera gutxiago",
+    recent: "Zure azken gastuak",
   },
   csv: { date: 'Data', merchant: 'Denda', category: 'Kategoria', total: 'Zenbateko osoa', myShare: 'Nire zatia', group: 'Taldea', source: 'Jatorria', note: 'Oharra' },
 };

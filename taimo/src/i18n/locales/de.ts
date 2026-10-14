@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const de: Translation = {
   common: { cancel: 'Abbrechen', save: 'Speichern', delete: 'Löschen', back: 'Zurück', continue: 'Weiter', done: 'Fertig', you: 'Du', me: 'Ich', today: 'Heute, {time}', yesterday: 'Gestern, {time}', unknown: '?' },
   cat: { super: 'Lebensmittel', comer: 'Auswärts essen', ocio: 'Freizeit', deporte: 'Sport', estudios: 'Ausbildung', transporte: 'Verkehr', casa: 'Wohnen', compras: 'Shopping', salud: 'Gesundheit', suscripciones: 'Abos', otros: 'Sonstiges' },
-  tabs: { home: 'Start', groups: 'Gruppen', stats: 'Statistik', settings: 'Einstellungen' },
+  tabs: { home: 'Start', groups: 'Gruppen', stats: "Übersicht", settings: 'Einstellungen', more: "Mehr" },
   onboarding: {
     welcomeTitle: 'Willkommen bei Taimo',
     welcomeText: 'Du zahlst mit dem Handy und Taimo trägt es automatisch ein. Es zeigt dir, wie viel du für jeden Bereich noch hast, und teilt Kosten mit Partner oder WG.',
@@ -570,6 +570,21 @@ const de: Translation = {
     goal: "Sparziel erreicht",
     impulse: "Nein zu einem Spontankauf",
     hundred: "100 Ausgaben erfasst",
+  },
+  more: {
+    askDesc: "Frag alles zu deinen Ausgaben",
+    goalsDesc: "Spar für etwas, das du willst",
+    chDesc: "Kleine Challenges, um weniger auszugeben",
+    wishDesc: "Warte 48 Stunden vor einem Spontankauf",
+    historyDesc: "Alle Ausgaben, mit Suche",
+    fxDesc: "Rechne jede Währung in deine um",
+    autoDesc: "Zahlungen automatisch erfassen",
+    settingsDesc: "Name, Sprache, Währung, Budget…",
+  },
+  easy: {
+    moreOptions: "Mehr Optionen (Datum, Währung, Beleg)",
+    lessOptions: "Weniger Optionen",
+    recent: "Deine letzten Ausgaben",
   },
   csv: { date: 'Datum', merchant: 'Händler', category: 'Kategorie', total: 'Gesamtbetrag', myShare: 'Mein Anteil', group: 'Gruppe', source: 'Quelle', note: 'Notiz' },
 };

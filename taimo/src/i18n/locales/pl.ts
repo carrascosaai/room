@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const pl: Translation = {
   common: { cancel: 'Anuluj', save: 'Zapisz', delete: 'Usuń', back: 'Wstecz', continue: 'Dalej', done: 'Gotowe', you: 'Ty', me: 'Ja', today: 'Dziś, {time}', yesterday: 'Wczoraj, {time}', unknown: '?' },
   cat: { super: 'Zakupy spożywcze', comer: 'Jedzenie na mieście', ocio: 'Rozrywka', deporte: 'Sport', estudios: 'Nauka', transporte: 'Transport', casa: 'Dom', compras: 'Zakupy', salud: 'Zdrowie', suscripciones: 'Subskrypcje', otros: 'Inne' },
-  tabs: { home: 'Start', groups: 'Grupy', stats: 'Statystyki', settings: 'Ustawienia' },
+  tabs: { home: 'Start', groups: 'Grupy', stats: "Podsumowanie", settings: 'Ustawienia', more: "Więcej" },
   onboarding: {
     welcomeTitle: 'Witaj w Taimo',
     welcomeText: 'Płacisz telefonem, a Taimo samo to zapisuje. Pokazuje, ile zostało ci na każdą rzecz, i dzieli wydatki z partnerem albo współlokatorami.',
@@ -570,6 +570,21 @@ const pl: Translation = {
     goal: "Cel osiągnięty",
     impulse: "Odmówiłeś zachciance",
     hundred: "100 zapisanych wydatków",
+  },
+  more: {
+    askDesc: "Zapytaj o cokolwiek o swoich wydatkach",
+    goalsDesc: "Oszczędzaj na coś, czego chcesz",
+    chDesc: "Małe wyzwania, by wydawać mniej",
+    wishDesc: "Odczekaj 48 godzin przed zachcianką",
+    historyDesc: "Wszystkie wydatki, z wyszukiwarką",
+    fxDesc: "Przelicz dowolną walutę na swoją",
+    autoDesc: "Płatności zapisywane automatycznie",
+    settingsDesc: "Imię, język, waluta, budżet…",
+  },
+  easy: {
+    moreOptions: "Więcej opcji (data, waluta, paragon)",
+    lessOptions: "Mniej opcji",
+    recent: "Twoje ostatnie wydatki",
   },
   csv: { date: 'Data', merchant: 'Sprzedawca', category: 'Kategoria', total: 'Kwota całkowita', myShare: 'Moja część', group: 'Grupa', source: 'Źródło', note: 'Notatka' },
 };

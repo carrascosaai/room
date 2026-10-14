@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const it: Translation = {
   common: { cancel: 'Annulla', save: 'Salva', delete: 'Elimina', back: 'Indietro', continue: 'Continua', done: 'Fatto', you: 'Tu', me: 'Io', today: 'Oggi, {time}', yesterday: 'Ieri, {time}', unknown: '?' },
   cat: { super: 'Spesa', comer: 'Mangiare fuori', ocio: 'Tempo libero', deporte: 'Sport', estudios: 'Studio', transporte: 'Trasporti', casa: 'Casa', compras: 'Shopping', salud: 'Salute', suscripciones: 'Abbonamenti', otros: 'Altro' },
-  tabs: { home: 'Home', groups: 'Gruppi', stats: 'Statistiche', settings: 'Impostazioni' },
+  tabs: { home: 'Home', groups: 'Gruppi', stats: "Riepilogo", settings: 'Impostazioni', more: "Altro" },
   onboarding: {
     welcomeTitle: 'Benvenuto su Taimo',
     welcomeText: 'Paghi con il telefono e Taimo lo registra da solo. Ti dice quanto ti resta per ogni voce e divide le spese con il partner o i coinquilini.',
@@ -570,6 +570,21 @@ const it: Translation = {
     goal: "Obiettivo raggiunto",
     impulse: "Hai detto no a uno sfizio",
     hundred: "100 spese registrate",
+  },
+  more: {
+    askDesc: "Chiedi quello che vuoi sulle tue spese",
+    goalsDesc: "Risparmia per qualcosa che vuoi",
+    chDesc: "Piccole sfide per spendere meno",
+    wishDesc: "Aspetta 48 ore prima di uno sfizio",
+    historyDesc: "Tutte le spese, con ricerca",
+    fxDesc: "Converti qualsiasi valuta nella tua",
+    autoDesc: "Registra i pagamenti da soli",
+    settingsDesc: "Nome, lingua, valuta, budget…",
+  },
+  easy: {
+    moreOptions: "Altre opzioni (data, valuta, scontrino)",
+    lessOptions: "Meno opzioni",
+    recent: "Le tue ultime spese",
   },
   csv: { date: 'Data', merchant: 'Esercente', category: 'Categoria', total: 'Importo totale', myShare: 'La mia parte', group: 'Gruppo', source: 'Origine', note: 'Nota' },
 };

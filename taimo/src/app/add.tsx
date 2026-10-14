@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { canRecognizeText, recognizeText } from 'taimo-capture';
-import { Alert, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Text, TextInput, View } from 'react-native';
 
 import { categoryStatus } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
@@ -101,6 +101,10 @@ export default function AddExpense() {
   );
 
   const [scanMessage, setScanMessage] = useState<string | null>(null);
+  // Lo básico a la vista; fecha, moneda y ticket en «Más opciones» (abiertas si ya se usan).
+  const [showMore, setShowMore] = useState(
+    () => !!editing || !!params.currency || !!Number(params.daysAgo) || (group?.kind === 'trip' && !!recentForeign),
+  );
 
   /** Foto del ticket → importe, comercio, fecha y (en grupos) productos para repartir. */
   async function scan(source: 'camera' | 'library') {
@@ -228,7 +232,6 @@ export default function AddExpense() {
         <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600' }}>{editing ? t('add.editTitle') : t('add.newTitle')}</Text>
         <View style={{ width: 90 }} />
       </Row>
-      {!editing ? <Button label={t('scan.button')} variant="secondary" onPress={askScan} /> : null}
       {scanMessage ? <Muted style={{ textAlign: 'center' }}>{scanMessage}</Muted> : null}
 
       <View style={{ alignItems: 'center', gap: space.sm }}>
@@ -244,7 +247,7 @@ export default function AddExpense() {
             accessibilityLabel={t('add.amount')}
             style={{ color: colors.text, fontSize: 48, fontWeight: '800', width: Math.max(140, Math.min(260, (amountText.length || 4) * 30)), textAlign: 'center' }}
           />
-          <CurrencyButton value={cur} onPress={() => setPicking(true)} />
+          {showMore || cur !== i18n.currency ? <CurrencyButton value={cur} onPress={() => setPicking(true)} /> : null}
         </Row>
         {timeCost ? <Muted style={{ textAlign: 'center' }}>⏱️ {t('work.cost', { time: timeCost })}</Muted> : null}
         {cur !== base ? (
@@ -254,20 +257,25 @@ export default function AddExpense() {
         ) : null}
       </View>
 
-      <View style={{ gap: space.xs }}>
-        <Muted>{t('ins.when')}</Muted>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
-          {dayOptions.map((o) => (
-            <Chip key={o.key} label={o.label} selected={day === o.key} onPress={() => setDay(o.key)} />
-          ))}
-        </ScrollView>
-      </View>
+      {showMore ? (
+        <View style={{ gap: space.md }}>
+          <View style={{ gap: space.xs }}>
+            <Muted>{t('ins.when')}</Muted>
+            <Row style={{ flexWrap: 'wrap', gap: space.sm }}>
+              {dayOptions.map((o) => (
+                <Chip key={o.key} label={o.label} selected={day === o.key} onPress={() => setDay(o.key)} />
+              ))}
+            </Row>
+          </View>
+          {!editing ? <Button label={t('scan.button')} variant="secondary" onPress={askScan} /> : null}
+        </View>
+      ) : null}
 
       <Input label={t('add.where')} placeholder={t('add.wherePlaceholder')} value={merchant} onChangeText={setMerchant} />
 
       <View style={{ gap: space.sm }}>
         <Muted>{!catTouched && merchant.trim() ? t('add.suggested') : t('add.category')}</Muted>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+        <Row style={{ flexWrap: 'wrap', gap: space.sm }}>
           {CATEGORIES.map((c) => (
             <Chip
               key={c.id}
@@ -279,13 +287,13 @@ export default function AddExpense() {
               }}
             />
           ))}
-        </ScrollView>
+        </Row>
       </View>
 
       {state.groups.length > 0 ? (
         <View style={{ gap: space.sm }}>
           <Muted>{t('add.shared')}</Muted>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+          <Row style={{ flexWrap: 'wrap', gap: space.sm }}>
             <Chip label={t('add.onlyMine')} selected={!group} onPress={() => setGroupId(undefined)} />
             {state.groups.map((g) => (
               <Chip
@@ -301,7 +309,7 @@ export default function AddExpense() {
                 }}
               />
             ))}
-          </ScrollView>
+          </Row>
         </View>
       ) : null}
 
@@ -439,6 +447,9 @@ export default function AddExpense() {
         </View>
       ) : null}
 
+      {!editing ? (
+        <Button label={showMore ? t('easy.lessOptions') : t('easy.moreOptions')} variant="ghost" onPress={() => setShowMore((v) => !v)} />
+      ) : null}
       <Button label={editing ? t('common.save') : t('add.addButton')} disabled={!valid} onPress={save} />
       {editing ? (
         <Button

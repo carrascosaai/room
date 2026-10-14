@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const fr: Translation = {
   common: { cancel: 'Annuler', save: 'Enregistrer', delete: 'Supprimer', back: 'Retour', continue: 'Continuer', done: 'Terminé', you: 'Vous', me: 'Moi', today: 'Aujourd’hui, {time}', yesterday: 'Hier, {time}', unknown: '?' },
   cat: { super: 'Courses', comer: 'Restaurants', ocio: 'Loisirs', deporte: 'Sport', estudios: 'Études', transporte: 'Transport', casa: 'Maison', compras: 'Shopping', salud: 'Santé', suscripciones: 'Abonnements', otros: 'Autres' },
-  tabs: { home: 'Accueil', groups: 'Groupes', stats: 'Statistiques', settings: 'Réglages' },
+  tabs: { home: 'Accueil', groups: 'Groupes', stats: "Résumé", settings: 'Réglages', more: "Plus" },
   onboarding: {
     welcomeTitle: 'Bienvenue sur Taimo',
     welcomeText: 'Payez avec votre téléphone et Taimo note la dépense tout seul. Il vous dit combien il vous reste pour chaque poste et partage les frais avec votre partenaire ou vos colocataires.',
@@ -570,6 +570,21 @@ const fr: Translation = {
     goal: "Objectif atteint",
     impulse: "Tu as dit non à un achat impulsif",
     hundred: "100 dépenses notées",
+  },
+  more: {
+    askDesc: "Pose tes questions sur tes dépenses",
+    goalsDesc: "Économise pour ce qui te tient à cœur",
+    chDesc: "Petits défis pour dépenser moins",
+    wishDesc: "Attends 48 heures avant un achat impulsif",
+    historyDesc: "Toutes tes dépenses, avec recherche",
+    fxDesc: "Convertis n’importe quelle devise",
+    autoDesc: "Que tes paiements se notent tout seuls",
+    settingsDesc: "Nom, langue, devise, budget…",
+  },
+  easy: {
+    moreOptions: "Plus d’options (date, devise, ticket)",
+    lessOptions: "Moins d’options",
+    recent: "Tes dernières dépenses",
   },
   csv: { date: 'Date', merchant: 'Commerçant', category: 'Catégorie', total: 'Montant total', myShare: 'Ma part', group: 'Groupe', source: 'Origine', note: 'Note' },
 };

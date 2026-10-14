@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const nb: Translation = {
   common: { cancel: 'Avbryt', save: 'Lagre', delete: 'Slett', back: 'Tilbake', continue: 'Fortsett', done: 'Ferdig', you: 'Du', me: 'Meg', today: 'I dag, {time}', yesterday: 'I går, {time}', unknown: '?' },
   cat: { super: 'Dagligvarer', comer: 'Spise ute', ocio: 'Fritid', deporte: 'Sport', estudios: 'Studier', transporte: 'Transport', casa: 'Bolig', compras: 'Shopping', salud: 'Helse', suscripciones: 'Abonnementer', otros: 'Annet' },
-  tabs: { home: 'Hjem', groups: 'Grupper', stats: 'Statistikk', settings: 'Innstillinger' },
+  tabs: { home: 'Hjem', groups: 'Grupper', stats: "Oversikt", settings: 'Innstillinger', more: "Mer" },
   onboarding: {
     welcomeTitle: 'Velkommen til Taimo',
     welcomeText: 'Betal med mobilen, så fører Taimo det opp for deg. Du ser hvor mye du har igjen til hver ting, og kan dele utgifter med partneren eller de du bor med.',
@@ -570,6 +570,21 @@ const nb: Translation = {
     goal: "Mål nådd",
     impulse: "Sa nei til et impulskjøp",
     hundred: "100 utgifter ført",
+  },
+  more: {
+    askDesc: "Spør om hva du vil om utgiftene",
+    goalsDesc: "Spar til noe du vil ha",
+    chDesc: "Små utfordringer for å bruke mindre",
+    wishDesc: "Vent 48 timer før et impulskjøp",
+    historyDesc: "Alle utgifter, med søk",
+    fxDesc: "Regn om hvilken som helst valuta",
+    autoDesc: "La betalinger føres automatisk",
+    settingsDesc: "Navn, språk, valuta, budsjett…",
+  },
+  easy: {
+    moreOptions: "Flere valg (dato, valuta, kvittering)",
+    lessOptions: "Færre valg",
+    recent: "Dine siste utgifter",
   },
   csv: { date: 'Dato', merchant: 'Brukersted', category: 'Kategori', total: 'Totalbeløp', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Notat' },
 };

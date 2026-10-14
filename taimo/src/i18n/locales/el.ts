@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const el: Translation = {
   common: { cancel: 'Άκυρο', save: 'Αποθήκευση', delete: 'Διαγραφή', back: 'Πίσω', continue: 'Συνέχεια', done: 'Τέλος', you: 'Εσύ', me: 'Εγώ', today: 'Σήμερα, {time}', yesterday: 'Χθες, {time}', unknown: ';' },
   cat: { super: 'Σούπερ μάρκετ', comer: 'Φαγητό έξω', ocio: 'Ψυχαγωγία', deporte: 'Αθλητισμός', estudios: 'Σπουδές', transporte: 'Μετακινήσεις', casa: 'Σπίτι', compras: 'Ψώνια', salud: 'Υγεία', suscripciones: 'Συνδρομές', otros: 'Άλλα' },
-  tabs: { home: 'Αρχική', groups: 'Ομάδες', stats: 'Στατιστικά', settings: 'Ρυθμίσεις' },
+  tabs: { home: 'Αρχική', groups: 'Ομάδες', stats: "Σύνοψη", settings: 'Ρυθμίσεις', more: "Περισσότερα" },
   onboarding: {
     welcomeTitle: 'Καλώς ήρθες στο Taimo',
     welcomeText: 'Πληρώνεις με το κινητό και το Taimo το καταγράφει μόνο του. Σου λέει πόσα σου μένουν για κάθε πράγμα και μοιράζει τα έξοδα με τον σύντροφο ή τους συγκατοίκους σου.',
@@ -570,6 +570,21 @@ const el: Translation = {
     goal: "Στόχος επιτεύχθηκε",
     impulse: "Είπες όχι σε μια παρόρμηση",
     hundred: "100 έξοδα καταγραμμένα",
+  },
+  more: {
+    askDesc: "Ρώτα ό,τι θες για τα έξοδά σου",
+    goalsDesc: "Αποταμίευσε για κάτι που θέλεις",
+    chDesc: "Μικρές προκλήσεις για να ξοδεύεις λιγότερα",
+    wishDesc: "Περίμενε 48 ώρες πριν από μια παρόρμηση",
+    historyDesc: "Όλα τα έξοδα, με αναζήτηση",
+    fxDesc: "Μετάτρεψε κάθε νόμισμα στο δικό σου",
+    autoDesc: "Οι πληρωμές καταγράφονται μόνες τους",
+    settingsDesc: "Όνομα, γλώσσα, νόμισμα, προϋπολογισμός…",
+  },
+  easy: {
+    moreOptions: "Περισσότερες επιλογές (ημερομηνία, νόμισμα, απόδειξη)",
+    lessOptions: "Λιγότερες επιλογές",
+    recent: "Τα τελευταία σου έξοδα",
   },
   csv: { date: 'Ημερομηνία', merchant: 'Έμπορος', category: 'Κατηγορία', total: 'Συνολικό ποσό', myShare: 'Το μερίδιό μου', group: 'Ομάδα', source: 'Προέλευση', note: 'Σημείωση' },
 };

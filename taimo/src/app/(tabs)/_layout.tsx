@@ -11,7 +11,7 @@ import { colors } from '@/ui/theme';
 
 function icon(emoji: string) {
   return ({ focused }: { focused: boolean }) => (
-    <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>
+    <Text style={{ fontSize: 24, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>
   );
 }
 
@@ -35,14 +35,15 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textFaint,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, height: 68, paddingTop: 6, paddingBottom: 10 },
+        tabBarLabelStyle: { fontSize: 13, fontWeight: '600' },
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
       <Tabs.Screen name="index" options={{ title: t('tabs.home'), tabBarIcon: icon('🏠') }} />
       <Tabs.Screen name="groups" options={{ title: t('tabs.groups'), tabBarIcon: icon('👥') }} />
       <Tabs.Screen name="stats" options={{ title: t('tabs.stats'), tabBarIcon: icon('📊') }} />
-      <Tabs.Screen name="settings" options={{ title: t('tabs.settings'), tabBarIcon: icon('⚙️') }} />
+      <Tabs.Screen name="more" options={{ title: t('tabs.more'), tabBarIcon: icon('☰') }} />
     </Tabs>
   );
 }

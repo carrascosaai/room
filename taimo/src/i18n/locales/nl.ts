@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const nl: Translation = {
   common: { cancel: 'Annuleren', save: 'Opslaan', delete: 'Verwijderen', back: 'Terug', continue: 'Doorgaan', done: 'Klaar', you: 'Jij', me: 'Ik', today: 'Vandaag, {time}', yesterday: 'Gisteren, {time}', unknown: '?' },
   cat: { super: 'Boodschappen', comer: 'Uit eten', ocio: 'Vrije tijd', deporte: 'Sport', estudios: 'Studie', transporte: 'Vervoer', casa: 'Wonen', compras: 'Shoppen', salud: 'Gezondheid', suscripciones: 'Abonnementen', otros: 'Overig' },
-  tabs: { home: 'Home', groups: 'Groepen', stats: 'Statistieken', settings: 'Instellingen' },
+  tabs: { home: 'Home', groups: 'Groepen', stats: "Overzicht", settings: 'Instellingen', more: "Meer" },
   onboarding: {
     welcomeTitle: 'Welkom bij Taimo',
     welcomeText: 'Betaal met je telefoon en Taimo noteert het vanzelf. Je ziet hoeveel je nog over hebt per onderdeel en kosten delen met je partner of huisgenoten gaat vanzelf.',
@@ -570,6 +570,21 @@ const nl: Translation = {
     goal: "Doel gehaald",
     impulse: "Nee gezegd tegen een impulsaankoop",
     hundred: "100 uitgaven genoteerd",
+  },
+  more: {
+    askDesc: "Vraag alles over je uitgaven",
+    goalsDesc: "Spaar voor iets wat je wilt",
+    chDesc: "Kleine uitdagingen om minder uit te geven",
+    wishDesc: "Wacht 48 uur voor een impulsaankoop",
+    historyDesc: "Al je uitgaven, met zoeken",
+    fxDesc: "Reken elke munt om naar de jouwe",
+    autoDesc: "Laat betalingen vanzelf noteren",
+    settingsDesc: "Naam, taal, munt, budget…",
+  },
+  easy: {
+    moreOptions: "Meer opties (datum, munt, bonnetje)",
+    lessOptions: "Minder opties",
+    recent: "Je laatste uitgaven",
   },
   csv: { date: 'Datum', merchant: 'Winkel', category: 'Categorie', total: 'Totaalbedrag', myShare: 'Mijn deel', group: 'Groep', source: 'Bron', note: 'Notitie' },
 };

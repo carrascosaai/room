@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const ro: Translation = {
   common: { cancel: 'Anulează', save: 'Salvează', delete: 'Șterge', back: 'Înapoi', continue: 'Continuă', done: 'Gata', you: 'Tu', me: 'Eu', today: 'Azi, {time}', yesterday: 'Ieri, {time}', unknown: '?' },
   cat: { super: 'Cumpărături alimentare', comer: 'În oraș', ocio: 'Distracție', deporte: 'Sport', estudios: 'Studii', transporte: 'Transport', casa: 'Casă', compras: 'Cumpărături', salud: 'Sănătate', suscripciones: 'Abonamente', otros: 'Altele' },
-  tabs: { home: 'Acasă', groups: 'Grupuri', stats: 'Statistici', settings: 'Setări' },
+  tabs: { home: 'Acasă', groups: 'Grupuri', stats: "Rezumat", settings: 'Setări', more: "Mai mult" },
   onboarding: {
     welcomeTitle: 'Bun venit în Taimo',
     welcomeText: 'Plătești cu telefonul și Taimo notează singur. Îți spune cât ți-a mai rămas pentru fiecare lucru și împarte cheltuielile cu partenerul sau colegii de apartament.',
@@ -570,6 +570,21 @@ const ro: Translation = {
     goal: "Obiectiv atins",
     impulse: "Ai refuzat o cumpărătură impulsivă",
     hundred: "100 de cheltuieli înregistrate",
+  },
+  more: {
+    askDesc: "Întreabă orice despre cheltuieli",
+    goalsDesc: "Economisește pentru ceva ce vrei",
+    chDesc: "Provocări mici ca să cheltui mai puțin",
+    wishDesc: "Așteaptă 48 de ore înainte de un moft",
+    historyDesc: "Toate cheltuielile, cu căutare",
+    fxDesc: "Convertește orice monedă în a ta",
+    autoDesc: "Plățile se notează singure",
+    settingsDesc: "Nume, limbă, monedă, buget…",
+  },
+  easy: {
+    moreOptions: "Mai multe opțiuni (dată, monedă, bon)",
+    lessOptions: "Mai puține opțiuni",
+    recent: "Ultimele tale cheltuieli",
   },
   csv: { date: 'Dată', merchant: 'Comerciant', category: 'Categorie', total: 'Sumă totală', myShare: 'Partea mea', group: 'Grup', source: 'Sursă', note: 'Notă' },
 };

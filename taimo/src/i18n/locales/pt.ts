@@ -3,7 +3,7 @@ import type { Translation } from '../core';
 const pt: Translation = {
   common: { cancel: 'Cancelar', save: 'Guardar', delete: 'Apagar', back: 'Voltar', continue: 'Continuar', done: 'Concluído', you: 'Tu', me: 'Eu', today: 'Hoje, {time}', yesterday: 'Ontem, {time}', unknown: '?' },
   cat: { super: 'Supermercado', comer: 'Comer fora', ocio: 'Lazer', deporte: 'Desporto', estudios: 'Estudos', transporte: 'Transportes', casa: 'Casa', compras: 'Compras', salud: 'Saúde', suscripciones: 'Subscrições', otros: 'Outros' },
-  tabs: { home: 'Início', groups: 'Grupos', stats: 'Estatísticas', settings: 'Definições' },
+  tabs: { home: 'Início', groups: 'Grupos', stats: "Resumo", settings: 'Definições', more: "Mais" },
   onboarding: {
     welcomeTitle: 'Bem-vindo ao Taimo',
     welcomeText: 'Pagas com o telemóvel e o Taimo regista sozinho. Diz-te quanto te resta para cada coisa e divide as despesas com o teu par ou com quem vives.',
@@ -570,6 +570,21 @@ const pt: Translation = {
     goal: "Meta cumprida",
     impulse: "Disseste não a um capricho",
     hundred: "100 despesas registadas",
+  },
+  more: {
+    askDesc: "Pergunta o que quiseres sobre as tuas despesas",
+    goalsDesc: "Poupa para algo que queiras",
+    chDesc: "Pequenos desafios para gastar menos",
+    wishDesc: "Espera 48 horas antes de um capricho",
+    historyDesc: "Todas as despesas, com pesquisa",
+    fxDesc: "Converte qualquer moeda para a tua",
+    autoDesc: "Que os pagamentos se registem sozinhos",
+    settingsDesc: "Nome, idioma, moeda, orçamento…",
+  },
+  easy: {
+    moreOptions: "Mais opções (data, moeda, talão)",
+    lessOptions: "Menos opções",
+    recent: "As tuas últimas despesas",
   },
   csv: { date: 'Data', merchant: 'Comerciante', category: 'Categoria', total: 'Valor total', myShare: 'A minha parte', group: 'Grupo', source: 'Origem', note: 'Nota' },
 };

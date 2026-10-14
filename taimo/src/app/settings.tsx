@@ -204,7 +204,6 @@ export default function Settings() {
 
   return (
     <Screen>
-      <Title>{t('settings.title')}</Title>
 
       <Card>
         <H2>{t('settings.name')}</H2>
@@ -223,15 +222,6 @@ export default function Settings() {
           </Row>
         </Card>
       </Pressable>
-
-      <Card>
-        <H2>{t('theme.title')}</H2>
-        <Row style={{ flexWrap: 'wrap' }}>
-          {(['auto', 'light', 'dark'] as const).map((th) => (
-            <Chip key={th} label={t(`theme.${th}`)} selected={(state.profile.theme ?? 'auto') === th} onPress={() => dispatch({ type: 'setTheme', theme: th })} />
-          ))}
-        </Row>
-      </Card>
 
       <Card>
         <H2>{t('settings.currency')}</H2>
@@ -254,6 +244,67 @@ export default function Settings() {
       </Card>
 
       <Card>
+        <H2>{t('settings.budget')}</H2>
+        <Muted>{t('settings.total', { amount: money(totalBudget(state.budgets)) })}</Muted>
+        <Button label={t('smart.suggest')} variant="secondary" onPress={suggest} />
+        {budgetMessage ? <Muted>{budgetMessage}</Muted> : null}
+        {CATEGORIES.map((c) => (
+          <Row key={c.id}>
+            <CategoryBadge id={c.id} size={32} />
+            <Text style={{ color: colors.text, flex: 1 }}>{t(`cat.${c.id}`)}</Text>
+            <View style={{ width: 100 }}>
+              <Input
+                value={values[c.id]}
+                keyboardType="decimal-pad"
+                placeholder="—"
+                style={{ textAlign: 'right', paddingVertical: 8 }}
+                onChangeText={(v) => setValues((prev) => ({ ...prev, [c.id]: v }))}
+                onBlur={() => dispatch({ type: 'setBudget', category: c.id, amount: parseAmount(values[c.id]) ?? 0 })}
+              />
+            </View>
+            <Muted style={{ width: 34 }}>{i18n.currency}</Muted>
+          </Row>
+        ))}
+      </Card>
+
+      <Card>
+        <H2>{t('theme.title')}</H2>
+        <Row style={{ flexWrap: 'wrap' }}>
+          {(['auto', 'light', 'dark'] as const).map((th) => (
+            <Chip key={th} label={t(`theme.${th}`)} selected={(state.profile.theme ?? 'auto') === th} onPress={() => dispatch({ type: 'setTheme', theme: th })} />
+          ))}
+        </Row>
+      </Card>
+
+      <Card>
+        <H2>{t('settings.notifications')}</H2>
+        <Muted>{t('settings.notificationsText')}</Muted>
+        <Button label={t('settings.enableNotifications')} variant="secondary" onPress={() => ensureNotificationPermission().catch(() => {})} />
+      </Card>
+
+      {Platform.OS !== 'web' ? (
+        <Card>
+          <Row>
+            <View style={{ flex: 1, gap: 2 }}>
+              <H2>🔒 {t('lock.title')}</H2>
+              <Muted>{t('lock.text')}</Muted>
+            </View>
+            <Switch value={!!state.profile.lock} onValueChange={() => toggleLock().catch(() => {})} trackColor={{ true: colors.primary, false: colors.border }} />
+          </Row>
+          {lockMessage ? <Muted>{lockMessage}</Muted> : null}
+        </Card>
+      ) : null}
+
+      <Card>
+        <H2>{t('pay.title')}</H2>
+        <Muted>{t('pay.hint')}</Muted>
+        <Input label={t('pay.bizum')} value={payment.bizum ?? ''} keyboardType="phone-pad" placeholder="600 000 000" onChangeText={(v) => setPayment((p) => ({ ...p, bizum: v }))} onBlur={savePayment} />
+        <Input label={t('pay.iban')} value={payment.iban ?? ''} autoCapitalize="characters" autoCorrect={false} placeholder="ES00 0000 0000 0000 0000 0000" onChangeText={(v) => setPayment((p) => ({ ...p, iban: v }))} onBlur={savePayment} />
+        <Input label={t('pay.paypal')} value={payment.paypal ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="paypal.me/…" onChangeText={(v) => setPayment((p) => ({ ...p, paypal: v }))} onBlur={savePayment} />
+        <Input label={t('pay.revolut')} value={payment.revolut ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="@…" onChangeText={(v) => setPayment((p) => ({ ...p, revolut: v }))} onBlur={savePayment} />
+      </Card>
+
+      <Card>
         <H2>⏱️ {t('work.title')}</H2>
         <Muted>{t('work.hint')}</Muted>
         <Row>
@@ -264,15 +315,6 @@ export default function Settings() {
             <Input label={t('work.hours')} value={hours} onChangeText={setHours} onBlur={saveIncome} keyboardType="decimal-pad" />
           </View>
         </Row>
-      </Card>
-
-      <Card>
-        <H2>{t('pay.title')}</H2>
-        <Muted>{t('pay.hint')}</Muted>
-        <Input label={t('pay.bizum')} value={payment.bizum ?? ''} keyboardType="phone-pad" placeholder="600 000 000" onChangeText={(v) => setPayment((p) => ({ ...p, bizum: v }))} onBlur={savePayment} />
-        <Input label={t('pay.iban')} value={payment.iban ?? ''} autoCapitalize="characters" autoCorrect={false} placeholder="ES00 0000 0000 0000 0000 0000" onChangeText={(v) => setPayment((p) => ({ ...p, iban: v }))} onBlur={savePayment} />
-        <Input label={t('pay.paypal')} value={payment.paypal ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="paypal.me/…" onChangeText={(v) => setPayment((p) => ({ ...p, paypal: v }))} onBlur={savePayment} />
-        <Input label={t('pay.revolut')} value={payment.revolut ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="@…" onChangeText={(v) => setPayment((p) => ({ ...p, revolut: v }))} onBlur={savePayment} />
       </Card>
 
       <Card>
@@ -302,39 +344,11 @@ export default function Settings() {
       </Card>
 
       <Card>
-        <H2>{t('settings.budget')}</H2>
-        <Muted>{t('settings.total', { amount: money(totalBudget(state.budgets)) })}</Muted>
-        <Button label={t('smart.suggest')} variant="secondary" onPress={suggest} />
-        {budgetMessage ? <Muted>{budgetMessage}</Muted> : null}
-        {CATEGORIES.map((c) => (
-          <Row key={c.id}>
-            <CategoryBadge id={c.id} size={32} />
-            <Text style={{ color: colors.text, flex: 1 }}>{t(`cat.${c.id}`)}</Text>
-            <View style={{ width: 100 }}>
-              <Input
-                value={values[c.id]}
-                keyboardType="decimal-pad"
-                placeholder="—"
-                style={{ textAlign: 'right', paddingVertical: 8 }}
-                onChangeText={(v) => setValues((prev) => ({ ...prev, [c.id]: v }))}
-                onBlur={() => dispatch({ type: 'setBudget', category: c.id, amount: parseAmount(values[c.id]) ?? 0 })}
-              />
-            </View>
-            <Muted style={{ width: 34 }}>{i18n.currency}</Muted>
-          </Row>
-        ))}
-      </Card>
-
-      <Button
-        label={Platform.OS === 'android' ? t('settings.autoAndroid') : t('settings.autoIos')}
-        variant="secondary"
-        onPress={() => router.push('/automation')}
-      />
-
-      <Card>
-        <H2>{t('settings.notifications')}</H2>
-        <Muted>{t('settings.notificationsText')}</Muted>
-        <Button label={t('settings.enableNotifications')} variant="secondary" onPress={() => ensureNotificationPermission().catch(() => {})} />
+        <H2>{t('backup.title')}</H2>
+        <Muted>{t('backup.text')}</Muted>
+        <Button label={t('backup.export')} variant="secondary" onPress={() => saveBackup().catch(() => {})} />
+        <Button label={t('backup.import')} variant="ghost" onPress={() => restoreFile().catch(() => setBackupMessage(t('backup.invalid')))} />
+        {backupMessage ? <Muted>{backupMessage}</Muted> : null}
       </Card>
 
       <Card>
@@ -344,27 +358,6 @@ export default function Settings() {
         <Button label={t('settings.export')} variant="secondary" onPress={() => exportCsv().catch(() => {})} />
         {csvMessage ? <Muted>{csvMessage}</Muted> : null}
       </Card>
-
-      <Card>
-        <H2>{t('backup.title')}</H2>
-        <Muted>{t('backup.text')}</Muted>
-        <Button label={t('backup.export')} variant="secondary" onPress={() => saveBackup().catch(() => {})} />
-        <Button label={t('backup.import')} variant="ghost" onPress={() => restoreFile().catch(() => setBackupMessage(t('backup.invalid')))} />
-        {backupMessage ? <Muted>{backupMessage}</Muted> : null}
-      </Card>
-
-      {Platform.OS !== 'web' ? (
-        <Card>
-          <Row>
-            <View style={{ flex: 1, gap: 2 }}>
-              <H2>🔒 {t('lock.title')}</H2>
-              <Muted>{t('lock.text')}</Muted>
-            </View>
-            <Switch value={!!state.profile.lock} onValueChange={() => toggleLock().catch(() => {})} trackColor={{ true: colors.primary, false: colors.border }} />
-          </Row>
-          {lockMessage ? <Muted>{lockMessage}</Muted> : null}
-        </Card>
-      ) : null}
 
       <Card>
         <H2>{t('settings.privacy')}</H2>
