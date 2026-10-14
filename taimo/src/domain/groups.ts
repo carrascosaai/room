@@ -160,3 +160,27 @@ export function withoutPot(balance: Record<string, Cents>): Record<string, Cents
   const { [POT]: _pot, ...rest } = balance;
   return rest;
 }
+
+/**
+ * Pareja: reparto según lo que gana cada uno, en porcentajes enteros que suman 100
+ * (1.800 € y 1.200 € → 60 / 40). Null si falta algún sueldo.
+ */
+export function incomeWeights(incomes: Record<string, Cents>): Record<string, number> | null {
+  const values = Object.values(incomes);
+  if (values.length < 2 || values.some((v) => !(v > 0))) return null;
+  return splitByWeights(100, incomes);
+}
+
+/** Lo «nuestro» de un mes: total compartido del grupo y la parte de cada uno. */
+export function sharedMonth(group: Group, expenses: Expense[], month: string): { total: Cents; shares: Record<string, Cents> } {
+  const shares: Record<string, Cents> = Object.fromEntries(group.members.map((m) => [m.id, 0]));
+  let total = 0;
+  for (const e of expenses) {
+    if (e.groupId !== group.id || !e.shares) continue;
+    const d = new Date(e.date);
+    if (`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` !== month) continue;
+    total += e.amount;
+    for (const [id, s] of Object.entries(e.shares)) shares[id] = (shares[id] ?? 0) + s;
+  }
+  return { total, shares };
+}

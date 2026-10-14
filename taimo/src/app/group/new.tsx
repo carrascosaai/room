@@ -8,6 +8,7 @@ import { useI18n, type TKey } from '@/i18n';
 import { newId, useStore } from '@/store/store';
 import { Button, Card, Chip, H2, Input, Muted, Row, Screen, Title } from '@/ui/components';
 import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
+import { IncomeSplit } from '@/ui/IncomeSplit';
 import { colors, space } from '@/ui/theme';
 
 const KINDS: { id: GroupKind; emoji: string; hint: TKey }[] = [
@@ -125,6 +126,10 @@ export default function NewGroup() {
               <Chip key={`i${r.join()}`} label={`${t('common.me')} ${r[1]} / ${names[0]} ${r[0]}`} selected={ratio[0] === r[1] && ratio[1] === r[0]} onPress={() => setRatio([r[1], r[0]])} />
             ))}
           </Row>
+          {RATIOS.some((r) => (r[0] === ratio[0] && r[1] === ratio[1]) || (r[1] === ratio[0] && r[0] === ratio[1])) ? null : (
+            <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>{t('couple.result', { a: ratio[0], b: ratio[1], name: names[0] })}</Text>
+          )}
+          <IncomeSplit me={state.profile.name || t('common.me')} myIncome={state.profile.income?.monthly} other={names[0]} onApply={setRatio} />
           <Muted>{t('split.weightsHint')}</Muted>
         </View>
       ) : null}

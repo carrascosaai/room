@@ -5,7 +5,8 @@ import { ActivityIndicator, Platform, Pressable, Share, Switch, Text, View } fro
 
 import { category as categoryInfo } from '@/domain/categories';
 import { groupBudgetPlan, groupInsights, tripDays } from '@/domain/groupInsights';
-import { balances, nextPayer, POT, potContributions, potLeft, suggestTransfers, withoutPot } from '@/domain/groups';
+import { monthKey } from '@/domain/budget';
+import { balances, nextPayer, POT, potContributions, potLeft, sharedMonth, suggestTransfers, withoutPot } from '@/domain/groups';
 import { parseAmount } from '@/domain/money';
 import { buildPayRequest, canBePaid, payLink } from '@/domain/paylink';
 import { buildPush } from '@/domain/sync';
@@ -17,6 +18,7 @@ import { Button, Card, Chip, Empty, H2, Input, Muted, ProgressBar, Row, Screen }
 import { confirm } from '@/ui/confirm';
 import { CurrencyButton, CurrencyPicker, currencyFlag } from '@/ui/CurrencyPicker';
 import { ExpenseRow } from '@/ui/ExpenseRow';
+import { IncomeSplit } from '@/ui/IncomeSplit';
 import { PayButtons } from '@/ui/PayButtons';
 import { paymentLines } from '@/ui/messages';
 import { colors, radius, space } from '@/ui/theme';
@@ -170,6 +172,8 @@ export default function GroupDetail() {
         ) : null}
       </Card>
 
+      {group.kind === 'couple' && group.members.length === 2 ? <CoupleCard group={group} /> : null}
+
       {payer ? (
         <Card>
           <Row>
@@ -317,6 +321,43 @@ export default function GroupDetail() {
   );
 }
 
+/** Pareja: lo nuestro de este mes, la parte de cada uno y lo tuyo (que solo ves tú). */
+function CoupleCard({ group }: { group: Group }) {
+  const { state } = useStore();
+  const { t, moneyIn, money } = useI18n();
+  const cur = group.currency ?? state.profile.currency;
+  const month = monthKey(new Date());
+  const ours = sharedMonth(group, state.expenses, month);
+  const me = group.members.find((m) => m.isMe);
+  const partner = group.members.find((m) => !m.isMe);
+  if (!me || !partner) return null;
+  const mine = state.expenses.filter((e) => !e.groupId && monthKey(e.date) === month).reduce((s, e) => s + e.amount, 0);
+  const pct = (id: string) => (group.weights ? `${Math.round(((group.weights[id] ?? 0) / Object.values(group.weights).reduce((a, b) => a + b, 0)) * 100)}\u00a0%` : null);
+  const cell = (label: string, amount: number, sub?: string | null) => (
+    <View style={{ flex: 1, gap: 2 }}>
+      <Muted style={{ fontSize: 14 }}>{label}</Muted>
+      <Text style={{ color: colors.text, fontSize: 20, fontWeight: '800' }} adjustsFontSizeToFit numberOfLines={1}>
+        {moneyIn(amount, cur)}
+      </Text>
+      {sub ? <Muted style={{ fontSize: 14 }}>{sub}</Muted> : null}
+    </View>
+  );
+  return (
+    <Card>
+      <H2>❤️ {t('couple.title')}</H2>
+      <Row style={{ alignItems: 'flex-start' }}>
+        {cell(t('couple.ours'), ours.total)}
+        {cell(t('couple.myPart'), ours.shares[me.id] ?? 0, pct(me.id))}
+        {cell(t('couple.theirPart', { name: partner.name }), ours.shares[partner.id] ?? 0, pct(partner.id))}
+      </Row>
+      <View style={{ backgroundColor: colors.bg, borderRadius: radius.md, padding: space.md, gap: 2 }}>
+        <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700' }}>🔒 {t('couple.mine', { amount: money(mine) })}</Text>
+        <Muted>{t('couple.private', { name: partner.name })}</Muted>
+      </View>
+    </Card>
+  );
+}
+
 /** Gastos fijos de cada mes (alquiler, luz…), que se apuntan solos. */
 function RecurringCard({ group }: { group: Group }) {
   const { dispatch } = useStore();
@@ -393,7 +434,7 @@ function RecurringCard({ group }: { group: Group }) {
 
 /** Ajustes del grupo: nombre, moneda, presupuesto, fechas y reparto por defecto. */
 function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) {
-  const { dispatch } = useStore();
+  const { state, dispatch } = useStore();
   const i18n = useI18n();
   const { t } = i18n;
   const [name, setName] = useState(group.name);
@@ -455,6 +496,14 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
       ) : null}
       <Muted>{t('split.defaultSplit')}</Muted>
       <Muted style={{ fontSize: 12 }}>{t('split.defaultHint')}</Muted>
+      {group.kind === 'couple' && group.members.length === 2 && group.members.some((m) => m.isMe) ? (
+        <IncomeSplit
+          me={state.profile.name || t('common.me')}
+          myIncome={state.profile.income?.monthly}
+          other={group.members.find((m) => !m.isMe)!.name}
+          onApply={([mine, theirs]) => setWeights(Object.fromEntries(group.members.map((m) => [m.id, String(m.isMe ? mine : theirs)])))}
+        />
+      ) : null}
       {group.members.map((m) => (
         <Row key={m.id}>
           <Text style={{ color: colors.text, flex: 1 }}>{m.isMe ? t('common.you') : m.name}</Text>

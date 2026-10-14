@@ -71,3 +71,25 @@ describe('enlace para cobrar sin instalar nada', () => {
     expect(r?.p).toEqual({ bizum: '6001' });
   });
 });
+
+describe('pareja: tuyo, mío y nuestro', () => {
+  it('reparte según sueldos en porcentajes que suman 100', async () => {
+    const { incomeWeights } = await import('../src/domain/groups');
+    expect(incomeWeights({ me: 180000, ana: 120000 })).toEqual({ me: 60, ana: 40 });
+    expect(incomeWeights({ me: 100000, ana: 200000 })).toEqual({ me: 33, ana: 67 });
+    expect(incomeWeights({ me: 100000, ana: 0 })).toBeNull();
+    expect(incomeWeights({ me: 100000 })).toBeNull();
+  });
+
+  it('suma lo compartido del mes y la parte de cada uno', async () => {
+    const { sharedMonth } = await import('../src/domain/groups');
+    const couple: Group = { id: 'g1', name: 'Casa', emoji: '❤️', kind: 'couple', createdAt: '2026-10-01', members: [{ id: 'me', name: 'Fer', isMe: true }, { id: 'ana', name: 'Ana' }] };
+    const list = [
+      ex('a', 'me', { me: 6000, ana: 4000 }, '2026-10-03T12:00:00'),
+      ex('b', 'ana', { me: 300, ana: 200 }, '2026-10-20T12:00:00'),
+      ex('c', 'ana', { me: 1000, ana: 1000 }, '2026-09-20T12:00:00'),
+      { ...ex('d', 'me', { me: 999 }, '2026-10-05T12:00:00'), groupId: undefined },
+    ];
+    expect(sharedMonth(couple, list, '2026-10')).toEqual({ total: 10500, shares: { me: 6300, ana: 4200 } });
+  });
+});
