@@ -82,9 +82,16 @@ function GoalCard({ goal }: { goal: Goal }) {
   const [amount, setAmount] = useState('');
   const perMonth = goalPerMonth(goal);
   const done = goal.saved >= goal.target;
+  const [warning, setWarning] = useState<string | null>(null);
   const move = (sign: 1 | -1) => {
     const value = parseAmount(amount);
     if (!value) return;
+    // No se puede sacar más de lo que hay apartado: se dice y no se toca nada.
+    if (sign < 0 && value > goal.saved) {
+      setWarning(goal.saved > 0 ? t('fixa.withdrawTooMuch', { amount: money(goal.saved) }) : t('fixa.withdrawNothing'));
+      return;
+    }
+    setWarning(null);
     dispatch({ type: 'saveToGoal', id: goal.id, amount: sign * value });
     setAmount('');
   };
@@ -114,6 +121,7 @@ function GoalCard({ goal }: { goal: Goal }) {
         </View>
         <Button label={t('goal.add')} onPress={() => move(1)} disabled={!parseAmount(amount)} />
       </Row>
+      {warning ? <Text style={{ color: colors.warning, fontSize: 16 }}>{warning}</Text> : null}
       <Row style={{ justifyContent: 'space-between' }}>
         <Button label={t('goal.withdraw')} variant="ghost" onPress={() => move(-1)} disabled={!parseAmount(amount)} />
         <Button

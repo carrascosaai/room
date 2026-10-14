@@ -5,13 +5,14 @@ import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 
-import { deleteAccount, downloadBackup, signOut, uploadBackup } from '@/auth/auth';
+import { authConfigured, deleteAccount, downloadBackup, signOut, uploadBackup } from '@/auth/auth';
 import { makeBackup, readBackup } from '@/domain/backup';
 import { totalBudget } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
 import { parseBankFile } from '@/domain/bankfiles';
 import { expensesToCsv, isAlreadyImported, rowsToExpenses } from '@/domain/csv';
-import { suggestBudgets } from '@/domain/insights';
+import { historyDays, MIN_DAYS_FOR_BUDGET } from '@/domain/dataSpan';
+import { suggestBudgets, type BudgetSuggestion } from '@/domain/insights';
 import { parseAmount } from '@/domain/money';
 import type { CategoryId } from '@/domain/types';
 import { FALLBACK, rateBetween } from '@/fx/fx';
@@ -24,6 +25,7 @@ import { Button, Card, CategoryBadge, Chip, H2, Input, Muted, Row, Screen, Title
 import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
 import { confirm } from '@/ui/confirm';
 import { colors, space } from '@/ui/theme';
+import { toast } from '@/ui/Toast';
 
 export default function Settings() {
   const { state, dispatch } = useStore();
@@ -40,6 +42,10 @@ export default function Settings() {
   const [budgetMessage, setBudgetMessage] = useState<string | null>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [lockMessage, setLockMessage] = useState<string | null>(null);
+  // Propuesta de presupuesto: primero se enseña y solo se aplica si dices que sí.
+  const [proposal, setProposal] = useState<BudgetSuggestion | null>(null);
+  // Lo avanzado (cuenta en la nube, formatos de archivo, borrar todo) va plegado.
+  const [advanced, setAdvanced] = useState(false);
   const [income, setIncome] = useState(state.profile.income ? String(Math.round(state.profile.income.monthly / 100)) : '');
   const [hours, setHours] = useState(state.profile.income ? String(state.profile.income.hoursPerWeek) : '40');
   const saveIncome = () => {
@@ -49,16 +55,30 @@ export default function Settings() {
   };
 
   function suggest() {
+    setProposal(null);
+    // Con menos de un mes de gastos la propuesta saldría mal: mejor esperar.
+    const days = historyDays(state.expenses);
+    if (days < MIN_DAYS_FOR_BUDGET) {
+      setBudgetMessage(t('fixa.suggestNeedDays', { days }));
+      return;
+    }
     const s = suggestBudgets(state);
     if (!s) {
       setBudgetMessage(t('smart.none'));
       return;
     }
-    for (const [category, amount] of Object.entries(s.budgets)) dispatch({ type: 'setBudget', category: category as CategoryId, amount: amount! });
+    setBudgetMessage(null);
+    setProposal(s);
+  }
+
+  function applyProposal() {
+    if (!proposal) return;
+    for (const [category, amount] of Object.entries(proposal.budgets)) dispatch({ type: 'setBudget', category: category as CategoryId, amount: amount! });
     setValues(Object.fromEntries(CATEGORIES.map((c) => {
-      const v = s.budgets[c.id] ?? state.budgets[c.id];
+      const v = proposal.budgets[c.id] ?? state.budgets[c.id];
       return [c.id, v ? String(Math.round(v / 100)) : ''];
     })));
+    setProposal(null);
     setBudgetMessage(t('smart.text'));
   }
 
@@ -72,6 +92,7 @@ export default function Settings() {
       a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
+      toast(t('fixa.backupSaved'));
       return;
     }
     const file = new File(Paths.cache, fileName);
@@ -105,6 +126,7 @@ export default function Settings() {
     confirm(t('backup.confirm', { date: when }), t('common.cancel'), t('backup.import'), () => {
       dispatch({ type: 'restoreBackup', state: restored.state });
       setBackupMessage(t('auth.restored'));
+      toast(t('auth.restored'));
     });
   }
 
@@ -185,6 +207,7 @@ export default function Settings() {
       return;
     }
     const dupes = expenses.length - fresh.length;
+    toast(t('settings.imported', { count: fresh.length }));
     setCsvMessage(
       [
         t('settings.imported', { count: fresh.length }),
@@ -221,7 +244,8 @@ export default function Settings() {
 
   return (
     <Screen>
-
+      {/* ── Tú y la app ── */}
+      <Section title={t('fixa.secYou')} />
       <Card>
         <H2>{t('settings.name')}</H2>
         <Input value={name} onChangeText={setName} onBlur={() => dispatch({ type: 'setProfileName', name: name.trim() })} />
@@ -261,31 +285,6 @@ export default function Settings() {
       </Card>
 
       <Card>
-        <H2>{t('settings.budget')}</H2>
-        <Muted>{t('settings.total', { amount: money(totalBudget(state.budgets)) })}</Muted>
-        <Button label={t('smart.suggest')} variant="secondary" onPress={suggest} />
-        {budgetMessage ? <Muted>{budgetMessage}</Muted> : null}
-        {CATEGORIES.map((c) => (
-          <Row key={c.id}>
-            <CategoryBadge id={c.id} size={32} />
-            <Text style={{ color: colors.text, flex: 1 }}>{t(`cat.${c.id}`)}</Text>
-            <View style={{ width: 100 }}>
-              <Input
-                value={values[c.id]}
-                accessibilityLabel={`${t(`cat.${c.id}`)} (${i18n.currency})`}
-                keyboardType="decimal-pad"
-                placeholder="—"
-                style={{ textAlign: 'right', paddingVertical: 8 }}
-                onChangeText={(v) => setValues((prev) => ({ ...prev, [c.id]: v }))}
-                onBlur={() => dispatch({ type: 'setBudget', category: c.id, amount: parseAmount(values[c.id]) ?? 0 })}
-              />
-            </View>
-            <Muted style={{ width: 40 }}>{i18n.currency}</Muted>
-          </Row>
-        ))}
-      </Card>
-
-      <Card>
         <H2>{t('theme.title')}</H2>
         <Row style={{ flexWrap: 'wrap' }}>
           {(['auto', 'light', 'dark'] as const).map((th) => (
@@ -313,13 +312,48 @@ export default function Settings() {
         </Card>
       ) : null}
 
+      {/* ── Presupuesto ── */}
+      <Section title={t('fixa.secBudget')} />
       <Card>
-        <H2>{t('pay.title')}</H2>
-        <Muted>{t('pay.hint')}</Muted>
-        <Input label={t('pay.bizum')} value={payment.bizum ?? ''} keyboardType="phone-pad" placeholder="600 000 000" onChangeText={(v) => setPayment((p) => ({ ...p, bizum: v }))} onBlur={savePayment} />
-        <Input label={t('pay.iban')} value={payment.iban ?? ''} autoCapitalize="characters" autoCorrect={false} placeholder="ES00 0000 0000 0000 0000 0000" onChangeText={(v) => setPayment((p) => ({ ...p, iban: v }))} onBlur={savePayment} />
-        <Input label={t('pay.paypal')} value={payment.paypal ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="paypal.me/…" onChangeText={(v) => setPayment((p) => ({ ...p, paypal: v }))} onBlur={savePayment} />
-        <Input label={t('pay.revolut')} value={payment.revolut ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="@…" onChangeText={(v) => setPayment((p) => ({ ...p, revolut: v }))} onBlur={savePayment} />
+        <H2>{t('settings.budget')}</H2>
+        <Muted>{t('settings.total', { amount: money(totalBudget(state.budgets)) })}</Muted>
+        <Button label={t('smart.suggest')} variant="secondary" onPress={suggest} />
+        {budgetMessage ? <Muted>{budgetMessage}</Muted> : null}
+        {proposal ? (
+          <View style={{ gap: space.sm, backgroundColor: colors.primarySoft, borderRadius: 16, padding: space.md, borderWidth: 1, borderColor: colors.primaryDark }}>
+            <Text style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>{t('fixa.proposalTitle')}</Text>
+            {CATEGORIES.filter((c) => proposal.budgets[c.id] !== undefined).map((c) => (
+              <Row key={c.id} style={{ justifyContent: 'space-between' }}>
+                <Text style={{ color: colors.text, flex: 1 }}>
+                  {c.emoji} {t(`cat.${c.id}`)}
+                </Text>
+                <Muted>{state.budgets[c.id] ? money(state.budgets[c.id]!) : '—'}</Muted>
+                <Text style={{ color: colors.text, fontWeight: '700' }}> → {money(proposal.budgets[c.id]!)}</Text>
+              </Row>
+            ))}
+            <Muted>{t('smart.text')}</Muted>
+            <Button label={t('fixa.apply')} onPress={applyProposal} />
+            <Button label={t('common.cancel')} variant="ghost" onPress={() => setProposal(null)} />
+          </View>
+        ) : null}
+        {CATEGORIES.map((c) => (
+          <Row key={c.id}>
+            <CategoryBadge id={c.id} size={32} />
+            <Text style={{ color: colors.text, flex: 1 }}>{t(`cat.${c.id}`)}</Text>
+            <View style={{ width: 100 }}>
+              <Input
+                value={values[c.id]}
+                accessibilityLabel={`${t(`cat.${c.id}`)} (${i18n.currency})`}
+                keyboardType="decimal-pad"
+                placeholder="—"
+                style={{ textAlign: 'right', paddingVertical: 8 }}
+                onChangeText={(v) => setValues((prev) => ({ ...prev, [c.id]: v }))}
+                onBlur={() => dispatch({ type: 'setBudget', category: c.id, amount: parseAmount(values[c.id]) ?? 0 })}
+              />
+            </View>
+            <Muted style={{ width: 40 }}>{i18n.currency}</Muted>
+          </Row>
+        ))}
       </Card>
 
       <Card>
@@ -335,81 +369,113 @@ export default function Settings() {
         </Row>
       </Card>
 
+      {/* ── Cómo te pagan ── */}
+      <Section title={t('fixa.secPay')} />
       <Card>
-        <H2>{t('auth.account')}</H2>
-        {account ? (
-          <>
-            <Muted>{t('auth.signedInAs', { name: account.email ?? state.profile.name })}</Muted>
-            <Muted>{lastBackup ? t('auth.lastBackup', { date: i18n.date(lastBackup, { dateStyle: 'medium', timeStyle: 'short' }) }) : ''}</Muted>
-            <Button label={t('auth.backupNow')} variant="secondary" onPress={backupNow} />
-            <Button label={t('auth.restore')} variant="secondary" onPress={restore} />
-            <Button
-              label={t('auth.signOut')}
-              variant="ghost"
-              onPress={async () => {
-                await signOut().catch(() => {});
-                dispatch({ type: 'setAccount', account: undefined });
-              }}
-            />
-            <Button
-              label={t('auth.deleteAccount')}
-              variant="danger"
-              onPress={() =>
-                confirm(t('auth.deleteConfirm'), t('common.cancel'), t('common.delete'), async () => {
-                  try {
-                    await deleteAccount();
-                    dispatch({ type: 'setAccount', account: undefined });
-                    setAccountMessage(t('auth.deleted'));
-                  } catch {
-                    setAccountMessage(t('auth.deleteError'));
-                  }
-                })
-              }
-            />
-          </>
-        ) : (
-          <>
-            <Muted>{t('auth.notSignedIn')}</Muted>
-            <AuthButtons onSignedIn={() => setAccountMessage(null)} />
-          </>
-        )}
-        {accountMessage ? <Muted>{accountMessage}</Muted> : null}
+        <H2>{t('pay.title')}</H2>
+        <Muted>{t('pay.hint')}</Muted>
+        <Input label={t('pay.bizum')} value={payment.bizum ?? ''} keyboardType="phone-pad" placeholder="600 000 000" onChangeText={(v) => setPayment((p) => ({ ...p, bizum: v }))} onBlur={savePayment} />
+        <Input label={t('pay.iban')} value={payment.iban ?? ''} autoCapitalize="characters" autoCorrect={false} placeholder="ES00 0000 0000 0000 0000 0000" onChangeText={(v) => setPayment((p) => ({ ...p, iban: v }))} onBlur={savePayment} />
+        <Input label={t('pay.paypal')} value={payment.paypal ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="paypal.me/…" onChangeText={(v) => setPayment((p) => ({ ...p, paypal: v }))} onBlur={savePayment} />
+        <Input label={t('pay.revolut')} value={payment.revolut ?? ''} autoCapitalize="none" autoCorrect={false} placeholder="@…" onChangeText={(v) => setPayment((p) => ({ ...p, revolut: v }))} onBlur={savePayment} />
       </Card>
 
+      {/* ── Copias y extractos ── */}
+      <Section title={t('fixa.secData')} />
       <Card>
         <H2>{t('backup.title')}</H2>
         <Muted>{t('backup.text')}</Muted>
         <Button label={t('backup.export')} variant="secondary" onPress={() => saveBackup().catch(() => {})} />
-        <Button label={t('backup.import')} variant="ghost" onPress={() => restoreFile().catch(() => setBackupMessage(t('backup.invalid')))} />
+        <Button label={t('fixa.restoreCopy')} variant="secondary" onPress={() => restoreFile().catch(() => setBackupMessage(t('backup.invalid')))} />
         {backupMessage ? <Muted>{backupMessage}</Muted> : null}
       </Card>
 
       <Card>
-        <H2>{t('settings.data')}</H2>
-        <Muted>{t('settings.dataText')}</Muted>
-        <Button label={t('settings.import')} variant="secondary" onPress={() => importCsv().catch(() => setCsvMessage(t('settings.importError')))} />
-        <Button label={t('settings.export')} variant="secondary" onPress={() => exportCsv().catch(() => {})} />
+        <H2>🏦 {t('fixa.importBank')}</H2>
+        <Muted>{t('fixa.importBankHint')}</Muted>
+        <Button label={t('fixa.importBankButton')} variant="secondary" onPress={() => importCsv().catch(() => setCsvMessage(t('settings.importError')))} />
+        <Button label={t('settings.export')} variant="ghost" onPress={() => exportCsv().catch(() => {})} />
         {csvMessage ? <Muted>{csvMessage}</Muted> : null}
       </Card>
 
-      <Card>
-        <H2>{t('settings.privacy')}</H2>
-        <Muted>{t('settings.privacyText')}</Muted>
-      </Card>
+      {/* ── Más opciones (plegado) ── */}
+      <Button label={advanced ? `▲ ${t('fixa.fewerOptions')}` : `▼ ${t('fixa.moreOptions')}`} variant="ghost" onPress={() => setAdvanced((v) => !v)} />
+      {advanced ? (
+        <>
+          <Card>
+            <H2>{t('settings.data')}</H2>
+            <Muted>{t('settings.dataText')}</Muted>
+          </Card>
 
-      <View style={{ gap: space.sm }}>
-        <Button
-          label={t('settings.reset')}
-          variant="danger"
-          onPress={() =>
-            confirm(t('settings.resetConfirm'), t('common.cancel'), t('common.delete'), () => {
-              dispatch({ type: 'reset' });
-              router.replace('/onboarding');
-            })
-          }
-        />
-        <Muted style={{ textAlign: 'center' }}>{t('settings.version')}</Muted>
-      </View>
+          {authConfigured || account ? (
+            <Card>
+              <H2>{t('auth.account')}</H2>
+              {account ? (
+                <>
+                  <Muted>{t('auth.signedInAs', { name: account.email ?? state.profile.name })}</Muted>
+                  <Muted>{lastBackup ? t('auth.lastBackup', { date: i18n.date(lastBackup, { dateStyle: 'medium', timeStyle: 'short' }) }) : ''}</Muted>
+                  <Button label={t('auth.backupNow')} variant="secondary" onPress={backupNow} />
+                  <Button label={t('auth.restore')} variant="secondary" onPress={restore} />
+                  <Button
+                    label={t('auth.signOut')}
+                    variant="ghost"
+                    onPress={async () => {
+                      await signOut().catch(() => {});
+                      dispatch({ type: 'setAccount', account: undefined });
+                    }}
+                  />
+                  <Button
+                    label={t('auth.deleteAccount')}
+                    variant="danger"
+                    onPress={() =>
+                      confirm(t('auth.deleteConfirm'), t('common.cancel'), t('common.delete'), async () => {
+                        try {
+                          await deleteAccount();
+                          dispatch({ type: 'setAccount', account: undefined });
+                          setAccountMessage(t('auth.deleted'));
+                        } catch {
+                          setAccountMessage(t('auth.deleteError'));
+                        }
+                      })
+                    }
+                  />
+                </>
+              ) : (
+                <>
+                  <Muted>{t('auth.notSignedIn')}</Muted>
+                  <AuthButtons onSignedIn={() => setAccountMessage(null)} />
+                </>
+              )}
+              {accountMessage ? <Muted>{accountMessage}</Muted> : null}
+            </Card>
+          ) : null}
+
+          <Card>
+            <H2>{t('settings.privacy')}</H2>
+            <Muted>{t('settings.privacyText')}</Muted>
+          </Card>
+
+          <Button
+            label={t('settings.reset')}
+            variant="danger"
+            onPress={() =>
+              confirm(t('settings.resetConfirm'), t('common.cancel'), t('common.delete'), () => {
+                dispatch({ type: 'reset' });
+                router.replace('/onboarding');
+              })
+            }
+          />
+        </>
+      ) : null}
     </Screen>
+  );
+}
+
+/** Título de cada bloque de Ajustes, grande y con aire por encima. */
+function Section({ title }: { title: string }) {
+  return (
+    <Text accessibilityRole="header" style={{ color: colors.primary, fontSize: 18, fontWeight: '800', marginTop: space.md }}>
+      {title}
+    </Text>
   );
 }

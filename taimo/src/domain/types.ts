@@ -14,7 +14,8 @@ export type CategoryId =
   | 'suscripciones'
   | 'otros';
 
-export type ExpenseSource = 'manual' | 'applepay' | 'notificacion' | 'csv' | 'fijo';
+/** `efectivo`: pagado con billetes y monedas desde el monedero. */
+export type ExpenseSource = 'manual' | 'applepay' | 'notificacion' | 'csv' | 'fijo' | 'efectivo';
 
 /** Cómo se reparte un gasto de grupo. */
 export type SplitMode = 'equal' | 'weights' | 'exact' | 'items';
@@ -63,6 +64,8 @@ export interface Expense {
   original?: OriginalAmount;
   /** Última modificación (ISO). Sirve para sincronizar grupos: gana el cambio más reciente. */
   updatedAt?: string;
+  /** Ya lo has mirado en «Revisión rápida» (solo gastos apuntados solos). */
+  reviewed?: boolean;
 }
 
 export interface Member {
@@ -201,6 +204,8 @@ export interface AppState {
   wishes?: import('./habits').Wish[];
   /** «Taimo te devuelve dinero»: avisos descartados y dinero recuperado. */
   moneyBack?: import('./moneyback').MoneyBackState;
+  /** Monedero de efectivo: lo sacado del cajero y el último recuento. */
+  cash?: import('./cash').CashWallet;
 }
 
 export interface Goal {

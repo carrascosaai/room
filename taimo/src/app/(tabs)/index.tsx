@@ -3,10 +3,13 @@ import { Platform, Pressable, Text, View } from 'react-native';
 import { canRecognizeText } from 'taimo-capture';
 
 import { categoryStatus, monthKey, monthSummary } from '@/domain/budget';
+import { chargesWithin, upcomingCharges } from '@/domain/calendar';
 import { CATEGORIES, category } from '@/domain/categories';
 import { categoryTrend, expectedLeftover, monthForecast } from '@/domain/insights';
 import { findMoneyBack, urgentMoneyBack } from '@/domain/moneyback';
+import { reviewQueue } from '@/domain/review';
 import { tripCandidates } from '@/domain/smart';
+import { safeToSpendToday } from '@/domain/today';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { BigButton, Card, CategoryBadge, Empty, H2, ProgressBar, Row, Screen } from '@/ui/components';
@@ -15,7 +18,7 @@ import { TripSuggestion } from '@/ui/TripSuggestion';
 import { colors, radius, space } from '@/ui/theme';
 
 /**
- * Inicio pensado para cualquiera: cuánto te queda, un botón grande para
+ * Inicio pensado para cualquiera: cuánto puedes gastar hoy, un botón grande para
  * apuntar, como mucho un aviso (el más importante) y tus últimos gastos.
  * Todo lo demás está en la pestaña «Más».
  */
@@ -27,6 +30,7 @@ export default function Home() {
   const monthName = date(today, { month: 'long' });
   const budgets = CATEGORIES.map((c) => categoryStatus(state, c.id, today)).filter((s) => s.budget > 0);
   const recent = state.expenses.slice(0, 5);
+  const safe = safeToSpendToday(state, today);
 
   return (
     <Screen>
@@ -34,8 +38,8 @@ export default function Home() {
         {state.profile.name ? t('home.hello', { name: state.profile.name }) : t('home.helloAnon')}
       </Text>
 
-      {/* Lo único que hay que mirar: cuánto te queda (o, sin presupuesto, cuánto llevas) */}
-      {summary.budget === 0 ? (
+      {/* Lo único que hay que mirar: cuánto puedes gastar hoy (o, sin presupuesto, cuánto llevas) */}
+      {!safe ? (
         <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>
           <Text style={{ color: colors.textMuted, fontSize: 17 }}>{t('home.spentThisMonth')}</Text>
           <Text style={{ color: colors.text, fontSize: 46, fontWeight: '800' }} accessibilityRole="header" adjustsFontSizeToFit numberOfLines={1}>
@@ -45,25 +49,37 @@ export default function Home() {
         </Card>
       ) : (
         <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>
-          <Text style={{ color: colors.textMuted, fontSize: 17 }}>{t('home.leftThisMonth', { month: monthName })}</Text>
+          <Text style={{ color: colors.textMuted, fontSize: 18 }}>{t('today.label')}</Text>
           <Text
-            style={{ color: summary.remaining < 0 ? colors.danger : colors.text, fontSize: 46, fontWeight: '800' }}
+            style={{ color: safe.over ? colors.danger : colors.text, fontSize: 52, fontWeight: '800' }}
             accessibilityRole="header"
+            accessibilityLabel={`${t('today.label')}: ${money(safe.amount)}`}
             adjustsFontSizeToFit
             numberOfLines={1}
           >
-            {money(summary.remaining)}
+            {money(safe.amount)}
           </Text>
-          <ProgressBar progress={summary.progress} />
-          <Text style={{ color: colors.text, fontSize: 18, lineHeight: 25 }}>
-            {summary.remaining > 0
-              ? t('home.perDay', { amount: money(summary.dailyAllowance), count: summary.daysLeft })
-              : t('home.overLimit')}
-          </Text>
+          {safe.spentToday > 0 ? <Text style={{ color: colors.textMuted, fontSize: 17 }}>{t('today.spentToday', { amount: money(safe.spentToday) })}</Text> : null}
+          {safe.over || safe.amount === 0 ? (
+            <Text style={{ color: colors.text, fontSize: 18, lineHeight: 25 }}>
+              {safe.over
+                ? t('today.over', { amount: money(-safe.remaining) })
+                : safe.daysLeft > 1
+                  ? t('today.doneToday', { amount: money(safe.tomorrow) })
+                  : t('today.doneLastDay')}
+            </Text>
+          ) : null}
+          <View style={{ gap: space.xs, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: space.md }}>
+            {safe.over ? null : (
+              <Text style={{ color: colors.text, fontSize: 17 }}>{t('today.leftMonth', { month: monthName, amount: money(summary.remaining) })}</Text>
+            )}
+            <ProgressBar progress={summary.progress} />
+          </View>
         </Card>
       )}
 
       <BigButton emoji="＋" label={t('home.add')} onPress={() => router.push('/add')} />
+      <BigButton emoji="💶" label={t('cash.pay')} variant="secondary" onPress={() => router.push('/monedero')} />
       <BigButton label={t('mesa.start')} variant="secondary" onPress={() => router.push('/mesa-nueva')} />
       {canRecognizeText ? <BigButton emoji="📷" label={t('scan.button').replace(/^📷\s*/, '')} variant="secondary" onPress={() => router.push({ pathname: '/add', params: { scan: '1' } })} /> : null}
 
@@ -73,16 +89,23 @@ export default function Home() {
         <Card>
           <H2>{t('home.budgets')}</H2>
           {budgets.map((s) => (
-            <View key={s.category} style={{ gap: space.xs }}>
+            <Pressable
+              key={s.category}
+              onPress={() => router.push('/settings')}
+              accessibilityRole="button"
+              accessibilityHint={t('today.editBudget')}
+              style={({ pressed }) => ({ gap: space.xs, paddingVertical: space.xs, opacity: pressed ? 0.7 : 1 })}
+            >
               <Row>
                 <CategoryBadge id={s.category} size={36} />
                 <Text style={{ color: colors.text, flex: 1, fontSize: 17 }}>{t(`cat.${s.category}`)}</Text>
                 <Text style={{ color: s.remaining < 0 ? colors.danger : colors.textMuted, fontSize: 16 }}>
-                  {s.remaining >= 0 ? t('home.left', { amount: money(s.remaining) }) : t('home.over', { amount: money(-s.remaining) })}
+                  {s.remaining >= 0 ? t('home.left', { amount: money(s.remaining) }) : t('today.overBy', { amount: money(-s.remaining) })}
                 </Text>
+                <Text style={{ color: colors.primary, fontSize: 22 }}>›</Text>
               </Row>
               <ProgressBar progress={s.progress} color={category(s.category).color} />
-            </View>
+            </Pressable>
           ))}
         </Card>
       ) : null}
@@ -114,6 +137,26 @@ export default function Home() {
           {doubles.length
             ? t('back.homeTip', { amount: money(doubles.reduce((s, m) => s + m.amount, 0)) })
             : t('misc.homeCheck', { count: soon.length })}
+        </Tip>
+      );
+    }
+
+    // Gastos que Taimo apuntó solo y aún no has mirado.
+    const toReview = reviewQueue(state.expenses, today).length;
+    if (toReview > 0) {
+      return (
+        <Tip emoji="👀" color={colors.primary} onPress={() => router.push('/revisar')}>
+          {t('today.reviewTip', { count: toReview })}
+        </Tip>
+      );
+    }
+
+    // Recibos que llegan en los próximos 7 días.
+    const week = chargesWithin(upcomingCharges(state, today, 7), today, 7);
+    if (week.count > 0) {
+      return (
+        <Tip emoji="📅" color={colors.primary} onPress={() => router.push('/calendario')}>
+          {t('cal.weekTip', { amount: money(week.total) })}
         </Tip>
       );
     }

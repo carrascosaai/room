@@ -8,7 +8,7 @@ import { monthRecap } from '@/domain/insights';
 import { changePct } from '@/domain/stats';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
-import { Button, Card, Muted, Screen } from '@/ui/components';
+import { Button, Card, Muted, Notice, Screen } from '@/ui/components';
 import { colors, radius, space } from '@/ui/theme';
 
 /** «Tu octubre en Taimo»: el resumen del mes para verlo y compartirlo. */
@@ -23,16 +23,32 @@ export default function Recap() {
   const r = monthRecap(state, month);
   const monthName = date(r.month, { month: 'long' });
   const change = changePct(r.spent, r.previous || null);
+  const dm = (d: Date) => date(d, { day: 'numeric', month: 'short' });
 
   const lines: { emoji: string; text: string; big?: boolean }[] = [
     { emoji: '💸', text: t('recap.spent', { amount: money(r.spent) }), big: true },
-    ...(change !== null ? [{ emoji: change > 0 ? '📈' : '📉', text: t('recap.vs', { change: `${change > 0 ? '+' : ''}${change}%` }) }] : []),
+    ...(change !== null
+      ? [
+          {
+            emoji: change > 0 ? '📈' : '📉',
+            // Mes sin terminar: contra los mismos días del anterior («frente a 1–14 sept»), como en Resumen.
+            text: r.partial
+              ? t('ins.vsRange', { change: `${change > 0 ? '+' : ''}${change}%`, range: `${dm(r.previousRange.start)}–${dm(new Date(r.previousRange.end.getTime() - 1))}` })
+              : t('recap.vs', { change: `${change > 0 ? '+' : ''}${change}%` }),
+          },
+        ]
+      : []),
     ...(r.top ? [{ emoji: category(r.top.category).emoji, text: t('recap.top', { category: t(`cat.${r.top.category}`), amount: money(r.top.total) }) }] : []),
     ...(r.biggestDay ? [{ emoji: '📅', text: t('recap.day', { date: date(r.biggestDay.date, { weekday: 'long', day: 'numeric' }), amount: money(r.biggestDay.total) }) }] : []),
+    // Hasta que no acaba el mes no se celebra: se dice lo que queda.
     ...(r.budget > 0
       ? [r.spent <= r.budget
-          ? { emoji: '🏆', text: t('recap.under', { amount: money(r.budget - r.spent) }) }
-          : { emoji: '⚠️', text: t('recap.over', { amount: money(r.spent - r.budget) }) }]
+          ? r.partial
+            ? { emoji: '💰', text: t('fixa.budgetLeftSoFar', { amount: money(r.budget - r.spent) }) }
+            : { emoji: '🏆', text: t('recap.under', { amount: money(r.budget - r.spent) }) }
+          : r.partial
+            ? { emoji: '⚠️', text: t('fixa.budgetOverSoFar', { amount: money(r.spent - r.budget) }) }
+            : { emoji: '⚠️', text: t('recap.over', { amount: money(r.spent - r.budget) }) }]
       : []),
     ...(r.shared > 0 ? [{ emoji: '👥', text: t('recap.shared', { amount: money(r.shared) }) }] : []),
     { emoji: '🧾', text: t('recap.count', { count: r.count }) },
@@ -61,7 +77,7 @@ export default function Recap() {
         ))}
       </View>
       <Button label={`📤 ${t('recap.share')}`} onPress={() => share().catch(() => {})} />
-      {copied ? <Muted style={{ textAlign: 'center' }}>{t('group.inviteCopied')}</Muted> : null}
+      {copied ? <Notice text={t('fixa.messageCopied')} /> : null}
       {r.count === 0 ? (
         <Card>
           <Muted>{t('home.empty')}</Muted>

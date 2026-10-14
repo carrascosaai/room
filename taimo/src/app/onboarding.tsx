@@ -1,8 +1,11 @@
+import * as DocumentPicker from 'expo-document-picker';
+import { File } from 'expo-file-system';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Platform, Pressable, Text, View } from 'react-native';
 
-import { downloadBackup, type SignedIn } from '@/auth/auth';
+import { authConfigured, downloadBackup, type SignedIn } from '@/auth/auth';
+import { readBackup } from '@/domain/backup';
 import { CATEGORIES } from '@/domain/categories';
 import { parseAmount } from '@/domain/money';
 import type { AppState, CategoryId } from '@/domain/types';
@@ -11,6 +14,7 @@ import { deviceCurrency, LANGUAGES, useI18n, type CurrencyCode } from '@/i18n';
 import { useStore } from '@/store/store';
 import { AuthButtons } from '@/ui/AuthButtons';
 import { Button, Card, CategoryBadge, Input, Muted, Row, Screen, Title } from '@/ui/components';
+import { confirm } from '@/ui/confirm';
 import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
 import { colors, radius, space } from '@/ui/theme';
 
@@ -67,7 +71,7 @@ function LanguageChip() {
 
 export default function Onboarding() {
   const { dispatch } = useStore();
-  const { t, locale, currencyName } = useI18n();
+  const { t, locale, currencyName, date } = useI18n();
   const [step, setStep] = useState<'welcome' | 'account' | 'name' | 'budget'>('welcome');
   const [name, setName] = useState('');
   const [currency, setCurrency] = useState<CurrencyCode>(deviceCurrency());
@@ -103,6 +107,36 @@ export default function Onboarding() {
     setStep('name');
   }
 
+  // Sin cuentas configuradas, el paso de «Entrar con Apple/Google» sobra.
+  const afterWelcome = authConfigured ? 'account' : 'name';
+  const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
+
+  /** «Recuperar una copia»: elige el archivo de copia que guardaste y lo trae todo. */
+  async function restoreFromFile() {
+    setRestoreMessage(null);
+    let backup: ReturnType<typeof readBackup> = null;
+    try {
+      const picked = await DocumentPicker.getDocumentAsync({ type: ['application/json', '*/*'], copyToCacheDirectory: true });
+      if (picked.canceled) return;
+      const asset = picked.assets[0];
+      const text = Platform.OS === 'web' ? await (await fetch(asset.uri)).text() : await new File(asset.uri).text();
+      backup = readBackup(text);
+    } catch {
+      backup = null;
+    }
+    if (!backup) {
+      setRestoreMessage(t('backup.invalid'));
+      return;
+    }
+    const restored = backup;
+    const exported = new Date(restored.exportedAt);
+    const when = Number.isNaN(exported.getTime()) ? t('common.unknown') : date(exported, { dateStyle: 'medium' });
+    confirm(t('backup.confirm', { date: when }), t('common.cancel'), t('backup.import'), () => {
+      dispatch({ type: 'restoreBackup', state: { ...restored.state, onboarded: true } });
+      router.replace('/');
+    });
+  }
+
   if (step === 'welcome') {
     return (
       <Screen>
@@ -118,7 +152,10 @@ export default function Onboarding() {
               <Muted style={{ flex: 1 }}>{t('onboarding.privacy')}</Muted>
             </Row>
           </Card>
-          <Button label={t('onboarding.start')} onPress={() => setStep('account')} />
+          <Button label={t('onboarding.start')} onPress={() => setStep(afterWelcome)} />
+          {/* Para quien cambia de móvil y guardó una copia. */}
+          <Button label={`📂 ${t('fixa.restoreCopy')}`} variant="ghost" onPress={() => restoreFromFile().catch(() => setRestoreMessage(t('backup.invalid')))} />
+          {restoreMessage ? <Text style={{ color: colors.warning, fontSize: 16, textAlign: 'center' }}>{restoreMessage}</Text> : null}
         </View>
       </Screen>
     );
@@ -144,7 +181,7 @@ export default function Onboarding() {
         <Title>{t('onboarding.nameTitle')}</Title>
         <Input placeholder={t('onboarding.namePlaceholder')} value={name} onChangeText={setName} autoFocus autoCapitalize="words" />
         <Button label={t('common.continue')} disabled={!name.trim()} onPress={() => setStep('budget')} />
-        <Button label={t('common.back')} variant="ghost" onPress={() => setStep('account')} />
+        <Button label={t('common.back')} variant="ghost" onPress={() => setStep(authConfigured ? 'account' : 'welcome')} />
       </Screen>
     );
   }

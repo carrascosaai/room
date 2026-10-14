@@ -2,10 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 
 import { restoredState } from '@/domain/backup';
+import { adjusted, withWithdrawal, type CashWallet } from '@/domain/cash';
 import { findDuplicate, type CapturePayload } from '@/domain/capture';
 import type { Challenge } from '@/domain/challenges';
 import type { Wish } from '@/domain/habits';
 import { normalizeMerchant } from '@/domain/categorize';
+import { isAutomatic } from '@/domain/review';
 import { isRecurringInstanceId, withRecurringSkipped } from '@/domain/groupInsights';
 import { changeGroupCurrency, groupExpenseToPersonal } from '@/domain/currencyChange';
 import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
@@ -80,6 +82,13 @@ export type Action =
   | { type: 'setGroupRemote'; groupId: string; code: string }
   | { type: 'applySnapshot'; groupId: string; snapshot: GroupSnapshot; syncStartedAt: string }
   | { type: 'joinGroup'; snapshot: GroupSnapshot; meMemberId: string; newMemberName?: string }
+  /** Monedero: «Saqué dinero del cajero» (no es un gasto). */
+  | { type: 'cashWithdraw'; id: string; amount: Cents; date?: string }
+  | { type: 'cashRemoveWithdrawal'; id: string }
+  /** Monedero: «¿Te cuadra?» — lo que hay ahora de verdad. */
+  | { type: 'cashAdjust'; balance: Cents }
+  /** Revisión rápida: «Bien» (sin cambios). */
+  | { type: 'markReviewed'; ids: string[] }
   | { type: 'reset' };
 
 const now = () => new Date().toISOString();
@@ -179,7 +188,9 @@ export function reducer(state: AppState, action: Action): AppState {
           ? learn(state, action.expense.merchant, action.expense.category)
           : state.learnedCategories;
       const stamp = now();
-      let next: Expense = { ...action.expense, updatedAt: stamp };
+      // Un gasto automático que editas a mano ya está revisado (y lo revisado no se olvida al editar).
+      const reviewed = action.expense.reviewed ?? (prev?.reviewed || (prev && isAutomatic(prev) ? true : undefined));
+      let next: Expense = { ...action.expense, updatedAt: stamp, ...(reviewed ? { reviewed } : {}) };
       let tombstones = state.tombstones;
       let groups = state.groups;
       const moved = prev?.groupId && prev.groupId !== action.expense.groupId ? prev.groupId : undefined;
@@ -322,6 +333,18 @@ export function reducer(state: AppState, action: Action): AppState {
       // Trae los gastos y pagos que ya tenía el grupo.
       return applySnapshot(withGroup, group.id, action.snapshot, '1970-01-01T00:00:00.000Z');
     }
+    case 'cashWithdraw':
+      if (!(action.amount > 0)) return state;
+      return { ...state, cash: withWithdrawal(state.cash, { id: action.id, amount: action.amount, date: action.date ?? now() }, now()) };
+    case 'cashRemoveWithdrawal':
+      if (!state.cash) return state;
+      return { ...state, cash: { ...state.cash, withdrawals: state.cash.withdrawals.filter((w) => w.id !== action.id), updatedAt: now() } };
+    case 'cashAdjust':
+      return { ...state, cash: adjusted(state.cash, action.balance, now()) };
+    case 'markReviewed': {
+      const ids = new Set(action.ids);
+      return { ...state, expenses: state.expenses.map((e) => (ids.has(e.id) ? { ...e, reviewed: true } : e)) };
+    }
     case 'reset':
       return { ...initialState };
   }
@@ -352,6 +375,17 @@ export function migrate(saved: Partial<AppState> | null | undefined): AppState {
     settlements: arr(s.settlements),
     tombstones: arr(s.tombstones),
     learnedCategories: s.learnedCategories && typeof s.learnedCategories === 'object' ? s.learnedCategories : {},
+    cash: migrateCash(s.cash),
+  };
+}
+
+function migrateCash(c: CashWallet | undefined): CashWallet | undefined {
+  if (!c || typeof c !== 'object') return undefined;
+  return {
+    base: Number.isFinite(c.base) ? c.base : 0,
+    since: typeof c.since === 'string' ? c.since : '1970-01-01T00:00:00.000Z',
+    withdrawals: Array.isArray(c.withdrawals) ? c.withdrawals.filter((w) => w && Number.isFinite(w.amount) && typeof w.date === 'string') : [],
+    updatedAt: typeof c.updatedAt === 'string' ? c.updatedAt : new Date().toISOString(),
   };
 }
 

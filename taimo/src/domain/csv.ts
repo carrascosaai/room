@@ -243,10 +243,38 @@ export interface CsvImportResult {
   skipped: number;
 }
 
+// Lo que los bancos ponen delante del comercio («COMPRA TARJ. MERCADONA VALENCIA»).
+const BANK_PREFIX =
+  /^(?:(?:adeudo\s+)?compra\s+(?:con\s+)?tarj(?:eta|\.)?(?:\s+(?:de\s+)?(?:credito|crédito|debito|débito))?|pago\s+(?:con\s+)?tarjeta(?:\s+(?:de\s+)?(?:credito|crédito|debito|débito))?|compra\s+en|pago\s+en|compra\s+internet\s+en|compra|card\s+payment(?:\s+to)?|debit\s+card\s+purchase|pos\s+purchase|pos|tpv|kartenzahlung|paiement\s+(?:par\s+)?carte|achat\s+cb|cb)\b[\s.:\-*]*/iu;
+// Números de tarjeta, fechas y horas sueltas que se cuelan («5402XXXX1234», «12/10», «13.10.2026», «10:22»).
+const NOISE = /\b(?:\d{4}[x*•]+\d{0,4}|[x*•]{4,}\d{0,4}|\d{1,2}[/.\-]\d{1,2}(?:[/.\-]\d{2,4})?|\d{1,2}:\d{2}(?::\d{2})?)\b/giu;
+// Ciudades y países que se ponen al final (solo si queda algo delante).
+const TRAILING_PLACE =
+  /\s+(?:madrid|barcelona|valencia|sevilla|zaragoza|malaga|málaga|murcia|palma|bilbao|alicante|cordoba|córdoba|valladolid|vigo|gijon|gijón|granada|oviedo|santander|pamplona|almeria|almería|salamanca|toledo|cadiz|cádiz|burgos|leon|león|coruna|coruña|a coruña|la coruna|la coruña|san sebastian|donostia|vitoria|logroño|logrono|huelva|badajoz|caceres|cáceres|castellon|castellón|tarragona|girona|lleida|lisboa|porto|paris|london|berlin|roma|rome|milano|amsterdam|bruxelles|es|esp|spain|españa|espana)$/iu;
+
+/**
+ * Limpia el nombre del comercio que trae el extracto del banco:
+ * «COMPRA TARJ. MERCADONA VALENCIA» → «MERCADONA». Si al limpiar no queda nada, se deja como venía.
+ */
+export function cleanBankMerchant(raw: string): string {
+  const original = raw.replace(/\s+/g, ' ').trim();
+  let s = original;
+  for (let k = 0; k < 2; k++) s = s.replace(BANK_PREFIX, '').trim();
+  s = s.replace(NOISE, ' ').replace(/\s+/g, ' ').trim();
+  // Puede haber ciudad y país («MADRID ES»): hasta dos veces. Solo en nombres
+  // escritos como los bancos (todo en mayúsculas): «Café Valencia» se queda igual.
+  for (let k = 0; k < 2 && !/\p{Ll}/u.test(s); k++) {
+    const shorter = s.replace(TRAILING_PLACE, '').trim();
+    if (shorter && /\p{L}/u.test(shorter)) s = shorter;
+  }
+  s = s.replace(/^[\s.,:;\-*]+|[\s.,:;\-*]+$/g, '').trim();
+  return s && /\p{L}/u.test(s) ? s : original;
+}
+
 /** Movimientos -> gastos (categoría sugerida por el comercio). */
 export function rowsToExpenses(rows: BankRow[], learned: Record<string, CategoryId> = {}, fallbackMerchant = 'Movimiento importado'): Omit<Expense, 'id'>[] {
   return rows.map((r) => {
-    const merchant = r.merchant || fallbackMerchant;
+    const merchant = (r.merchant && cleanBankMerchant(r.merchant)) || fallbackMerchant;
     return { amount: r.amount, merchant, category: categorize(merchant, learned), date: r.date, source: 'csv' as const };
   });
 }

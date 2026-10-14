@@ -7,12 +7,12 @@ import { canRecognizeText, recognizeText } from 'taimo-capture';
 
 import { parseAmount } from '@/domain/money';
 import { parseReceipt } from '@/domain/receipt';
-import { billLink, billTotal, compactBill, findClaimInText, MAX_ITEMS, MAX_PEOPLE, previewTableClaim, sharedPart, type TableBill } from '@/domain/table';
+import { billLink, billTotal, compactBill, findClaimInText, MAX_ITEMS, MAX_PEOPLE, previewTableClaim, sharedPart, tableUnpaid, type TableBill } from '@/domain/table';
 import type { Expense } from '@/domain/types';
 import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
 import { webBase } from '@/sync/api';
-import { BigButton, Button, Card, H2, Input, Muted, Row, Screen } from '@/ui/components';
+import { BigButton, Button, Card, H2, Input, Muted, Notice, Row, Screen } from '@/ui/components';
 import { tableClaimMessage } from '@/ui/messages';
 import { QrCode } from '@/ui/QrCode';
 import { colors, radius, space } from '@/ui/theme';
@@ -112,7 +112,7 @@ function Setup({ source, onCreate, currency, t, i18n }: {
 
   return (
     <Screen>
-      <Stack.Screen options={{ headerShown: true, title: t('mesa.newTitle') }} />
+      <Stack.Screen options={{ headerShown: true, title: t('mesa.title') }} />
       <Muted style={{ fontSize: 17 }}>{t('mesa.startHint')}</Muted>
 
       {canRecognizeText && Platform.OS !== 'web' ? <BigButton emoji="📷" label={scanning ? '…' : t('mesa.scan')} onPress={scan} /> : null}
@@ -171,6 +171,9 @@ function Setup({ source, onCreate, currency, t, i18n }: {
           ) : sharedPart(bill) > 0 ? (
             <Text style={{ color: colors.text, fontSize: 17 }}>🤝 {t('mesa.shared', { count: people, amount: money(sharedPart(bill)) })}</Text>
           ) : null}
+          {parsed.length > 0 && total > itemsSum ? (
+            <Text style={{ color: colors.text, fontSize: 17 }}>🧾 {t('fixa.extraLine', { amount: money(total - itemsSum), each: money(Math.round((total - itemsSum) / people)) })}</Text>
+          ) : null}
           {itemsSum > total ? <Text style={{ color: colors.danger, fontSize: 16 }}>{t('mesa.itemsOver', { amount: money(itemsSum - total) })}</Text> : null}
         </Card>
       ) : null}
@@ -215,6 +218,7 @@ function TableQr({ groupId }: { groupId: string }) {
   const { t, moneyIn } = i18n;
   const [note, setNote] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const group = state.groups.find((g) => g.id === groupId)!;
   const bill = group.table!;
   const money = (c: number) => moneyIn(c, group.currency ?? bill.c);
@@ -224,13 +228,15 @@ function TableQr({ groupId }: { groupId: string }) {
   const paid = state.settlements.filter((s) => s.groupId === group.id);
   const paidSum = paid.reduce((s, x) => s + x.amount, 0);
   const total = expense?.amount ?? billTotal(bill);
+  const unpaid = tableUnpaid(group, state.settlements);
   const nameOf = (id: string) => group.members.find((m) => m.id === id)?.name ?? '?';
 
   async function share() {
-    const message = t('mesa.shareMessage', { place: bill.m || '🍽️', link });
+    const message = bill.m ? t('mesa.shareMessage', { place: bill.m, link }) : t('fixa.shareMessageNoPlace', { link });
     if (Platform.OS === 'web') {
       await Clipboard.setStringAsync(message).catch(() => {});
-      setNote(t('group.inviteCopied'));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 6000);
     } else await Share.share({ message });
   }
 
@@ -260,10 +266,12 @@ function TableQr({ groupId }: { groupId: string }) {
       <QrCode value={link} size={360} />
       <Muted style={{ textAlign: 'center', fontSize: 16 }}>{t('mesa.total', { amount: money(total) })} · {t('mesa.peopleCount', { count: bill.n })}</Muted>
       <BigButton emoji="📤" label={t('mesa.sendLink')} variant="secondary" onPress={share} />
+      {copied ? <Notice text={t('fixa.messageCopied')} /> : null}
 
       <Card>
         <H2>{t('mesa.whoPaid')}</H2>
         {paid.length === 0 ? <Muted>{t('mesa.nobodyYet')}</Muted> : null}
+        {unpaid > 0 ? <Text style={{ color: colors.warning, fontSize: 17, fontWeight: '700' }}>{t('fixa.tableUnpaid', { count: unpaid })}</Text> : null}
         {paid.map((s) => (
           <Row key={s.id} style={{ justifyContent: 'space-between' }}>
             <Text style={{ color: colors.text, fontSize: 18, flex: 1 }} numberOfLines={1}>✅ {nameOf(s.from)}</Text>

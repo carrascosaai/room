@@ -279,3 +279,14 @@ export function previewTableClaim(state: AppState, claim: TableClaim, now = new 
     mismatch: expected !== null && expected !== claim.a,
   };
 }
+
+/**
+ * Cuántas personas de la mesa faltan por pagar: los de la mesa (sin contar a
+ * quien pagó) menos los que ya han mandado su aviso. 0 si no es una mesa.
+ */
+export function tableUnpaid(group: Group, settlements: Settlement[]): number {
+  if (!group.table) return 0;
+  const me = group.members.find((m) => m.isMe)?.id;
+  const paid = new Set(settlements.filter((s) => s.groupId === group.id && s.from !== me).map((s) => s.from));
+  return Math.max(0, group.table.n - 1 - paid.size);
+}

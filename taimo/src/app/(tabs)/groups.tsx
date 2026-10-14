@@ -3,6 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { balances } from '@/domain/groups';
 import { groupBudgetPlan } from '@/domain/groupInsights';
+import { tableUnpaid } from '@/domain/table';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { syncConfigured } from '@/sync/api';
@@ -23,11 +24,14 @@ export default function Groups() {
         const cur = g.currency ?? currency;
         const myBalance = me ? balances(g, state.expenses, state.settlements)[me] ?? 0 : 0;
         const plan = groupBudgetPlan(g, state.expenses);
+        // Mesa de «Paga tu parte»: no está «al día» mientras falte alguien por pagar.
+        const unpaid = tableUnpaid(g, state.settlements);
+        const status = unpaid > 0 ? t('fixa.tableUnpaid', { count: unpaid }) : null;
         return (
           <Pressable
             key={g.id}
             accessibilityRole="button"
-            accessibilityLabel={`${g.name}, ${myBalance === 0 ? t('groups.settled') : `${myBalance > 0 ? t('groups.owedToYou') : t('groups.youOwe')} ${moneyIn(Math.abs(myBalance), cur)}`}`}
+            accessibilityLabel={`${g.name}, ${status ?? ''} ${myBalance === 0 ? (status ? '' : t('groups.settled')) : `${myBalance > 0 ? t('groups.owedToYou') : t('groups.youOwe')} ${moneyIn(Math.abs(myBalance), cur)}`}`}
             onPress={() => router.push({ pathname: '/group/[id]', params: { id: g.id } })}
           >
             <Card>
@@ -44,7 +48,9 @@ export default function Groups() {
                   </Muted>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  {myBalance === 0 ? (
+                  {status ? (
+                    <Text style={{ color: colors.warning, fontWeight: '700', textAlign: 'right' }}>{status}</Text>
+                  ) : myBalance === 0 ? (
                     <Muted>{t('groups.settled')}</Muted>
                   ) : (
                     <>

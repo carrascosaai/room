@@ -36,3 +36,24 @@ describe('pegar el aviso del banco', () => {
     expect(tidyMerchant('H&M')).toBe('H&M');
   });
 });
+
+describe('pegar un aviso con fecha', () => {
+  const now = new Date('2026-10-14T10:00:00');
+  it('el comercio no se lleva el «el» ni la fecha, y la fecha se devuelve', () => {
+    const r = parsePastedPayment('Pago con tarjeta de 23,40 € en BAR MANOLO SL el 13/10/2026', { home: 'EUR', now });
+    expect(r).toMatchObject({ amount: 2340, merchant: 'BAR MANOLO SL', date: '2026-10-13' });
+    expect(parsePastedPayment('Card payment of €5.00 at BLUE CAFE on 2026-10-12', { home: 'EUR', now })).toMatchObject({ merchant: 'BLUE CAFE', date: '2026-10-12' });
+    expect(parsePastedPayment('Kartenzahlung 8,00 EUR bei REWE am 11.10.2026', { home: 'EUR', now })).toMatchObject({ merchant: 'REWE', date: '2026-10-11' });
+  });
+  it('«el» dentro del nombre se queda; sin fecha no hay fecha', () => {
+    const r = parsePastedPayment('Compra con tarjeta de 10,00 € en BAR EL PUERTO', { home: 'EUR', now });
+    expect(r?.merchant).toBe('BAR EL PUERTO');
+    expect(r?.date).toBeUndefined();
+  });
+  it('fechas imposibles o del futuro no valen', async () => {
+    const { findDate } = await import('../src/domain/notifications');
+    expect(findDate('el 31/02/2026', now)).toBeNull();
+    expect(findDate('el 20/12/2026', now)).toBeNull();
+    expect(findDate('el 13/10/26', now)).toBe('2026-10-13');
+  });
+});

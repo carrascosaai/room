@@ -7,6 +7,9 @@ import { colors, radius, space } from '@/ui/theme';
 
 const ITEMS: { emoji: string; title: TKey; desc: TKey; href: Href }[] = [
   { emoji: '💸', title: 'back.title', desc: 'back.desc', href: '/devuelve' },
+  { emoji: '📅', title: 'cal.title', desc: 'cal.moreDesc', href: '/calendario' },
+  { emoji: '💶', title: 'cash.title', desc: 'cash.moreDesc', href: '/monedero' },
+  { emoji: '👀', title: 'rev.title', desc: 'rev.moreDesc', href: '/revisar' },
   { emoji: '💬', title: 'asst.title', desc: 'more.askDesc', href: '/assistant' },
   { emoji: '🎯', title: 'goal.title', desc: 'more.goalsDesc', href: '/goals' },
   { emoji: '🏆', title: 'ch.title', desc: 'more.chDesc', href: '/challenges' },

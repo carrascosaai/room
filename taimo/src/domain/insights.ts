@@ -249,14 +249,24 @@ export interface MonthRecap {
   budget: Cents;
   /** Tu parte de los gastos compartidos. */
   shared: Cents;
+  /**
+   * El mes aún no ha terminado: `previous` es solo el mismo tramo del mes
+   * anterior (del 1 al 14 contra del 1 al 14), igual que en Resumen.
+   */
+  partial: boolean;
+  /** Tramo del mes anterior con el que se compara. */
+  previousRange: { start: Date; end: Date };
 }
 
 /** El resumen de un mes ya terminado (o el actual), para verlo y compartirlo. */
-export function monthRecap(state: ShareState & Pick<AppState, 'budgets'>, month: Date): MonthRecap {
+export function monthRecap(state: ShareState & Pick<AppState, 'budgets'>, month: Date, now: Date = new Date()): MonthRecap {
   const home = homeOf(state);
   const start = new Date(month.getFullYear(), month.getMonth(), 1);
   const end = new Date(month.getFullYear(), month.getMonth() + 1, 1);
   const prevStart = new Date(month.getFullYear(), month.getMonth() - 1, 1);
+  // Mes en curso: se compara con los mismos días del mes anterior (como en Resumen).
+  const partial = now >= start && now < end;
+  const prevEnd = partial ? new Date(Math.min(start.getTime(), prevStart.getTime() + (now.getTime() - start.getTime()))) : start;
   let spent = 0;
   let previous = 0;
   let count = 0;
@@ -267,7 +277,7 @@ export function monthRecap(state: ShareState & Pick<AppState, 'budgets'>, month:
   for (const e of state.expenses) {
     const t = new Date(e.date);
     const share = myShare(e, state.groups, home);
-    if (t >= prevStart && t < start) previous += share;
+    if (t >= prevStart && t < prevEnd) previous += share;
     if (t < start || t >= end || share <= 0) continue;
     spent += share;
     count++;
@@ -288,6 +298,8 @@ export function monthRecap(state: ShareState & Pick<AppState, 'budgets'>, month:
     biggestDay: dayEntry ? { date: new Date(start.getFullYear(), start.getMonth(), dayEntry[0]), total: dayEntry[1] } : null,
     budget: Object.values(state.budgets).reduce<number>((s, v) => s + (v ?? 0), 0),
     shared,
+    partial,
+    previousRange: { start: prevStart, end: prevEnd },
   };
 }
 

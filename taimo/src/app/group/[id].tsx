@@ -10,18 +10,22 @@ import { balances, nextPayer, POT, potContributions, potLeft, sharedMonth, sugge
 import { parseAmount, parseTripDate } from '@/domain/money';
 import { buildPayRequest, canBePaid, payLink } from '@/domain/paylink';
 import { buildPush } from '@/domain/sync';
+import { tableUnpaid } from '@/domain/table';
 import type { Group, Recurring } from '@/domain/types';
 import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
+import { sameName } from '@/domain/names';
 import { createRemoteGroup, inviteLink, SyncError, syncConfigured, webBase } from '@/sync/api';
-import { Button, Card, Chip, Empty, H2, Input, Muted, ProgressBar, Row, Screen } from '@/ui/components';
+import { Button, Card, Chip, Empty, H2, Input, Muted, Notice, ProgressBar, Row, Screen } from '@/ui/components';
 import { confirm } from '@/ui/confirm';
 import { CurrencyButton, CurrencyPicker, currencyFlag } from '@/ui/CurrencyPicker';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { IncomeSplit } from '@/ui/IncomeSplit';
 import { PayButtons } from '@/ui/PayButtons';
 import { paymentLines } from '@/ui/messages';
+import { DateField } from '@/ui/DateField';
 import { colors, radius, space } from '@/ui/theme';
+import { useFlash } from '@/ui/useFlash';
 
 export default function GroupDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,6 +36,11 @@ export default function GroupDetail() {
   const [sharing, setSharing] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [memberError, setMemberError] = useState<string | null>(null);
+  // «Hecho · Deshacer» unos segundos después de marcar un pago.
+  const [justSettled, showSettled, hideSettled] = useFlash<string>(8000);
+  // «Mensaje copiado» junto al botón que se pulsó (en la web no hay menú de compartir).
+  const [copied, showCopied] = useFlash<string>(6000);
   const group = state.groups.find((g) => g.id === id);
 
   if (!group) {
@@ -57,6 +66,9 @@ export default function GroupDetail() {
     return !m ? t('common.unknown') : m.isMe ? state.profile.name || m.name : m.name;
   };
   const expenses = state.expenses.filter((e) => e.groupId === group.id);
+  // Pagos entre miembros (y al bote), los más recientes primero.
+  const settlements = state.settlements.filter((s) => s.groupId === group.id).sort((a, b) => b.date.localeCompare(a.date));
+  const isMe = (memberId: string) => !!group.members.find((m) => m.id === memberId)?.isMe;
   const balance = balances(group, state.expenses, state.settlements);
   const transfers = suggestTransfers(balance);
   const insights = groupInsights(group, state.expenses);
@@ -69,29 +81,48 @@ export default function GroupDetail() {
   const currencies = Object.entries(insights.byCurrency).filter(([c]) => c && c !== cur);
 
   function settle(from: string, to: string, amount: number) {
-    dispatch({ type: 'addSettlement', settlement: { id: newId(), groupId: group!.id, from, to, amount, date: new Date().toISOString() } });
+    const sid = newId();
+    dispatch({ type: 'addSettlement', settlement: { id: sid, groupId: group!.id, from, to, amount, date: new Date().toISOString() } });
+    showSettled(sid);
+  }
+
+  function undoSettlement(sid: string) {
+    const s = state.settlements.find((x) => x.id === sid);
+    if (!s) return;
+    confirm(t('fixa.undoPaymentConfirm', { from: name(s.from), to: name(s.to), amount: money(s.amount) }), t('common.cancel'), t('fixa.undo'), () => {
+      dispatch({ type: 'deleteSettlement', id: sid });
+      hideSettled();
+    });
+  }
+
+  /** Texto del saldo: en segunda persona para ti («Te deben», «Debes»). */
+  function balanceText(memberId: string, b: number): string {
+    if (isMe(memberId)) return b === 0 ? t('fixa.youSettled') : b > 0 ? t('fixa.youAreOwed', { amount: money(b) }) : t('fixa.youOwe', { amount: money(-b) });
+    return b === 0 ? t('group.settled') : b > 0 ? t('group.isOwed', { amount: money(b) }) : t('group.owes', { amount: money(-b) });
   }
 
   async function remind(from: string, to: string, amount: number) {
+    const where = `t-${from}-${to}`;
     const toMe = group!.members.find((m) => m.id === to)?.isMe;
     // Si te deben a ti: enlace que se abre en el navegador para pagarte sin instalar nada.
     const base = webBase();
     if (toMe && base) {
       const req = buildPayRequest(group!, state.expenses, from, to, amount, state.profile.payment, { from: realName(from), to: realName(to) }, cur);
       if (canBePaid(req)) {
-        await shareText(t('plink.askMessage', { name: realName(from), group: group!.name, amount: money(amount), link: payLink(base, req) }));
+        await shareText(t('plink.askMessage', { name: realName(from), group: group!.name, amount: money(amount), link: payLink(base, req) }), where);
         return;
       }
     }
     const pay = toMe ? paymentLines(state.profile.payment, amount, cur) : [];
     const message = [t('gx.remindMessage', { name: realName(from), amount: money(amount), to: realName(to), group: group!.name }), ...(pay.length ? ['', t('pay.payMe'), ...pay] : [])].join('\n');
-    await shareText(message);
+    await shareText(message, where);
   }
 
-  async function shareText(message: string) {
+  /** En el móvil abre «Compartir»; en la web copia el mensaje y lo dice junto al botón pulsado. */
+  async function shareText(message: string, where: string) {
     if (Platform.OS === 'web') {
       await Clipboard.setStringAsync(message).catch(() => {});
-      setShareError(t('group.inviteCopied'));
+      showCopied(where);
     } else await Share.share({ message });
   }
 
@@ -137,7 +168,7 @@ export default function GroupDetail() {
     const message = t('group.inviteMessage', { name: group.name, link: inviteLink(code), code });
     if (Platform.OS === 'web') {
       await Clipboard.setStringAsync(message).catch(() => {});
-      setShareError(t('group.inviteCopied'));
+      showCopied('invite');
     } else {
       await Share.share({ message });
     }
@@ -183,7 +214,7 @@ export default function GroupDetail() {
           <Row>
             <Text style={{ fontSize: 24 }}>👉</Text>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>{t('gx.nextPayer', { name: name(payer) })}</Text>
+              <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>{isMe(payer) ? t('fixa.nextPayerMe') : t('gx.nextPayer', { name: name(payer) })}</Text>
               <Muted>{t('gx.nextPayerHint')}</Muted>
             </View>
           </Row>
@@ -195,10 +226,14 @@ export default function GroupDetail() {
       ) : (
         <Button label={t('group.addShared')} onPress={() => router.push({ pathname: '/add', params: { groupId: group.id } })} />
       )}
-      {expenses.length > 0 ? <Button label={`📤 ${t('pay.share')}`} variant="secondary" onPress={() => shareText(summaryText())} /> : null}
+      {expenses.length > 0 ? <Button label={`📤 ${t('pay.share')}`} variant="secondary" onPress={() => shareText(summaryText(), 'summary')} /> : null}
+      {copied === 'summary' ? <Notice text={t('fixa.messageCopied')} /> : null}
 
       {/* Saldos y cómo quedar en paz */}
       <Card>
+        {tableUnpaid(group, state.settlements) > 0 ? (
+          <Text style={{ color: colors.warning, fontSize: 17, fontWeight: '700' }}>{t('fixa.tableUnpaid', { count: tableUnpaid(group, state.settlements) })}</Text>
+        ) : null}
         {group.members.map((m) => {
           const b = balance[m.id] ?? 0;
           return (
@@ -207,11 +242,12 @@ export default function GroupDetail() {
                 {name(m.id)}
               </Text>
               <Text style={{ color: b > 0 ? colors.success : b < 0 ? colors.warning : colors.textMuted, fontSize: 16, flexShrink: 1, textAlign: 'right' }}>
-                {b === 0 ? t('group.settled') : b > 0 ? t('group.isOwed', { amount: money(b) }) : t('group.owes', { amount: money(-b) })}
+                {balanceText(m.id, b)}
               </Text>
             </Row>
           );
         })}
+        {justSettled ? <Notice text={t('fixa.paidDone')} actionLabel={t('fixa.undo')} onAction={() => undoSettlement(justSettled)} /> : null}
         {transfers.length > 0 ? <H2>{t('group.settleTitle')}</H2> : null}
         {transfers.map((tr) => (
           <View key={`${tr.from}-${tr.to}`} style={{ gap: space.sm }}>
@@ -240,6 +276,7 @@ export default function GroupDetail() {
                 <Button label={`🔔 ${t('gx.remind')}`} variant="ghost" onPress={() => remind(tr.from, tr.to, tr.amount)} />
               )
             )}
+            {copied === `t-${tr.from}-${tr.to}` ? <Notice text={t('fixa.messageCopied')} /> : null}
           </View>
         ))}
       </Card>
@@ -256,7 +293,9 @@ export default function GroupDetail() {
                   <Text style={{ color: colors.text, flex: 1 }} numberOfLines={2}>
                     {name(m.id)}
                   </Text>
-                  <Muted style={{ flexShrink: 1, textAlign: 'right' }}>{t('gx.paidLine', { paid: money(paid), share: money(insights.shareOf[m.id] ?? 0) })}</Muted>
+                  <Muted style={{ flexShrink: 1, textAlign: 'right' }}>
+                    {t(m.isMe ? 'fixa.paidLineMe' : 'gx.paidLine', { paid: money(paid), share: money(insights.shareOf[m.id] ?? 0) })}
+                  </Muted>
                 </Row>
                 <ProgressBar progress={paid / Math.max(1, insights.total)} alerts={false} />
               </View>
@@ -295,6 +334,7 @@ export default function GroupDetail() {
           <Muted>{group.remote ? t('group.sharedText', { code: group.remote.code }) : t('group.shareText')}</Muted>
           {sharing ? <ActivityIndicator color={colors.primary} /> : <Button label={t('group.invite')} variant="secondary" onPress={invite} />}
           {shareError ? <Muted>{shareError}</Muted> : null}
+          {copied === 'invite' ? <Notice text={t('group.inviteCopied')} /> : null}
         </Card>
       ) : null}
 
@@ -305,6 +345,33 @@ export default function GroupDetail() {
         ) : (
           expenses.map((e) => <ExpenseRow key={e.id} expense={e} groups={state.groups} perspective="group" />)
         )}
+        {settlements.length > 0 ? (
+          <>
+            <H2>{t('fixa.paymentsTitle')}</H2>
+            <Muted>{t('fixa.paymentsHint')}</Muted>
+            {settlements.map((s) => (
+              <Row key={s.id} style={{ justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: 24 }}>💸</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }} numberOfLines={2}>
+                    {name(s.from)} → {name(s.to)}
+                  </Text>
+                  <Muted>
+                    {i18n.date(s.date, { day: 'numeric', month: 'short', year: 'numeric' })} · {money(s.amount)}
+                  </Muted>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t('fixa.undo')}: ${name(s.from)} → ${name(s.to)}, ${money(s.amount)}`}
+                  onPress={() => undoSettlement(s.id)}
+                  style={{ minHeight: 44, minWidth: 44, justifyContent: 'center', paddingHorizontal: space.sm }}
+                >
+                  <Text style={{ color: colors.danger, fontSize: 16, fontWeight: '700' }}>{t('fixa.undo')}</Text>
+                </Pressable>
+              </Row>
+            ))}
+          </>
+        ) : null}
       </Card>
 
       {!group.table ? (
@@ -319,11 +386,20 @@ export default function GroupDetail() {
               variant="secondary"
               disabled={!newMember.trim()}
               onPress={() => {
-                dispatch({ type: 'addMember', groupId: group.id, member: { id: newId(), name: newMember.trim() } });
+                const clean = newMember.trim();
+                // Dos personas con el mismo nombre lían las cuentas: pedimos otro (p. ej. «Ana G.»).
+                const taken = group.members.some((m) => sameName(m.isMe ? state.profile.name || m.name : m.name, clean));
+                if (taken) {
+                  setMemberError(t('fixa.duplicateName', { name: clean }));
+                  return;
+                }
+                setMemberError(null);
+                dispatch({ type: 'addMember', groupId: group.id, member: { id: newId(), name: clean } });
                 setNewMember('');
               }}
             />
           </Row>
+          {memberError ? <Text style={{ color: colors.danger, fontSize: 15 }}>{memberError}</Text> : null}
         </Card>
       ) : null}
 
@@ -400,6 +476,7 @@ function RecurringCard({ group }: { group: Group }) {
     const m = group.members.find((x) => x.id === mid);
     return m?.isMe ? t('common.you') : m?.name ?? '?';
   };
+  const payerIsMe = (mid: string) => !!group.members.find((x) => x.id === mid)?.isMe;
 
   function add() {
     const amount = parseAmount(rAmount);
@@ -422,7 +499,7 @@ function RecurringCard({ group }: { group: Group }) {
             <Text style={{ color: colors.text, fontWeight: '600' }} numberOfLines={2}>
               🔁 {r.name}
             </Text>
-            <Muted>{t('gx.recurringLine', { day: r.day, name: name(r.paidBy) })}</Muted>
+            <Muted>{payerIsMe(r.paidBy) ? t('fixa.recurringLineMe', { day: r.day }) : t('gx.recurringLine', { day: r.day, name: name(r.paidBy) })}</Muted>
           </View>
           <Text style={{ color: colors.text, fontWeight: '600' }}>{moneyIn(r.amount, cur)}</Text>
           <Pressable
@@ -482,7 +559,7 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
   const [pot, setPot] = useState(!!group.pot);
   const startDate = parseTripDate(start);
   const endDate = parseTripDate(end);
-  const datesOk = group.kind !== 'trip' || (startDate !== null && endDate !== null);
+  const datesOk = group.kind !== 'trip' || (startDate !== null && endDate !== null && (!startDate || !endDate || startDate <= endDate));
 
   function save() {
     if (!datesOk) return;
@@ -522,16 +599,12 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
         />
       ) : null}
       {group.kind === 'trip' ? (
-        <Row>
-          <View style={{ flex: 1 }}>
-            <Input label={t('gx.startDate')} placeholder="2026-11-01" value={start} onChangeText={setStart} autoCapitalize="none" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Input label={t('gx.endDate')} placeholder="2026-11-10" value={end} onChangeText={setEnd} autoCapitalize="none" />
-          </View>
-        </Row>
+        <>
+          <DateField label={t('fixa.startDate')} value={start} onChange={setStart} />
+          <DateField label={t('fixa.endDate')} value={end} onChange={setEnd} min={start} />
+        </>
       ) : null}
-      {!datesOk ? <Text style={{ color: colors.danger, fontSize: 15 }}>{t('gx.badDate')}</Text> : null}
+      {!datesOk ? <Text style={{ color: colors.danger, fontSize: 15 }}>{t('fixa.badDates')}</Text> : null}
       <Muted>{t('split.defaultSplit')}</Muted>
       <Muted>{t('split.defaultHint')}</Muted>
       {group.kind === 'couple' && group.members.length === 2 && group.members.some((m) => m.isMe) ? (

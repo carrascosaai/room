@@ -100,7 +100,7 @@ export function findMoney(text: string, home = 'EUR'): Money | null {
 
 const MERCHANT_PATTERNS = [
   // "en MERCADONA", "at Starbucks", "chez Carrefour", "bei REWE", "presso Esselunga", "em Pingo Doce", "bij Albert Heijn"…
-  /(?:^|\s)(?:en|at|chez|bei|presso|em|bij|hos|w|u|в|στο|στην|to VPA|towards|merchant:?|info:?)\s+([^\n,;·|]+?)(?=\s+(?:con|com|with|avec|mit|on|am|op|på|dnia|el día|using|via\s+(?:apple|google|samsung|garmin|fitbit|paypal|nfc)|por|para|par|per|pour|für|for|was|is|in|has|have|using|del|from|kl|um|à|à las|a las|at \d)\b|\s+\d|\s*[,;·|]|\.(?=\s|$)|\s*$)/gimu,
+  /(?:^|\s)(?:en|at|chez|bei|presso|em|bij|hos|w|u|в|στο|στην|to VPA|towards|merchant:?|info:?)\s+([^\n,;·|]+?)(?=\s+(?:con|com|with|avec|mit|on|am|op|på|dnia|el día|using|via\s+(?:apple|google|samsung|garmin|fitbit|paypal|nfc)|por|para|par|per|pour|für|for|was|is|in|has|have|using|del|from|kl|um|à|à las|a las|at \d)\b|\s+(?:el|le|il|on|am|op|em|o|den|der|the|du|del|de)\s+\d|\s+\d|\s*[,;·|]|\.(?=\s|$)|\s*$)/gimu,
   // "Starbucks · 4,50 €" / "MERCADONA - 12,40 €"
   /^([^\n·|]+?)\s*[·|–-]\s*(?=\S*\d)/mu,
 ];
@@ -166,22 +166,57 @@ export function parsePaymentNotification(n: RawNotification, opts: ParseOptions 
 }
 
 /**
+ * Fecha escrita en el aviso («el 13/10/2026», «on 2026-10-13», «13.10.26»), como
+ * 'YYYY-MM-DD'. Se lee día/mes/año (como en casi todo el mundo) salvo que el
+ * segundo número no pueda ser un mes. Fechas imposibles o muy en el futuro: nada.
+ */
+export function findDate(text: string, now = new Date()): string | null {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const valid = (y: number, m: number, d: number) => {
+    const date = new Date(Date.UTC(y, m - 1, d));
+    if (date.getUTCFullYear() !== y || date.getUTCMonth() !== m - 1 || date.getUTCDate() !== d) return null;
+    // Un pago no puede ser de dentro de más de un día (ni de hace más de 2 años).
+    const ms = date.getTime() - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    if (ms > 86_400_000 || ms < -2 * 366 * 86_400_000) return null;
+    return `${y}-${pad(m)}-${pad(d)}`;
+  };
+  const iso = /(?:^|[^\d])(\d{4})-(\d{1,2})-(\d{1,2})(?![\d])/.exec(text);
+  if (iso) {
+    const r = valid(Number(iso[1]), Number(iso[2]), Number(iso[3]));
+    if (r) return r;
+  }
+  for (const m of text.matchAll(/(?:^|[^\d.,])(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})(?![\d])/g)) {
+    let [a, b] = [Number(m[1]), Number(m[2])];
+    const y = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
+    if (b > 12 && a <= 12) [a, b] = [b, a];
+    const r = valid(y, b, a);
+    if (r) return r;
+  }
+  return null;
+}
+
+/**
  * Texto pegado por el usuario (el aviso del banco, un SMS, un correo): como lo
  * pega a propósito, basta con encontrar un importe. Si además parece un pago
  * con tarjeta, se saca también el comercio y la categoría.
  */
-export function parsePastedPayment(text: string, opts: ParseOptions = {}): { amount: number; currency: string; merchant: string | null; category?: CategoryId } | null {
+export function parsePastedPayment(
+  text: string,
+  opts: ParseOptions & { now?: Date } = {},
+): { amount: number; currency: string; merchant: string | null; category?: CategoryId; date?: string } | null {
   const clean = text.trim().slice(0, 600);
   if (!clean) return null;
+  // La fecha del aviso, si la dice (si no, el gasto queda con la de hoy).
+  const date = findDate(clean, opts.now) ?? undefined;
   const strict = parsePaymentNotification({ package: 'clipboard', title: '', text: clean, postedAt: new Date().toISOString() }, { ...opts, defaultMerchant: '' });
-  if (strict) return { amount: strict.amount, currency: strict.currency, merchant: strict.merchant || null, category: strict.category };
+  if (strict) return { amount: strict.amount, currency: strict.currency, merchant: strict.merchant || null, category: strict.category, date };
   // Sin pinta de pago: si es dinero que te llega (devolución, Bizum recibido, nómina…) o un código, no es un gasto.
   if (NOT_PURCHASE.test(clean) || NOT_SPENT.test(clean)) return null;
   const money = findMoney(clean, opts.home);
   if (!money) return null;
   const [first, ...rest] = clean.split('\n');
   const merchant = extractMerchant(first, rest.join('\n'), money.raw);
-  return { amount: money.amount, currency: money.currency, merchant, category: merchant ? categorize(merchant, opts.learned ?? {}) : undefined };
+  return { amount: money.amount, currency: money.currency, merchant, category: merchant ? categorize(merchant, opts.learned ?? {}) : undefined, date };
 }
 
 /**

@@ -38,6 +38,9 @@ export function AuthButtons({ onSignedIn }: { onSignedIn: (result: SignedIn) => 
     }
   }
 
+  // Sin inicio de sesión configurado no se enseñan botones que no hacen nada.
+  if (!authConfigured) return null;
+
   return (
     <View style={{ gap: space.md }}>
       {nativeApple ? (

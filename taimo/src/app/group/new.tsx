@@ -3,11 +3,13 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { parseAmount, parseTripDate } from '@/domain/money';
+import { duplicateNames, sameName } from '@/domain/names';
 import type { Group, GroupKind } from '@/domain/types';
 import { useI18n, type TKey } from '@/i18n';
 import { newId, useStore } from '@/store/store';
 import { Button, Card, Chip, H2, Input, Muted, Row, Screen, Title } from '@/ui/components';
 import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
+import { DateField } from '@/ui/DateField';
 import { IncomeSplit } from '@/ui/IncomeSplit';
 import { colors, space } from '@/ui/theme';
 
@@ -74,10 +76,21 @@ export default function NewGroup() {
   // Fechas: vale 2026-11-15 y también 15/11/2026; si no, se avisa y no se crea.
   const startDate = parseTripDate(start);
   const endDate = parseTripDate(end);
-  const datesOk = kind !== 'trip' || (startDate !== null && endDate !== null);
-  const valid = !!name.trim() && names.length > 0 && datesOk;
+  const datesOk = kind !== 'trip' || (startDate !== null && endDate !== null && (!startDate || !endDate || startDate <= endDate));
+  // Nombres repetidos (o tu propio nombre otra vez): luego no se sabría quién es quién.
+  const myName = state.profile.name || t('common.me');
+  const repeated = [...duplicateNames(names), ...names.filter((n) => sameName(n, myName) || sameName(n, t('common.me')))];
+  const valid = !!name.trim() && names.length > 0 && datesOk && repeated.length === 0;
   // Por qué no se puede crear todavía (botón desactivado sin explicación no ayuda a nadie).
-  const missing = !name.trim() ? t('groups.needName') : names.length === 0 ? t('groups.needMembers') : null;
+  const missing = !name.trim()
+    ? t('groups.needName')
+    : names.length === 0
+      ? t('groups.needMembers')
+      : repeated.length
+        ? t('fixa.duplicateName', { name: repeated[0] })
+        : !datesOk
+          ? t('fixa.badDates')
+          : null;
 
   function create() {
     const meId = newId();
@@ -141,16 +154,11 @@ export default function NewGroup() {
       ) : null}
 
       {kind === 'trip' ? (
-        <Row>
-          <View style={{ flex: 1 }}>
-            <Input label={t('gx.startDate')} placeholder="2026-11-01" value={start} onChangeText={setStart} autoCapitalize="none" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Input label={t('gx.endDate')} placeholder="2026-11-10" value={end} onChangeText={setEnd} autoCapitalize="none" />
-          </View>
-        </Row>
+        <>
+          <DateField label={t('fixa.startDate')} value={start} onChange={setStart} />
+          <DateField label={t('fixa.endDate')} value={end} onChange={setEnd} min={start} />
+        </>
       ) : null}
-      {kind === 'trip' && !datesOk ? <Text style={{ color: colors.danger, fontSize: 15 }}>{t('gx.badDate')}</Text> : null}
 
       {kind !== 'other' ? (
         <Input
@@ -162,7 +170,7 @@ export default function NewGroup() {
         />
       ) : null}
 
-      {missing ? <Muted>{missing}</Muted> : null}
+      {missing ? <Text style={{ color: repeated.length || !datesOk ? colors.danger : colors.textMuted, fontSize: 15 }}>{missing}</Text> : null}
       <Button label={t('groups.create')} disabled={!valid} onPress={create} />
       <Button label={t('common.back')} variant="ghost" onPress={() => setKind(null)} />
       <CurrencyPicker visible={picking} value={currency} onClose={() => setPicking(false)} onSelect={setCurrency} />

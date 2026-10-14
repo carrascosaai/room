@@ -52,6 +52,7 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled: !!disabled }}
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [
@@ -60,7 +61,9 @@ export function Button({
         variant === 'secondary' && { backgroundColor: colors.surfaceAlt, borderColor: colors.border, borderWidth: 1 },
         variant === 'ghost' && { backgroundColor: 'transparent' },
         variant === 'danger' && { backgroundColor: 'transparent', borderColor: colors.danger, borderWidth: 1 },
-        (pressed || disabled) && { opacity: disabled ? 0.4 : 0.8 },
+        pressed && !disabled && { opacity: 0.8 },
+        // Desactivado: gris y sin color, para que se note también en modo oscuro.
+        disabled && { backgroundColor: variant === 'ghost' ? 'transparent' : colors.surfaceAlt, borderColor: colors.border, borderWidth: variant === 'ghost' ? 0 : 1, opacity: 0.7 },
       ]}
     >
       <Text
@@ -69,6 +72,7 @@ export function Button({
           variant === 'primary' && { color: colors.onPrimary },
           variant === 'ghost' && { color: colors.primary },
           variant === 'danger' && { color: colors.danger },
+          disabled && { color: colors.textFaint },
         ]}
       >
         {label}
@@ -172,6 +176,28 @@ export function Empty({ emoji, text }: { emoji: string; text: string }) {
     <View style={{ alignItems: 'center', paddingVertical: space.xl, gap: space.sm }}>
       <Text style={{ fontSize: 36 }}>{emoji}</Text>
       <Muted style={{ textAlign: 'center' }}>{text}</Muted>
+    </View>
+  );
+}
+
+/**
+ * Aviso corto que aparece unos segundos (p. ej. «Hecho · Deshacer» o «Mensaje copiado»).
+ * Se lee en voz alta con el lector de pantalla.
+ */
+export function Notice({ text, actionLabel, onAction, tone = 'success' }: { text: string; actionLabel?: string; onAction?: () => void; tone?: 'success' | 'warning' }) {
+  const color = tone === 'warning' ? colors.warning : colors.primary;
+  return (
+    <View
+      accessibilityLiveRegion="polite"
+      accessibilityRole="alert"
+      style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: colors.primarySoft, borderColor: color, borderWidth: 1, borderRadius: radius.md, padding: space.md }}
+    >
+      <Text style={{ flex: 1, color: colors.text, fontSize: 16, fontWeight: '600' }}>{text}</Text>
+      {actionLabel && onAction ? (
+        <Pressable accessibilityRole="button" onPress={onAction} style={{ minHeight: 44, minWidth: 44, justifyContent: 'center', paddingHorizontal: space.sm }}>
+          <Text style={{ color, fontSize: 17, fontWeight: '800', textDecorationLine: 'underline' }}>{actionLabel}</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

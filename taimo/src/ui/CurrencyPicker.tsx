@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { countryIndex, searchCurrencies } from '@/fx/countries';
 import { WORLD_CURRENCIES } from '@/fx/currencies';
 import { CURRENCIES, useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
@@ -14,7 +15,6 @@ export function currencyFlag(code: string): string {
   return FLAGS.get(code) ?? '🏳️';
 }
 
-const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 /** Botón compacto "🇯🇵 JPY ▾" que abre el selector. */
 export function CurrencyButton({ value, onPress }: { value: string; onPress: () => void }) {
@@ -60,17 +60,14 @@ export function CurrencyPicker({
   onSelect: (code: string) => void;
   onClose: () => void;
 }) {
-  const { t, currencyName } = useI18n();
+  const { t, currencyName, locale } = useI18n();
   const { state, dispatch } = useStore();
   const [query, setQuery] = useState('');
+  const countries = useMemo(() => countryIndex(locale), [locale]);
 
   const rows = useMemo<Row[]>(() => {
-    const q = norm(query.trim());
-    if (q) {
-      return WORLD_CURRENCIES.filter(
-        ([code, name]) => norm(code).includes(q) || norm(name).includes(q) || norm(currencyName(code)).includes(q),
-      ).map(([code]) => ({ type: 'currency', code }));
-    }
+    // Se busca por código, por nombre de la moneda y por país («Japón», «Alemania»).
+    if (query.trim()) return searchCurrencies(query, currencyName, countries).map((code) => ({ type: 'currency', code }));
     const recent = state.recentCurrencies ?? [];
     const out: Row[] = [];
     if (recent.length) {
@@ -82,7 +79,7 @@ export function CurrencyPicker({
     out.push({ type: 'header', title: t('fx.all') });
     WORLD_CURRENCIES.forEach(([code]) => out.push({ type: 'currency', code }));
     return out;
-  }, [query, state.recentCurrencies, t, currencyName]);
+  }, [query, state.recentCurrencies, t, currencyName, countries]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} presentationStyle="pageSheet">

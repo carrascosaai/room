@@ -8,6 +8,7 @@ import { useI18n } from '@/i18n';
 import { webBase } from '@/sync/api';
 import { BigButton, Button, Card, Empty, H2, Input, Muted, Row, Screen } from '@/ui/components';
 import { PayButtons } from '@/ui/PayButtons';
+import { HomeButton } from '@/ui/HomeButton';
 import { colors, radius, space } from '@/ui/theme';
 
 /** Teléfono de Bizum → número para abrir el chat de WhatsApp de quien pagó. */
@@ -74,7 +75,10 @@ export default function Mesa() {
 
   async function notify() {
     const link = claimLink(webBase(), { b: bill!.id, w: name.trim(), i: picked, a: amount, u: diner });
-    const message = t('mesa.sentMessage', { name: bill!.t, amount: money(amount), place: bill!.m || '🍽️', link });
+    // Sin nombre del sitio, la frase va sin «de …» (nada de «de 🍽️»).
+    const message = bill!.m
+      ? t('mesa.sentMessage', { name: bill!.t, amount: money(amount), place: bill!.m, link })
+      : t('fixa.sentMessageNoPlace', { name: bill!.t, amount: money(amount), link });
     setSent(true);
     if (Platform.OS !== 'web') {
       await Share.share({ message });
@@ -87,9 +91,12 @@ export default function Mesa() {
   return (
     <Screen>
       <Stack.Screen options={{ headerShown: false }} />
+      {Platform.OS !== 'web' ? <HomeButton /> : null}
       <Text style={{ fontSize: 48, textAlign: 'center' }}>🍽️</Text>
       <Text style={{ color: colors.text, fontSize: 26, fontWeight: '800', textAlign: 'center' }}>{t('mesa.title')}</Text>
-      <Muted style={{ textAlign: 'center', fontSize: 17 }}>{t('mesa.paidBy', { name: bill.t, amount: money(total), place: bill.m || '🍽️' })}</Muted>
+      <Muted style={{ textAlign: 'center', fontSize: 17 }}>
+        {bill.m ? t('mesa.paidBy', { name: bill.t, amount: money(total), place: bill.m }) : t('fixa.paidByNoPlace', { name: bill.t, amount: money(total) })}
+      </Muted>
 
       <Input label={t('mesa.who')} placeholder={t('mesa.whoPlaceholder')} value={name} onChangeText={setName} autoCapitalize="words" />
 
@@ -129,6 +136,10 @@ export default function Mesa() {
               </Pressable>
             ),
           )}
+          {/* Lo que no son platos (servicio, pan, propina), en su propia línea. */}
+          {(bill.x ?? 0) > 0 ? (
+            <Text style={{ color: colors.text, fontSize: 17 }}>🧾 {t('fixa.extraLine', { amount: money(bill.x ?? 0), each: money(Math.round((bill.x ?? 0) / bill.n)) })}</Text>
+          ) : null}
           {sharedPart(bill) > 0 ? (
             <Muted style={{ fontSize: 16 }}>
               🤝 {t('mesa.shared', { count: bill.n, amount: money(sharedPart(bill)) })}

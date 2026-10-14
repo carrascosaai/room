@@ -22,7 +22,12 @@ export default function Challenges() {
   const got = achievements(state);
   const list = (state.challenges ?? []).map((c) => ({ c, s: evaluateChallenge(c, state) }));
 
+  // Un reto igual que ya está en marcha no se empieza dos veces.
+  const running = (kind: ChallengeKind, category?: CategoryId) =>
+    list.some(({ c, s }) => s.status === 'active' && c.kind === kind && (kind !== 'noCategory' || c.category === category));
+
   const start = (kind: ChallengeKind) => {
+    if (running(kind, kind === 'noCategory' ? cat : undefined)) return;
     const today = new Date();
     const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     dispatch({ type: 'startChallenge', challenge: { id: newId(), kind, category: kind === 'noCategory' ? cat : undefined, start: iso, days: 7 } });
@@ -61,16 +66,16 @@ export default function Challenges() {
             <Chip key={c} label={`${category(c).emoji} ${t(`cat.${c}`)}`} selected={cat === c} onPress={() => setCat(c)} />
           ))}
         </Row>
-        <Button label={t('ch.start')} onPress={() => start('noCategory')} />
+        {running('noCategory', cat) ? <Muted>✓ {t('fixa.challengeRunning')}</Muted> : <Button label={t('ch.start')} onPress={() => start('noCategory')} />}
       </Card>
       <Card>
         <Text style={{ color: colors.text, fontWeight: '700' }}>📉 {t('ch.lessWeek')}</Text>
-        <Button label={t('ch.start')} variant="secondary" onPress={() => start('lessThanLastWeek')} />
+        {running('lessThanLastWeek') ? <Muted>✓ {t('fixa.challengeRunning')}</Muted> : <Button label={t('ch.start')} variant="secondary" onPress={() => start('lessThanLastWeek')} />}
       </Card>
       <Card>
         <Text style={{ color: colors.text, fontWeight: '700' }}>🚫 {t('ch.noSpend')}</Text>
         <Muted>{t('ch.noSpendHint')}</Muted>
-        <Button label={t('ch.start')} variant="secondary" onPress={() => start('noSpendDays')} />
+        {running('noSpendDays') ? <Muted>✓ {t('fixa.challengeRunning')}</Muted> : <Button label={t('ch.start')} variant="secondary" onPress={() => start('noSpendDays')} />}
       </Card>
       <H2>{t('ach.title')}</H2>
       <Muted>{t('ach.count', { count: got.size, total: ACHIEVEMENTS.length })}</Muted>

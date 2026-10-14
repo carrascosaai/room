@@ -20,6 +20,7 @@ import { onNotificationOpen, scheduleNightlyReminder, scheduleSubscriptionAlerts
 import { StoreProvider, useStore } from '@/store/store';
 import { useGroupSync } from '@/sync/useGroupSync';
 import { applyTheme, colors } from '@/ui/theme';
+import { ToastHost } from '@/ui/Toast';
 
 /** Tareas de fondo mientras la app está abierta. */
 function BackgroundWork() {
@@ -100,9 +101,12 @@ function RootStack() {
           <Stack.Screen name="join" options={{ presentation: 'modal' }} />
           <Stack.Screen name="pay" />
           <Stack.Screen name="devuelve" options={{ headerShown: true, title: t('back.title') }} />
+          <Stack.Screen name="monedero" options={{ headerShown: true, title: t('cash.title') }} />
+          <Stack.Screen name="calendario" options={{ headerShown: true, title: t('cal.title') }} />
+          <Stack.Screen name="revisar" options={{ headerShown: true, title: t('rev.title') }} />
           <Stack.Screen name="mesa" />
           <Stack.Screen name="mesa-pagado" />
-          <Stack.Screen name="mesa-nueva" options={{ headerShown: true, title: t('mesa.newTitle') }} />
+          <Stack.Screen name="mesa-nueva" options={{ headerShown: true, title: t('mesa.title') }} />
           <Stack.Screen name="language" options={{ presentation: 'modal' }} />
           <Stack.Screen name="settings" options={{ headerShown: true, title: t('settings.title') }} />
           <Stack.Screen name="wishlist" options={{ headerShown: true, title: t('wish.title') }} />
@@ -208,6 +212,7 @@ function ThemedRoot() {
     <View key={mode} style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <RootStack />
+      <ToastHost />
     </View>
   );
 }

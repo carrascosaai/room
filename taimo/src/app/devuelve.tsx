@@ -8,6 +8,8 @@ import { findMoneyBack, recoveredTotal, type MoneyBack } from '@/domain/moneybac
 import { useI18n, type TKey } from '@/i18n';
 import { useStore } from '@/store/store';
 import { Button, Card, Empty, Input, Muted, Row, Screen } from '@/ui/components';
+import { confirm } from '@/ui/confirm';
+import { HomeButton } from '@/ui/HomeButton';
 import { colors, space } from '@/ui/theme';
 
 const EMOJI: Record<MoneyBack['kind'], string> = { double: '⚠️', priceUp: '📈', newSub: '🔔', returnWindow: '↩️', flight: '✈️', warranty: '🛡️' };
@@ -47,15 +49,30 @@ export default function Devuelve() {
   const recovered = (m: MoneyBack, amount = m.amount) => dispatch({ type: 'moneyBackRecovered', id: m.id, amount });
   const dismiss = (m: MoneyBack) => dispatch({ type: 'moneyBackDismiss', id: m.id });
 
+  /** Cobro repetido devuelto: se quita el cobro de más para que el presupuesto cuadre. */
+  function doubleRefunded(m: MoneyBack) {
+    const e = m.expenseId ? state.expenses.find((x) => x.id === m.expenseId) : undefined;
+    if (!e) return recovered(m);
+    confirm(t('fixa.refundConfirm', { merchant: m.merchant, amount: money(m.amount) }), t('common.cancel'), t('fixa.refundOk'), () => {
+      recovered(m);
+      dispatch({ type: 'deleteExpense', id: e.id });
+      setNote(t('fixa.refundDone', { amount: money(m.amount) }));
+    });
+  }
+
   return (
     <Screen>
-      <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark, alignItems: 'center' }}>
-        <Text style={{ color: colors.textMuted, fontSize: 17, textAlign: 'center' }}>{t('back.recovered')}</Text>
-        <Text style={{ color: colors.text, fontSize: 46, fontWeight: '800' }} adjustsFontSizeToFit numberOfLines={1} accessibilityRole="header">
-          {money(saved.total)}
-        </Text>
-        {saved.thisYear !== saved.total ? <Muted>{t('back.recoveredYear', { amount: money(saved.thisYear) })}</Muted> : null}
-      </Card>
+      <HomeButton />
+      {/* «Te ha ayudado a recuperar 0,00 €» no dice nada: solo cuando ya hay algo. */}
+      {saved.total > 0 ? (
+        <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark, alignItems: 'center' }}>
+          <Text style={{ color: colors.textMuted, fontSize: 17, textAlign: 'center' }}>{t('back.recovered')}</Text>
+          <Text style={{ color: colors.text, fontSize: 46, fontWeight: '800' }} adjustsFontSizeToFit numberOfLines={1} accessibilityRole="header">
+            {money(saved.total)}
+          </Text>
+          {saved.thisYear !== saved.total ? <Muted>{t('back.recoveredYear', { amount: money(saved.thisYear) })}</Muted> : null}
+        </Card>
+      ) : null}
 
       {note ? (
         <Card>
@@ -79,7 +96,7 @@ export default function Devuelve() {
             {m.kind === 'double' ? (
               <>
                 <Button label={t('back.copyClaim')} onPress={() => copyClaim(m)} />
-                <Button label={t('back.gotIt')} variant="secondary" onPress={() => recovered(m)} />
+                <Button label={t('back.gotIt')} variant="secondary" onPress={() => doubleRefunded(m)} />
               </>
             ) : null}
             {m.kind === 'priceUp' || m.kind === 'newSub' ? (

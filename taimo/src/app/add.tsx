@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { canRecognizeText, recognizeText } from 'taimo-capture';
 import { Alert, Platform, Pressable, Text, TextInput, View } from 'react-native';
 
-import { categoryStatus } from '@/domain/budget';
+import { isUnusuallyLarge } from '@/domain/amountCheck';
+import { categoryStatus, homeOf, myShare } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
 import { categorize } from '@/domain/categorize';
 import { exactRemainder, POT, splitByItems, splitByWeights, splitEqually } from '@/domain/groups';
@@ -21,6 +22,7 @@ import { Button, Chip, Input, Muted, Row, Screen } from '@/ui/components';
 import { confirm } from '@/ui/confirm';
 import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
 import { purchaseMessage } from '@/ui/messages';
+import { toast } from '@/ui/Toast';
 import { workCost } from '@/ui/workTime';
 import { colors, radius, space } from '@/ui/theme';
 
@@ -58,9 +60,21 @@ export default function AddExpense() {
   const group = state.groups.find((g) => g.id === groupId);
   const base = group?.currency ?? i18n.currency;
   const recentForeign = (state.recentCurrencies ?? []).find((c) => c !== base);
-  const [cur, setCur] = useState<string>(
-    editing?.original?.currency ?? params.currency ?? (group?.kind === 'trip' && recentForeign ? recentForeign : base),
-  );
+  // Moneda por defecto: si el grupo tiene la suya (viaje a Japón en yenes), esa.
+  // Solo en un viaje llevado en tu moneda se propone la última extranjera que usaste.
+  const defaultCur = (g: typeof group) => {
+    const b = g?.currency ?? i18n.currency;
+    const foreign = (state.recentCurrencies ?? []).find((c) => c !== b);
+    const ownCurrency = !!g?.currency && g.currency !== i18n.currency;
+    return g?.kind === 'trip' && !ownCurrency && foreign ? foreign : b;
+  };
+  const [cur, setCurState] = useState<string>(editing?.original?.currency ?? params.currency ?? defaultCur(group));
+  // Si el usuario elige una moneda a mano, al cambiar de grupo ya no se la cambiamos.
+  const [curTouched, setCurTouched] = useState(Boolean(editing || params.currency));
+  const setCur = (c: string) => {
+    setCurState(c);
+    setCurTouched(true);
+  };
   const fmtInput = (c: Cents) => fmtIn(c, cur);
   const zeroPlaceholder = currencyDecimals(cur) > 0 ? `0${decimalSep}${'0'.repeat(currencyDecimals(cur))}` : '0';
   const [amountText, setAmountText] = useState(
@@ -89,6 +103,7 @@ export default function AddExpense() {
   }, [locale, day]);
 
   const me = group?.members.find((m) => m.isMe)?.id;
+  const allIds = group?.members.map((m) => m.id) ?? [];
   const [paidBy, setPaidBy] = useState<string | undefined>(editing?.paidBy);
   const [participants, setParticipants] = useState<string[] | undefined>(editing?.shares ? Object.keys(editing.shares) : undefined);
   const [mode, setMode] = useState<SplitMode>(editing?.splitMode ?? (group?.weights ? 'weights' : 'equal'));
@@ -108,7 +123,7 @@ export default function AddExpense() {
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   // Lo básico a la vista; fecha, moneda y ticket en «Más opciones» (abiertas si ya se usan).
   const [showMore, setShowMore] = useState(
-    () => !!editing || !!params.currency || !!Number(params.daysAgo) || (group?.kind === 'trip' && !!recentForeign),
+    () => !!editing || !!params.currency || !!Number(params.daysAgo) || (group?.kind === 'trip' && cur !== base),
   );
 
   /** Foto del ticket → importe, comercio, fecha y (en grupos) productos para repartir. */
@@ -141,7 +156,8 @@ export default function AddExpense() {
     if (r.date) setDay(new Date(r.date).toDateString());
     if (group && r.items.length > 1) {
       setMode('items');
-      setItems(r.items.map((it, i) => ({ key: `scan-${i}`, name: it.name, amount: fmtIn(it.amount, r.currency), who: me ? [me] : [] })));
+      // Cada producto empieza repartido entre todos; se quita a quien no lo tomó.
+      setItems(r.items.map((it, i) => ({ key: `scan-${i}`, name: it.name, amount: fmtIn(it.amount, r.currency), who: allIds })));
     }
     setScanMessage(t('scan.done'));
   }
@@ -157,6 +173,12 @@ export default function AddExpense() {
     setAmountText(fmtIn(r.amount, r.currency));
     if (r.merchant) setMerchant(tidyMerchant(r.merchant));
     if (r.currency !== cur) setCur(r.currency);
+    // El aviso decía el día del pago («el 13/10/2026»): se usa esa fecha.
+    if (r.date) {
+      const [y, m, d] = r.date.split('-').map(Number);
+      setDay(new Date(y, m - 1, d, 12).toDateString());
+      setShowMore(true);
+    }
     setScanMessage(t('paste.done'));
   }
 
@@ -187,6 +209,16 @@ export default function AddExpense() {
   // En horas de trabajo (con el importe pasado a tu moneda).
   const inHome = base === i18n.currency ? amount : convert(amount, base, i18n.currency, rates) ?? amount;
   const timeCost = amount > 0 ? workCost(i18n, state.profile, inHome) : null;
+  // ¿Un cero de más? Se avisa (sin impedir guardar) si es mucho más de lo que sueles gastar.
+  const history = useMemo(() => {
+    const home = homeOf(state);
+    return state.expenses
+      .filter((e) => e.id !== editing?.id)
+      .slice(0, 200)
+      .map((e) => myShare(e, state.groups, home));
+  }, [state.expenses.length]);
+  const capHome = convert(500000, 'EUR', i18n.currency, rates) ?? 500000;
+  const tooBig = isUnusuallyLarge(group ? (convert(amount, base, i18n.currency, rates) ?? amount) : inHome, history, capHome);
 
   const weightNums = Object.fromEntries(
     effectiveParticipants.map((id) => [id, Number((weights[id] ?? '1').replace(',', '.')) || 0]),
@@ -244,6 +276,9 @@ export default function AddExpense() {
     if (!editing && Platform.OS !== 'web') {
       const next = reducer(state, action);
       Alert.alert(t('add.savedTitle', { amount: moneyIn(amount, base) }), purchaseMessage(i18n, categoryStatus(next, expense.category)));
+    } else {
+      // En la web (y al editar) no hay ventana: un aviso corto que se ve en la pantalla siguiente.
+      toast(`${t('fixa.saved')} · ${moneyIn(amount, base)}`);
     }
     router.back();
   }
@@ -275,8 +310,14 @@ export default function AddExpense() {
             accessibilityLabel={t('add.amount')}
             style={{ color: colors.text, fontSize: 48, fontWeight: '800', width: Math.max(140, Math.min(260, (amountText.length || 4) * 30)), textAlign: 'center' }}
           />
-          {showMore || cur !== i18n.currency ? <CurrencyButton value={cur} onPress={() => setPicking(true)} /> : null}
+          {/* La moneda siempre a la vista, junto al importe («¥», «€»…). */}
+          <CurrencyButton value={cur} onPress={() => setPicking(true)} />
         </Row>
+        {tooBig ? (
+          <Text accessibilityLiveRegion="polite" style={{ color: colors.warning, fontSize: 16, fontWeight: '600', textAlign: 'center' }}>
+            ⚠️ {t('fixa.bigAmount', { amount: moneyIn(entered, cur) })}
+          </Text>
+        ) : null}
         {timeCost ? <Muted style={{ textAlign: 'center' }}>⏱️ {t('work.cost', { time: timeCost })}</Muted> : null}
         {cur !== base ? (
           <Muted style={{ textAlign: 'center' }}>
@@ -324,7 +365,14 @@ export default function AddExpense() {
         <View style={{ gap: space.sm }}>
           <Muted>{t('add.shared')}</Muted>
           <Row style={{ flexWrap: 'wrap', gap: space.sm }}>
-            <Chip label={t('add.onlyMine')} selected={!group} onPress={() => setGroupId(undefined)} />
+            <Chip
+              label={t('add.onlyMine')}
+              selected={!group}
+              onPress={() => {
+                setGroupId(undefined);
+                if (!curTouched) setCurState(i18n.currency);
+              }}
+            />
             {state.groups.map((g) => (
               <Chip
                 key={g.id}
@@ -332,6 +380,7 @@ export default function AddExpense() {
                 selected={groupId === g.id}
                 onPress={() => {
                   setGroupId(g.id);
+                  if (!curTouched) setCurState(defaultCur(g));
                   setPaidBy(undefined);
                   setParticipants(undefined);
                   setMode(g.weights ? 'weights' : 'equal');
@@ -413,7 +462,7 @@ export default function AddExpense() {
               <Button
                 label={t('ticket.addItem')}
                 variant="secondary"
-                onPress={() => setItems((list) => [...list, { key: `${Date.now()}-${list.length}`, name: '', amount: '', who: me ? [me] : [] }])}
+                onPress={() => setItems((list) => [...list, { key: `${Date.now()}-${list.length}`, name: '', amount: '', who: effectiveParticipants.length ? effectiveParticipants : allIds }])}
               />
               {itemsLeft < 0 ? (
                 <Text style={{ color: colors.warning }}>{t('ticket.over', { amount: moneyIn(-itemsLeft, cur) })}</Text>
@@ -469,9 +518,16 @@ export default function AddExpense() {
                   <Muted style={{ width: 90, textAlign: 'right' }}>{shares?.[m.id] !== undefined ? moneyIn(shares[m.id], base) : ''}</Muted>
                 </Row>
               ))}
-              {mode === 'exact' && exactLeft !== 0 ? (
-                <Text style={{ color: colors.warning }}>
-                  {exactLeft > 0 ? t('split.remaining', { amount: moneyIn(exactLeft, cur) }) : t('split.over', { amount: moneyIn(-exactLeft, cur) })}
+              {/* Lo que falta por repartir, al momento mientras se escribe. */}
+              {mode === 'exact' ? (
+                <Text accessibilityLiveRegion="polite" style={{ color: exactLeft === 0 && entered > 0 ? colors.success : colors.warning, fontSize: 16, fontWeight: '700' }}>
+                  {entered <= 0
+                    ? t('fixa.typeTotalFirst')
+                    : exactLeft === 0
+                      ? `✓ ${t('fixa.allAssigned')}`
+                      : exactLeft > 0
+                        ? t('split.remaining', { amount: moneyIn(exactLeft, cur) })
+                        : t('split.over', { amount: moneyIn(-exactLeft, cur) })}
                 </Text>
               ) : null}
             </View>
@@ -488,7 +544,7 @@ export default function AddExpense() {
       <Button label={editing ? t('common.save') : t('add.addButton')} disabled={!valid} onPress={save} />
       {/* Un gasto tuyo (p. ej. la cena que pagaste) se puede convertir en una mesa de «Paga tu parte». */}
       {editing && !editing.groupId && !groupId ? (
-        <Button label={t('misc.splitQr')} variant="secondary" onPress={() => router.push({ pathname: '/mesa-nueva', params: { expenseId: editing.id } })} />
+        <Button label={`🍽️ ${t('mesa.title')}`} variant="secondary" onPress={() => router.push({ pathname: '/mesa-nueva', params: { expenseId: editing.id } })} />
       ) : null}
       {editing ? (
         <Button
