@@ -3,10 +3,11 @@ import * as Linking from 'expo-linking';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 
+import { parseAmount } from '@/domain/money';
 import { findMoneyBack, recoveredTotal, type MoneyBack } from '@/domain/moneyback';
 import { useI18n, type TKey } from '@/i18n';
 import { useStore } from '@/store/store';
-import { Button, Card, Empty, Muted, Row, Screen } from '@/ui/components';
+import { Button, Card, Empty, Input, Muted, Row, Screen } from '@/ui/components';
 import { colors, space } from '@/ui/theme';
 
 const EMOJI: Record<MoneyBack['kind'], string> = { double: '⚠️', priceUp: '📈', newSub: '🔔', returnWindow: '↩️', flight: '✈️', warranty: '🛡️' };
@@ -21,13 +22,18 @@ export default function Devuelve() {
   const i18n = useI18n();
   const { t, money, date } = i18n;
   const [note, setNote] = useState<string | null>(null);
+  // Vuelo: cuánto te han pagado de verdad (lo escribe la persona; no nos lo inventamos).
+  const [paidFor, setPaidFor] = useState<string | null>(null);
+  const [paidText, setPaidText] = useState('');
   const items = findMoneyBack(state);
   const saved = recoveredTotal(state);
   const day = (iso?: string) => (iso ? date(`${iso}T12:00:00`, { day: 'numeric', month: 'long', year: 'numeric' }) : '');
   const search = (q: string) => Linking.openURL(`https://www.google.com/search?q=${encodeURIComponent(q)}`).catch(() => {});
 
   function text(m: MoneyBack): { title: string; body: string } {
-    const v = { merchant: m.merchant, amount: money(m.amount), date: day(m.until), before: money(m.before ?? 0), now: money(m.now ?? 0), monthly: money(Math.round(m.amount / 12)) };
+    const v = { merchant: m.merchant, amount: money(m.amount), date: day(m.until), before: money(m.before ?? 0), now: money(m.now ?? 0), monthly: money(m.now ?? Math.round(m.amount / 12)) };
+    // Un primer cobro grande (anual): sin «al mes» ni «al año» inventados.
+    if (m.kind === 'newSub' && m.yearly) return { title: t('back.newSubTitle', v), body: t('misc.newSubYearText', v) };
     return { title: t(`back.${m.kind}Title` as TKey, v), body: t(`back.${m.kind}Text` as TKey, v) };
   }
 
@@ -86,7 +92,21 @@ export default function Devuelve() {
             {m.kind === 'flight' ? (
               <>
                 <Button label={t('back.howClaim')} onPress={() => search(t('back.searchFlight', { merchant: m.merchant }))} />
-                <Button label={t('back.flightPaid')} variant="secondary" onPress={() => recovered(m, 25000)} />
+                {paidFor === m.id ? (
+                  <>
+                    <Input label={t('misc.flightHowMuch')} keyboardType="decimal-pad" placeholder={money(0)} value={paidText} onChangeText={setPaidText} />
+                    <Button
+                      label={t('common.save')}
+                      onPress={() => {
+                        recovered(m, parseAmount(paidText) ?? 0);
+                        setPaidFor(null);
+                        setPaidText('');
+                      }}
+                    />
+                  </>
+                ) : (
+                  <Button label={t('back.flightPaid')} variant="secondary" onPress={() => setPaidFor(m.id)} />
+                )}
               </>
             ) : null}
             <Button label={m.kind === 'warranty' ? t('back.hide') : t('back.notIssue')} variant="ghost" onPress={() => dismiss(m)} />

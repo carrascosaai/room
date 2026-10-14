@@ -5,7 +5,7 @@ import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 
-import { downloadBackup, signOut, uploadBackup } from '@/auth/auth';
+import { deleteAccount, downloadBackup, signOut, uploadBackup } from '@/auth/auth';
 import { makeBackup, readBackup } from '@/domain/backup';
 import { totalBudget } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
@@ -350,6 +350,21 @@ export default function Settings() {
                 await signOut().catch(() => {});
                 dispatch({ type: 'setAccount', account: undefined });
               }}
+            />
+            <Button
+              label={t('auth.deleteAccount')}
+              variant="danger"
+              onPress={() =>
+                confirm(t('auth.deleteConfirm'), t('common.cancel'), t('common.delete'), async () => {
+                  try {
+                    await deleteAccount();
+                    dispatch({ type: 'setAccount', account: undefined });
+                    setAccountMessage(t('auth.deleted'));
+                  } catch {
+                    setAccountMessage(t('auth.deleteError'));
+                  }
+                })
+              }
             />
           </>
         ) : (

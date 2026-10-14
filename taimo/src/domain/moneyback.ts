@@ -22,6 +22,8 @@ export interface MoneyBack {
   /** Precio antes y ahora (subidas). */
   before?: Cents;
   now?: Cents;
+  /** Suscripción nueva que parece anual (un cobro grande): no se multiplica por 12. */
+  yearly?: boolean;
 }
 
 export interface MoneyBackState {
@@ -53,33 +55,65 @@ const RETURN_DAYS: [string[], number][] = [
   [['shein', 'aliexpress', 'temu', 'vinted', 'ebay'], 14],
 ];
 
-/** Tiendas donde lo normal es comprar aparatos con garantía (en España, 3 años por ley desde 2022). */
-const WARRANTY_SHOPS = ['mediamarkt', 'media markt', 'worten', 'pccomponentes', 'apple', 'fnac', 'el corte ingles', 'amazon', 'samsung', 'xiaomi', 'conforama', 'leroy merlin', 'ikea', 'carrefour', 'boulanger', 'saturn', 'currys', 'best buy'];
+/**
+ * Tiendas de aparatos electrónicos (en España, 3 años de garantía por ley desde
+ * 2022). Solo de electrónica: en una tienda de todo no sabemos qué se compró.
+ */
+const WARRANTY_SHOPS = ['mediamarkt', 'media markt', 'worten', 'pccomponentes', 'apple store', 'apple com', 'fnac', 'samsung', 'xiaomi', 'boulanger', 'darty', 'saturn', 'currys', 'best buy', 'phone house', 'k tuin'];
 const WARRANTY_YEARS = 3;
+/** Como mucho las garantías de las compras más recientes (si no, la lista no se acaba). */
+const WARRANTY_MAX = 3;
 
 /** Aerolíneas: si el vuelo llegó con más de 3 h de retraso o se canceló, la ley europea (CE 261/2004) da hasta 600 €. */
-const AIRLINES = ['ryanair', 'vueling', 'iberia', 'easyjet', 'air europa', 'volotea', 'binter', 'lufthansa', 'tap air', 'klm', 'air france', 'wizz', 'transavia', 'eurowings', 'british airways', 'ita airways', 'norwegian', 'level', 'iberia express', 'swiss', 'brussels airlines', 'aegean', 'turkish airlines'];
+const AIRLINES = ['ryanair', 'vueling', 'iberia', 'easyjet', 'air europa', 'volotea', 'binter', 'lufthansa', 'tap air', 'tap portugal', 'klm', 'air france', 'wizz', 'wizzair', 'transavia', 'eurowings', 'british airways', 'ita airways', 'norwegian', 'flylevel', 'level com', 'iberia express', 'swiss air', 'swiss international', 'brussels airlines', 'aegean', 'turkish airlines'];
+/** Nombres de aerolínea que también son palabras corrientes («Level Gym», «Swiss Bank»): solo si es el nombre entero. */
+const AIRLINES_EXACT = ['level', 'swiss'];
 const FLIGHT_MAX = 60000;
-/** En España se puede reclamar hasta 5 años después. */
+/** En España se puede reclamar hasta 5 años después, pero solo avisamos de vuelos del último año… */
 const FLIGHT_YEARS = 5;
+const FLIGHT_RECENT_DAYS = 365;
+/** …y de unos pocos, los más recientes. */
+const FLIGHT_MAX_ITEMS = 3;
 
-const has = (key: string, words: string[]) => words.some((w) => ` ${key} `.includes(` ${w.trim()} `) || key.startsWith(w.trim()));
+/** Cobros repetidos: lo normal en transporte (metro, bus, parking) y ocio (entradas) no es un error. */
+const DOUBLE_SKIP = new Set(['transporte', 'ocio']);
+/** Dos cobros iguales separados por más de esto ya son dos compras. */
+const DOUBLE_WINDOW_MS = 10 * 60_000;
+
+/** Facturas que cambian cada mes (luz, gas, agua, teléfono): que suban no es una subida de precio. */
+const VARIABLE_BILLS = ['iberdrola', 'endesa', 'naturgy', 'holaluz', 'repsol', 'totalenergies', 'total energies', 'edp', 'octopus', 'factor energia', 'lucera', 'som energia', 'canal de isabel', 'aguas', 'agua', 'aigues', 'gas natural', 'luz', 'electricidad', 'energia', 'energy'];
+
+/** Más que esto en el primer cobro: seguramente es un pago anual, no mensual. */
+const YEARLY_FROM = 3000;
+
+/** Palabra entera (o varias seguidas): «cos» no casa con «cosmetics», ni «swiss» con «swissotel». */
+const has = (key: string, words: string[]) => words.some((w) => ` ${key} `.includes(` ${w.trim()} `));
 
 function returnDays(key: string): number | null {
   for (const [shops, days] of RETURN_DAYS) if (has(key, shops)) return days;
   return null;
 }
 
-/** Cobros repetidos: mismo comercio, mismo importe y mismo día (y no es un café que repites). */
+/** ¿Lleva la hora de verdad del cobro? Solo los que se apuntan solos (Apple Pay, aviso del banco); a mano o del extracto, solo el día. */
+const hasTime = (e: Expense) => (e.source === 'applepay' || e.source === 'notificacion') && e.date.length > 10;
+
+/**
+ * Cobros repetidos: mismo comercio, mismo importe y mismo día; y si sabemos la
+ * hora, con menos de 10 minutos entre uno y otro (dos cafés por la mañana y por
+ * la tarde son dos compras).
+ */
 function doubles(expenses: Expense[], since: number): MoneyBack[] {
-  const seen = new Map<string, Expense>();
+  const seen = new Map<string, Expense[]>();
   const out: MoneyBack[] = [];
-  const sorted = [...expenses].filter((e) => !e.groupId && e.amount >= 1000 && new Date(e.date).getTime() >= since).sort((a, b) => a.date.localeCompare(b.date));
+  const sorted = [...expenses]
+    .filter((e) => !e.groupId && e.amount >= 1000 && !DOUBLE_SKIP.has(e.category) && new Date(e.date).getTime() >= since)
+    .sort((a, b) => a.date.localeCompare(b.date));
   for (const e of sorted) {
     const key = `${normalizeMerchant(e.merchant)}|${e.amount}|${e.date.slice(0, 10)}`;
-    const first = seen.get(key);
-    if (first) out.push({ id: `double-${e.id}`, kind: 'double', merchant: e.merchant, amount: e.amount, expenseId: e.id });
-    else seen.set(key, e);
+    const before = seen.get(key) ?? [];
+    const twin = before.find((f) => !hasTime(e) || !hasTime(f) || Math.abs(new Date(e.date).getTime() - new Date(f.date).getTime()) <= DOUBLE_WINDOW_MS);
+    if (twin) out.push({ id: `double-${e.id}`, kind: 'double', merchant: e.merchant, amount: e.amount, expenseId: e.id });
+    seen.set(key, [...before, e]);
   }
   return out;
 }
@@ -90,12 +124,15 @@ function subscriptionAlerts(expenses: Expense[], today: Date): MoneyBack[] {
   const personal = expenses.filter((e) => !e.groupId && e.amount > 0);
   for (const sub of detectSubscriptions(personal, today)) {
     const key = normalizeMerchant(sub.merchant);
+    // Luz, agua, teléfono…: cambian cada mes, no es una subida.
+    if (sub.category === 'casa' || has(key, VARIABLE_BILLS)) continue;
     const charges = personal.filter((e) => normalizeMerchant(e.merchant) === key).sort((a, b) => a.date.localeCompare(b.date));
     const last = charges[charges.length - 1];
     const before = charges.slice(0, -1).map((e) => e.amount);
     const prev = before[before.length - 1];
     if (prev && last.amount - prev >= 50 && last.amount > prev * 1.03) {
-      out.push({ id: `up-${key}-${last.amount}`, kind: 'priceUp', merchant: last.merchant, amount: (last.amount - prev) * 12, expenseId: last.id, before: prev, now: last.amount });
+      // Id por comercio (no por importe): si dices «está bien», no vuelve a salir con cada céntimo.
+      out.push({ id: `up-${key}`, kind: 'priceUp', merchant: last.merchant, amount: (last.amount - prev) * 12, expenseId: last.id, before: prev, now: last.amount });
     }
   }
   // Primer cargo de algo que parece una suscripción, en los últimos 10 días.
@@ -109,21 +146,30 @@ function subscriptionAlerts(expenses: Expense[], today: Date): MoneyBack[] {
     if (list.length !== 1) continue;
     const e = list[0];
     if (e.category !== 'suscripciones' || new Date(e.date).getTime() < recent) continue;
-    out.push({ id: `new-${k}`, kind: 'newSub', merchant: e.merchant, amount: e.amount * 12, expenseId: e.id });
+    // Un primer cobro grande suele ser anual: no se multiplica por 12.
+    const yearly = e.amount > YEARLY_FROM;
+    out.push({ id: `new-${k}`, kind: 'newSub', merchant: e.merchant, amount: yearly ? e.amount : e.amount * 12, now: e.amount, expenseId: e.id, ...(yearly ? { yearly } : {}) });
   }
   return out;
 }
 
+function isAirline(key: string): boolean {
+  return has(key, AIRLINES) || AIRLINES_EXACT.includes(key);
+}
+
 function purchases(expenses: Expense[], today: Date): MoneyBack[] {
   const out: MoneyBack[] = [];
+  const flights: MoneyBack[] = [];
+  const warranties: MoneyBack[] = [];
   const t = isoDay(today);
+  const recentFlight = isoDay(new Date(today.getTime() - FLIGHT_RECENT_DAYS * DAY));
   for (const e of expenses) {
     if (e.groupId || e.amount <= 0) continue;
     const key = normalizeMerchant(e.merchant);
     const day = e.date.slice(0, 10);
-    if (has(key, AIRLINES) && e.category !== 'comer') {
+    if (isAirline(key) && e.category !== 'comer' && e.category !== 'deporte' && e.category !== 'super') {
       const until = addYears(day, FLIGHT_YEARS);
-      if (until >= t) out.push({ id: `flight-${e.id}`, kind: 'flight', merchant: e.merchant, amount: FLIGHT_MAX, expenseId: e.id, until });
+      if (until >= t && day >= recentFlight) flights.push({ id: `flight-${e.id}`, kind: 'flight', merchant: e.merchant, amount: FLIGHT_MAX, expenseId: e.id, until });
       continue;
     }
     if (e.category !== 'compras' && e.category !== 'casa' && e.category !== 'deporte') continue;
@@ -134,12 +180,14 @@ function purchases(expenses: Expense[], today: Date): MoneyBack[] {
       const left = Math.round((new Date(`${until}T12:00:00`).getTime() - new Date(`${t}T12:00:00`).getTime()) / DAY);
       if (left >= 0 && left <= Math.min(7, days)) out.push({ id: `return-${e.id}`, kind: 'returnWindow', merchant: e.merchant, amount: e.amount, expenseId: e.id, until });
     }
-    if (has(key, WARRANTY_SHOPS) && e.amount >= 5000) {
+    if (e.category === 'compras' && has(key, WARRANTY_SHOPS) && e.amount >= 5000) {
       const until = addYears(day, WARRANTY_YEARS);
-      if (until >= t) out.push({ id: `warranty-${e.id}`, kind: 'warranty', merchant: e.merchant, amount: e.amount, expenseId: e.id, until });
+      if (until >= t) warranties.push({ id: `warranty-${e.id}`, kind: 'warranty', merchant: e.merchant, amount: e.amount, expenseId: e.id, until });
     }
   }
-  return out;
+  // Lo más reciente primero (la fecha límite más lejana) y solo unos pocos.
+  const newest = (a: MoneyBack, b: MoneyBack) => (b.until ?? '').localeCompare(a.until ?? '');
+  return [...out, ...flights.sort(newest).slice(0, FLIGHT_MAX_ITEMS), ...warranties.sort(newest).slice(0, WARRANTY_MAX)];
 }
 
 const URGENCY: Record<MoneyBackKind, number> = { double: 0, returnWindow: 1, newSub: 2, priceUp: 3, flight: 4, warranty: 5 };

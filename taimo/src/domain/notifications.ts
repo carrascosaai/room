@@ -27,6 +27,8 @@ const WALLETS = new Set(rules.wallets);
 const DENY = new Set(rules.deny);
 const PURCHASE = new RegExp(rules.purchase, 'iu');
 const NOT_PURCHASE = new RegExp(rules.notPurchase, 'iu');
+/** Mensajes de dinero que te llega o que no son un pago: el aviso de «Paga tu parte», códigos… */
+const NOT_SPENT = /mesa-pagado|te he pagado|i['’]ve paid you|paid you|\bc[oó]digo\b|\bcode\b|\bpin\b|\botp\b|contraseña/iu;
 const BALANCE = new RegExp(`(${rules.balance})[^\\d]{0,25}$`, 'iu');
 const CARD_HINT = new RegExp(rules.cardHint, 'iu');
 const AMBIGUOUS: Record<string, string[]> = rules.ambiguous;
@@ -173,9 +175,21 @@ export function parsePastedPayment(text: string, opts: ParseOptions = {}): { amo
   if (!clean) return null;
   const strict = parsePaymentNotification({ package: 'clipboard', title: '', text: clean, postedAt: new Date().toISOString() }, { ...opts, defaultMerchant: '' });
   if (strict) return { amount: strict.amount, currency: strict.currency, merchant: strict.merchant || null, category: strict.category };
+  // Sin pinta de pago: si es dinero que te llega (devolución, Bizum recibido, nómina…) o un código, no es un gasto.
+  if (NOT_PURCHASE.test(clean) || NOT_SPENT.test(clean)) return null;
   const money = findMoney(clean, opts.home);
   if (!money) return null;
   const [first, ...rest] = clean.split('\n');
   const merchant = extractMerchant(first, rest.join('\n'), money.raw);
   return { amount: money.amount, currency: money.currency, merchant, category: merchant ? categorize(merchant, opts.learned ?? {}) : undefined };
+}
+
+/**
+ * El comercio tal como se pegó, pero sin gritar: «BURGER KING» → «Burger King».
+ * Si ya viene con mayúsculas y minúsculas («McDonald's»), se deja igual.
+ */
+export function tidyMerchant(name: string): string {
+  const s = name.trim();
+  if (/\p{Ll}/u.test(s) || !/\p{Lu}/u.test(s)) return s;
+  return s.toLowerCase().replace(/(^|[\s\-/&.(])(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase());
 }

@@ -7,12 +7,13 @@ import { canRecognizeText, recognizeText } from 'taimo-capture';
 
 import { parseAmount } from '@/domain/money';
 import { parseReceipt } from '@/domain/receipt';
-import { billLink, billTotal, findClaimInText, MAX_ITEMS, MAX_PEOPLE, sharedPart, type TableBill } from '@/domain/table';
+import { billLink, billTotal, compactBill, findClaimInText, MAX_ITEMS, MAX_PEOPLE, previewTableClaim, sharedPart, type TableBill } from '@/domain/table';
 import type { Expense } from '@/domain/types';
 import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
 import { webBase } from '@/sync/api';
 import { BigButton, Button, Card, H2, Input, Muted, Row, Screen } from '@/ui/components';
+import { tableClaimMessage } from '@/ui/messages';
 import { QrCode } from '@/ui/QrCode';
 import { colors, radius, space } from '@/ui/theme';
 
@@ -44,7 +45,8 @@ function Setup({ source, onCreate, currency, t, i18n }: {
   t: ReturnType<typeof useI18n>['t'];
   i18n: ReturnType<typeof useI18n>;
 }) {
-  const { state } = useStore();
+  const { state, dispatch } = useStore();
+  const [payer, setPayer] = useState(state.profile.name ?? '');
   const [place, setPlace] = useState(source?.merchant ?? '');
   const [items, setItems] = useState<Item[]>([]);
   const [totalText, setTotalText] = useState(source ? String((source.original?.amount ?? source.amount) / 100) : '');
@@ -61,11 +63,12 @@ function Setup({ source, onCreate, currency, t, i18n }: {
   const itemsSum = parsed.reduce((s, it) => s + it.price, 0);
   const typedTotal = parseAmount(totalText) ?? 0;
   const total = typedTotal || itemsSum;
-  const bill: TableBill = {
+  const payerName = (state.profile.name || payer).trim().slice(0, 40);
+  const draft: TableBill = {
     id: newId().slice(-10),
     m: place.trim().slice(0, 48),
     c: currency,
-    t: state.profile.name || t('common.me'),
+    t: payerName,
     p: pay,
     i: parsed.map((it) => [it.name || '·', it.price]),
     s: parsed.flatMap((it, i) => (it.shared ? [i] : [])),
@@ -73,7 +76,10 @@ function Setup({ source, onCreate, currency, t, i18n }: {
     x: total - itemsSum,
     d: new Date().toISOString().slice(0, 10),
   };
-  const valid = total > 0 && billTotal(bill) === total;
+  // Nombres cortos para que el QR se lea bien; si ni así cabe, hay que quitar platos.
+  const { bill, fits } = compactBill(webBase(), draft);
+  const valid = total > 0 && billTotal(bill) === total && itemsSum <= total;
+  const ready = valid && fits && canBePaid && !!payerName;
 
   async function scan() {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
@@ -90,6 +96,7 @@ function Setup({ source, onCreate, currency, t, i18n }: {
   }
 
   function create() {
+    if (!state.profile.name && payerName) dispatch({ type: 'setProfileName', name: payerName });
     const expense: Expense = source ?? {
       id: newId(),
       amount: total,
@@ -110,6 +117,7 @@ function Setup({ source, onCreate, currency, t, i18n }: {
 
       {canRecognizeText && Platform.OS !== 'web' ? <BigButton emoji="📷" label={scanning ? '…' : t('mesa.scan')} onPress={scan} /> : null}
 
+      {!state.profile.name ? <Input label={t('misc.payerName')} placeholder={t('mesa.whoPlaceholder')} value={payer} onChangeText={setPayer} autoCapitalize="words" /> : null}
       <Input label={t('mesa.place')} placeholder="La Tagliatella" value={place} onChangeText={setPlace} />
       <Input label={t('mesa.totalLabel')} keyboardType="decimal-pad" placeholder={money(0)} value={totalText} onChangeText={setTotalText} />
 
@@ -140,6 +148,8 @@ function Setup({ source, onCreate, currency, t, i18n }: {
                 onPress={() => update(i, { shared: !it.shared })}
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: it.shared }}
+                // El lector ya dice si está marcado: sin leer los emojis.
+                accessibilityLabel={t('mesa.sharedToggle')}
                 style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: space.sm, borderRadius: radius.md, backgroundColor: it.shared ? colors.primarySoft : 'transparent' }}
               >
                 <Text style={{ color: colors.text, fontSize: 16 }}>{it.shared ? '✅' : '⬜'} 🤝 {t('mesa.sharedToggle')}</Text>
@@ -172,8 +182,15 @@ function Setup({ source, onCreate, currency, t, i18n }: {
         </Card>
       ) : null}
 
-      <BigButton emoji="🍽️" label={t('mesa.create')} onPress={() => (valid && canBePaid ? create() : undefined)} variant={valid && canBePaid ? 'primary' : 'secondary'} />
-      {!valid ? <Muted style={{ textAlign: 'center' }}>{t('mesa.needTotal')}</Muted> : null}
+      {!fits ? (
+        <Card style={{ borderColor: colors.warning }}>
+          <Text style={{ color: colors.text, fontSize: 17 }}>⚠️ {t('misc.tooManyItems')}</Text>
+        </Card>
+      ) : null}
+
+      <BigButton emoji="🍽️" label={t('mesa.create')} onPress={() => (ready ? create() : undefined)} variant={ready ? 'primary' : 'secondary'} />
+      {!valid && itemsSum <= total ? <Muted style={{ textAlign: 'center' }}>{t('mesa.needTotal')}</Muted> : null}
+      {valid && !payerName ? <Muted style={{ textAlign: 'center' }}>{t('misc.payerNeeded')}</Muted> : null}
     </Screen>
   );
 }
@@ -194,8 +211,10 @@ function Stepper({ label, onPress, a11y }: { label: string; onPress: () => void;
 /** El QR de la mesa y quién ha pagado ya. */
 function TableQr({ groupId }: { groupId: string }) {
   const { state, dispatch } = useStore();
-  const { t, moneyIn } = useI18n();
+  const i18n = useI18n();
+  const { t, moneyIn } = i18n;
   const [note, setNote] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const group = state.groups.find((g) => g.id === groupId)!;
   const bill = group.table!;
   const money = (c: number) => moneyIn(c, group.currency ?? bill.c);
@@ -218,6 +237,7 @@ function TableQr({ groupId }: { groupId: string }) {
   async function paste() {
     const text = await Clipboard.getStringAsync().catch(() => '');
     const claim = findClaimInText(text ?? '');
+    setWarning(null);
     if (!claim) {
       setNote(t('mesa.pasteNone'));
       return;
@@ -226,15 +246,18 @@ function TableQr({ groupId }: { groupId: string }) {
       setNote(t('mesa.claimUnknown'));
       return;
     }
+    // Se mira antes qué se va a apuntar de verdad, para decirlo bien.
+    const msg = tableClaimMessage(i18n, claim, previewTableClaim(state, claim), group.currency ?? bill.c);
     dispatch({ type: 'tableClaim', claim });
-    setNote(t('mesa.claimAdded', { name: claim.w, amount: money(claim.a) }));
+    setNote(msg.text);
+    setWarning(msg.warning);
   }
 
   return (
     <Screen>
       <Stack.Screen options={{ headerShown: true, title: bill.m || t('mesa.title') }} />
       <Text style={{ color: colors.text, fontSize: 22, fontWeight: '800', textAlign: 'center' }}>{t('mesa.showQr')}</Text>
-      <QrCode value={link} size={300} />
+      <QrCode value={link} size={360} />
       <Muted style={{ textAlign: 'center', fontSize: 16 }}>{t('mesa.total', { amount: money(total) })} · {t('mesa.peopleCount', { count: bill.n })}</Muted>
       <BigButton emoji="📤" label={t('mesa.sendLink')} variant="secondary" onPress={share} />
 
@@ -253,6 +276,7 @@ function TableQr({ groupId }: { groupId: string }) {
         </Row>
         <Button label={t('mesa.paste')} variant="secondary" onPress={paste} />
         {note ? <Text style={{ color: colors.text, fontSize: 16, textAlign: 'center' }}>{note}</Text> : null}
+        {warning ? <Text style={{ color: colors.danger, fontSize: 16, textAlign: 'center' }}>⚠️ {warning}</Text> : null}
       </Card>
       <Button label={t('common.back')} variant="ghost" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
     </Screen>

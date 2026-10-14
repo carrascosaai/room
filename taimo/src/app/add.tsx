@@ -10,7 +10,7 @@ import { categorize } from '@/domain/categorize';
 import { exactRemainder, POT, splitByItems, splitByWeights, splitEqually } from '@/domain/groups';
 import { currencyDecimals, parseAmount } from '@/domain/money';
 import { parseReceipt } from '@/domain/receipt';
-import { parsePastedPayment } from '@/domain/notifications';
+import { parsePastedPayment, tidyMerchant } from '@/domain/notifications';
 import * as Clipboard from 'expo-clipboard';
 import type { CategoryId, Cents, Expense, ReceiptItem, SplitMode } from '@/domain/types';
 import { convert, rateBetween } from '@/fx/fx';
@@ -136,7 +136,7 @@ export default function AddExpense() {
       return;
     }
     setAmountText(fmtIn(r.total, r.currency));
-    if (r.merchant) setMerchant(r.merchant.charAt(0) + r.merchant.slice(1).toLowerCase());
+    if (r.merchant) setMerchant(tidyMerchant(r.merchant));
     if (r.currency !== cur) setCur(r.currency);
     if (r.date) setDay(new Date(r.date).toDateString());
     if (group && r.items.length > 1) {
@@ -155,7 +155,7 @@ export default function AddExpense() {
       return;
     }
     setAmountText(fmtIn(r.amount, r.currency));
-    if (r.merchant) setMerchant(r.merchant.charAt(0) + r.merchant.slice(1).toLowerCase());
+    if (r.merchant) setMerchant(tidyMerchant(r.merchant));
     if (r.currency !== cur) setCur(r.currency);
     setScanMessage(t('paste.done'));
   }
@@ -486,6 +486,10 @@ export default function AddExpense() {
       ) : null}
       {missing ? <Muted style={{ textAlign: 'center' }}>{missing}</Muted> : null}
       <Button label={editing ? t('common.save') : t('add.addButton')} disabled={!valid} onPress={save} />
+      {/* Un gasto tuyo (p. ej. la cena que pagaste) se puede convertir en una mesa de «Paga tu parte». */}
+      {editing && !editing.groupId && !groupId ? (
+        <Button label={t('misc.splitQr')} variant="secondary" onPress={() => router.push({ pathname: '/mesa-nueva', params: { expenseId: editing.id } })} />
+      ) : null}
       {editing ? (
         <Button
           label={t('add.deleteButton')}

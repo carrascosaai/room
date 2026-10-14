@@ -128,6 +128,7 @@ function PlasticCard() {
   const { state, dispatch } = useStore();
   const { t } = useI18n();
   const on = !!state.profile.nightly;
+  const [denied, setDenied] = useState(false);
   return (
     <Card style={{ borderColor: colors.warning }}>
       <Row style={{ alignItems: 'flex-start' }}>
@@ -143,12 +144,18 @@ function PlasticCard() {
           accessibilityLabel={t('nightly.toggle')}
           value={on}
           onValueChange={async (v) => {
-            if (v) await ensureNotificationPermission().catch(() => false);
+            // Sin permiso para avisos el recordatorio no llegaría: no se enciende.
+            if (v && !(await ensureNotificationPermission().catch(() => false))) {
+              setDenied(true);
+              return;
+            }
+            setDenied(false);
             dispatch({ type: 'setNightly', on: v });
           }}
           trackColor={{ true: colors.primary, false: colors.border }}
         />
       </Row>
+      {denied ? <Text style={{ color: colors.danger, fontSize: 16, lineHeight: 22 }}>{t('misc.nightlyDenied')}</Text> : null}
     </Card>
   );
 }

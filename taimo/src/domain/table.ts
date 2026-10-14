@@ -1,4 +1,5 @@
 import { decodeJson, encodeJson, linkData } from './b64';
+import { currencyDecimals } from './money';
 import type { AppState, Cents, Expense, Group, PaymentInfo, Settlement } from './types';
 
 /**
@@ -38,10 +39,19 @@ export interface TableClaim {
   w: string;
   i: number[];
   a: Cents;
+  /**
+   * Id al azar de quien paga (se crea en su móvil). Así «Ana» y «ana», o dos
+   * nombres en otro alfabeto, no se pisan. Los avisos antiguos no lo traen.
+   */
+  u?: string;
 }
 
 export const MAX_ITEMS = 40;
 export const MAX_PEOPLE = 30;
+/** Nombre de cada plato dentro del QR (más largo, el QR no se lee bien). */
+export const ITEM_NAME_MAX = 16;
+/** Largo máximo del enlace para que el QR se lea bien desde una pantalla. */
+export const MAX_LINK = 900;
 
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const cents = (v: unknown) => (Number.isInteger(v) && Math.abs(v as number) <= 100_000_000 ? (v as number) : null);
@@ -59,7 +69,9 @@ function sharedPool(bill: TableBill): Cents {
 
 /** Lo que le toca a cada uno de lo compartido. */
 export function sharedPart(bill: TableBill): Cents {
-  return Math.round(sharedPool(bill) / Math.max(1, bill.n));
+  // Redondeado a lo que tiene la moneda (en yenes no hay céntimos).
+  const step = 10 ** Math.max(0, 2 - currencyDecimals(bill.c));
+  return Math.round(sharedPool(bill) / Math.max(1, bill.n) / step) * step;
 }
 
 /** Lo que paga quien elige `picked`: sus productos más su parte de lo compartido. */
@@ -116,7 +128,8 @@ export function decodeClaim(input: string): TableClaim | null {
     const a = cents(raw?.a);
     if (!b || !w || a === null || a <= 0) return null;
     const i = Array.isArray(raw.i) ? raw.i.filter((x): x is number => Number.isInteger(x) && x >= 0 && x < MAX_ITEMS).slice(0, MAX_ITEMS) : [];
-    return { b, w, i, a };
+    const u = typeof raw.u === 'string' && /^[A-Za-z0-9_-]{4,24}$/.test(raw.u) ? raw.u : '';
+    return { b, w, i, a, ...(u ? { u } : {}) };
   } catch {
     return null;
   }
@@ -132,6 +145,30 @@ export function claimLink(base: string, claim: TableClaim): string {
   return `${base.replace(/\/+$/, '')}/mesa-pagado#${encodeClaim(claim)}`;
 }
 
+/**
+ * Deja la mesa lista para un QR que se lea bien: acorta los nombres de los
+ * platos y, si aun así el enlace es muy largo, prueba con nombres más cortos.
+ * `fits` es false si ni así cabe (hay que quitar platos o dejar solo el total).
+ */
+export function compactBill(base: string, bill: TableBill): { bill: TableBill; link: string; fits: boolean } {
+  let out = bill;
+  let link = billLink(base, bill);
+  for (const max of [ITEM_NAME_MAX, 12, 8]) {
+    out = { ...bill, i: bill.i.map(([name, a]) => [name.trim().slice(0, max).trim() || '·', a] as [string, Cents]) };
+    link = billLink(base, out);
+    if (link.length <= MAX_LINK) return { bill: out, link, fits: true };
+  }
+  return { bill: out, link, fits: false };
+}
+
+/** Id al azar para quien paga su parte (letras y números, sin datos personales). */
+export function newDinerId(random: () => number = Math.random): string {
+  const abc = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let id = '';
+  for (let k = 0; k < 10; k++) id += abc[Math.floor(random() * abc.length)];
+  return id;
+}
+
 /** Busca un enlace de aviso dentro de un mensaje pegado («Ya te he pagado… https://…/mesa-pagado#…»). */
 export function findClaimInText(text: string): TableClaim | null {
   const m = text.match(/mesa-pagado[^\s#]*#([A-Za-z0-9_-]+)/) ?? text.match(/mesa-pagado\?d=([A-Za-z0-9_-]+)/);
@@ -143,7 +180,8 @@ const slug = (name: string) =>
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
+    // Cualquier alfabeto (cirílico, griego…), no solo el latino.
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 24) || 'x';
 
@@ -187,7 +225,8 @@ export function applyTableClaim(state: AppState, claim: TableClaim, now = new Da
   const expense = group && state.expenses.find((e) => e.groupId === group.id);
   if (!group || !me || !expense) return { state, status: 'unknown' };
   const at = now.toISOString();
-  const memberId = `mesa-${slug(claim.w)}`;
+  // Con id de comensal no se pisan dos personas con el mismo nombre; los avisos antiguos usan el nombre.
+  const memberId = claim.u ? `mesa-u-${claim.u}` : `mesa-${slug(claim.w)}`;
   const existing = group.members.find((m) => m.id === memberId);
   const shares = { ...(expense.shares ?? {}) };
   const othersBefore = Object.entries(shares).reduce((s, [id, a]) => (id === me.id || id === memberId ? s : s + a), 0);
@@ -197,7 +236,10 @@ export function applyTableClaim(state: AppState, claim: TableClaim, now = new Da
   shares[memberId] = amount;
   shares[me.id] = left - amount;
   const settlement: Settlement = { id: `${group.id}-${memberId}`, groupId: group.id, from: memberId, to: me.id, amount, date: at, updatedAt: at };
-  const members = existing ? group.members : [...group.members, { id: memberId, name: claim.w, updatedAt: at }];
+  // Con id de comensal, si corrige su nombre al reenviar el aviso, se actualiza.
+  const members = existing
+    ? group.members.map((m) => (claim.u && m.id === memberId && m.name !== claim.w ? { ...m, name: claim.w, updatedAt: at } : m))
+    : [...group.members, { id: memberId, name: claim.w, updatedAt: at }];
   return {
     status: existing ? 'updated' : 'added',
     amount,
@@ -207,5 +249,33 @@ export function applyTableClaim(state: AppState, claim: TableClaim, now = new Da
       expenses: state.expenses.map((e) => (e.id === expense.id ? { ...e, shares, splitMode: 'exact', updatedAt: at } : e)),
       settlements: [...state.settlements.filter((s) => s.id !== settlement.id), settlement],
     },
+  };
+}
+
+/**
+ * Lo que pasará al apuntar un aviso, para contárselo bien a quien pagó: lo que
+ * se apunta de verdad (puede ser menos si ya no quedaba tanto) y si el importe
+ * no cuadra con lo que eligió en la mesa.
+ */
+export function previewTableClaim(state: AppState, claim: TableClaim, now = new Date()): {
+  status: ClaimResult['status'];
+  /** Lo que queda apuntado como pagado. */
+  amount: Cents;
+  /** Lo que le tocaba según lo que marcó (null si la mesa no está en este móvil). */
+  expected: Cents | null;
+  /** Avisos para quien pagó. */
+  capped: boolean;
+  mismatch: boolean;
+} {
+  const r = applyTableClaim(state, claim, now);
+  const bill = state.groups.find((g) => g.table?.id === claim.b)?.table;
+  const expected = bill ? claimAmount(bill, claim.i) : null;
+  const amount = r.status === 'added' || r.status === 'updated' ? r.amount : 0;
+  return {
+    status: r.status,
+    amount,
+    expected,
+    capped: (r.status === 'added' || r.status === 'updated') && amount < claim.a,
+    mismatch: expected !== null && expected !== claim.a,
   };
 }

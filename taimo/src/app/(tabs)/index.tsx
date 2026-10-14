@@ -103,12 +103,17 @@ export default function Home() {
   function oneTip() {
     if (tripCandidates(state).length) return <TripSuggestion />;
 
-    // Dinero que podría ser tuyo (cobros repetidos, subidas, plazos para devolver…).
+    // Dinero que es tuyo: solo si corre prisa (un cobro repetido, o un plazo para devolver que acaba en 3 días).
+    // Lo demás (subidas, suscripciones…) se ve en «Dinero que es tuyo» y no tapa los avisos del presupuesto.
     const urgent = urgentMoneyBack(findMoneyBack(state, today));
-    if (urgent.length) {
+    const doubles = urgent.filter((m) => m.kind === 'double');
+    const soon = urgent.filter((m) => m.kind === 'returnWindow' && m.until && daysUntil(m.until, today) <= 3);
+    if (doubles.length || soon.length) {
       return (
         <Tip emoji="💸" color={colors.warning} onPress={() => router.push('/devuelve')}>
-          {t('back.homeTip', { amount: money(urgent.reduce((s, m) => s + m.amount, 0)) })}
+          {doubles.length
+            ? t('back.homeTip', { amount: money(doubles.reduce((s, m) => s + m.amount, 0)) })
+            : t('misc.homeCheck', { count: soon.length })}
         </Tip>
       );
     }
@@ -161,6 +166,12 @@ export default function Home() {
     }
     return null;
   }
+}
+
+/** Días que faltan hasta una fecha YYYY-MM-DD (0 = hoy). */
+function daysUntil(iso: string, today: Date): number {
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  return Math.round((new Date(`${iso}T00:00:00`).getTime() - start) / 86_400_000);
 }
 
 function Tip({ emoji, color, children, onPress }: { emoji: string; color: string; children: React.ReactNode; onPress?: () => void }) {

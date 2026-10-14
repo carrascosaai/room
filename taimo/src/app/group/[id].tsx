@@ -288,7 +288,8 @@ export default function GroupDetail() {
 
       {group.kind === 'flat' || group.kind === 'couple' ? <RecurringCard group={group} /> : null}
 
-      {syncConfigured ? (
+      {/* Las mesas de «Paga tu parte» no se comparten ni se editan aquí: van por el QR. */}
+      {syncConfigured && !group.table ? (
         <Card>
           <H2>{group.remote ? t('group.sharedTitle') : t('group.shareTitle')}</H2>
           <Muted>{group.remote ? t('group.sharedText', { code: group.remote.code }) : t('group.shareText')}</Muted>
@@ -306,25 +307,27 @@ export default function GroupDetail() {
         )}
       </Card>
 
-      <Card>
-        <H2>{t('group.members')}</H2>
-        <Row>
-          <View style={{ flex: 1 }}>
-            <Input placeholder={t('group.addMemberPlaceholder')} value={newMember} onChangeText={setNewMember} />
-          </View>
-          <Button
-            label={t('group.addMember')}
-            variant="secondary"
-            disabled={!newMember.trim()}
-            onPress={() => {
-              dispatch({ type: 'addMember', groupId: group.id, member: { id: newId(), name: newMember.trim() } });
-              setNewMember('');
-            }}
-          />
-        </Row>
-      </Card>
+      {!group.table ? (
+        <Card>
+          <H2>{t('group.members')}</H2>
+          <Row>
+            <View style={{ flex: 1 }}>
+              <Input placeholder={t('group.addMemberPlaceholder')} value={newMember} onChangeText={setNewMember} />
+            </View>
+            <Button
+              label={t('group.addMember')}
+              variant="secondary"
+              disabled={!newMember.trim()}
+              onPress={() => {
+                dispatch({ type: 'addMember', groupId: group.id, member: { id: newId(), name: newMember.trim() } });
+                setNewMember('');
+              }}
+            />
+          </Row>
+        </Card>
+      ) : null}
 
-      {editing ? (
+      {group.table ? null : editing ? (
         <GroupSettings group={group} onDone={() => setEditing(false)} />
       ) : (
         <Button label={`⚙️ ${t('gx.settings')}`} variant="secondary" onPress={() => setEditing(true)} />

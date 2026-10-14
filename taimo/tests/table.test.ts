@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { applyTableClaim, billLink, billTotal, claimAmount, claimLink, decodeBill, decodeClaim, findClaimInText, startTable, type TableBill } from '../src/domain/table';
+import { applyTableClaim, billLink, billTotal, claimAmount, claimLink, compactBill, decodeBill, decodeClaim, findClaimInText, ITEM_NAME_MAX, MAX_LINK, newDinerId, previewTableClaim, sharedPart, startTable, type TableBill } from '../src/domain/table';
 import { initialState } from '../src/store/store';
 import { myShare } from '../src/domain/budget';
 import type { AppState } from '../src/domain/types';
@@ -87,5 +87,66 @@ describe('Paga tu parte', () => {
     const r = applyTableClaim(state, { b: 't1', w: 'Ana', i: [], a: 9000 });
     expect(r.status === 'added' && r.amount).toBe(5000);
     expect(applyTableClaim(r.state, { b: 't1', w: 'Luis', i: [], a: 100 }).status).toBe('nothingLeft');
+  });
+
+  const table = (amount = 10200, id = 't2') => {
+    const st: AppState = { ...initialState, expenses: [{ id: 'e1', amount, merchant: 'Bar', category: 'comer', date: '2026-10-14T21:00:00.000Z', source: 'manual' }] };
+    return startTable(st, 'e1', { ...bill, id }, 'me')!.state;
+  };
+
+  it('el id de comensal: dos «Ana» no se pisan y reenviar el mismo aviso no duplica', () => {
+    let state = table();
+    state = applyTableClaim(state, { b: 't2', w: 'Ana', i: [2], a: 3650, u: 'aaaa1111' }).state;
+    state = applyTableClaim(state, { b: 't2', w: 'ana', i: [3], a: 3250, u: 'bbbb2222' }).state;
+    const again = applyTableClaim(state, { b: 't2', w: 'Ana M.', i: [2], a: 3650, u: 'aaaa1111' });
+    expect(again.status).toBe('updated');
+    state = again.state;
+    expect(state.groups[0].members.map((m) => m.name)).toEqual(['·', 'Ana M.', 'ana']);
+    expect(state.settlements).toHaveLength(2);
+    expect(new Set(state.settlements.map((x) => x.id)).size).toBe(2);
+  });
+
+  it('nombres en otro alfabeto (avisos antiguos sin id) tampoco se pisan', () => {
+    let state = table();
+    state = applyTableClaim(state, { b: 't2', w: 'Анна', i: [], a: 1000 }).state;
+    state = applyTableClaim(state, { b: 't2', w: 'Μαρία', i: [], a: 1000 }).state;
+    expect(state.groups[0].members).toHaveLength(3);
+  });
+
+  it('el id viaja en el aviso; los avisos antiguos siguen valiendo', () => {
+    const u = newDinerId();
+    expect(u).toMatch(/^[a-z0-9]{10}$/);
+    const claim = { b: bill.id, w: 'Lucía', i: [2], a: 3650, u };
+    expect(decodeClaim(claimLink('https://x', claim))).toEqual(claim);
+    expect(decodeClaim(claimLink('https://x', { b: bill.id, w: 'Lucía', i: [2], a: 3650 }))).toEqual({ b: bill.id, w: 'Lucía', i: [2], a: 3650 });
+    const enc = (o: object) => 'https://x/mesa-pagado#' + Buffer.from(JSON.stringify(o)).toString('base64url');
+    expect(decodeClaim(enc({ ...claim, u: '<script>' }))).toEqual({ b: bill.id, w: 'Lucía', i: [2], a: 3650 });
+  });
+
+  it('a quien pagó se le dice lo que se apunta de verdad y si no cuadra', () => {
+    let state = table(5000);
+    // Lo que eligió (Solomillo + compartido) son 3650, pero dice 9000 y solo quedan 5000.
+    let p = previewTableClaim(state, { b: 't2', w: 'Ana', i: [2], a: 9000, u: 'aaaa1111' });
+    expect(p).toMatchObject({ status: 'added', amount: 5000, expected: 3650, capped: true, mismatch: true });
+    state = applyTableClaim(state, { b: 't2', w: 'Ana', i: [2], a: 9000, u: 'aaaa1111' }).state;
+    p = previewTableClaim(state, { b: 't2', w: 'Luis', i: [3], a: 3250, u: 'cccc3333' });
+    expect(p).toMatchObject({ status: 'nothingLeft', amount: 0 });
+    expect(previewTableClaim(table(), { b: 't2', w: 'Eva', i: [2], a: 3650 })).toMatchObject({ status: 'added', amount: 3650, capped: false, mismatch: false });
+  });
+
+  it('lo compartido se redondea a lo que tiene la moneda', () => {
+    expect(sharedPart({ ...bill, c: 'JPY', i: [['寿司', 100000]], s: [0], x: 0, n: 3 })).toBe(33300);
+    expect(sharedPart({ ...bill, c: 'EUR', i: [['Vino', 1000]], s: [0], x: 0, n: 3 })).toBe(333);
+  });
+
+  it('el QR siempre se puede leer: nombres cortos y, si no cabe, se avisa', () => {
+    const long = 'Ensalada de la casa con queso de cabra'.slice(0, 30);
+    const make = (n: number): TableBill => ({ ...bill, i: Array.from({ length: n }, (_, k) => [`${long} ${k}`, 1000 + k] as [string, number]), s: undefined, x: undefined });
+    const ok = compactBill('https://room.example/taimo', make(20));
+    expect(ok.fits).toBe(true);
+    expect(ok.link.length).toBeLessThanOrEqual(MAX_LINK);
+    expect(ok.bill.i.every(([name]) => name.length <= ITEM_NAME_MAX)).toBe(true);
+    expect(decodeBill(ok.link)?.i).toHaveLength(20);
+    expect(compactBill('https://room.example/taimo', make(40)).fits).toBe(false);
   });
 });

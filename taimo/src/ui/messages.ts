@@ -52,3 +52,24 @@ export function paymentLines(payment: PaymentInfo | undefined, amount: Cents, cu
   if (payment.revolut && handle(payment.revolut)) lines.push(`Revolut: https://revolut.me/${handle(payment.revolut)}`);
   return lines;
 }
+
+/**
+ * Lo que se le dice a quien pagó al llegar un aviso de «Paga tu parte»: lo que
+ * de verdad queda apuntado y, si algo no cuadra, un aviso para que lo mire.
+ */
+export function tableClaimMessage(
+  i18n: I18n,
+  claim: { w: string; a: Cents },
+  preview: { status: string; amount: Cents; expected: Cents | null; capped: boolean; mismatch: boolean },
+  currency: string,
+): { text: string; warning: string | null } {
+  const money = (c: Cents) => i18n.moneyIn(c, currency);
+  if (preview.status === 'unknown') return { text: i18n.t('mesa.claimUnknown'), warning: null };
+  if (preview.status === 'nothingLeft') return { text: i18n.t('misc.claimNothingLeft', { name: claim.w, amount: money(claim.a) }), warning: null };
+  const text = i18n.t('mesa.claimAdded', { name: claim.w, amount: money(preview.amount) });
+  if (preview.capped) return { text, warning: i18n.t('misc.claimCapped', { name: claim.w, claimed: money(claim.a), amount: money(preview.amount) }) };
+  if (preview.mismatch && preview.expected !== null) {
+    return { text, warning: i18n.t('misc.claimMismatch', { name: claim.w, claimed: money(claim.a), expected: money(preview.expected) }) };
+  }
+  return { text, warning: null };
+}

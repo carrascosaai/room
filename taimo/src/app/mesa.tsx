@@ -3,7 +3,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Platform, Pressable, Share, Text, View } from 'react-native';
 
-import { claimAmount, claimLink, decodeBill, sharedPart } from '@/domain/table';
+import { claimAmount, claimLink, decodeBill, newDinerId, sharedPart } from '@/domain/table';
 import { useI18n } from '@/i18n';
 import { webBase } from '@/sync/api';
 import { BigButton, Button, Card, Empty, H2, Input, Muted, Row, Screen } from '@/ui/components';
@@ -16,6 +16,26 @@ function whatsappNumber(bizum?: string): string | null {
   if (/^[67]\d{8}$/.test(d)) return `34${d}`;
   if (/^\+\d{8,15}$/.test(d)) return d.slice(1);
   return null;
+}
+
+/**
+ * Id al azar de este comensal para esta mesa. En el navegador se guarda, así
+ * que si vuelve a mandar el aviso se actualiza en vez de salir dos veces.
+ */
+function dinerId(billId: string): string {
+  const key = `taimo-mesa-${billId}`;
+  try {
+    if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem(key);
+      if (saved && /^[a-z0-9]{4,24}$/.test(saved)) return saved;
+      const id = newDinerId();
+      localStorage.setItem(key, id);
+      return id;
+    }
+  } catch {
+    // Sin almacenamiento (modo privado…): vale un id nuevo.
+  }
+  return newDinerId();
 }
 
 /**
@@ -32,6 +52,7 @@ export default function Mesa() {
   const [name, setName] = useState('');
   const [picked, setPicked] = useState<number[]>([]);
   const [sent, setSent] = useState(false);
+  const diner = useMemo(() => (bill ? dinerId(bill.id) : ''), [bill?.id]);
 
   if (!bill) {
     return (
@@ -52,7 +73,7 @@ export default function Mesa() {
   const ready = name.trim().length > 0 && amount > 0;
 
   async function notify() {
-    const link = claimLink(webBase(), { b: bill!.id, w: name.trim(), i: picked, a: amount });
+    const link = claimLink(webBase(), { b: bill!.id, w: name.trim(), i: picked, a: amount, u: diner });
     const message = t('mesa.sentMessage', { name: bill!.t, amount: money(amount), place: bill!.m || '🍽️', link });
     setSent(true);
     if (Platform.OS !== 'web') {
@@ -86,6 +107,8 @@ export default function Mesa() {
                 onPress={() => toggle(i)}
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: picked.includes(i) }}
+                // El lector ya dice si está marcado: sin leer «✅»/«⬜».
+                accessibilityLabel={`${item}, ${money(price)}`}
                 style={{
                   minHeight: 56,
                   borderRadius: radius.md,
@@ -125,6 +148,14 @@ export default function Mesa() {
       {amount > 0 ? (
         <View style={{ gap: space.sm }}>
           <H2>{t('mesa.pay', { name: bill.t })}</H2>
+          {/* Aviso contra estafas: el enlace lo puede haber hecho cualquiera (igual que en «pay»). */}
+          <View
+            accessibilityRole="alert"
+            style={{ flexDirection: 'row', gap: space.sm, alignItems: 'flex-start', backgroundColor: colors.surface, borderColor: colors.warning, borderWidth: 1.5, borderRadius: radius.md, padding: space.md }}
+          >
+            <Text style={{ fontSize: 20 }}>🛡️</Text>
+            <Text style={{ color: colors.text, fontSize: 17, lineHeight: 24, flex: 1 }}>{t('plink.verify', { name: bill.t })}</Text>
+          </View>
           <PayButtons name={bill.t} pay={bill.p} amount={amount} currency={bill.c} />
         </View>
       ) : null}

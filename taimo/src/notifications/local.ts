@@ -87,7 +87,7 @@ export async function scheduleWishReminder(wish: { id: string; name: string; amo
   const when = new Date(new Date(wish.createdAt).getTime() + 48 * 3_600_000);
   await Notifications.scheduleNotificationAsync({
     identifier: `taimo-wish-${wish.id}`,
-    content: { title: i18n.t('wish.notifTitle', { name: wish.name }), body: i18n.t('wish.notifBody', { amount: i18n.money(wish.amount) }), data: { url: 'taimo://wishlist' } },
+    content: { title: i18n.t('wish.notifTitle', { name: wish.name }), body: i18n.t('wish.notifBody', { amount: i18n.money(wish.amount) }), data: { url: '/wishlist' } },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
   });
 }
@@ -109,12 +109,33 @@ export async function scheduleNightlyReminder(on: boolean, i18n: I18n) {
   });
 }
 
-/** Al tocar un aviso con `data.url`, abre esa pantalla. */
+/**
+ * Al tocar un aviso con `data.url`, abre esa pantalla. También si la app estaba
+ * cerrada: el toque que la ha abierto se lee al arrancar.
+ */
 export function onNotificationOpen(open: (url: string) => void): () => void {
   if (Platform.OS === 'web') return () => {};
-  const sub = Notifications.addNotificationResponseReceivedListener((r) => {
+  let lastId: string | null = null;
+  const handle = (r: Notifications.NotificationResponse | null) => {
+    if (!r) return;
+    // El mismo toque puede llegar por las dos vías: solo se abre una vez.
+    const id = `${r.notification.request.identifier}|${r.notification.date}`;
+    if (id === lastId) return;
+    lastId = id;
     const url = r.notification.request.content.data?.url;
     if (typeof url === 'string' && url.startsWith('/')) open(url);
-  });
-  return () => sub.remove();
+  };
+  let active = true;
+  Notifications.getLastNotificationResponseAsync()
+    .then((r) => {
+      if (active) handle(r);
+      // Que no se vuelva a abrir la próxima vez que se monte.
+      return Notifications.clearLastNotificationResponseAsync();
+    })
+    .catch(() => {});
+  const sub = Notifications.addNotificationResponseReceivedListener(handle);
+  return () => {
+    active = false;
+    sub.remove();
+  };
 }
