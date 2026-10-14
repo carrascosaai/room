@@ -235,3 +235,58 @@ export function budgetCrossings(before: ShareState & Pick<AppState, 'budgets'>, 
   return alerts;
 }
 
+
+export interface MonthRecap {
+  /** Primer día del mes. */
+  month: Date;
+  spent: Cents;
+  previous: Cents;
+  count: number;
+  /** Cuántos se apuntaron solos (Wallet, notificaciones). */
+  auto: number;
+  top: { category: CategoryId; total: Cents } | null;
+  biggestDay: { date: Date; total: Cents } | null;
+  budget: Cents;
+  /** Tu parte de los gastos compartidos. */
+  shared: Cents;
+}
+
+/** El resumen de un mes ya terminado (o el actual), para verlo y compartirlo. */
+export function monthRecap(state: ShareState & Pick<AppState, 'budgets'>, month: Date): MonthRecap {
+  const home = homeOf(state);
+  const start = new Date(month.getFullYear(), month.getMonth(), 1);
+  const end = new Date(month.getFullYear(), month.getMonth() + 1, 1);
+  const prevStart = new Date(month.getFullYear(), month.getMonth() - 1, 1);
+  let spent = 0;
+  let previous = 0;
+  let count = 0;
+  let auto = 0;
+  let shared = 0;
+  const byCat = new Map<CategoryId, Cents>();
+  const byDay = new Map<number, Cents>();
+  for (const e of state.expenses) {
+    const t = new Date(e.date);
+    const share = myShare(e, state.groups, home);
+    if (t >= prevStart && t < start) previous += share;
+    if (t < start || t >= end || share <= 0) continue;
+    spent += share;
+    count++;
+    if (e.source === 'applepay' || e.source === 'notificacion') auto++;
+    if (e.groupId) shared += share;
+    byCat.set(e.category, (byCat.get(e.category) ?? 0) + share);
+    byDay.set(t.getDate(), (byDay.get(t.getDate()) ?? 0) + share);
+  }
+  const topEntry = [...byCat.entries()].sort((a, b) => b[1] - a[1])[0];
+  const dayEntry = [...byDay.entries()].sort((a, b) => b[1] - a[1])[0];
+  return {
+    month: start,
+    spent,
+    previous,
+    count,
+    auto,
+    top: topEntry ? { category: topEntry[0], total: topEntry[1] } : null,
+    biggestDay: dayEntry ? { date: new Date(start.getFullYear(), start.getMonth(), dayEntry[0]), total: dayEntry[1] } : null,
+    budget: Object.values(state.budgets).reduce<number>((s, v) => s + (v ?? 0), 0),
+    shared,
+  };
+}

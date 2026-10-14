@@ -23,6 +23,7 @@ export default function Home() {
   );
   const recent = state.expenses.slice(0, 8);
   const forecast = monthForecast(state, today);
+  const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
   const trend = categoryTrend(state, today);
   const goals = state.goals ?? [];
   const openGoal = goals.find((g) => g.saved < g.target);
@@ -38,6 +39,13 @@ export default function Home() {
         </View>
 
         <QuickAdd />
+        {today.getDate() <= 7 && state.expenses.some((e) => monthKey(e.date) === monthKey(lastMonth)) ? (
+          <Button
+            label={t('recap.open', { month: date(lastMonth, { month: 'long' }) })}
+            variant="secondary"
+            onPress={() => router.push({ pathname: '/recap', params: { month: monthKey(lastMonth) } })}
+          />
+        ) : null}
         <TripSuggestion />
 
         <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>

@@ -402,6 +402,20 @@ const gl: Translation = {
     one: "Á viaxe",
     dismiss: "Son meus",
   },
+  recap: {
+    title: "O teu {month} en Taimo",
+    open: "✨ Ver o resumo de {month}",
+    spent: "Gastaches {amount}",
+    vs: "{change} respecto ao mes anterior",
+    top: "Onde máis: {category} ({amount})",
+    day: "O teu día máis caro: {date} ({amount})",
+    under: "{amount} por baixo do orzamento 🎉",
+    over: "Pasácheste {amount} do orzamento",
+    shared: "A túa parte dos gastos compartidos: {amount}",
+    count: "Gastos apuntados: {count}",
+    auto: "Apuntados sós ⚡: {count}",
+    share: "Compartir o resumo",
+  },
   csv: { date: 'Data', merchant: 'Comercio', category: 'Categoría', total: 'Importe total', myShare: 'A miña parte', group: 'Grupo', source: 'Orixe', note: 'Nota' },
 };
 

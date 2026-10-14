@@ -402,6 +402,20 @@ const cs: Translation = {
     one: "Do cesty",
     dismiss: "Jsou moje",
   },
+  recap: {
+    title: "Tvůj {month} v Taimo",
+    open: "✨ Zobrazit shrnutí: {month}",
+    spent: "Utratil jsi {amount}",
+    vs: "{change} oproti minulému měsíci",
+    top: "Nejvíc: {category} ({amount})",
+    day: "Nejdražší den: {date} ({amount})",
+    under: "{amount} pod rozpočtem 🎉",
+    over: "{amount} nad rozpočet",
+    shared: "Tvůj podíl na společných výdajích: {amount}",
+    count: "Zapsané výdaje: {count}",
+    auto: "Zapsané samy ⚡: {count}",
+    share: "Sdílet shrnutí",
+  },
   csv: { date: 'Datum', merchant: 'Obchodník', category: 'Kategorie', total: 'Celková částka', myShare: 'Můj podíl', group: 'Skupina', source: 'Zdroj', note: 'Poznámka' },
 };
 

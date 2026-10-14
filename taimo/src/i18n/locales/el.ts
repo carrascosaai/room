@@ -402,6 +402,20 @@ const el: Translation = {
     one: "Στο ταξίδι",
     dismiss: "Είναι δικά μου",
   },
+  recap: {
+    title: "Ο {month} σου στο Taimo",
+    open: "✨ Δες τη σύνοψη του {month}",
+    spent: "Ξόδεψες {amount}",
+    vs: "{change} σε σχέση με τον προηγούμενο μήνα",
+    top: "Περισσότερα σε: {category} ({amount})",
+    day: "Η πιο ακριβή μέρα: {date} ({amount})",
+    under: "{amount} κάτω από τον προϋπολογισμό 🎉",
+    over: "{amount} πάνω από τον προϋπολογισμό",
+    shared: "Το μερίδιό σου στα κοινά έξοδα: {amount}",
+    count: "Έξοδα που καταγράφηκαν: {count}",
+    auto: "Καταγράφηκαν μόνα τους ⚡: {count}",
+    share: "Κοινοποίηση σύνοψης",
+  },
   csv: { date: 'Ημερομηνία', merchant: 'Έμπορος', category: 'Κατηγορία', total: 'Συνολικό ποσό', myShare: 'Το μερίδιό μου', group: 'Ομάδα', source: 'Προέλευση', note: 'Σημείωση' },
 };
 

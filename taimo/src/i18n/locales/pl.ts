@@ -402,6 +402,20 @@ const pl: Translation = {
     one: "Do podróży",
     dismiss: "Są moje",
   },
+  recap: {
+    title: "Twój {month} w Taimo",
+    open: "✨ Zobacz podsumowanie: {month}",
+    spent: "Wydałeś {amount}",
+    vs: "{change} względem poprzedniego miesiąca",
+    top: "Najwięcej: {category} ({amount})",
+    day: "Najdroższy dzień: {date} ({amount})",
+    under: "{amount} poniżej budżetu 🎉",
+    over: "{amount} ponad budżet",
+    shared: "Twoja część wspólnych wydatków: {amount}",
+    count: "Zapisane wydatki: {count}",
+    auto: "Zapisane automatycznie ⚡: {count}",
+    share: "Udostępnij podsumowanie",
+  },
   csv: { date: 'Data', merchant: 'Sprzedawca', category: 'Kategoria', total: 'Kwota całkowita', myShare: 'Moja część', group: 'Grupa', source: 'Źródło', note: 'Notatka' },
 };
 

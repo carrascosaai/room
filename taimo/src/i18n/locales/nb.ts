@@ -402,6 +402,20 @@ const nb: Translation = {
     one: "Til turen",
     dismiss: "De er mine",
   },
+  recap: {
+    title: "Din {month} i Taimo",
+    open: "✨ Se oppsummeringen for {month}",
+    spent: "Du brukte {amount}",
+    vs: "{change} mot måneden før",
+    top: "Mest på: {category} ({amount})",
+    day: "Dyreste dag: {date} ({amount})",
+    under: "{amount} under budsjett 🎉",
+    over: "{amount} over budsjett",
+    shared: "Din del av delte utgifter: {amount}",
+    count: "Førte utgifter: {count}",
+    auto: "Ført automatisk ⚡: {count}",
+    share: "Del oppsummeringen",
+  },
   csv: { date: 'Dato', merchant: 'Brukersted', category: 'Kategori', total: 'Totalbeløp', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Notat' },
 };
 

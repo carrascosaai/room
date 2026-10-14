@@ -80,6 +80,7 @@ function RootStack() {
         <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
         <Stack.Screen name="join" options={{ presentation: 'modal' }} />
         <Stack.Screen name="language" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="recap" options={{ headerShown: true, title: '' }} />
         <Stack.Screen name="goals" options={{ headerShown: true, title: t('goal.title') }} />
         <Stack.Screen name="history" options={{ headerShown: true, title: t('history.title') }} />
         <Stack.Screen name="converter" options={{ headerShown: true, title: t('fx.title') }} />

@@ -402,6 +402,20 @@ const ro: Translation = {
     one: "În călătorie",
     dismiss: "Sunt ale mele",
   },
+  recap: {
+    title: "{month} tău în Taimo",
+    open: "✨ Vezi rezumatul pentru {month}",
+    spent: "Ai cheltuit {amount}",
+    vs: "{change} față de luna dinainte",
+    top: "Cel mai mult: {category} ({amount})",
+    day: "Cea mai scumpă zi: {date} ({amount})",
+    under: "{amount} sub buget 🎉",
+    over: "{amount} peste buget",
+    shared: "Partea ta din cheltuielile comune: {amount}",
+    count: "Cheltuieli înregistrate: {count}",
+    auto: "Înregistrate singure ⚡: {count}",
+    share: "Distribuie rezumatul",
+  },
   csv: { date: 'Dată', merchant: 'Comerciant', category: 'Categorie', total: 'Sumă totală', myShare: 'Partea mea', group: 'Grup', source: 'Sursă', note: 'Notă' },
 };
 

@@ -402,6 +402,20 @@ const fi: Translation = {
     one: "Matkaan",
     dismiss: "Ne ovat minun",
   },
+  recap: {
+    title: "{month} Taimossa",
+    open: "✨ Katso kuukauden {month} yhteenveto",
+    spent: "Käytit {amount}",
+    vs: "{change} edelliseen kuukauteen verrattuna",
+    top: "Eniten: {category} ({amount})",
+    day: "Kallein päivä: {date} ({amount})",
+    under: "{amount} alle budjetin 🎉",
+    over: "{amount} yli budjetin",
+    shared: "Osuutesi jaetuista kuluista: {amount}",
+    count: "Kirjatut kulut: {count}",
+    auto: "Kirjattu itsestään ⚡: {count}",
+    share: "Jaa yhteenveto",
+  },
   csv: { date: 'Päivämäärä', merchant: 'Kauppias', category: 'Luokka', total: 'Kokonaissumma', myShare: 'Oma osuus', group: 'Ryhmä', source: 'Lähde', note: 'Huomautus' },
 };
 

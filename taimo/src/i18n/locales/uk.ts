@@ -402,6 +402,20 @@ const uk: Translation = {
     one: "До подорожі",
     dismiss: "Це мої",
   },
+  recap: {
+    title: "Твій {month} у Taimo",
+    open: "✨ Переглянути підсумок за {month}",
+    spent: "Ти витратив {amount}",
+    vs: "{change} порівняно з попереднім місяцем",
+    top: "Найбільше: {category} ({amount})",
+    day: "Найдорожчий день: {date} ({amount})",
+    under: "На {amount} менше за бюджет 🎉",
+    over: "Бюджет перевищено на {amount}",
+    shared: "Твоя частка спільних витрат: {amount}",
+    count: "Записано витрат: {count}",
+    auto: "Записано самостійно ⚡: {count}",
+    share: "Поділитися підсумком",
+  },
   csv: { date: 'Дата', merchant: 'Продавець', category: 'Категорія', total: 'Загальна сума', myShare: 'Моя частка', group: 'Група', source: 'Джерело', note: 'Примітка' },
 };
 

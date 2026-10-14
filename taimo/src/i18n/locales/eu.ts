@@ -402,6 +402,20 @@ const eu: Translation = {
     one: "Bidaiara",
     dismiss: "Nireak dira",
   },
+  recap: {
+    title: "Zure {month} Taimon",
+    open: "✨ Ikusi {month}(e)ko laburpena",
+    spent: "{amount} gastatu zenituen",
+    vs: "{change} aurreko hilabetearekin alderatuta",
+    top: "Gehien: {category} ({amount})",
+    day: "Egunik garestiena: {date} ({amount})",
+    under: "Aurrekontutik {amount} behera 🎉",
+    over: "Aurrekontua {amount} gainditu zenuen",
+    shared: "Zure zatia gastu partekatuetan: {amount}",
+    count: "Apuntatutako gastuak: {count}",
+    auto: "Bakarrik apuntatuak ⚡: {count}",
+    share: "Partekatu laburpena",
+  },
   csv: { date: 'Data', merchant: 'Denda', category: 'Kategoria', total: 'Zenbateko osoa', myShare: 'Nire zatia', group: 'Taldea', source: 'Jatorria', note: 'Oharra' },
 };
 

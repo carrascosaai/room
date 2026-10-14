@@ -402,6 +402,20 @@ const tr: Translation = {
     one: "Seyahate",
     dismiss: "Benim",
   },
+  recap: {
+    title: "Taimo'da {month}",
+    open: "✨ {month} özetini gör",
+    spent: "{amount} harcadın",
+    vs: "Önceki aya göre {change}",
+    top: "En çok: {category} ({amount})",
+    day: "En pahalı gün: {date} ({amount})",
+    under: "Bütçenin {amount} altında 🎉",
+    over: "Bütçeyi {amount} aştın",
+    shared: "Ortak harcamalardaki payın: {amount}",
+    count: "Kaydedilen harcama: {count}",
+    auto: "Kendiliğinden kaydedilen ⚡: {count}",
+    share: "Özetimi paylaş",
+  },
   csv: { date: 'Tarih', merchant: 'Satıcı', category: 'Kategori', total: 'Toplam tutar', myShare: 'Benim payım', group: 'Grup', source: 'Kaynak', note: 'Not' },
 };
 

@@ -402,6 +402,20 @@ const da: Translation = {
     one: "Til rejsen",
     dismiss: "De er mine",
   },
+  recap: {
+    title: "Din {month} i Taimo",
+    open: "✨ Se din opsummering af {month}",
+    spent: "Du brugte {amount}",
+    vs: "{change} i forhold til måneden før",
+    top: "Mest på: {category} ({amount})",
+    day: "Dyreste dag: {date} ({amount})",
+    under: "{amount} under budget 🎉",
+    over: "{amount} over budget",
+    shared: "Din del af delte udgifter: {amount}",
+    count: "Noterede udgifter: {count}",
+    auto: "Noteret automatisk ⚡: {count}",
+    share: "Del min opsummering",
+  },
   csv: { date: 'Dato', merchant: 'Forretning', category: 'Kategori', total: 'Samlet beløb', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Note' },
 };
 

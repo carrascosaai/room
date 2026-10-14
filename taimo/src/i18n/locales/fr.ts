@@ -402,6 +402,20 @@ const fr: Translation = {
     one: "Au voyage",
     dismiss: "C’est à moi",
   },
+  recap: {
+    title: "Ton {month} avec Taimo",
+    open: "✨ Voir ton bilan de {month}",
+    spent: "Tu as dépensé {amount}",
+    vs: "{change} par rapport au mois d’avant",
+    top: "Le plus : {category} ({amount})",
+    day: "Jour le plus cher : {date} ({amount})",
+    under: "{amount} sous le budget 🎉",
+    over: "{amount} au-dessus du budget",
+    shared: "Ta part des dépenses partagées : {amount}",
+    count: "Dépenses notées : {count}",
+    auto: "Notées automatiquement ⚡ : {count}",
+    share: "Partager mon bilan",
+  },
   csv: { date: 'Date', merchant: 'Commerçant', category: 'Catégorie', total: 'Montant total', myShare: 'Ma part', group: 'Groupe', source: 'Origine', note: 'Note' },
 };
 

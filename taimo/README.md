@@ -22,6 +22,8 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
   viaje y, con un toque, pasan a la moneda del viaje repartidos como reparte el grupo.
 - **Categorías en todo el mundo**: cadenas y palabras de muchos países e idiomas (Tesco, Walmart, Rewe, Магнит,
   セブンイレブン, «dinner», «Miete»…).
+- **Tu mes en Taimo**: resumen mensual para compartir (gasto, comparación, categoría y día más caro, presupuesto,
+  gastos compartidos y apuntados solos). Aparece en Inicio los primeros días del mes y en Estadísticas.
 - **Presupuesto automático**: «✨ Proponer según lo que gasto» pone en cada categoría la media de tus últimos meses
   (o extrapola este mes si aún no hay historial), redondeada hacia arriba.
 - **Avisos al 80 % y al 100 %** de cada categoría también con los pagos que se apuntan solos.

@@ -68,3 +68,20 @@ describe('copia de seguridad en archivo', () => {
     expect(reducer(initialState, { type: 'setLock', lock: true }).profile.lock).toBe(true);
   });
 });
+
+describe('resumen del mes', () => {
+  it('total, comparación, categoría y día más caro', async () => {
+    const { monthRecap } = await import('../src/domain/insights');
+    const exp = [
+      { ...e(new Date(2026, 8, 3), 3000, 'super'), source: 'applepay' as const },
+      e(new Date(2026, 8, 3), 2000, 'comer'),
+      e(new Date(2026, 8, 20), 1500, 'super'),
+      e(new Date(2026, 7, 10), 5000, 'ocio'),
+    ];
+    const r = monthRecap({ groups: [], budgets: { super: 10000 }, expenses: exp }, new Date(2026, 8, 15));
+    expect(r).toMatchObject({ spent: 6500, previous: 5000, count: 3, auto: 1, budget: 10000, shared: 0 });
+    expect(r.top).toEqual({ category: 'super', total: 4500 });
+    expect(r.biggestDay?.total).toBe(5000);
+    expect(r.biggestDay?.date.getDate()).toBe(3);
+  });
+});

@@ -402,6 +402,20 @@ const sv: Translation = {
     one: "Till resan",
     dismiss: "De är mina",
   },
+  recap: {
+    title: "Din {month} i Taimo",
+    open: "✨ Se din sammanfattning av {month}",
+    spent: "Du spenderade {amount}",
+    vs: "{change} jämfört med månaden innan",
+    top: "Mest på: {category} ({amount})",
+    day: "Dyraste dagen: {date} ({amount})",
+    under: "{amount} under budget 🎉",
+    over: "{amount} över budget",
+    shared: "Din del av delade utgifter: {amount}",
+    count: "Bokförda utgifter: {count}",
+    auto: "Bokförda automatiskt ⚡: {count}",
+    share: "Dela min sammanfattning",
+  },
   csv: { date: 'Datum', merchant: 'Handlare', category: 'Kategori', total: 'Totalbelopp', myShare: 'Min del', group: 'Grupp', source: 'Källa', note: 'Anteckning' },
 };
 

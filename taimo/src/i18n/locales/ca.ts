@@ -402,6 +402,20 @@ const ca: Translation = {
     one: "Al viatge",
     dismiss: "Són meves",
   },
+  recap: {
+    title: "El teu {month} a Taimo",
+    open: "✨ Veure el resum de {month}",
+    spent: "Vas gastar {amount}",
+    vs: "{change} respecte al mes anterior",
+    top: "On més: {category} ({amount})",
+    day: "El dia més car: {date} ({amount})",
+    under: "{amount} per sota del pressupost 🎉",
+    over: "Et vas passar {amount} del pressupost",
+    shared: "La teva part de les despeses compartides: {amount}",
+    count: "Despeses apuntades: {count}",
+    auto: "Apuntades soles ⚡: {count}",
+    share: "Compartir el resum",
+  },
   csv: { date: 'Data', merchant: 'Comerç', category: 'Categoria', total: 'Import total', myShare: 'La meva part', group: 'Grup', source: 'Origen', note: 'Nota' },
 };
 

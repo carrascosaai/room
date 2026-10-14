@@ -1,12 +1,14 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { monthKey } from '@/domain/budget';
 import { category } from '@/domain/categories';
 import { detectSubscriptions } from '@/domain/insights';
 import { changePct, periodStats, shiftAnchor, type Bucket, type Period, type Range } from '@/domain/stats';
 import { useI18n, type I18n, type TKey } from '@/i18n';
 import { useStore } from '@/store/store';
-import { Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen, Title } from '@/ui/components';
+import { Button, Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen, Title } from '@/ui/components';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { colors, radius, space } from '@/ui/theme';
 
@@ -218,6 +220,13 @@ export default function Stats() {
           </Text>
         ) : null}
         {avg ? <Muted>{avg}</Muted> : null}
+        {period === 'month' && stats.total > 0 ? (
+          <Button
+            label={t('recap.open', { month: i18n.date(stats.range.start, { month: 'long' }) })}
+            variant="secondary"
+            onPress={() => router.push({ pathname: '/recap', params: { month: monthKey(stats.range.start) } })}
+          />
+        ) : null}
 
         {stats.total > 0 ? (
           <>

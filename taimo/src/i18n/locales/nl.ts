@@ -402,6 +402,20 @@ const nl: Translation = {
     one: "Naar de reis",
     dismiss: "Zijn van mij",
   },
+  recap: {
+    title: "Jouw {month} in Taimo",
+    open: "✨ Bekijk je overzicht van {month}",
+    spent: "Je gaf {amount} uit",
+    vs: "{change} t.o.v. de maand ervoor",
+    top: "Het meest: {category} ({amount})",
+    day: "Duurste dag: {date} ({amount})",
+    under: "{amount} onder budget 🎉",
+    over: "{amount} over budget",
+    shared: "Jouw deel van gedeelde uitgaven: {amount}",
+    count: "Genoteerde uitgaven: {count}",
+    auto: "Vanzelf genoteerd ⚡: {count}",
+    share: "Deel mijn overzicht",
+  },
   csv: { date: 'Datum', merchant: 'Winkel', category: 'Categorie', total: 'Totaalbedrag', myShare: 'Mijn deel', group: 'Groep', source: 'Bron', note: 'Notitie' },
 };
 
