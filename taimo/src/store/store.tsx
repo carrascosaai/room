@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useS
 import { findDuplicate, type CapturePayload } from '@/domain/capture';
 import { normalizeMerchant } from '@/domain/categorize';
 import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
-import type { AppState, CategoryId, Cents, Expense, Group, Member, PaymentInfo, Settlement } from '@/domain/types';
+import type { AppState, CategoryId, Cents, Expense, Goal, Group, Member, PaymentInfo, Settlement } from '@/domain/types';
 
 const STORAGE_KEY = 'taimo:state:v1';
 
@@ -32,6 +32,9 @@ export type Action =
   | { type: 'completeOnboarding'; name: string; budgets: AppState['budgets']; currency?: string }
   | { type: 'setProfileName'; name: string }
   | { type: 'setPayment'; payment: PaymentInfo }
+  | { type: 'addGoal'; goal: Goal }
+  | { type: 'saveToGoal'; id: string; amount: Cents; leftoverMonth?: string }
+  | { type: 'deleteGoal'; id: string }
   | { type: 'setLanguage'; language: NonNullable<AppState['profile']['language']> }
   | { type: 'setCurrency'; currency: string }
   | { type: 'setAccount'; account: AppState['profile']['account'] }
@@ -74,6 +77,16 @@ export function reducer(state: AppState, action: Action): AppState {
       };
     case 'setProfileName':
       return { ...state, profile: { ...state.profile, name: action.name } };
+    case 'addGoal':
+      return { ...state, goals: [...(state.goals ?? []), action.goal] };
+    case 'saveToGoal':
+      return {
+        ...state,
+        goals: (state.goals ?? []).map((g) => (g.id === action.id ? { ...g, saved: Math.max(0, g.saved + action.amount) } : g)),
+        leftoverMonth: action.leftoverMonth ?? state.leftoverMonth,
+      };
+    case 'deleteGoal':
+      return { ...state, goals: (state.goals ?? []).filter((g) => g.id !== action.id) };
     case 'setPayment':
       return { ...state, profile: { ...state.profile, payment: action.payment } };
     case 'setLanguage':

@@ -1,17 +1,17 @@
 import { router } from 'expo-router';
 import { Platform, Pressable, Text, View } from 'react-native';
 
-import { categoryStatus, monthSummary } from '@/domain/budget';
+import { categoryStatus, monthKey, monthSummary } from '@/domain/budget';
 import { CATEGORIES, category } from '@/domain/categories';
-import { categoryTrend, monthForecast } from '@/domain/insights';
+import { categoryTrend, expectedLeftover, monthForecast } from '@/domain/insights';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
-import { Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen } from '@/ui/components';
+import { Button, Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen } from '@/ui/components';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { colors, radius, space } from '@/ui/theme';
 
 export default function Home() {
-  const { state } = useStore();
+  const { state, dispatch } = useStore();
   const { t, money, date } = useI18n();
   const today = new Date();
   const summary = monthSummary(state, today);
@@ -22,6 +22,9 @@ export default function Home() {
   const recent = state.expenses.slice(0, 8);
   const forecast = monthForecast(state, today);
   const trend = categoryTrend(state, today);
+  const goals = state.goals ?? [];
+  const openGoal = goals.find((g) => g.saved < g.target);
+  const leftover = state.leftoverMonth === monthKey(today) ? 0 : expectedLeftover(forecast);
   const hasAuto = state.expenses.some((e) => e.source === 'applepay' || e.source === 'notificacion');
 
   return (
@@ -82,6 +85,38 @@ export default function Home() {
             </Card>
           </Pressable>
         ) : null}
+
+        <Pressable onPress={() => router.push('/goals')} accessibilityRole="button">
+          <Card>
+            <Row>
+              <Text style={{ fontSize: 24 }}>🎯</Text>
+              <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16, flex: 1 }}>{t('goal.title')}</Text>
+              <Text style={{ color: colors.primary, fontSize: 22 }}>›</Text>
+            </Row>
+            {goals.length === 0 ? <Muted>{t('goal.hint')}</Muted> : null}
+            {goals.slice(0, 3).map((g) => (
+              <View key={g.id} style={{ gap: space.xs }}>
+                <Row style={{ justifyContent: 'space-between' }}>
+                  <Text style={{ color: colors.text }}>
+                    {g.emoji} {g.name}
+                  </Text>
+                  <Muted>{t('goal.progress', { saved: money(g.saved), target: money(g.target) })}</Muted>
+                </Row>
+                <ProgressBar progress={Math.min(1, g.saved / g.target)} color={colors.primary} />
+              </View>
+            ))}
+            {openGoal && leftover > 0 ? (
+              <View style={{ backgroundColor: colors.bg, borderRadius: radius.md, padding: space.md, gap: space.sm }}>
+                <Text style={{ color: colors.text }}>{t('goal.leftover', { amount: money(leftover), goal: openGoal.name })}</Text>
+                <Button
+                  label={t('goal.moveLeftover', { amount: money(leftover) })}
+                  variant="secondary"
+                  onPress={() => dispatch({ type: 'saveToGoal', id: openGoal.id, amount: leftover, leftoverMonth: monthKey(today) })}
+                />
+              </View>
+            ) : null}
+          </Card>
+        </Pressable>
 
         <Pressable onPress={() => router.push('/converter')} accessibilityRole="button">
           <Card>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { categoryTrend, detectSubscriptions, matchesSearch, monthForecast } from '../src/domain/insights';
+import { categoryTrend, detectSubscriptions, expectedLeftover, goalPerMonth, matchesSearch, monthForecast } from '../src/domain/insights';
+import { initialState, reducer } from '../src/store/store';
 import type { Expense } from '../src/domain/types';
 import { handle, paymentLines } from '../src/ui/messages';
 
@@ -109,5 +110,32 @@ describe('cómo te pagan', () => {
       'Revolut: https://revolut.me/fer',
     ]);
     expect(paymentLines(undefined, 100, 'EUR')).toEqual([]);
+  });
+});
+
+describe('metas de ahorro', () => {
+  const goal = { id: 'g', name: 'Japón', emoji: '✈️', target: 300000, saved: 60000, deadline: '2027-04-14', createdAt: '2026-10-01' };
+  it('reparte lo que falta entre los meses que quedan', () => {
+    expect(goalPerMonth(goal, today)).toBe(40000); // 2400 € en 6 meses
+    expect(goalPerMonth({ ...goal, deadline: undefined }, today)).toBeNull();
+    expect(goalPerMonth({ ...goal, saved: 300000 }, today)).toBeNull();
+  });
+
+  it('propone apartar lo que va a sobrar, redondeado', () => {
+    expect(expectedLeftover({ spent: 0, projected: 52340, budget: 64000 })).toBe(11500);
+    expect(expectedLeftover({ spent: 0, projected: 63500, budget: 64000 })).toBe(0);
+    expect(expectedLeftover({ spent: 0, projected: 100, budget: 0 })).toBe(0);
+    expect(expectedLeftover(null)).toBe(0);
+  });
+
+  it('el reductor aparta, saca sin bajar de cero y recuerda el mes', () => {
+    let s = reducer(initialState, { type: 'addGoal', goal: { ...goal, saved: 0 } });
+    s = reducer(s, { type: 'saveToGoal', id: 'g', amount: 5000, leftoverMonth: '2026-10' });
+    expect(s.goals![0].saved).toBe(5000);
+    expect(s.leftoverMonth).toBe('2026-10');
+    s = reducer(s, { type: 'saveToGoal', id: 'g', amount: -9000 });
+    expect(s.goals![0].saved).toBe(0);
+    s = reducer(s, { type: 'deleteGoal', id: 'g' });
+    expect(s.goals).toEqual([]);
   });
 });

@@ -154,4 +154,19 @@ export interface AppState {
   fx?: { date: string; fetchedAt: string; rates: Record<string, number>; source: 'online' | 'fallback' };
   /** Monedas usadas hace poco (para tenerlas a mano en viajes). */
   recentCurrencies?: string[];
+  /** Metas de ahorro (no cuentan como gasto). */
+  goals?: Goal[];
+  /** Mes (YYYY-MM) en el que ya apartaste lo que te sobraba, para no volver a proponerlo. */
+  leftoverMonth?: string;
+}
+
+export interface Goal {
+  id: string;
+  name: string;
+  emoji: string;
+  target: Cents;
+  saved: Cents;
+  /** Fecha límite opcional (YYYY-MM-DD). */
+  deadline?: string;
+  createdAt: string;
 }

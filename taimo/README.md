@@ -21,6 +21,8 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
   llevar a esas alturas del mes.
 - **Suscripciones detectadas solas**: cobros que se repiten cada mes (Netflix, Spotify, gimnasio…) con lo que
   cuestan al mes y al año.
+- **Metas de ahorro** (un viaje, el carné, un portátil): cuánto llevas, cuánto apartar al mes para llegar a tiempo
+  y, cuando vas a terminar el mes con dinero de sobra, Inicio te propone apartarlo en un toque.
 - **Historial completo** agrupado por días con buscador (sin tildes) y filtros por categoría o grupo.
 - **Fecha del gasto**: hoy, ayer o cualquier día de la última semana.
 - **Registro automático de pagos**

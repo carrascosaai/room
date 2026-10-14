@@ -1,6 +1,6 @@
 import { daysInMonth, homeOf, myShare, type ShareState } from './budget';
 import { normalizeMerchant } from './categorize';
-import type { AppState, Cents, CategoryId, Expense } from './types';
+import type { AppState, Cents, CategoryId, Expense, Goal } from './types';
 
 /** Gastos que no siguen el ritmo diario: se pagan una vez al mes. */
 const FIXED: CategoryId[] = ['casa', 'suscripciones'];
@@ -152,4 +152,21 @@ export function matchesSearch(e: Expense, query: string, categoryName: (id: Cate
   if (!q) return true;
   const hay = normalizeMerchant(`${e.merchant} ${e.note ?? ''} ${categoryName(e.category)}`);
   return q.split(' ').every((w) => hay.includes(w));
+}
+
+/** Cuánto apartar cada mes para llegar a la meta a tiempo (null si no tiene fecha o ya está). */
+export function goalPerMonth(goal: Goal, today: Date = new Date()): Cents | null {
+  const left = goal.target - goal.saved;
+  if (left <= 0 || !goal.deadline) return null;
+  const end = new Date(`${goal.deadline}T12:00:00`);
+  const months = (end.getFullYear() - today.getFullYear()) * 12 + end.getMonth() - today.getMonth();
+  return Math.ceil(left / Math.max(1, months));
+}
+
+/** Lo que previsiblemente te sobrará este mes (para apartarlo a una meta), o 0. */
+export function expectedLeftover(forecast: Forecast | null): Cents {
+  if (!forecast || forecast.budget === 0) return 0;
+  const left = forecast.budget - forecast.projected;
+  // Redondeado a la baja de 5 en 5 para que sea una cifra cómoda.
+  return left >= 1000 ? Math.floor(left / 500) * 500 : 0;
 }
