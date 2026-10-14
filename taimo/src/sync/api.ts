@@ -78,10 +78,16 @@ export function extractCode(input: string): string | null {
   return bare ? bare[1].toUpperCase() : null;
 }
 
-/** Web pública de Taimo, donde se abren los enlaces de pago (EXPO_PUBLIC_WEB_URL). En la versión web, la propia. */
+/** Donde está publicada la web de Taimo: dentro de Room, en /taimo. */
+const DEFAULT_WEB_URL = 'https://room-seven-steel.vercel.app/taimo';
+
+/**
+ * Web pública de Taimo, donde se abren los enlaces de pago. En la versión web,
+ * la propia (con su subcarpeta); en el móvil, EXPO_PUBLIC_WEB_URL o la de Room.
+ */
 export function webBase(): string {
-  const env = process.env.EXPO_PUBLIC_WEB_URL ?? '';
-  if (env) return env;
-  if (typeof window !== 'undefined' && window.location?.origin?.startsWith('http')) return window.location.origin;
-  return '';
+  if (typeof window !== 'undefined' && window.location?.origin?.startsWith('http')) {
+    return window.location.origin + (process.env.EXPO_PUBLIC_BASE_PATH ?? '');
+  }
+  return process.env.EXPO_PUBLIC_WEB_URL || DEFAULT_WEB_URL;
 }
