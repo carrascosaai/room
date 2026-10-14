@@ -5,6 +5,7 @@ import { findDuplicate, type CapturePayload } from '@/domain/capture';
 import { normalizeMerchant } from '@/domain/categorize';
 import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
 import type { AppState, CategoryId, Cents, Expense, Goal, Group, Member, PaymentInfo, Settlement } from '@/domain/types';
+import { FALLBACK, rateBetween } from '@/fx/fx';
 
 const STORAGE_KEY = 'taimo:state:v1';
 
@@ -35,6 +36,7 @@ export type Action =
   | { type: 'addGoal'; goal: Goal }
   | { type: 'saveToGoal'; id: string; amount: Cents; leftoverMonth?: string }
   | { type: 'deleteGoal'; id: string }
+  | { type: 'toggleIgnoredApp'; app: string }
   | { type: 'setLanguage'; language: NonNullable<AppState['profile']['language']> }
   | { type: 'setCurrency'; currency: string }
   | { type: 'setAccount'; account: AppState['profile']['account'] }
@@ -85,6 +87,10 @@ export function reducer(state: AppState, action: Action): AppState {
         goals: (state.goals ?? []).map((g) => (g.id === action.id ? { ...g, saved: Math.max(0, g.saved + action.amount) } : g)),
         leftoverMonth: action.leftoverMonth ?? state.leftoverMonth,
       };
+    case 'toggleIgnoredApp': {
+      const ignored = state.ignoredApps ?? [];
+      return { ...state, ignoredApps: ignored.includes(action.app) ? ignored.filter((a) => a !== action.app) : [...ignored, action.app] };
+    }
     case 'deleteGoal':
       return { ...state, goals: (state.goals ?? []).filter((g) => g.id !== action.id) };
     case 'setPayment':
@@ -192,16 +198,22 @@ export function reducer(state: AppState, action: Action): AppState {
 export function expenseFromCapture(state: AppState, payload: CapturePayload): { expense: Expense; duplicate: boolean } {
   const dup = findDuplicate(state.expenses, payload);
   if (dup) return { expense: dup, duplicate: true };
+  // Pagado en otra moneda (de viaje, compras online): se guarda en la tuya con el cambio del día.
+  const home = state.profile.currency;
+  const foreign = payload.currency && payload.currency !== home ? payload.currency : null;
+  const rate = foreign ? rateBetween(foreign, home, state.fx ?? FALLBACK) : null;
   return {
     duplicate: false,
     expense: {
       id: newId(),
-      amount: payload.amount,
+      amount: foreign && rate ? Math.round(payload.amount * rate) : payload.amount,
       merchant: payload.merchant,
       category: payload.category,
       date: payload.date,
       source: payload.source,
-      note: payload.card ? `Tarjeta: ${payload.card}` : undefined,
+      note: payload.card ? `💳 ${payload.card}` : undefined,
+      original: foreign && rate ? { amount: payload.amount, currency: foreign, rate } : undefined,
+      app: payload.app,
     },
   };
 }

@@ -4,6 +4,7 @@ interface TaimoCaptureNative {
   drainPending(): string;
   hasNotificationAccess(): boolean;
   openNotificationAccessSettings(): void;
+  setIgnoredApps?(apps: string[]): void;
 }
 
 // No existe en Expo Go ni en web: allí la app funciona sin captura nativa.
@@ -30,4 +31,13 @@ export function hasNotificationAccess(): boolean {
 
 export function openNotificationAccessSettings(): void {
   native?.openNotificationAccessSettings();
+}
+
+/** Android: apps cuyos avisos el lector nativo no debe guardar ni anunciar. */
+export function setIgnoredApps(apps: string[]): void {
+  try {
+    native?.setIgnoredApps?.(apps);
+  } catch {
+    // Versiones antiguas del módulo nativo no la tienen.
+  }
 }

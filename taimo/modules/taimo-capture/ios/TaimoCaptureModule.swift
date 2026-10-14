@@ -25,5 +25,9 @@ public class TaimoCaptureModule: Module {
 
     Function("openNotificationAccessSettings") { () -> Void in
     }
+
+    /// Solo tiene sentido en Android (lector de notificaciones).
+    Function("setIgnoredApps") { (_: [String]) -> Void in
+    }
   }
 }

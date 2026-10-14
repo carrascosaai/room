@@ -9,6 +9,7 @@ object PendingStore {
   private const val PREFS = "taimo.capture"
   private const val KEY = "pending"
   private const val MAX_ITEMS = 200
+  private const val IGNORED = "ignored"
 
   @Synchronized
   fun append(context: Context, item: JSONObject) {
@@ -28,5 +29,16 @@ object PendingStore {
     val value = prefs.getString(KEY, "[]") ?: "[]"
     prefs.edit().remove(KEY).apply()
     return value
+  }
+
+  /** Apps cuyos avisos de pago el usuario ha pedido ignorar (la app las manda con setIgnoredApps). */
+  fun ignoredApps(context: Context): Set<String> {
+    val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(IGNORED, "[]") ?: "[]"
+    val array = JSONArray(raw)
+    return (0 until array.length()).map { array.getString(it) }.toSet()
+  }
+
+  fun setIgnoredApps(context: Context, apps: List<String>) {
+    context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(IGNORED, JSONArray(apps).toString()).apply()
   }
 }

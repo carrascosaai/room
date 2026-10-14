@@ -25,10 +25,15 @@ export function useNativeCaptures(defaultMerchant: string, onCaptured?: (count: 
     for (const item of items) {
       let payload: CapturePayload | null;
       if (Platform.OS === 'android') {
-        payload = parsePaymentNotification(item as unknown as RawNotification, current.learnedCategories);
+        payload = parsePaymentNotification(item as unknown as RawNotification, {
+          learned: current.learnedCategories,
+          home: current.profile.currency,
+          defaultMerchant,
+          ignored: current.ignoredApps,
+        });
       } else {
         const when = item.date ? new Date(item.date) : new Date();
-        payload = parseCaptureParams(item, current.learnedCategories, Number.isNaN(when.getTime()) ? new Date() : when, defaultMerchant);
+        payload = parseCaptureParams(item, current.learnedCategories, Number.isNaN(when.getTime()) ? new Date() : when, defaultMerchant, current.profile.currency);
       }
       if (!payload) continue;
       const { expense, duplicate } = expenseFromCapture(current, payload);

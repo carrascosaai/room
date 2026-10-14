@@ -26,15 +26,23 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
 - **Historial completo** agrupado por días con buscador (sin tildes) y filtros por categoría o grupo.
 - **Fecha del gasto**: hoy, ayer o cualquier día de la última semana.
 - **Registro automático de pagos**
-  - **iPhone**: automatización de Atajos con el disparador «Transacción» de Wallet. Dos formas:
+  - **iPhone**: automatización de Atajos con el disparador «Transacción» de Wallet: cualquier tarjeta de Wallet, de
+    cualquier banco y país, en cualquier moneda. Dos formas:
     - Acción **«Registrar pago en Taimo»** (App Intent nativo): apunta el pago **sin abrir la app** y muestra un aviso
       «⚡ Apuntado en Taimo». Necesita la app instalada (no Expo Go).
     - Enlace `taimo://capture?amount=…&merchant=…&card=…`: abre Taimo un segundo. Funciona también en Expo Go.
-  - **Android**: lector de notificaciones de Google Wallet y de los bancos (BBVA, Santander, CaixaBank, Revolut,
-    N26…). Solo lee las de esas apps que llevan un importe y no envía nada fuera del móvil. Avisa con
-    «⚡ 12,40 € apuntados en Taimo».
+  - **Android**: lector de notificaciones **universal**: cualquier banco, cartera (Google Wallet, Samsung Wallet,
+    PayPal, Revolut, Nubank, Mercado Pago, Paytm, Alipay, M-PESA…) o **SMS del banco**, en cualquier país, idioma
+    (~25) y moneda (155, con símbolo o código: «¥3,000», «R$ 45,90», «Rs.500 debited», «1 234,56 zł»). Descarta
+    ingresos, devoluciones, códigos de verificación, pagos rechazados, saldos y ofertas; nunca lee WhatsApp, correo
+    ni redes sociales. Si el mismo pago llega por Wallet y por el banco, cuenta una vez. Desde «Registro automático»
+    puedes ignorar cualquier app. Las reglas viven en un JSON que comparten el lector nativo (Kotlin) y la app
+    (`modules/taimo-capture/android/src/main/assets/taimo_payment_rules.json`). Nada sale del móvil.
+  - Los pagos en otra moneda (viajes, compras online) se guardan convertidos a la tuya, con el importe original.
   - Taimo adivina la categoría por el comercio, aprende de tus correcciones y evita duplicados.
-- **Gastos a mano** en dos toques e **importación del extracto del banco (CSV)** para tarjeta física, Bizum o recibos.
+- **Extractos de cualquier banco del mundo**: CSV en cualquier idioma (columnas de importe o de cargo/abono, fechas
+  día/mes o mes/día), **OFX/QFX, QIF, CAMT.053 (ISO 20022) y MT940**, convertidos a tu moneda si vienen en otra.
+- **Gastos a mano** en dos toques, con fecha (hoy, ayer o la última semana).
 - **Grupos compartidos, más allá de Tricount.** Cada tipo de grupo trae lo que necesita:
   - **Pareja**: reparto por defecto aunque no vayáis al 50 % (60/40, 70/30…), presupuesto mensual común y
     **«Le toca pagar a…»**: quién debería pagar lo siguiente para equilibraros sin hacer transferencias.

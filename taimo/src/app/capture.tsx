@@ -28,7 +28,7 @@ export default function Capture() {
   useEffect(() => {
     if (done.current) return;
     done.current = true;
-    const payload = parseCaptureParams(params, state.learnedCategories, new Date(), t('capture.defaultMerchant'));
+    const payload = parseCaptureParams(params, state.learnedCategories, new Date(), t('capture.defaultMerchant'), state.profile.currency);
     if (!payload) {
       setError(true);
       return;

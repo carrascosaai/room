@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { setIgnoredApps } from 'taimo-capture';
+
 import { useAccountSync } from '@/auth/useAccountSync';
 import { useNativeCaptures } from '@/capture/useNativeCaptures';
 import { dueRecurring } from '@/domain/groupInsights';
@@ -37,6 +39,10 @@ function BackgroundWork() {
       if (due.length) dispatch({ type: 'importExpenses', expenses: due });
     }
   }, [recurringKey, state.expenses.length]);
+
+  // El lector nativo de Android tampoco debe anunciar pagos de las apps ignoradas.
+  const ignoredKey = (state.ignoredApps ?? []).join();
+  useEffect(() => setIgnoredApps(state.ignoredApps ?? []), [ignoredKey]);
 
   // Resumen semanal con los números al día y en el idioma elegido.
   const summaryKey = `${state.expenses.length}:${JSON.stringify(state.budgets)}:${i18n.lang}:${i18n.currency}`;

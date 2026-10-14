@@ -150,6 +150,7 @@ describe('capture', () => {
       category: 'ocio',
       source: 'applepay',
       date: now.toISOString(),
+      currency: 'EUR',
     });
   });
 

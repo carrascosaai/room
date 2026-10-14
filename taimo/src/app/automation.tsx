@@ -8,8 +8,11 @@ import { hasNotificationAccess, nativeCaptureAvailable, openNotificationAccessSe
 import { PAYMENT_APPS } from '@/domain/notifications';
 import { useI18n, type TKey } from '@/i18n';
 import { ensureNotificationPermission } from '@/notifications/local';
+import { useStore } from '@/store/store';
 import { Button, Card, H2, Muted, Row, Screen } from '@/ui/components';
 import { colors, radius, space } from '@/ui/theme';
+
+const EXAMPLES = 'Google Wallet, Samsung Wallet, PayPal, Revolut, BBVA, Santander, Nubank, Mercado Pago, Chase, Monzo, Paytm, PhonePe, Alipay, M-PESA, SMS';
 
 const CAPTURE_URL = 'taimo://capture?amount=[Amount]&merchant=[Merchant]&card=[Card]';
 
@@ -70,7 +73,7 @@ function AndroidSetup() {
     <>
       <Card style={{ borderColor: enabled ? colors.success : colors.border }}>
         <H2>{enabled ? t('automation.androidEnabled') : t('automation.androidWhat')}</H2>
-        <Muted>{t('automation.androidText', { apps: Object.values(PAYMENT_APPS).join(', ') })}</Muted>
+        <Muted>{t('automation.androidText', { apps: EXAMPLES })}</Muted>
       </Card>
       {!enabled ? (
         <Button
@@ -82,7 +85,41 @@ function AndroidSetup() {
         />
       ) : null}
       <Muted>{t('automation.androidHint')}</Muted>
+      <CaptureApps />
     </>
+  );
+}
+
+/** Apps de las que ya se han apuntado pagos, con opción de ignorarlas. */
+function CaptureApps() {
+  const { state, dispatch } = useStore();
+  const { t } = useI18n();
+  const ignored = state.ignoredApps ?? [];
+  const seen = new Map<string, { name: string; count: number }>();
+  for (const e of state.expenses) {
+    if (!e.app) continue;
+    const prev = seen.get(e.app);
+    seen.set(e.app, { name: PAYMENT_APPS[e.app] ?? e.note?.replace(/^💳 /, '') ?? e.app, count: (prev?.count ?? 0) + 1 });
+  }
+  for (const app of ignored) if (!seen.has(app)) seen.set(app, { name: PAYMENT_APPS[app] ?? app, count: 0 });
+  if (seen.size === 0) return null;
+  return (
+    <Card>
+      <H2>{t('cap.title')}</H2>
+      <Muted>{t('cap.hint')}</Muted>
+      {[...seen.entries()].map(([app, info]) => {
+        const off = ignored.includes(app);
+        return (
+          <Row key={app} style={{ justifyContent: 'space-between' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: off ? colors.textMuted : colors.text, fontWeight: '600' }}>{info.name}</Text>
+              <Muted>{info.count > 0 ? `⚡ ${info.count}` : ''}</Muted>
+            </View>
+            <Button label={off ? t('cap.resume') : t('cap.ignore')} variant={off ? 'secondary' : 'ghost'} onPress={() => dispatch({ type: 'toggleIgnoredApp', app })} />
+          </Row>
+        );
+      })}
+    </Card>
   );
 }
 
@@ -100,6 +137,12 @@ export default function Automation() {
       ) : (
         <>
           <Muted>{t('automation.introIos')}</Muted>
+          <Card>
+            <Row style={{ alignItems: 'flex-start' }}>
+              <Text style={{ fontSize: 22 }}>🌍</Text>
+              <Text style={{ color: colors.text, flex: 1, fontSize: 15, lineHeight: 21 }}>{t('cap.iosWorld')}</Text>
+            </Row>
+          </Card>
           {nativeCaptureAvailable ? <Steps steps={STEPS_INTENT} /> : null}
           {nativeCaptureAvailable ? <H2>{t('automation.fallbackTitle')}</H2> : null}
           <Steps steps={STEPS_URL} />

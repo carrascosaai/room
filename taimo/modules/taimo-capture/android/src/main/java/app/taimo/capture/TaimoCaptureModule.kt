@@ -18,6 +18,10 @@ class TaimoCaptureModule : Module() {
       PendingStore.drain(context)
     }
 
+    Function("setIgnoredApps") { apps: List<String> ->
+      PendingStore.setIgnoredApps(context, apps)
+    }
+
     Function("hasNotificationAccess") {
       NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
     }

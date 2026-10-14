@@ -1,0 +1,593 @@
+{
+ "version": 1,
+ "apps": {
+  "com.google.android.apps.walletnfcrel": "Google Wallet",
+  "com.samsung.android.spay": "Samsung Wallet",
+  "com.paypal.android.p2pmobile": "PayPal",
+  "com.venmo": "Venmo",
+  "com.squareup.cash": "Cash App",
+  "com.zellepay.zelle": "Zelle",
+  "com.klarna.android": "Klarna",
+  "com.revolut.revolut": "Revolut",
+  "de.number26.android": "N26",
+  "com.transferwise.android": "Wise",
+  "com.bunq.android": "bunq",
+  "co.uk.getmondo": "Monzo",
+  "com.starlingbank.android": "Starling",
+  "com.imaginecurve.curve.prd": "Curve",
+  "com.lydia": "Lydia",
+  "com.satispay.customer": "Satispay",
+  "it.poste.postepay": "Postepay",
+  "pt.sibs.android.mbway": "MB WAY",
+  "no.dnb.vipps": "Vipps",
+  "se.bankgirot.swish": "Swish",
+  "dk.danskebank.mobilepay": "MobilePay",
+  "pl.pkobp.iko": "PKO IKO",
+  "com.bbva.bbvacontigo": "BBVA",
+  "es.bancosantander.apps": "Santander",
+  "es.lacaixa.mobile.android.newwapicon": "CaixaBank",
+  "com.imaginbank.app": "imagin",
+  "es.ingdirect.android": "ING",
+  "com.openbank.app": "Openbank",
+  "net.inverline.bancosabadell.officelocator.android": "Sabadell",
+  "es.bankinter.bankingapp": "Bankinter",
+  "com.kutxabank.android": "Kutxabank",
+  "es.unicajabanco.app": "Unicaja",
+  "com.abanca.bancamovil": "ABANCA",
+  "es.evobanco.bancamovil": "EVO",
+  "com.grppl.android.shell.CMBlloydsTSB73": "Lloyds",
+  "uk.co.hsbc.hsbcukmobilebanking": "HSBC",
+  "com.barclays.android.barclaysmobilebanking": "Barclays",
+  "com.rbs.mobile.android.natwest": "NatWest",
+  "com.chase.sig.android": "Chase",
+  "com.wf.wellsfargomobile": "Wells Fargo",
+  "com.infonow.bofa": "Bank of America",
+  "com.konylabs.capitalone": "Capital One",
+  "com.americanexpress.android.acctsvcs.us": "American Express",
+  "com.citi.citimobile": "Citi",
+  "com.discoverfinancial.mobile": "Discover",
+  "com.usaa.mobile.android.usaa": "USAA",
+  "com.chime.chmapplication": "Chime",
+  "com.td": "TD",
+  "com.rbc.mobile.android": "RBC",
+  "com.bmo.mobile": "BMO",
+  "com.cibc.android.mobi": "CIBC",
+  "com.commbank.netbank": "CommBank",
+  "au.com.nab.mobile": "NAB",
+  "org.westpac.bank": "Westpac",
+  "com.anz.android.gomoney": "ANZ",
+  "fr.creditagricole.androidapp": "Crédit Agricole",
+  "net.bnpparibas.mescomptes": "BNP Paribas",
+  "com.boursorama.android.clients": "Boursorama",
+  "mobi.societegenerale.mobile.lappli": "Société Générale",
+  "fr.lcl.android.customerarea": "LCL",
+  "com.fortuneo.android": "Fortuneo",
+  "com.starfinanz.smob.android.sfinanzstatus": "Sparkasse",
+  "de.commerzbanking.mobil": "Commerzbank",
+  "com.db.pwcc.dbmobile": "Deutsche Bank",
+  "de.dkb.portalapp": "DKB",
+  "de.comdirect.android": "comdirect",
+  "com.ing.diba.mbbr2": "ING",
+  "de.fiducia.smartphone.android.banking.vr": "VR Banking",
+  "com.latuabancaperandroid": "Intesa Sanpaolo",
+  "pt.cgd.caixadirecta": "Caixadirecta",
+  "com.abnamro.nl.mobile.payments": "ABN AMRO",
+  "com.ing.mobile": "ING",
+  "nl.rabomobiel": "Rabobank",
+  "pl.mbank": "mBank",
+  "pl.ing.mojeing": "ING",
+  "com.garanti.cepsubesi": "Garanti BBVA",
+  "com.akbank.android.apps.akbank_direkt": "Akbank",
+  "com.ykb.android": "Yapı Kredi",
+  "com.pozitron.iscep": "İşCep",
+  "com.ziraat.ziraatmobil": "Ziraat",
+  "com.nu.production": "Nubank",
+  "com.mercadopago.wallet": "Mercado Pago",
+  "br.com.intermedium": "Inter",
+  "com.itau": "Itaú",
+  "br.com.bb.android": "Banco do Brasil",
+  "com.bradesco": "Bradesco",
+  "com.picpay": "PicPay",
+  "com.bancomer.mbanking": "BBVA México",
+  "net.one97.paytm": "Paytm",
+  "com.phonepe.app": "PhonePe",
+  "com.google.android.apps.nbu.paisa.user": "Google Pay",
+  "in.org.npci.upiapp": "BHIM",
+  "com.csam.icici.bank.imobile": "ICICI",
+  "com.sbi.lotusintouch": "YONO SBI",
+  "com.snapwork.hdfc": "HDFC",
+  "com.axis.mobile": "Axis",
+  "com.eg.android.AlipayGphone": "Alipay",
+  "jp.ne.paypay.android.app": "PayPay",
+  "com.kakaopay.app": "KakaoPay",
+  "com.globe.gcash.android": "GCash",
+  "com.safaricom.mpesa.lifestyle": "M-PESA"
+ },
+ "wallets": [
+  "com.google.android.apps.walletnfcrel",
+  "com.samsung.android.spay"
+ ],
+ "deny": [
+  "app.taimo",
+  "com.whatsapp",
+  "com.whatsapp.w4b",
+  "org.telegram.messenger",
+  "org.thoughtcrime.securesms",
+  "com.facebook.orca",
+  "com.facebook.katana",
+  "com.instagram.android",
+  "com.discord",
+  "com.Slack",
+  "com.snapchat.android",
+  "com.twitter.android",
+  "com.zhiliaoapp.musically",
+  "com.google.android.gm",
+  "com.microsoft.office.outlook",
+  "com.microsoft.teams",
+  "com.google.android.apps.dynamite",
+  "com.linkedin.android",
+  "com.reddit.frontpage",
+  "com.google.android.youtube",
+  "com.spotify.music",
+  "com.android.vending",
+  "com.google.android.calendar"
+ ],
+ "purchase": "pag(o|ado|aste|amento)|compra|cargo|gastad|gasto|consumo|cobr(o|ado)|transacc|tarjeta|paid|payment|purchase|spent|charged|debited|debit|transaction|txn|\\bpos\\b|\\bupi\\b|card|achat|paiement|carte|dépense|zahlung|bezahlt|einkauf|karte|belastet|abbuchung|umsatz|acquisto|addebit|carta|cartão|débito|betaling|betaald|aankoop|kaart|köp|betalning|kortköp|\\bkort\\b|kjøp|betalt|køb|osto|maksu|kortti|veloitus|zakup|płatnoś|transakcj|karta|obciąż|platba|nákup|transakc|plată|plata|cumpăr|tranzac|αγορά|πληρωμ|χρέωσ|κάρτα|harcama|ödeme|alışveriş|\\bkart\\b|покупк|оплат|списан|картк|карт|支付|付款|消费|扣款|購入|支払|決済|ご利用|결제|승인|खर्च|डेबिट",
+ "notPurchase": "recibid|has recibido|te han enviado|te ha enviado|ingreso|ingresad|abono|abonad|nómina|devoluci|reembolso|refund|received|credited|deposit|incoming|sent you|you got paid|reçu|remboursement|virement reçu|erhalten|gutschrift|eingang|erstattung|ricevut|accredit|rimborso|recebid|reembols|estorno|ontvangen|teruggestort|mottagit|insättning|mottatt|modtaget|vastaanotettu|hyvitys|otrzymał|wpływ|zwrot|přijat|připsán|vrácen|primit|rambursare|λάβατε|πίστωσ|επιστροφ|alındı|iade|yatırıldı|зачислен|получен|возврат|надійшл|повернен|退款|收到|入账|入金|返金|입금|환불|cashback|código de verificación|código de seguridad|verification code|security code|one-time password|\\botp\\b|einmalpasswort|code de vérification|rechazad|denegad|declined|failed|fallid|refusé|abgelehnt|rifiutat|recusad|geweigerd|nekad|avvist|afvist|hylätty|odrzucon|zamítnut|respins|απορρίφθηκε|reddedildi|отклонен|відхилен|拒绝|拒否|거절|solicitud de pago|payment request|te pide|requests? \\$|wants you to pay|vence|due date|fecha de vencimiento|recordatorio de pago|payment due|oferta|descuento|offer|promo|sorteo",
+ "balance": "saldo|balance|disponible|available|avail\\.? ?bal|kontostand|solde|disponibil|beschikbaar|tillgängligt|disponível|bakiye|остаток|баланс|余额|残高|잔액|limite|límite|limit",
+ "cardHint": "\\*{2,}\\s?\\d{3,4}|[xX•·]{2,}\\s?\\d{3,4}|ending( in)? \\d{4}|terminada en \\d{4}|acabada en \\d{4}|finissant par \\d{4}|endend auf \\d{4}|tarjeta|card|carte|karte|carta|cartão|kaart|\\bkort\\b|kortti|karta|\\bkart\\b|κάρτα|карт|カード|카드|卡|\\ba/c\\b|acct|\\bupi\\b|apple pay|google pay|samsung pay|contactless|sin contacto|nfc",
+ "symbols": [
+  [
+   "US$",
+   "USD"
+  ],
+  [
+   "CA$",
+   "CAD"
+  ],
+  [
+   "C$",
+   "CAD"
+  ],
+  [
+   "A$",
+   "AUD"
+  ],
+  [
+   "AU$",
+   "AUD"
+  ],
+  [
+   "NZ$",
+   "NZD"
+  ],
+  [
+   "HK$",
+   "HKD"
+  ],
+  [
+   "S$",
+   "SGD"
+  ],
+  [
+   "MX$",
+   "MXN"
+  ],
+  [
+   "R$",
+   "BRL"
+  ],
+  [
+   "NT$",
+   "TWD"
+  ],
+  [
+   "COL$",
+   "COP"
+  ],
+  [
+   "CLP$",
+   "CLP"
+  ],
+  [
+   "ARS$",
+   "ARS"
+  ],
+  [
+   "RD$",
+   "DOP"
+  ],
+  [
+   "E£",
+   "EGP"
+  ],
+  [
+   "GH₵",
+   "GHS"
+  ],
+  [
+   "KSh",
+   "KES"
+  ],
+  [
+   "S/",
+   "PEN"
+  ],
+  [
+   "zł",
+   "PLN"
+  ],
+  [
+   "Kč",
+   "CZK"
+  ],
+  [
+   "Ft",
+   "HUF"
+  ],
+  [
+   "lei",
+   "RON"
+  ],
+  [
+   "лв",
+   "BGN"
+  ],
+  [
+   "грн",
+   "UAH"
+  ],
+  [
+   "руб",
+   "RUB"
+  ],
+  [
+   "Rp",
+   "IDR"
+  ],
+  [
+   "RM",
+   "MYR"
+  ],
+  [
+   "Rs.",
+   "INR"
+  ],
+  [
+   "Rs",
+   "INR"
+  ],
+  [
+   "CHF",
+   "CHF"
+  ],
+  [
+   "Fr.",
+   "CHF"
+  ],
+  [
+   "TL",
+   "TRY"
+  ],
+  [
+   "€",
+   "EUR"
+  ],
+  [
+   "£",
+   "GBP"
+  ],
+  [
+   "¥",
+   "JPY"
+  ],
+  [
+   "￥",
+   "JPY"
+  ],
+  [
+   "元",
+   "CNY"
+  ],
+  [
+   "円",
+   "JPY"
+  ],
+  [
+   "원",
+   "KRW"
+  ],
+  [
+   "₹",
+   "INR"
+  ],
+  [
+   "₩",
+   "KRW"
+  ],
+  [
+   "₽",
+   "RUB"
+  ],
+  [
+   "₪",
+   "ILS"
+  ],
+  [
+   "₫",
+   "VND"
+  ],
+  [
+   "₱",
+   "PHP"
+  ],
+  [
+   "฿",
+   "THB"
+  ],
+  [
+   "₦",
+   "NGN"
+  ],
+  [
+   "₺",
+   "TRY"
+  ],
+  [
+   "₴",
+   "UAH"
+  ],
+  [
+   "₸",
+   "KZT"
+  ],
+  [
+   "₼",
+   "AZN"
+  ],
+  [
+   "₾",
+   "GEL"
+  ],
+  [
+   "৳",
+   "BDT"
+  ],
+  [
+   "₨",
+   "PKR"
+  ],
+  [
+   "﷼",
+   "SAR"
+  ],
+  [
+   "د.إ",
+   "AED"
+  ],
+  [
+   "kr.",
+   "DKK"
+  ],
+  [
+   "kr",
+   "SEK"
+  ],
+  [
+   "$",
+   "USD"
+  ]
+ ],
+ "codes": [
+  "AED",
+  "AFN",
+  "ALL",
+  "AMD",
+  "ANG",
+  "AOA",
+  "ARS",
+  "AUD",
+  "AWG",
+  "AZN",
+  "BAM",
+  "BBD",
+  "BDT",
+  "BGN",
+  "BHD",
+  "BIF",
+  "BMD",
+  "BND",
+  "BOB",
+  "BRL",
+  "BSD",
+  "BTN",
+  "BWP",
+  "BYN",
+  "BZD",
+  "CAD",
+  "CDF",
+  "CHF",
+  "CLP",
+  "CNY",
+  "COP",
+  "CRC",
+  "CUP",
+  "CVE",
+  "CZK",
+  "DJF",
+  "DKK",
+  "DOP",
+  "DZD",
+  "EGP",
+  "ERN",
+  "ETB",
+  "EUR",
+  "FJD",
+  "FKP",
+  "GBP",
+  "GEL",
+  "GHS",
+  "GIP",
+  "GMD",
+  "GNF",
+  "GTQ",
+  "GYD",
+  "HKD",
+  "HNL",
+  "HTG",
+  "HUF",
+  "IDR",
+  "ILS",
+  "INR",
+  "IQD",
+  "IRR",
+  "ISK",
+  "JMD",
+  "JOD",
+  "JPY",
+  "KES",
+  "KGS",
+  "KHR",
+  "KMF",
+  "KPW",
+  "KRW",
+  "KWD",
+  "KYD",
+  "KZT",
+  "LAK",
+  "LBP",
+  "LKR",
+  "LRD",
+  "LSL",
+  "LYD",
+  "MAD",
+  "MDL",
+  "MGA",
+  "MKD",
+  "MMK",
+  "MNT",
+  "MOP",
+  "MRU",
+  "MUR",
+  "MVR",
+  "MWK",
+  "MXN",
+  "MYR",
+  "MZN",
+  "NAD",
+  "NGN",
+  "NIO",
+  "NOK",
+  "NPR",
+  "NZD",
+  "OMR",
+  "PAB",
+  "PEN",
+  "PGK",
+  "PHP",
+  "PKR",
+  "PLN",
+  "PYG",
+  "QAR",
+  "RON",
+  "RSD",
+  "RUB",
+  "RWF",
+  "SAR",
+  "SBD",
+  "SCR",
+  "SDG",
+  "SEK",
+  "SGD",
+  "SHP",
+  "SLE",
+  "SOS",
+  "SRD",
+  "SSP",
+  "STN",
+  "SVC",
+  "SYP",
+  "SZL",
+  "THB",
+  "TJS",
+  "TMT",
+  "TND",
+  "TOP",
+  "TRY",
+  "TTD",
+  "TWD",
+  "TZS",
+  "UAH",
+  "UGX",
+  "USD",
+  "UYU",
+  "UZS",
+  "VES",
+  "VND",
+  "VUV",
+  "WST",
+  "XAF",
+  "XCD",
+  "XOF",
+  "XPF",
+  "YER",
+  "ZAR",
+  "ZMW",
+  "ZWG"
+ ],
+ "ambiguous": {
+  "$": [
+   "USD",
+   "CAD",
+   "AUD",
+   "NZD",
+   "MXN",
+   "ARS",
+   "CLP",
+   "COP",
+   "SGD",
+   "HKD",
+   "TWD",
+   "UYU",
+   "DOP"
+  ],
+  "kr": [
+   "SEK",
+   "NOK",
+   "DKK",
+   "ISK"
+  ],
+  "kr.": [
+   "DKK",
+   "ISK",
+   "SEK",
+   "NOK"
+  ],
+  "¥": [
+   "JPY",
+   "CNY"
+  ],
+  "￥": [
+   "JPY",
+   "CNY"
+  ],
+  "Rs": [
+   "INR",
+   "PKR",
+   "LKR",
+   "NPR"
+  ],
+  "Rs.": [
+   "INR",
+   "PKR",
+   "LKR",
+   "NPR"
+  ],
+  "Fr.": [
+   "CHF"
+  ],
+  "TL": [
+   "TRY"
+  ]
+ }
+}

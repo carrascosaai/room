@@ -1,6 +1,7 @@
-import { categorize } from './categorize';
+import { categorize, normalizeMerchant } from './categorize';
 import { isCategoryId } from './categories';
 import { parseAmount } from './money';
+import { findMoney } from './notifications';
 import type { CategoryId, Cents, Expense, ExpenseSource } from './types';
 
 /**
@@ -15,6 +16,10 @@ export interface CapturePayload {
   category: CategoryId;
   source: ExpenseSource;
   date: string;
+  /** Moneda del pago (si no es la tuya, se convierte al guardarlo). */
+  currency?: string;
+  /** App de Android que avisó del pago. */
+  app?: string;
 }
 
 type Params = Record<string, string | string[] | undefined>;
@@ -28,9 +33,14 @@ export function parseCaptureParams(
   learned: Record<string, CategoryId> = {},
   now: Date = new Date(),
   defaultMerchant = 'Card payment',
+  home = 'EUR',
 ): CapturePayload | null {
-  const amount = parseAmount(first(params.amount));
+  // Wallet manda el importe ya formateado en la moneda del pago: "¥3,000", "$12.34", "12,34 €".
+  const rawAmount = first(params.amount) ?? '';
+  const money = findMoney(rawAmount, home);
+  const amount = money?.amount ?? parseAmount(rawAmount);
   if (amount === null || amount === 0) return null;
+  const currencyParam = first(params.currency)?.trim().toUpperCase();
   const merchant = (first(params.merchant) ?? '').trim() || defaultMerchant;
   const requested = first(params.category);
   const sourceParam = first(params.source);
@@ -41,6 +51,7 @@ export function parseCaptureParams(
     category: isCategoryId(requested) ? requested : categorize(merchant, learned),
     source: sourceParam === 'notificacion' ? 'notificacion' : 'applepay',
     date: now.toISOString(),
+    currency: currencyParam && /^[A-Z]{3}$/.test(currencyParam) ? currencyParam : money?.currency ?? home,
   };
 }
 
@@ -48,15 +59,20 @@ export function parseCaptureParams(
 const DUPLICATE_WINDOW_MS = 3 * 60 * 1000;
 
 /**
- * Los Atajos a veces se disparan dos veces para el mismo pago. Si ya hay un
- * gasto con el mismo importe y comercio en los últimos minutos, lo devolvemos.
+ * El mismo pago puede llegar dos veces: el Atajo que se dispara doble, o en
+ * Android el aviso de Google Wallet y el del banco a la vez (con el comercio
+ * escrito distinto). Mismo importe en pocos minutos y comercio parecido, o
+ * ambos automáticos, es el mismo pago.
  */
 export function findDuplicate(expenses: Expense[], payload: CapturePayload): Expense | undefined {
   const t = new Date(payload.date).getTime();
-  return expenses.find(
-    (e) =>
-      e.amount === payload.amount &&
-      e.merchant.toLowerCase() === payload.merchant.toLowerCase() &&
-      Math.abs(new Date(e.date).getTime() - t) < DUPLICATE_WINDOW_MS,
-  );
+  const a = normalizeMerchant(payload.merchant);
+  return expenses.find((e) => {
+    const sameAmount = e.original && payload.currency && e.original.currency === payload.currency ? e.original.amount === payload.amount : e.amount === payload.amount;
+    if (!sameAmount || Math.abs(new Date(e.date).getTime() - t) >= DUPLICATE_WINDOW_MS) return false;
+    const b = normalizeMerchant(e.merchant);
+    const similar = a === b || (a.length >= 3 && b.includes(a)) || (b.length >= 3 && a.includes(b));
+    const bothAuto = e.source !== 'manual' && e.source !== 'csv' && e.source !== 'fijo';
+    return similar || bothAuto;
+  });
 }

@@ -14,38 +14,24 @@ import java.util.Locale
 import java.util.TimeZone
 
 /**
- * Escucha las notificaciones de Google Wallet y de los bancos de la lista.
- * Solo guarda (en el móvil) las que llevan un importe en euros; la app las
- * interpreta al abrirse (src/domain/notifications.ts). El resto se ignora.
+ * Escucha los avisos de pago de cualquier banco, cartera o SMS del banco, en
+ * cualquier país, moneda e idioma (reglas en PaymentRules). Solo guarda en el
+ * móvil los que son un pago; el resto se ignora sin guardarse en ningún sitio.
+ * La app los interpreta al abrirse (src/domain/notifications.ts).
  */
 class TaimoNotificationListener : NotificationListenerService() {
   companion object {
-    // Mantener igual que PAYMENT_APPS en src/domain/notifications.ts.
-    val PAYMENT_APPS = setOf(
-      "com.google.android.apps.walletnfcrel",
-      "com.samsung.android.spay",
-      "com.revolut.revolut",
-      "de.number26.android",
-      "com.bbva.bbvacontigo",
-      "es.bancosantander.apps",
-      "es.lacaixa.mobile.android.newwapicon",
-      "com.imaginbank.app",
-      "es.ingdirect.android",
-      "com.openbank.app",
-      "net.inverline.bancosabadell.officelocator.android",
-      "es.bankinter.bankingapp",
-    )
-    private val AMOUNT = Regex("(€\\s?-?\\d[\\d.,]*|-?\\d[\\d.,]*\\s?(€|eur\\b|euros?\\b))", RegexOption.IGNORE_CASE)
     private const val CHANNEL_ID = "taimo_captures"
   }
 
   override fun onNotificationPosted(sbn: StatusBarNotification) {
-    if (sbn.packageName !in PAYMENT_APPS) return
+    if (sbn.packageName == packageName) return
     val extras = sbn.notification?.extras ?: return
     val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
     val text = (extras.getCharSequence(Notification.EXTRA_BIG_TEXT)
       ?: extras.getCharSequence(Notification.EXTRA_TEXT))?.toString() ?: ""
-    val amount = AMOUNT.find("$title $text")?.value ?: return
+    if (text.isEmpty() && title.isEmpty()) return
+    val amount = PaymentRules.get(this).match(sbn.packageName, PendingStore.ignoredApps(this), title, text) ?: return
 
     val iso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
       timeZone = TimeZone.getTimeZone("UTC")

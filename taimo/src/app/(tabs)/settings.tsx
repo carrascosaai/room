@@ -8,8 +8,10 @@ import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { downloadBackup, signOut, uploadBackup } from '@/auth/auth';
 import { totalBudget } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
-import { expensesToCsv, isAlreadyImported, parseBankCsv } from '@/domain/csv';
+import { parseBankFile } from '@/domain/bankfiles';
+import { expensesToCsv, isAlreadyImported, rowsToExpenses } from '@/domain/csv';
 import { parseAmount } from '@/domain/money';
+import { FALLBACK, rateBetween } from '@/fx/fx';
 import { CURRENCIES, LANGUAGES, useI18n } from '@/i18n';
 import { ensureNotificationPermission } from '@/notifications/local';
 import { newId, useStore } from '@/store/store';
@@ -67,13 +69,21 @@ export default function Settings() {
   async function importCsv() {
     setCsvMessage(null);
     const picked = await DocumentPicker.getDocumentAsync({
-      type: ['text/csv', 'text/comma-separated-values', 'text/plain', 'application/csv', '*/*'],
+      // CSV, OFX/QFX, QIF, CAMT.053 (XML) y MT940 (.sta/.mt940/.txt): los extractos de cualquier banco.
+      type: ['*/*'],
       copyToCacheDirectory: true,
     });
     if (picked.canceled) return;
     const asset = picked.assets[0];
     const text = Platform.OS === 'web' ? await (await fetch(asset.uri)).text() : await new File(asset.uri).text();
-    const { expenses, skipped } = parseBankCsv(text, state.learnedCategories);
+    const { rows, skipped } = parseBankFile(text);
+    const home = state.profile.currency;
+    const rates = state.fx ?? FALLBACK;
+    const expenses = rowsToExpenses(rows, state.learnedCategories, t('capture.defaultMerchant')).map((e, i) => {
+      const cur = rows[i].currency;
+      const rate = cur && cur !== home ? rateBetween(cur, home, rates) : null;
+      return rate ? { ...e, amount: Math.round(e.amount * rate), original: { amount: e.amount, currency: cur!, rate } } : e;
+    });
     const fresh = expenses.filter((e) => !isAlreadyImported(state.expenses, e));
     if (fresh.length > 0) dispatch({ type: 'importExpenses', expenses: fresh.map((e) => ({ ...e, id: newId() })) });
     if (expenses.length === 0) {

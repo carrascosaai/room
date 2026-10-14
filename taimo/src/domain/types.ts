@@ -28,6 +28,8 @@ export interface OriginalAmount {
 }
 
 export interface Expense {
+  /** App de Android que avisó del pago (para poder ignorarla). */
+  app?: string;
   id: string;
   /** Importe total del pago (lo que salió de la tarjeta de quien pagó). */
   amount: Cents;
@@ -158,6 +160,8 @@ export interface AppState {
   goals?: Goal[];
   /** Mes (YYYY-MM) en el que ya apartaste lo que te sobraba, para no volver a proponerlo. */
   leftoverMonth?: string;
+  /** Apps de Android cuyos avisos de pago no quieres que se apunten. */
+  ignoredApps?: string[];
 }
 
 export interface Goal {
