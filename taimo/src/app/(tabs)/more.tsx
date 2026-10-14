@@ -6,6 +6,7 @@ import { Screen, Title } from '@/ui/components';
 import { colors, radius, space } from '@/ui/theme';
 
 const ITEMS: { emoji: string; title: TKey; desc: TKey; href: Href }[] = [
+  { emoji: '💸', title: 'back.title', desc: 'back.desc', href: '/devuelve' },
   { emoji: '💬', title: 'asst.title', desc: 'more.askDesc', href: '/assistant' },
   { emoji: '🎯', title: 'goal.title', desc: 'more.goalsDesc', href: '/goals' },
   { emoji: '🏆', title: 'ch.title', desc: 'more.chDesc', href: '/challenges' },

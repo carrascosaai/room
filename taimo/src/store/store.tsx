@@ -72,6 +72,9 @@ export type Action =
   | { type: 'createTable'; bill: TableBill; expense: Expense; meId: string }
   /** Aviso «ya he pagado» de un comensal. */
   | { type: 'tableClaim'; claim: TableClaim }
+  /** «Taimo te devuelve dinero»: «no es nada» o «ya lo he recuperado». */
+  | { type: 'moneyBackDismiss'; id: string }
+  | { type: 'moneyBackRecovered'; id: string; amount: Cents }
   | { type: 'importExpenses'; expenses: Expense[] }
   | { type: 'setGroupRemote'; groupId: string; code: string }
   | { type: 'applySnapshot'; groupId: string; snapshot: GroupSnapshot; syncStartedAt: string }
@@ -290,6 +293,14 @@ export function reducer(state: AppState, action: Action): AppState {
     }
     case 'tableClaim':
       return applyTableClaim(state, action.claim).state;
+    case 'moneyBackDismiss': {
+      const mb = state.moneyBack ?? { dismissed: [], recovered: [] };
+      return { ...state, moneyBack: { ...mb, dismissed: [...mb.dismissed.filter((x) => x !== action.id), action.id].slice(-500) } };
+    }
+    case 'moneyBackRecovered': {
+      const mb = state.moneyBack ?? { dismissed: [], recovered: [] };
+      return { ...state, moneyBack: { ...mb, recovered: [...mb.recovered.filter((r) => r.id !== action.id), { id: action.id, amount: action.amount, date: now() }] } };
+    }
     case 'setGroupRemote':
       return {
         ...state,

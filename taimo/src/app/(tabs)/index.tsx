@@ -5,6 +5,7 @@ import { canRecognizeText } from 'taimo-capture';
 import { categoryStatus, monthKey, monthSummary } from '@/domain/budget';
 import { CATEGORIES, category } from '@/domain/categories';
 import { categoryTrend, expectedLeftover, monthForecast } from '@/domain/insights';
+import { findMoneyBack, urgentMoneyBack } from '@/domain/moneyback';
 import { tripCandidates } from '@/domain/smart';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
@@ -101,6 +102,16 @@ export default function Home() {
   /** Como mucho un aviso: el más útil ahora mismo. */
   function oneTip() {
     if (tripCandidates(state).length) return <TripSuggestion />;
+
+    // Dinero que podría ser tuyo (cobros repetidos, subidas, plazos para devolver…).
+    const urgent = urgentMoneyBack(findMoneyBack(state, today));
+    if (urgent.length) {
+      return (
+        <Tip emoji="💸" color={colors.warning} onPress={() => router.push('/devuelve')}>
+          {t('back.homeTip', { amount: money(urgent.reduce((s, m) => s + m.amount, 0)) })}
+        </Tip>
+      );
+    }
 
     const forecast = monthForecast(state, today);
     if (forecast && forecast.budget > 0 && forecast.projected > forecast.budget) {

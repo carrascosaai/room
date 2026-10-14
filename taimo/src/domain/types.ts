@@ -197,6 +197,8 @@ export interface AppState {
   challenges?: import('./challenges').Challenge[];
   /** Lista de deseos con la regla de las 48 horas. */
   wishes?: import('./habits').Wish[];
+  /** «Taimo te devuelve dinero»: avisos descartados y dinero recuperado. */
+  moneyBack?: import('./moneyback').MoneyBackState;
 }
 
 export interface Goal {

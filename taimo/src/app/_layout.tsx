@@ -93,6 +93,7 @@ function RootStack() {
           <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
           <Stack.Screen name="join" options={{ presentation: 'modal' }} />
           <Stack.Screen name="pay" />
+          <Stack.Screen name="devuelve" options={{ headerShown: true, title: t('back.title') }} />
           <Stack.Screen name="mesa" />
           <Stack.Screen name="mesa-pagado" />
           <Stack.Screen name="mesa-nueva" options={{ headerShown: true, title: t('mesa.newTitle') }} />
