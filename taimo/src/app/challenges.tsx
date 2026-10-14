@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 
 import { category } from '@/domain/categories';
 import { dailyStreak, evaluateChallenge, type ChallengeKind } from '@/domain/challenges';
+import { ACHIEVEMENTS, achievements } from '@/domain/habits';
 import type { CategoryId } from '@/domain/types';
 import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
@@ -18,6 +19,7 @@ export default function Challenges() {
   const { t, money } = useI18n();
   const [cat, setCat] = useState<CategoryId>('comer');
   const streak = dailyStreak(state);
+  const got = achievements(state);
   const list = (state.challenges ?? []).map((c) => ({ c, s: evaluateChallenge(c, state) }));
 
   const start = (kind: ChallengeKind) => {
@@ -70,6 +72,35 @@ export default function Challenges() {
         <Muted>{t('ch.noSpendHint')}</Muted>
         <Button label={t('ch.start')} variant="secondary" onPress={() => start('noSpendDays')} />
       </Card>
+      <H2>{t('ach.title')}</H2>
+      <Muted>{t('ach.count', { count: got.size, total: ACHIEVEMENTS.length })}</Muted>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+        {ACHIEVEMENTS.map((a) => {
+          const on = got.has(a.id);
+          return (
+            <View
+              key={a.id}
+              accessibilityLabel={t(`ach.${a.id}`)}
+              style={{
+                width: '31%',
+                alignItems: 'center',
+                gap: 4,
+                padding: space.sm,
+                borderRadius: 16,
+                backgroundColor: on ? colors.primarySoft : colors.surface,
+                borderWidth: 1,
+                borderColor: on ? colors.primary : colors.border,
+                opacity: on ? 1 : 0.45,
+              }}
+            >
+              <Text style={{ fontSize: 28 }}>{on ? a.emoji : '🔒'}</Text>
+              <Text style={{ color: colors.text, fontSize: 12, textAlign: 'center' }} numberOfLines={2}>
+                {t(`ach.${a.id}`)}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
       <View style={{ height: space.lg }} />
     </Screen>
   );

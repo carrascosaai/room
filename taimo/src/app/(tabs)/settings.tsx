@@ -40,6 +40,13 @@ export default function Settings() {
   const [budgetMessage, setBudgetMessage] = useState<string | null>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [lockMessage, setLockMessage] = useState<string | null>(null);
+  const [income, setIncome] = useState(state.profile.income ? String(Math.round(state.profile.income.monthly / 100)) : '');
+  const [hours, setHours] = useState(state.profile.income ? String(state.profile.income.hoursPerWeek) : '40');
+  const saveIncome = () => {
+    const monthly = parseAmount(income);
+    const h = Number(hours.replace(',', '.'));
+    dispatch({ type: 'setIncome', income: monthly && h > 0 ? { monthly, hoursPerWeek: h } : undefined });
+  };
 
   function suggest() {
     const s = suggestBudgets(state);
@@ -244,6 +251,19 @@ export default function Settings() {
           onClose={() => setPickingCurrency(false)}
           onSelect={(c) => dispatch({ type: 'setCurrency', currency: c })}
         />
+      </Card>
+
+      <Card>
+        <H2>⏱️ {t('work.title')}</H2>
+        <Muted>{t('work.hint')}</Muted>
+        <Row>
+          <View style={{ flex: 1 }}>
+            <Input label={t('work.income')} value={income} onChangeText={setIncome} onBlur={saveIncome} keyboardType="decimal-pad" placeholder="1500" />
+          </View>
+          <View style={{ width: 120 }}>
+            <Input label={t('work.hours')} value={hours} onChangeText={setHours} onBlur={saveIncome} keyboardType="decimal-pad" />
+          </View>
+        </Row>
       </Card>
 
       <Card>

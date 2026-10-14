@@ -149,6 +149,8 @@ export interface Profile {
   lock?: boolean;
   /** Apariencia: la del móvil, clara u oscura. */
   theme?: 'auto' | 'light' | 'dark';
+  /** Para traducir gastos a horas de trabajo (opcional, solo en tu móvil). */
+  income?: { monthly: Cents; hoursPerWeek: number };
 }
 
 export interface PaymentInfo {
@@ -186,6 +188,8 @@ export interface AppState {
   tripDismissed?: string[];
   /** Retos de ahorro empezados. */
   challenges?: import('./challenges').Challenge[];
+  /** Lista de deseos con la regla de las 48 horas. */
+  wishes?: import('./habits').Wish[];
 }
 
 export interface Goal {

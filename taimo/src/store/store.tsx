@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useS
 
 import { findDuplicate, type CapturePayload } from '@/domain/capture';
 import type { Challenge } from '@/domain/challenges';
+import type { Wish } from '@/domain/habits';
 import { normalizeMerchant } from '@/domain/categorize';
 import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
 import type { AppState, CategoryId, Cents, Expense, Goal, Group, Member, PaymentInfo, Settlement } from '@/domain/types';
@@ -43,6 +44,10 @@ export type Action =
   | { type: 'dismissTrip'; ids: string[] }
   | { type: 'startChallenge'; challenge: Challenge }
   | { type: 'removeChallenge'; id: string }
+  | { type: 'addWish'; wish: Wish }
+  | { type: 'decideWish'; id: string; outcome: 'bought' | 'skipped' }
+  | { type: 'removeWish'; id: string }
+  | { type: 'setIncome'; income?: { monthly: Cents; hoursPerWeek: number } }
   | { type: 'setLanguage'; language: NonNullable<AppState['profile']['language']> }
   | { type: 'setCurrency'; currency: string }
   | { type: 'setAccount'; account: AppState['profile']['account'] }
@@ -95,6 +100,17 @@ export function reducer(state: AppState, action: Action): AppState {
       };
     case 'startChallenge':
       return { ...state, challenges: [action.challenge, ...(state.challenges ?? [])].slice(0, 30) };
+    case 'addWish':
+      return { ...state, wishes: [action.wish, ...(state.wishes ?? [])] };
+    case 'decideWish':
+      return {
+        ...state,
+        wishes: (state.wishes ?? []).map((w) => (w.id === action.id ? { ...w, outcome: action.outcome, decidedAt: now() } : w)),
+      };
+    case 'removeWish':
+      return { ...state, wishes: (state.wishes ?? []).filter((w) => w.id !== action.id) };
+    case 'setIncome':
+      return { ...state, profile: { ...state.profile, income: action.income } };
     case 'removeChallenge':
       return { ...state, challenges: (state.challenges ?? []).filter((c) => c.id !== action.id) };
     case 'dismissTrip':

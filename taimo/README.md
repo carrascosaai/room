@@ -16,6 +16,13 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
   reparto por categoría y gastos más grandes. Toca una barra para ver su importe.
 
 - **Presupuestos por categoría** y en Inicio: lo que te queda este mes y **cuánto puedes gastar al día**.
+- **Cada gasto en horas de trabajo** (opcional): «esta cena ≈ 4 h 55 min de tu trabajo», al apuntar, en la lista de
+  deseos, en los gastos hormiga y en Inicio («este mes llevas 17 h 55 min de trabajo gastadas»).
+- **Lista de deseos con la regla de las 48 horas**: apuntas el capricho, Taimo te avisa a las 48 h y, si ya no lo
+  quieres, cuenta como ahorro («te has ahorrado 60 € en caprichos»).
+- **Gastos hormiga**: pequeños gastos repetidos (cafés, snacks…) con lo que cuestan al mes y al año.
+- **Mapa del mes**: calendario coloreado por lo que gastaste cada día.
+- **Logros**: primer pago automático, rachas de 7 y 30 días, mes dentro del presupuesto, reto superado, meta cumplida…
 - **Siri** (iPhone): «Oye Siri, apunta un gasto en Taimo» → «50 euros en comida». Se apunta sin abrir la app, ideal
   para el efectivo. Frases en los 12 idiomas de la app que tiene Siri.
 - **Escanear el ticket**: foto → importe, comercio, fecha y productos, leídos en el propio móvil (Vision en iPhone,

@@ -4,12 +4,15 @@ import { Pressable, Text, View } from 'react-native';
 
 import { monthKey } from '@/domain/budget';
 import { category } from '@/domain/categories';
+import { smallHabits } from '@/domain/habits';
 import { detectSubscriptions, nextCharge } from '@/domain/insights';
 import { changePct, periodStats, shiftAnchor, type Bucket, type Period, type Range } from '@/domain/stats';
 import { useI18n, type I18n, type TKey } from '@/i18n';
+import { workCost } from '@/ui/workTime';
 import { useStore } from '@/store/store';
 import { Button, Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen, Title } from '@/ui/components';
 import { ExpenseRow } from '@/ui/ExpenseRow';
+import { Heatmap } from '@/ui/Heatmap';
 import { colors, radius, space } from '@/ui/theme';
 
 const PERIODS: { id: Period; label: TKey }[] = [
@@ -261,6 +264,10 @@ export default function Stats() {
         </Card>
       ) : null}
 
+      {period === 'month' ? <Heatmap month={stats.range.start} /> : null}
+
+      <SmallHabitsCard />
+
       <SubscriptionsCard />
 
       {stats.biggest.length > 0 ? (
@@ -314,6 +321,38 @@ function SubscriptionsCard() {
           </View>
         </Row>
       ))}
+    </Card>
+  );
+}
+
+/** Gastos hormiga: pequeños y repetidos, que sueltos no parecen nada. */
+function SmallHabitsCard() {
+  const { state } = useStore();
+  const i18n = useI18n();
+  const { t, money } = i18n;
+  const habits = useMemo(() => smallHabits(state), [state.expenses]);
+  if (habits.length === 0) return null;
+  return (
+    <Card>
+      <H2>🐜 {t('ants.title')}</H2>
+      <Muted>{t('ants.hint')}</Muted>
+      {habits.slice(0, 4).map((h) => {
+        const time = workCost(i18n, state.profile, h.monthly);
+        return (
+          <Row key={h.label}>
+            <CategoryBadge id={h.category} size={32} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: colors.text, fontSize: 15 }} numberOfLines={1}>
+                {h.label}
+              </Text>
+              <Muted>
+                {t('ants.line', { count: h.count, monthly: money(h.monthly), yearly: money(h.monthly * 12) })}
+                {time ? ` · ⏱️ ${time}` : ''}
+              </Muted>
+            </View>
+          </Row>
+        );
+      })}
     </Card>
   );
 }

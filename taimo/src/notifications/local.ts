@@ -78,3 +78,15 @@ export async function scheduleSubscriptionAlerts(subs: { merchant: string; month
     });
   }
 }
+
+/** A las 48 horas de apuntar un capricho: «¿Sigues queriendo las zapatillas?». */
+export async function scheduleWishReminder(wish: { id: string; name: string; amount: number; createdAt: string }, i18n: I18n) {
+  if (Platform.OS === 'web') return;
+  if (!(await ensureNotificationPermission())) return;
+  const when = new Date(new Date(wish.createdAt).getTime() + 48 * 3_600_000);
+  await Notifications.scheduleNotificationAsync({
+    identifier: `taimo-wish-${wish.id}`,
+    content: { title: i18n.t('wish.notifTitle', { name: wish.name }), body: i18n.t('wish.notifBody', { amount: i18n.money(wish.amount) }), data: { url: 'taimo://wishlist' } },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
+  });
+}

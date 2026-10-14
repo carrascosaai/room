@@ -11,7 +11,7 @@ import { exactRemainder, POT, splitByItems, splitByWeights, splitEqually } from 
 import { parseAmount } from '@/domain/money';
 import { parseReceipt } from '@/domain/receipt';
 import type { CategoryId, Cents, Expense, ReceiptItem, SplitMode } from '@/domain/types';
-import { rateBetween } from '@/fx/fx';
+import { convert, rateBetween } from '@/fx/fx';
 import { useRates } from '@/fx/useRates';
 import { useI18n } from '@/i18n';
 import { newId, reducer, useStore } from '@/store/store';
@@ -19,6 +19,7 @@ import { Button, Chip, Input, Muted, Row, Screen } from '@/ui/components';
 import { confirm } from '@/ui/confirm';
 import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
 import { purchaseMessage } from '@/ui/messages';
+import { workCost } from '@/ui/workTime';
 import { colors, radius, space } from '@/ui/theme';
 
 /** Pasa partes a la moneda base cuadrando céntimos con el total. */
@@ -160,6 +161,9 @@ export default function AddExpense() {
   const rate =
     cur === base ? 1 : editing?.original?.currency === cur && editing.original.rate ? editing.original.rate : rateBetween(cur, base, rates) ?? 1;
   const amount = Math.round(entered * rate);
+  // En horas de trabajo (con el importe pasado a tu moneda).
+  const inHome = base === i18n.currency ? amount : convert(amount, base, i18n.currency, rates) ?? amount;
+  const timeCost = amount > 0 ? workCost(i18n, state.profile, inHome) : null;
 
   const weightNums = Object.fromEntries(
     effectiveParticipants.map((id) => [id, Number((weights[id] ?? '1').replace(',', '.')) || 0]),
@@ -242,6 +246,7 @@ export default function AddExpense() {
           />
           <CurrencyButton value={cur} onPress={() => setPicking(true)} />
         </Row>
+        {timeCost ? <Muted style={{ textAlign: 'center' }}>⏱️ {t('work.cost', { time: timeCost })}</Muted> : null}
         {cur !== base ? (
           <Muted style={{ textAlign: 'center' }}>
             {t('fx.approx', { amount: moneyIn(amount, base) })} · {t('fx.rate', { from: cur, rate: number(rate, 5), to: base })}
