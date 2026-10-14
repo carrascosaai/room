@@ -106,6 +106,15 @@ export async function signOut(): Promise<void> {
   await supabase()?.auth.signOut();
 }
 
+/** Borra la cuenta y su copia en la nube (lo que hay en el móvil se queda). */
+export async function deleteAccount(): Promise<void> {
+  const sb = supabase();
+  if (!sb) return;
+  const { error } = await sb.rpc('taimo_delete_account');
+  if (error) throw error;
+  await sb.auth.signOut().catch(() => {});
+}
+
 export async function currentUser(): Promise<User | null> {
   const sb = supabase();
   if (!sb) return null;
