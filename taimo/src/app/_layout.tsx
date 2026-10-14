@@ -89,6 +89,7 @@ function RootStack() {
         <Stack.Screen name="add" options={{ presentation: 'modal' }} />
         <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
         <Stack.Screen name="join" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="pay" />
         <Stack.Screen name="language" options={{ presentation: 'modal' }} />
         <Stack.Screen name="settings" options={{ headerShown: true, title: t('settings.title') }} />
         <Stack.Screen name="wishlist" options={{ headerShown: true, title: t('wish.title') }} />

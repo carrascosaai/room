@@ -77,3 +77,11 @@ export function extractCode(input: string): string | null {
   const bare = input.match(/\b([A-HJ-NP-Za-hj-np-z2-9]{16})\b/);
   return bare ? bare[1].toUpperCase() : null;
 }
+
+/** Web pública de Taimo, donde se abren los enlaces de pago (EXPO_PUBLIC_WEB_URL). En la versión web, la propia. */
+export function webBase(): string {
+  const env = process.env.EXPO_PUBLIC_WEB_URL ?? '';
+  if (env) return env;
+  if (typeof window !== 'undefined' && window.location?.origin?.startsWith('http')) return window.location.origin;
+  return '';
+}

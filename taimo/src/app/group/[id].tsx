@@ -7,11 +7,12 @@ import { category as categoryInfo } from '@/domain/categories';
 import { groupBudgetPlan, groupInsights, tripDays } from '@/domain/groupInsights';
 import { balances, nextPayer, POT, potContributions, potLeft, suggestTransfers, withoutPot } from '@/domain/groups';
 import { parseAmount } from '@/domain/money';
+import { buildPayRequest, canBePaid, payLink } from '@/domain/paylink';
 import { buildPush } from '@/domain/sync';
 import type { Group, Recurring } from '@/domain/types';
 import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
-import { createRemoteGroup, inviteLink, SyncError, syncConfigured } from '@/sync/api';
+import { createRemoteGroup, inviteLink, SyncError, syncConfigured, webBase } from '@/sync/api';
 import { Button, Card, Chip, Empty, H2, Input, Muted, ProgressBar, Row, Screen } from '@/ui/components';
 import { confirm } from '@/ui/confirm';
 import { CurrencyButton, CurrencyPicker, currencyFlag } from '@/ui/CurrencyPicker';
@@ -67,6 +68,15 @@ export default function GroupDetail() {
 
   async function remind(from: string, to: string, amount: number) {
     const toMe = group!.members.find((m) => m.id === to)?.isMe;
+    // Si te deben a ti: enlace que se abre en el navegador para pagarte sin instalar nada.
+    const base = webBase();
+    if (toMe && base) {
+      const req = buildPayRequest(group!, state.expenses, from, to, amount, state.profile.payment, { from: realName(from), to: realName(to) }, cur);
+      if (canBePaid(req)) {
+        await shareText(t('plink.askMessage', { name: realName(from), group: group!.name, amount: money(amount), link: payLink(base, req) }));
+        return;
+      }
+    }
     const pay = toMe ? paymentLines(state.profile.payment, amount, cur) : [];
     const message = [t('gx.remindMessage', { name: realName(from), amount: money(amount), to: realName(to), group: group!.name }), ...(pay.length ? ['', t('pay.payMe'), ...pay] : [])].join('\n');
     await shareText(message);
@@ -199,7 +209,11 @@ export default function GroupDetail() {
             ) : null}
             <Button label={t('group.markPaid')} variant="secondary" onPress={() => settle(tr.from, tr.to, tr.amount)} />
             {group.members.find((m) => m.id === tr.from)?.isMe ? null : (
-              <Button label={`🔔 ${t('gx.remind')}`} variant="ghost" onPress={() => remind(tr.from, tr.to, tr.amount)} />
+              group.members.find((m) => m.id === tr.to)?.isMe ? (
+                <Button label={t('plink.ask')} onPress={() => remind(tr.from, tr.to, tr.amount)} />
+              ) : (
+                <Button label={`🔔 ${t('gx.remind')}`} variant="ghost" onPress={() => remind(tr.from, tr.to, tr.amount)} />
+              )
             )}
           </View>
         ))}
