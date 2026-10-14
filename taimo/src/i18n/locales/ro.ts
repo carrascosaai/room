@@ -260,6 +260,7 @@ const ro: Translation = {
     equal: "În părți egale",
     weights: "Proporțional",
     exact: "Sume exacte",
+    items: "Pe produse",
     weightsHint: "De exemplu 60/40 dacă aveți venituri diferite.",
     remaining: "Mai sunt {amount} de alocat",
     over: "{amount} în plus",
@@ -381,6 +382,25 @@ const ro: Translation = {
     auto: "Ca telefonul",
     light: "☀️ Luminos",
     dark: "🌙 Întunecat",
+  },
+  ticket: {
+    addItem: "+ Produs",
+    itemName: "Produs",
+    rest: "Rest nealocat (bacșiș, taxe…): {amount}. Se împarte proporțional.",
+    over: "Produsele depășesc totalul cu {amount}.",
+  },
+  quick: {
+    placeholder: "Adaugă rapid: „cafea 2,50”",
+    added: "✓ {merchant}: {amount}",
+    undo: "Anulează",
+    hint: "Scrie cum ai spune: „cafea 2,50”, „cină 45 cu Ana ieri”.",
+  },
+  tripx: {
+    title: "Sunt cheltuieli din călătorie?",
+    text: "Ai plătit asta în altă monedă în timpul „{group}”. Mută-le în călătorie și se împart singure.",
+    add: "Adaugă-le pe toate în călătorie",
+    one: "În călătorie",
+    dismiss: "Sunt ale mele",
   },
   csv: { date: 'Dată', merchant: 'Comerciant', category: 'Categorie', total: 'Sumă totală', myShare: 'Partea mea', group: 'Grup', source: 'Sursă', note: 'Notă' },
 };

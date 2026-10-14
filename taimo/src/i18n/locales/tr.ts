@@ -260,6 +260,7 @@ const tr: Translation = {
     equal: "Eşit",
     weights: "Orantılı",
     exact: "Kesin tutarlar",
+    items: "Ürüne göre",
     weightsHint: "Örneğin farklı kazanıyorsanız 60/40.",
     remaining: "Dağıtılacak {amount} kaldı",
     over: "{amount} fazla",
@@ -381,6 +382,25 @@ const tr: Translation = {
     auto: "Telefon gibi",
     light: "☀️ Açık",
     dark: "🌙 Koyu",
+  },
+  ticket: {
+    addItem: "+ Ürün",
+    itemName: "Ürün",
+    rest: "Atanmamış kalan (bahşiş, vergiler…): {amount}. Orantılı bölünür.",
+    over: "Ürünler toplamdan {amount} fazla.",
+  },
+  quick: {
+    placeholder: "Hızlı ekle: “kahve 2,50”",
+    added: "✓ {merchant}: {amount}",
+    undo: "Geri al",
+    hint: "Söyler gibi yaz: “kahve 2,50”, “akşam yemeği 45 Ana ile dün”.",
+  },
+  tripx: {
+    title: "Bunlar seyahat harcaması mı?",
+    text: "Bunları “{group}” sırasında başka bir para biriminde ödedin. Seyahate taşı, kendiliğinden bölünsün.",
+    add: "Hepsini seyahate ekle",
+    one: "Seyahate",
+    dismiss: "Benim",
   },
   csv: { date: 'Tarih', merchant: 'Satıcı', category: 'Kategori', total: 'Toplam tutar', myShare: 'Benim payım', group: 'Grup', source: 'Kaynak', note: 'Not' },
 };

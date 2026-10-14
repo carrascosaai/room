@@ -289,6 +289,7 @@ const en = {
     equal: 'Equally',
     weights: 'Proportion',
     exact: 'Exact amounts',
+    items: "By item",
     weightsHint: 'For example 60/40 if you earn different amounts.',
     remaining: '{amount} left to assign',
     over: '{amount} too much',
@@ -410,6 +411,25 @@ const en = {
     auto: "Like my phone",
     light: "☀️ Light",
     dark: "🌙 Dark",
+  },
+  ticket: {
+    addItem: "+ Item",
+    itemName: "Item",
+    rest: "Unassigned rest (tip, taxes…): {amount}. Split in proportion.",
+    over: "The items add up to {amount} more than the total.",
+  },
+  quick: {
+    placeholder: "Quick add: “coffee 2.50”",
+    added: "✓ {merchant}: {amount}",
+    undo: "Undo",
+    hint: "Write it like you’d say it: “coffee 2.50”, “dinner 45 with Ana yesterday”.",
+  },
+  tripx: {
+    title: "Were these from the trip?",
+    text: "You paid these in another currency during “{group}”. Move them to the trip and they’ll be split automatically.",
+    add: "Add all to the trip",
+    one: "To the trip",
+    dismiss: "They’re mine",
   },
   csv: {
     date: 'Date',

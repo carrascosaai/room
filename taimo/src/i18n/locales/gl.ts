@@ -260,6 +260,7 @@ const gl: Translation = {
     equal: "A partes iguais",
     weights: "Por proporción",
     exact: "Importes exactos",
+    items: "Por produtos",
     weightsHint: "Por exemplo 60/40 se gañades distinto.",
     remaining: "Faltan {amount} por asignar",
     over: "Sobran {amount}",
@@ -381,6 +382,25 @@ const gl: Translation = {
     auto: "Como o móbil",
     light: "☀️ Claro",
     dark: "🌙 Escuro",
+  },
+  ticket: {
+    addItem: "+ Produto",
+    itemName: "Produto",
+    rest: "Resto sen asignar (propina, impostos…): {amount}. Repártese en proporción.",
+    over: "Os produtos suman {amount} máis ca o total.",
+  },
+  quick: {
+    placeholder: "Apunta rápido: «café 2,50»",
+    added: "✓ {merchant}: {amount}",
+    undo: "Desfacer",
+    hint: "Escríbeo como o dirías: «café 2,50», «cea 45 con Ana onte».",
+  },
+  tripx: {
+    title: "Son gastos da viaxe?",
+    text: "Pagaches isto noutra moeda durante «{group}». Pásaos á viaxe e repártense sós.",
+    add: "Engadir todos á viaxe",
+    one: "Á viaxe",
+    dismiss: "Son meus",
   },
   csv: { date: 'Data', merchant: 'Comercio', category: 'Categoría', total: 'Importe total', myShare: 'A miña parte', group: 'Grupo', source: 'Orixe', note: 'Nota' },
 };

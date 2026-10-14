@@ -260,6 +260,7 @@ const de: Translation = {
     equal: "Gleichmäßig",
     weights: "Anteilig",
     exact: "Genaue Beträge",
+    items: "Nach Posten",
     weightsHint: "Zum Beispiel 60/40, wenn ihr unterschiedlich verdient.",
     remaining: "Noch {amount} zu verteilen",
     over: "{amount} zu viel",
@@ -381,6 +382,25 @@ const de: Translation = {
     auto: "Wie das Handy",
     light: "☀️ Hell",
     dark: "🌙 Dunkel",
+  },
+  ticket: {
+    addItem: "+ Posten",
+    itemName: "Posten",
+    rest: "Nicht zugeordneter Rest (Trinkgeld, Steuern…): {amount}. Wird anteilig verteilt.",
+    over: "Die Posten sind {amount} mehr als der Gesamtbetrag.",
+  },
+  quick: {
+    placeholder: "Schnell erfassen: „Kaffee 2,50“",
+    added: "✓ {merchant}: {amount}",
+    undo: "Rückgängig",
+    hint: "Schreib es, wie du es sagen würdest: „Kaffee 2,50“, „Abendessen 45 mit Ana gestern“.",
+  },
+  tripx: {
+    title: "Gehören die zur Reise?",
+    text: "Das hast du während „{group}“ in einer anderen Währung bezahlt. Verschieb es zur Reise, dann wird es automatisch aufgeteilt.",
+    add: "Alle zur Reise",
+    one: "Zur Reise",
+    dismiss: "Gehört mir",
   },
   csv: { date: 'Datum', merchant: 'Händler', category: 'Kategorie', total: 'Gesamtbetrag', myShare: 'Mein Anteil', group: 'Gruppe', source: 'Quelle', note: 'Notiz' },
 };

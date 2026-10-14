@@ -39,6 +39,7 @@ export type Action =
   | { type: 'saveToGoal'; id: string; amount: Cents; leftoverMonth?: string }
   | { type: 'deleteGoal'; id: string }
   | { type: 'toggleIgnoredApp'; app: string }
+  | { type: 'dismissTrip'; ids: string[] }
   | { type: 'setLanguage'; language: NonNullable<AppState['profile']['language']> }
   | { type: 'setCurrency'; currency: string }
   | { type: 'setAccount'; account: AppState['profile']['account'] }
@@ -89,6 +90,8 @@ export function reducer(state: AppState, action: Action): AppState {
         goals: (state.goals ?? []).map((g) => (g.id === action.id ? { ...g, saved: Math.max(0, g.saved + action.amount) } : g)),
         leftoverMonth: action.leftoverMonth ?? state.leftoverMonth,
       };
+    case 'dismissTrip':
+      return { ...state, tripDismissed: [...(state.tripDismissed ?? []), ...action.ids].slice(-500) };
     case 'toggleIgnoredApp': {
       const ignored = state.ignoredApps ?? [];
       return { ...state, ignoredApps: ignored.includes(action.app) ? ignored.filter((a) => a !== action.app) : [...ignored, action.app] };

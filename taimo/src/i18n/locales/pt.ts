@@ -260,6 +260,7 @@ const pt: Translation = {
     equal: "Partes iguais",
     weights: "Proporção",
     exact: "Valores exatos",
+    items: "Por produto",
     weightsHint: "Por exemplo 60/40 se ganham valores diferentes.",
     remaining: "Faltam {amount} por atribuir",
     over: "{amount} a mais",
@@ -381,6 +382,25 @@ const pt: Translation = {
     auto: "Como o telemóvel",
     light: "☀️ Claro",
     dark: "🌙 Escuro",
+  },
+  ticket: {
+    addItem: "+ Produto",
+    itemName: "Produto",
+    rest: "Resto por atribuir (gorjeta, impostos…): {amount}. Divide-se em proporção.",
+    over: "Os produtos somam {amount} a mais do que o total.",
+  },
+  quick: {
+    placeholder: "Registo rápido: «café 2,50»",
+    added: "✓ {merchant}: {amount}",
+    undo: "Anular",
+    hint: "Escreve como dirias: «café 2,50», «jantar 45 com a Ana ontem».",
+  },
+  tripx: {
+    title: "São despesas da viagem?",
+    text: "Pagaste isto noutra moeda durante «{group}». Passa-as para a viagem e dividem-se sozinhas.",
+    add: "Adicionar todas à viagem",
+    one: "À viagem",
+    dismiss: "São minhas",
   },
   csv: { date: 'Data', merchant: 'Comerciante', category: 'Categoria', total: 'Valor total', myShare: 'A minha parte', group: 'Grupo', source: 'Origem', note: 'Nota' },
 };

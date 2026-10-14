@@ -260,6 +260,7 @@ const it: Translation = {
     equal: "In parti uguali",
     weights: "In proporzione",
     exact: "Importi esatti",
+    items: "Per prodotto",
     weightsHint: "Ad esempio 60/40 se guadagnate cifre diverse.",
     remaining: "Mancano {amount} da assegnare",
     over: "{amount} di troppo",
@@ -381,6 +382,25 @@ const it: Translation = {
     auto: "Come il telefono",
     light: "☀️ Chiaro",
     dark: "🌙 Scuro",
+  },
+  ticket: {
+    addItem: "+ Prodotto",
+    itemName: "Prodotto",
+    rest: "Resto non assegnato (mancia, tasse…): {amount}. Diviso in proporzione.",
+    over: "I prodotti superano il totale di {amount}.",
+  },
+  quick: {
+    placeholder: "Aggiunta rapida: «caffè 2,50»",
+    added: "✓ {merchant}: {amount}",
+    undo: "Annulla",
+    hint: "Scrivilo come lo diresti: «caffè 2,50», «cena 45 con Ana ieri».",
+  },
+  tripx: {
+    title: "Sono spese del viaggio?",
+    text: "Hai pagato queste in un’altra valuta durante «{group}». Spostale nel viaggio e si dividono da sole.",
+    add: "Aggiungi tutte al viaggio",
+    one: "Al viaggio",
+    dismiss: "Sono mie",
   },
   csv: { date: 'Data', merchant: 'Esercente', category: 'Categoria', total: 'Importo totale', myShare: 'La mia parte', group: 'Gruppo', source: 'Origine', note: 'Nota' },
 };

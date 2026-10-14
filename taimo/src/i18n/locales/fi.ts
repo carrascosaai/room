@@ -260,6 +260,7 @@ const fi: Translation = {
     equal: "Tasan",
     weights: "Suhteessa",
     exact: "Tarkat summat",
+    items: "Tuotteittain",
     weightsHint: "Esimerkiksi 60/40, jos tienaatte eri verran.",
     remaining: "{amount} jakamatta",
     over: "{amount} liikaa",
@@ -381,6 +382,25 @@ const fi: Translation = {
     auto: "Kuten puhelimessa",
     light: "☀️ Vaalea",
     dark: "🌙 Tumma",
+  },
+  ticket: {
+    addItem: "+ Tuote",
+    itemName: "Tuote",
+    rest: "Jakamaton loppu (tippi, verot…): {amount}. Jaetaan suhteessa.",
+    over: "Tuotteet ovat {amount} enemmän kuin summa.",
+  },
+  quick: {
+    placeholder: "Pikakirjaus: ”kahvi 2,50”",
+    added: "✓ {merchant}: {amount}",
+    undo: "Kumoa",
+    hint: "Kirjoita kuten sanoisit: ”kahvi 2,50”, ”illallinen 45 Anan kanssa eilen”.",
+  },
+  tripx: {
+    title: "Ovatko nämä matkan kuluja?",
+    text: "Maksoit nämä toisessa valuutassa matkan ”{group}” aikana. Siirrä ne matkaan, niin ne jaetaan itsestään.",
+    add: "Lisää kaikki matkaan",
+    one: "Matkaan",
+    dismiss: "Ne ovat minun",
   },
   csv: { date: 'Päivämäärä', merchant: 'Kauppias', category: 'Luokka', total: 'Kokonaissumma', myShare: 'Oma osuus', group: 'Ryhmä', source: 'Lähde', note: 'Huomautus' },
 };

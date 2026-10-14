@@ -284,6 +284,7 @@ const es: Translation = {
     equal: "A partes iguales",
     weights: "Por proporción",
     exact: "Importes exactos",
+    items: "Por productos",
     weightsHint: "Por ejemplo 60/40 si ganáis distinto.",
     remaining: "Faltan {amount} por asignar",
     over: "Sobran {amount}",
@@ -405,6 +406,25 @@ const es: Translation = {
     auto: "Como el móvil",
     light: "☀️ Claro",
     dark: "🌙 Oscuro",
+  },
+  ticket: {
+    addItem: "+ Producto",
+    itemName: "Producto",
+    rest: "Resto sin asignar (propina, impuestos…): {amount}. Se reparte en proporción.",
+    over: "Los productos suman {amount} más que el total.",
+  },
+  quick: {
+    placeholder: "Apunta rápido: «café 2,50»",
+    added: "✓ {merchant}: {amount}",
+    undo: "Deshacer",
+    hint: "Escríbelo como lo dirías: «café 2,50», «cena 45 con Ana y yo ayer».",
+  },
+  tripx: {
+    title: "¿Son gastos del viaje?",
+    text: "Pagaste esto en otra moneda durante «{group}». Pásalos al viaje y se reparten solos.",
+    add: "Añadir todos al viaje",
+    one: "Al viaje",
+    dismiss: "Son míos",
   },
   csv: {
     date: 'Fecha',

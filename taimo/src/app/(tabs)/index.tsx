@@ -8,6 +8,8 @@ import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { Button, Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen } from '@/ui/components';
 import { ExpenseRow } from '@/ui/ExpenseRow';
+import { QuickAdd } from '@/ui/QuickAdd';
+import { TripSuggestion } from '@/ui/TripSuggestion';
 import { colors, radius, space } from '@/ui/theme';
 
 export default function Home() {
@@ -34,6 +36,9 @@ export default function Home() {
           <Muted>{state.profile.name ? t('home.hello', { name: state.profile.name }) : t('home.helloAnon')}</Muted>
           <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700' }}>Taimo</Text>
         </View>
+
+        <QuickAdd />
+        <TripSuggestion />
 
         <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>
           <Muted>{t('home.leftThisMonth', { month: monthName })}</Muted>

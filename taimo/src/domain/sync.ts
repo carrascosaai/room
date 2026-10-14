@@ -1,4 +1,4 @@
-import type { AppState, CategoryId, Cents, Expense, Group, GroupKind, Member, OriginalAmount, Recurring, Settlement, SplitMode } from './types';
+import type { AppState, CategoryId, Cents, Expense, Group, GroupKind, Member, OriginalAmount, ReceiptItem, Recurring, Settlement, SplitMode } from './types';
 
 /**
  * Formato que se intercambia con el servidor para un grupo compartido.
@@ -24,7 +24,7 @@ export interface RemoteExpense {
   updatedAt: string;
   deleted: boolean;
   /** Reparto y moneda original (opcional, para no perder cómo se hizo el gasto). */
-  extra?: { splitMode?: SplitMode; weights?: Record<string, number>; original?: OriginalAmount } | null;
+  extra?: { splitMode?: SplitMode; weights?: Record<string, number>; original?: OriginalAmount; items?: ReceiptItem[] } | null;
 }
 
 /** Ajustes del grupo que se comparten (gana el cambio más reciente). */
@@ -114,7 +114,7 @@ export function buildPush(state: AppState, groupId: string): GroupPush {
       source: e.source,
       updatedAt: e.updatedAt ?? e.date,
       deleted: false,
-      extra: e.splitMode || e.weights || e.original ? { splitMode: e.splitMode, weights: e.weights, original: e.original } : null,
+      extra: e.splitMode || e.weights || e.original || e.items ? { splitMode: e.splitMode, weights: e.weights, original: e.original, items: e.items } : null,
     }));
   const settlements: RemoteSettlement[] = state.settlements
     .filter((s) => s.groupId === groupId)
@@ -187,6 +187,7 @@ export function applySnapshot(
       ...(r.extra?.splitMode ? { splitMode: r.extra.splitMode } : {}),
       ...(r.extra?.weights ? { weights: r.extra.weights } : {}),
       ...(r.extra?.original ? { original: r.extra.original } : {}),
+      ...(r.extra?.items ? { items: r.extra.items } : {}),
     });
   }
   for (const l of localExpenses.values()) {

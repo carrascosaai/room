@@ -260,6 +260,7 @@ const da: Translation = {
     equal: "Ligeligt",
     weights: "Forholdsmæssigt",
     exact: "Præcise beløb",
+    items: "Pr. vare",
     weightsHint: "For eksempel 60/40, hvis I tjener forskelligt.",
     remaining: "{amount} mangler at blive fordelt",
     over: "{amount} for meget",
@@ -381,6 +382,25 @@ const da: Translation = {
     auto: "Som telefonen",
     light: "☀️ Lyst",
     dark: "🌙 Mørkt",
+  },
+  ticket: {
+    addItem: "+ Vare",
+    itemName: "Vare",
+    rest: "Ikke-fordelt rest (drikkepenge, afgifter…): {amount}. Fordeles forholdsmæssigt.",
+    over: "Varerne er {amount} mere end totalen.",
+  },
+  quick: {
+    placeholder: "Hurtig notering: “kaffe 2,50”",
+    added: "✓ {merchant}: {amount}",
+    undo: "Fortryd",
+    hint: "Skriv det, som du ville sige det: “kaffe 2,50”, “aftensmad 45 med Ana i går”.",
+  },
+  tripx: {
+    title: "Hører de til rejsen?",
+    text: "Du betalte dette i en anden valuta under “{group}”. Flyt dem til rejsen, så deles de automatisk.",
+    add: "Tilføj alle til rejsen",
+    one: "Til rejsen",
+    dismiss: "De er mine",
   },
   csv: { date: 'Dato', merchant: 'Forretning', category: 'Kategori', total: 'Samlet beløb', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Note' },
 };

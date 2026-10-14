@@ -17,7 +17,15 @@ export type CategoryId =
 export type ExpenseSource = 'manual' | 'applepay' | 'notificacion' | 'csv' | 'fijo';
 
 /** Cómo se reparte un gasto de grupo. */
-export type SplitMode = 'equal' | 'weights' | 'exact';
+export type SplitMode = 'equal' | 'weights' | 'exact' | 'items';
+
+/** Una línea del ticket en el reparto por productos (importe en la moneda en que se pagó). */
+export interface ReceiptItem {
+  name: string;
+  amount: Cents;
+  /** Quiénes lo comparten. */
+  who: string[];
+}
 
 /** Importe original cuando se pagó en otra moneda (p. ej. 3.000 JPY en un viaje). */
 export interface OriginalAmount {
@@ -49,6 +57,8 @@ export interface Expense {
   splitMode?: SplitMode;
   /** Pesos usados con splitMode 'weights' (p. ej. { ana: 60, luis: 40 }). */
   weights?: Record<string, number>;
+  /** Líneas del ticket con splitMode 'items'. */
+  items?: ReceiptItem[];
   /** Si se pagó en otra moneda: importe y tipo de cambio originales. `amount` ya está convertido. */
   original?: OriginalAmount;
   /** Última modificación (ISO). Sirve para sincronizar grupos: gana el cambio más reciente. */
@@ -166,6 +176,8 @@ export interface AppState {
   leftoverMonth?: string;
   /** Apps de Android cuyos avisos de pago no quieres que se apunten. */
   ignoredApps?: string[];
+  /** Gastos que dijiste que no eran del viaje (para no volver a proponerlo). */
+  tripDismissed?: string[];
 }
 
 export interface Goal {

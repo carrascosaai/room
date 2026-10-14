@@ -260,6 +260,7 @@ const sv: Translation = {
     equal: "Lika",
     weights: "Proportionellt",
     exact: "Exakta belopp",
+    items: "Per produkt",
     weightsHint: "Till exempel 60/40 om ni tjänar olika.",
     remaining: "{amount} kvar att fördela",
     over: "{amount} för mycket",
@@ -381,6 +382,25 @@ const sv: Translation = {
     auto: "Som mobilen",
     light: "☀️ Ljust",
     dark: "🌙 Mörkt",
+  },
+  ticket: {
+    addItem: "+ Produkt",
+    itemName: "Produkt",
+    rest: "Ofördelad rest (dricks, skatt…): {amount}. Delas i proportion.",
+    over: "Produkterna är {amount} mer än totalen.",
+  },
+  quick: {
+    placeholder: "Snabbregistrera: ”kaffe 2,50”",
+    added: "✓ {merchant}: {amount}",
+    undo: "Ångra",
+    hint: "Skriv som du skulle säga det: ”kaffe 2,50”, ”middag 45 med Ana igår”.",
+  },
+  tripx: {
+    title: "Hör de till resan?",
+    text: "Du betalade detta i en annan valuta under ”{group}”. Flytta dem till resan så delas de automatiskt.",
+    add: "Lägg alla i resan",
+    one: "Till resan",
+    dismiss: "De är mina",
   },
   csv: { date: 'Datum', merchant: 'Handlare', category: 'Kategori', total: 'Totalbelopp', myShare: 'Min del', group: 'Grupp', source: 'Källa', note: 'Anteckning' },
 };

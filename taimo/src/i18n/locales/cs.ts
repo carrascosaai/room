@@ -260,6 +260,7 @@ const cs: Translation = {
     equal: "Rovným dílem",
     weights: "Poměrem",
     exact: "Přesné částky",
+    items: "Podle položek",
     weightsHint: "Například 60/40, pokud vyděláváte různě.",
     remaining: "Zbývá rozdělit {amount}",
     over: "O {amount} víc",
@@ -381,6 +382,25 @@ const cs: Translation = {
     auto: "Podle telefonu",
     light: "☀️ Světlý",
     dark: "🌙 Tmavý",
+  },
+  ticket: {
+    addItem: "+ Položka",
+    itemName: "Položka",
+    rest: "Nepřiřazený zbytek (spropitné, daně…): {amount}. Rozdělí se poměrně.",
+    over: "Položky jsou o {amount} vyšší než součet.",
+  },
+  quick: {
+    placeholder: "Rychlý zápis: „káva 2,50“",
+    added: "✓ {merchant}: {amount}",
+    undo: "Zpět",
+    hint: "Napiš to, jak bys to řekl: „káva 2,50“, „večeře 45 s Anou včera“.",
+  },
+  tripx: {
+    title: "Jsou to výdaje z cesty?",
+    text: "Tohle jsi zaplatil v jiné měně během „{group}“. Přesuň je do cesty a rozdělí se samy.",
+    add: "Přidat vše do cesty",
+    one: "Do cesty",
+    dismiss: "Jsou moje",
   },
   csv: { date: 'Datum', merchant: 'Obchodník', category: 'Kategorie', total: 'Celková částka', myShare: 'Můj podíl', group: 'Skupina', source: 'Zdroj', note: 'Poznámka' },
 };

@@ -1,4 +1,4 @@
-import type { Cents, Expense, Group, Settlement } from './types';
+import type { Cents, Expense, Group, ReceiptItem, Settlement } from './types';
 
 /**
  * Reparte `amount` a partes iguales entre `memberIds`. Los céntimos sobrantes se
@@ -109,4 +109,24 @@ export function nextPayer(balance: Record<string, Cents>): string | null {
   if (entries.length < 2) return null;
   const [id, value] = entries.reduce((min, cur) => (cur[1] < min[1] ? cur : min));
   return value < 0 ? id : null;
+}
+
+/**
+ * Reparto por productos del ticket: cada línea se divide entre quienes la
+ * comparten y lo que no está en ninguna línea (propina, impuestos, pan…) se
+ * reparte en proporción a lo que ha consumido cada uno. Devuelve null si los
+ * productos suman más que el total o no hay nadie asignado.
+ */
+export function splitByItems(total: Cents, items: ReceiptItem[]): Record<string, Cents> | null {
+  const base: Record<string, Cents> = {};
+  let itemsTotal = 0;
+  for (const it of items) {
+    if (it.amount <= 0 || it.who.length === 0) continue;
+    itemsTotal += it.amount;
+    for (const [id, v] of Object.entries(splitEqually(it.amount, it.who))) base[id] = (base[id] ?? 0) + v;
+  }
+  if (itemsTotal === 0 || itemsTotal > total) return null;
+  const rest = total - itemsTotal;
+  const extra = rest > 0 ? splitByWeights(rest, base) : {};
+  return Object.fromEntries(Object.entries(base).map(([id, v]) => [id, v + (extra[id] ?? 0)]));
 }

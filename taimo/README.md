@@ -16,6 +16,12 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
   reparto por categoría y gastos más grandes. Toca una barra para ver su importe.
 
 - **Presupuestos por categoría** y en Inicio: lo que te queda este mes y **cuánto puedes gastar al día**.
+- **Apuntar rápido escribiendo como hablas**: «café 2,50», «ramen ¥1200», «cena 45 con Ana y yo ayer» (importe,
+  moneda, comercio, categoría, grupo y «ayer» en los 20 idiomas). Con grupo abre el formulario ya relleno.
+- **Modo viaje inteligente**: los pagos con tu tarjeta en otra moneda durante un viaje se proponen para el grupo del
+  viaje y, con un toque, pasan a la moneda del viaje repartidos como reparte el grupo.
+- **Categorías en todo el mundo**: cadenas y palabras de muchos países e idiomas (Tesco, Walmart, Rewe, Магнит,
+  セブンイレブン, «dinner», «Miete»…).
 - **Presupuesto automático**: «✨ Proponer según lo que gasto» pone en cada categoría la media de tus últimos meses
   (o extrapola este mes si aún no hay historial), redondeada hacia arriba.
 - **Avisos al 80 % y al 100 %** de cada categoría también con los pagos que se apuntan solos.
@@ -55,7 +61,8 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
     duplicarse aunque los tengan varios móviles.
   - **Viaje**: moneda del grupo, fechas y presupuesto: **cuánto podéis gastar al día entre todos y por persona**,
     coste por persona y en qué monedas se ha pagado.
-  - Tres formas de repartir cada gasto: **a partes iguales, por proporción o importes exactos**.
+  - Cuatro formas de repartir cada gasto: **a partes iguales, por proporción, importes exactos o por productos del
+    ticket** (cada uno paga lo suyo y la propina e impuestos van en proporción).
   - Quién ha pagado qué, gasto por categoría, **🔔 Recordar** (manda por WhatsApp lo que debe cada uno) y cómo
     quedar en paz con las mínimas transferencias. **Invita por WhatsApp** con un enlace o un código: todo se
     sincroniza, también los ajustes del grupo. **A tu presupuesto solo cuenta tu parte**, convertida a tu moneda.

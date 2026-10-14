@@ -260,6 +260,7 @@ const eu: Translation = {
     equal: "Zati berdinetan",
     weights: "Proportzioz",
     exact: "Zenbateko zehatzak",
+    items: "Produktuka",
     weightsHint: "Adibidez 60/40, irabazi desberdinak badituzue.",
     remaining: "{amount} esleitzeke",
     over: "{amount} soberan",
@@ -381,6 +382,25 @@ const eu: Translation = {
     auto: "Mugikorraren arabera",
     light: "☀️ Argia",
     dark: "🌙 Iluna",
+  },
+  ticket: {
+    addItem: "+ Produktua",
+    itemName: "Produktua",
+    rest: "Esleitu gabeko gainerakoa (eskupekoa, zergak…): {amount}. Proportzioan banatzen da.",
+    over: "Produktuek guztizkoa baino {amount} gehiago egiten dute.",
+  },
+  quick: {
+    placeholder: "Apuntatu azkar: «kafea 2,50»",
+    added: "✓ {merchant}: {amount}",
+    undo: "Desegin",
+    hint: "Idatzi esango zenukeen bezala: «kafea 2,50», «afaria 45 Anarekin atzo».",
+  },
+  tripx: {
+    title: "Bidaiako gastuak dira?",
+    text: "Hau beste dibisa batean ordaindu zenuen «{group}» bitartean. Pasatu bidaiara eta bakarrik banatuko dira.",
+    add: "Gehitu denak bidaiara",
+    one: "Bidaiara",
+    dismiss: "Nireak dira",
   },
   csv: { date: 'Data', merchant: 'Denda', category: 'Kategoria', total: 'Zenbateko osoa', myShare: 'Nire zatia', group: 'Taldea', source: 'Jatorria', note: 'Oharra' },
 };

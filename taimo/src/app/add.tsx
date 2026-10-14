@@ -5,9 +5,9 @@ import { Alert, Platform, ScrollView, Text, TextInput, View } from 'react-native
 import { categoryStatus } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
 import { categorize } from '@/domain/categorize';
-import { exactRemainder, splitByWeights, splitEqually } from '@/domain/groups';
+import { exactRemainder, splitByItems, splitByWeights, splitEqually } from '@/domain/groups';
 import { parseAmount } from '@/domain/money';
-import type { CategoryId, Cents, Expense, SplitMode } from '@/domain/types';
+import type { CategoryId, Cents, Expense, ReceiptItem, SplitMode } from '@/domain/types';
 import { rateBetween } from '@/fx/fx';
 import { useRates } from '@/fx/useRates';
 import { useI18n } from '@/i18n';
@@ -38,7 +38,7 @@ function scaleShares(shares: Record<string, Cents>, rate: number, total: Cents):
  * a partes iguales, por proporción o con importes exactos.
  */
 export default function AddExpense() {
-  const params = useLocalSearchParams<{ id?: string; groupId?: string }>();
+  const params = useLocalSearchParams<{ id?: string; groupId?: string; amount?: string; merchant?: string; currency?: string; daysAgo?: string }>();
   const { state, dispatch } = useStore();
   const i18n = useI18n();
   const { t, moneyIn, number, locale } = i18n;
@@ -52,14 +52,21 @@ export default function AddExpense() {
   const base = group?.currency ?? i18n.currency;
   const recentForeign = (state.recentCurrencies ?? []).find((c) => c !== base);
   const [cur, setCur] = useState<string>(
-    editing?.original?.currency ?? (group?.kind === 'trip' && recentForeign ? recentForeign : base),
+    editing?.original?.currency ?? params.currency ?? (group?.kind === 'trip' && recentForeign ? recentForeign : base),
   );
-  const [amountText, setAmountText] = useState(editing ? fmtInput(editing.original?.amount ?? editing.amount) : '');
-  const [merchant, setMerchant] = useState(editing?.merchant ?? '');
+  const [amountText, setAmountText] = useState(
+    editing ? fmtInput(editing.original?.amount ?? editing.amount) : params.amount ? fmtInput(Number(params.amount)) : '',
+  );
+  const [merchant, setMerchant] = useState(editing?.merchant ?? params.merchant ?? '');
   const [cat, setCat] = useState<CategoryId>(editing?.category ?? 'otros');
   const [catTouched, setCatTouched] = useState(Boolean(editing));
   const [picking, setPicking] = useState(false);
-  const [day, setDay] = useState(() => new Date(editing?.date ?? Date.now()).toDateString());
+  const [day, setDay] = useState(() => {
+    if (editing) return new Date(editing.date).toDateString();
+    const d = new Date();
+    d.setDate(d.getDate() - (Number(params.daysAgo) || 0));
+    return d.toDateString();
+  });
   const dayOptions = useMemo(() => {
     const rel = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
     const now = new Date();
@@ -85,6 +92,10 @@ export default function AddExpense() {
       : {},
   );
 
+  const [items, setItems] = useState<{ key: string; name: string; amount: string; who: string[] }[]>(() =>
+    (editing?.items ?? []).map((it, i) => ({ key: String(i), name: it.name, amount: fmtInput(it.amount), who: it.who })),
+  );
+
   const effectivePaidBy = paidBy ?? me;
   const effectiveParticipants = participants ?? group?.members.map((m) => m.id) ?? [];
   const entered = parseAmount(amountText) ?? 0;
@@ -98,19 +109,23 @@ export default function AddExpense() {
   );
   const exactNums = Object.fromEntries(effectiveParticipants.map((id) => [id, parseAmount(exact[id] ?? '') ?? 0]));
   const exactLeft = mode === 'exact' ? exactRemainder(entered, exactNums) : 0;
+  const parsedItems: ReceiptItem[] = items.map((it) => ({ name: it.name.trim(), amount: parseAmount(it.amount) ?? 0, who: it.who }));
+  const itemsSplit = mode === 'items' ? splitByItems(entered, parsedItems) : null;
+  const itemsLeft = entered - parsedItems.reduce((a, it) => a + it.amount, 0);
 
   const shares = useMemo(() => {
     if (!group) return undefined;
     if (mode === 'weights') return splitByWeights(amount, weightNums);
     if (mode === 'exact') return scaleShares(exactNums, rate, amount);
+    if (mode === 'items') return itemsSplit ? scaleShares(itemsSplit, rate, amount) : undefined;
     return splitEqually(amount, effectiveParticipants);
-  }, [group, mode, amount, JSON.stringify(weightNums), JSON.stringify(exactNums), rate, effectiveParticipants.join()]);
+  }, [group, mode, amount, JSON.stringify(weightNums), JSON.stringify(exactNums), JSON.stringify(itemsSplit), rate, effectiveParticipants.join()]);
 
   const suggested = merchant.trim() ? categorize(merchant, state.learnedCategories) : 'otros';
   const shownCat = catTouched ? cat : suggested;
   const valid =
     amount > 0 &&
-    (!group || (effectivePaidBy && effectiveParticipants.length > 0 && (mode !== 'exact' || exactLeft === 0)));
+    (!group || (effectivePaidBy && effectiveParticipants.length > 0 && (mode !== 'exact' || exactLeft === 0) && (mode !== 'items' || !!itemsSplit)));
 
   function save() {
     if (!valid) return;
@@ -127,6 +142,7 @@ export default function AddExpense() {
       shares: group ? shares : undefined,
       splitMode: group ? mode : undefined,
       weights: group && mode === 'weights' ? weightNums : undefined,
+      items: group && mode === 'items' ? parsedItems.filter((it) => it.amount > 0 && it.who.length) : undefined,
       original: cur !== base ? { amount: entered, currency: cur, rate } : undefined,
     };
     const action = editing ? ({ type: 'updateExpense', expense } as const) : ({ type: 'addExpense', expense } as const);
@@ -235,12 +251,82 @@ export default function AddExpense() {
           </Row>
 
           <Row style={{ flexWrap: 'wrap' }}>
-            {(['equal', 'weights', 'exact'] as SplitMode[]).map((m) => (
+            {(['equal', 'weights', 'exact', 'items'] as SplitMode[]).map((m) => (
               <Chip key={m} label={t(`split.${m}`)} selected={mode === m} onPress={() => setMode(m)} />
             ))}
           </Row>
 
-          {mode === 'equal' ? (
+          {mode === 'items' ? (
+            <View style={{ gap: space.md }}>
+              {items.map((it, idx) => (
+                <View key={it.key} style={{ gap: space.sm, borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: space.md }}>
+                  <Row>
+                    <View style={{ flex: 1 }}>
+                      <Input
+                        value={it.name}
+                        placeholder={t('ticket.itemName')}
+                        onChangeText={(v) => setItems((list) => list.map((x, i) => (i === idx ? { ...x, name: v } : x)))}
+                        style={{ paddingVertical: 8 }}
+                      />
+                    </View>
+                    <View style={{ width: 96 }}>
+                      <Input
+                        value={it.amount}
+                        keyboardType="decimal-pad"
+                        placeholder={`0${decimalSep}00`}
+                        onChangeText={(v) => setItems((list) => list.map((x, i) => (i === idx ? { ...x, amount: v } : x)))}
+                        style={{ textAlign: 'right', paddingVertical: 8 }}
+                      />
+                    </View>
+                    <Text
+                      accessibilityRole="button"
+                      accessibilityLabel={t('common.delete')}
+                      onPress={() => setItems((list) => list.filter((_, i) => i !== idx))}
+                      style={{ color: colors.textMuted, fontSize: 20, paddingHorizontal: 4 }}
+                    >
+                      ✕
+                    </Text>
+                  </Row>
+                  <Row style={{ flexWrap: 'wrap' }}>
+                    {group.members.map((m) => {
+                      const on = it.who.includes(m.id);
+                      return (
+                        <Chip
+                          key={m.id}
+                          label={`${on ? '✓ ' : ''}${name(m.id)}`}
+                          selected={on}
+                          onPress={() =>
+                            setItems((list) =>
+                              list.map((x, i) => (i === idx ? { ...x, who: on ? x.who.filter((w) => w !== m.id) : [...x.who, m.id] } : x)),
+                            )
+                          }
+                        />
+                      );
+                    })}
+                  </Row>
+                </View>
+              ))}
+              <Button
+                label={t('ticket.addItem')}
+                variant="secondary"
+                onPress={() => setItems((list) => [...list, { key: `${Date.now()}-${list.length}`, name: '', amount: '', who: me ? [me] : [] }])}
+              />
+              {itemsLeft < 0 ? (
+                <Text style={{ color: colors.warning }}>{t('ticket.over', { amount: moneyIn(-itemsLeft, cur) })}</Text>
+              ) : items.length > 0 && itemsLeft > 0 ? (
+                <Muted>{t('ticket.rest', { amount: moneyIn(itemsLeft, cur) })}</Muted>
+              ) : null}
+              {shares ? (
+                <Row style={{ flexWrap: 'wrap' }}>
+                  {group.members.map((m) => (
+                    <Muted key={m.id}>
+                      {name(m.id)}: {moneyIn(shares[m.id] ?? 0, base)}
+                    </Muted>
+                  ))}
+                </Row>
+              ) : null}
+            </View>
+          ) : mode === 'equal' ? (
             <Row style={{ flexWrap: 'wrap' }}>
               {group.members.map((m) => {
                 const on = effectiveParticipants.includes(m.id);

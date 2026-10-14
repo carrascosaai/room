@@ -260,6 +260,7 @@ const ca: Translation = {
     equal: "A parts iguals",
     weights: "Per proporció",
     exact: "Imports exactes",
+    items: "Per productes",
     weightsHint: "Per exemple 60/40 si guanyeu diferent.",
     remaining: "Falten {amount} per assignar",
     over: "Sobren {amount}",
@@ -381,6 +382,25 @@ const ca: Translation = {
     auto: "Com el mòbil",
     light: "☀️ Clar",
     dark: "🌙 Fosc",
+  },
+  ticket: {
+    addItem: "+ Producte",
+    itemName: "Producte",
+    rest: "Resta sense assignar (propina, impostos…): {amount}. Es reparteix en proporció.",
+    over: "Els productes sumen {amount} més que el total.",
+  },
+  quick: {
+    placeholder: "Apunta ràpid: «cafè 2,50»",
+    added: "✓ {merchant}: {amount}",
+    undo: "Desfer",
+    hint: "Escriu-ho com ho diries: «cafè 2,50», «sopar 45 amb l’Ana ahir».",
+  },
+  tripx: {
+    title: "Són despeses del viatge?",
+    text: "Vas pagar això en una altra moneda durant «{group}». Passa-les al viatge i es reparteixen soles.",
+    add: "Afegir-les totes al viatge",
+    one: "Al viatge",
+    dismiss: "Són meves",
   },
   csv: { date: 'Data', merchant: 'Comerç', category: 'Categoria', total: 'Import total', myShare: 'La meva part', group: 'Grup', source: 'Origen', note: 'Nota' },
 };

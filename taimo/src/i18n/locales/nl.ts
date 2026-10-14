@@ -260,6 +260,7 @@ const nl: Translation = {
     equal: "Gelijk",
     weights: "Naar verhouding",
     exact: "Exacte bedragen",
+    items: "Per product",
     weightsHint: "Bijvoorbeeld 60/40 als jullie verschillend verdienen.",
     remaining: "Nog {amount} te verdelen",
     over: "{amount} te veel",
@@ -381,6 +382,25 @@ const nl: Translation = {
     auto: "Zoals mijn telefoon",
     light: "☀️ Licht",
     dark: "🌙 Donker",
+  },
+  ticket: {
+    addItem: "+ Product",
+    itemName: "Product",
+    rest: "Niet toegewezen rest (fooi, btw…): {amount}. Wordt naar verhouding verdeeld.",
+    over: "De producten zijn {amount} meer dan het totaal.",
+  },
+  quick: {
+    placeholder: "Snel toevoegen: ‘koffie 2,50’",
+    added: "✓ {merchant}: {amount}",
+    undo: "Ongedaan maken",
+    hint: "Schrijf het zoals je het zou zeggen: ‘koffie 2,50’, ‘diner 45 met Ana gisteren’.",
+  },
+  tripx: {
+    title: "Horen deze bij de reis?",
+    text: "Je betaalde dit in een andere munt tijdens ‘{group}’. Verplaats ze naar de reis en ze worden vanzelf verdeeld.",
+    add: "Alles naar de reis",
+    one: "Naar de reis",
+    dismiss: "Zijn van mij",
   },
   csv: { date: 'Datum', merchant: 'Winkel', category: 'Categorie', total: 'Totaalbedrag', myShare: 'Mijn deel', group: 'Groep', source: 'Bron', note: 'Notitie' },
 };

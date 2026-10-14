@@ -260,6 +260,7 @@ const nb: Translation = {
     equal: "Likt",
     weights: "Forholdsmessig",
     exact: "Nøyaktige beløp",
+    items: "Per produkt",
     weightsHint: "For eksempel 60/40 hvis dere tjener ulikt.",
     remaining: "{amount} igjen å fordele",
     over: "{amount} for mye",
@@ -381,6 +382,25 @@ const nb: Translation = {
     auto: "Som mobilen",
     light: "☀️ Lyst",
     dark: "🌙 Mørkt",
+  },
+  ticket: {
+    addItem: "+ Produkt",
+    itemName: "Produkt",
+    rest: "Rest som ikke er fordelt (tips, avgifter…): {amount}. Fordeles forholdsmessig.",
+    over: "Produktene er {amount} mer enn totalen.",
+  },
+  quick: {
+    placeholder: "Hurtigføring: «kaffe 2,50»",
+    added: "✓ {merchant}: {amount}",
+    undo: "Angre",
+    hint: "Skriv det som du ville sagt det: «kaffe 2,50», «middag 45 med Ana i går».",
+  },
+  tripx: {
+    title: "Hører disse til turen?",
+    text: "Du betalte dette i en annen valuta under «{group}». Flytt dem til turen, så fordeles de automatisk.",
+    add: "Legg alle til turen",
+    one: "Til turen",
+    dismiss: "De er mine",
   },
   csv: { date: 'Dato', merchant: 'Brukersted', category: 'Kategori', total: 'Totalbeløp', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Notat' },
 };
