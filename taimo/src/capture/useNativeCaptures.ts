@@ -6,10 +6,12 @@ import { drainPending } from 'taimo-capture';
 import { categoryStatus } from '@/domain/budget';
 import { parseCaptureParams, type CapturePayload } from '@/domain/capture';
 import { budgetCrossings } from '@/domain/insights';
+import { parseQuickAdd, quickExpense } from '@/domain/smart';
+import { FALLBACK } from '@/fx/fx';
 import { parsePaymentNotification, type RawNotification } from '@/domain/notifications';
 import type { I18n } from '@/i18n';
 import { notifyNow } from '@/notifications/local';
-import { expenseFromCapture, reducer, useStore } from '@/store/store';
+import { expenseFromCapture, newId, reducer, useStore } from '@/store/store';
 import { purchaseMessage } from '@/ui/messages';
 
 /**
@@ -30,6 +32,23 @@ export function useNativeCaptures(i18n: I18n, onCaptured?: (count: number) => vo
     let current = before;
     let added = 0;
     for (const item of items) {
+      // Siri: «50 euros en comida» (sobre todo pagos en efectivo).
+      if (item.text) {
+        const q = parseQuickAdd(item.text, current);
+        if (!q) continue;
+        const when = item.date ? new Date(item.date) : new Date();
+        const expense = quickExpense(q, current, current.fx ?? FALLBACK, {
+          id: newId(),
+          now: Number.isNaN(when.getTime()) ? new Date() : when,
+          fallbackMerchant: i18n.t(`cat.${q.category}`),
+          note: '🎙️ Siri',
+        });
+        const action = { type: 'addExpense', expense } as const;
+        dispatch(action);
+        current = reducer(current, action);
+        added++;
+        continue;
+      }
       let payload: CapturePayload | null;
       if (Platform.OS === 'android') {
         payload = parsePaymentNotification(item as unknown as RawNotification, {

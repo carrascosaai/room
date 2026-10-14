@@ -290,3 +290,22 @@ export function monthRecap(state: ShareState & Pick<AppState, 'budgets'>, month:
     shared,
   };
 }
+
+/** Cuándo llegará el próximo cobro de una suscripción (mismo día del mes siguiente al último). */
+export function nextCharge(sub: Subscription, today: Date = new Date()): Date {
+  const last = new Date(sub.lastDate);
+  const day = last.getDate();
+  let y = last.getFullYear();
+  let m = last.getMonth() + 1;
+  let next = new Date(y, m, Math.min(day, daysInMonth(new Date(y, m, 1))), 10);
+  // Si ya pasó (un cobro que aún no ha llegado este mes), el siguiente.
+  while (next.getTime() < today.getTime() - 86_400_000) {
+    m++;
+    if (m > 11) {
+      m = 0;
+      y++;
+    }
+    next = new Date(y, m, Math.min(day, daysInMonth(new Date(y, m, 1))), 10);
+  }
+  return next;
+}

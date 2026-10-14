@@ -3,7 +3,7 @@ import { splitByWeights, splitEqually } from './groups';
 import { parseAmount } from './money';
 import { findMoney } from './notifications';
 import type { AppState, CategoryId, Cents, Expense, Group } from './types';
-import { convert, type Rates } from '../fx/fx';
+import { convert, rateBetween, type Rates } from '../fx/fx';
 
 /* ───────────── Modo viaje: tus pagos en el extranjero, al grupo del viaje ───────────── */
 
@@ -143,4 +143,36 @@ export function parseQuickAdd(text: string, state: Pick<AppState, 'groups' | 'le
     groupId: group?.id,
     daysAgo,
   };
+}
+
+/**
+ * El gasto que sale de una frase («50 euros en comida», «cena 40 con Ana y yo»):
+ * convertido a tu moneda si hace falta y, si nombra un grupo, repartido en él.
+ * Lo usan Apuntar rápido y Siri.
+ */
+export function quickExpense(
+  q: QuickAdd,
+  state: Pick<AppState, 'groups' | 'profile'>,
+  rates: Rates,
+  opts: { id: string; now?: Date; fallbackMerchant: string; note?: string },
+): Expense {
+  const home = state.profile.currency;
+  const rate = q.currency !== home ? rateBetween(q.currency, home, rates) : null;
+  const when = new Date(opts.now ?? Date.now());
+  if (q.daysAgo) {
+    when.setDate(when.getDate() - q.daysAgo);
+    when.setHours(12, 0, 0, 0);
+  }
+  const personal: Expense = {
+    id: opts.id,
+    amount: rate ? Math.round(q.amount * rate) : q.amount,
+    merchant: q.merchant || opts.fallbackMerchant,
+    category: q.category,
+    date: when.toISOString(),
+    source: 'manual',
+    note: opts.note,
+    original: rate ? { amount: q.amount, currency: q.currency, rate } : undefined,
+  };
+  const group = q.groupId ? state.groups.find((g) => g.id === q.groupId) : undefined;
+  return group ? moveToGroup(personal, group, home, rates) : personal;
 }

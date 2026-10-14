@@ -1,12 +1,15 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { canRecognizeText, recognizeText } from 'taimo-capture';
 import { Alert, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { categoryStatus } from '@/domain/budget';
 import { CATEGORIES } from '@/domain/categories';
 import { categorize } from '@/domain/categorize';
-import { exactRemainder, splitByItems, splitByWeights, splitEqually } from '@/domain/groups';
+import { exactRemainder, POT, splitByItems, splitByWeights, splitEqually } from '@/domain/groups';
 import { parseAmount } from '@/domain/money';
+import { parseReceipt } from '@/domain/receipt';
 import type { CategoryId, Cents, Expense, ReceiptItem, SplitMode } from '@/domain/types';
 import { rateBetween } from '@/fx/fx';
 import { useRates } from '@/fx/useRates';
@@ -38,7 +41,7 @@ function scaleShares(shares: Record<string, Cents>, rate: number, total: Cents):
  * a partes iguales, por proporción o con importes exactos.
  */
 export default function AddExpense() {
-  const params = useLocalSearchParams<{ id?: string; groupId?: string; amount?: string; merchant?: string; currency?: string; daysAgo?: string }>();
+  const params = useLocalSearchParams<{ id?: string; groupId?: string; amount?: string; merchant?: string; currency?: string; daysAgo?: string; scan?: string }>();
   const { state, dispatch } = useStore();
   const i18n = useI18n();
   const { t, moneyIn, number, locale } = i18n;
@@ -75,9 +78,9 @@ export default function AddExpense() {
       const label = n < 2 ? rel.format(-n, 'day') : i18n.date(d, { weekday: 'short', day: 'numeric' });
       return { key: d.toDateString(), label: label.charAt(0).toUpperCase() + label.slice(1) };
     });
-    if (editing && !list.some((o) => o.key === day)) list.push({ key: day, label: i18n.date(editing.date, { day: 'numeric', month: 'short' }) });
+    if (!list.some((o) => o.key === day)) list.push({ key: day, label: i18n.date(new Date(day), { day: 'numeric', month: 'short' }) });
     return list;
-  }, [locale]);
+  }, [locale, day]);
 
   const me = group?.members.find((m) => m.isMe)?.id;
   const [paidBy, setPaidBy] = useState<string | undefined>(editing?.paidBy);
@@ -95,6 +98,60 @@ export default function AddExpense() {
   const [items, setItems] = useState<{ key: string; name: string; amount: string; who: string[] }[]>(() =>
     (editing?.items ?? []).map((it, i) => ({ key: String(i), name: it.name, amount: fmtInput(it.amount), who: it.who })),
   );
+
+  const [scanMessage, setScanMessage] = useState<string | null>(null);
+
+  /** Foto del ticket → importe, comercio, fecha y (en grupos) productos para repartir. */
+  async function scan(source: 'camera' | 'library') {
+    setScanMessage(null);
+    if (!canRecognizeText) {
+      setScanMessage(t('scan.unavailable'));
+      return;
+    }
+    const perm = source === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      setScanMessage(t('scan.permission'));
+      return;
+    }
+    const picked =
+      source === 'camera'
+        ? await ImagePicker.launchCameraAsync({ quality: 0.9, mediaTypes: ['images'] })
+        : await ImagePicker.launchImageLibraryAsync({ quality: 0.9, mediaTypes: ['images'] });
+    if (picked.canceled || !picked.assets[0]) return;
+    setScanMessage(t('scan.reading'));
+    const lines = await recognizeText(picked.assets[0].uri).catch(() => []);
+    const r = parseReceipt(lines, base);
+    if (!r.total) {
+      setScanMessage(t('scan.failed'));
+      return;
+    }
+    setAmountText(fmtInput(r.total));
+    if (r.merchant) setMerchant(r.merchant.charAt(0) + r.merchant.slice(1).toLowerCase());
+    if (r.currency !== cur) setCur(r.currency);
+    if (r.date) setDay(new Date(r.date).toDateString());
+    if (group && r.items.length > 1) {
+      setMode('items');
+      setItems(r.items.map((it, i) => ({ key: `scan-${i}`, name: it.name, amount: fmtInput(it.amount), who: me ? [me] : [] })));
+    }
+    setScanMessage(t('scan.done'));
+  }
+
+  function askScan() {
+    if (Platform.OS === 'web') return scan('library');
+    Alert.alert(t('scan.button'), undefined, [
+      { text: t('scan.camera'), onPress: () => scan('camera') },
+      { text: t('scan.library'), onPress: () => scan('library') },
+      { text: t('common.cancel'), style: 'cancel' },
+    ]);
+  }
+
+  const scannedOnOpen = useRef(false);
+  useEffect(() => {
+    if (params.scan && !scannedOnOpen.current) {
+      scannedOnOpen.current = true;
+      askScan();
+    }
+  }, [params.scan]);
 
   const effectivePaidBy = paidBy ?? me;
   const effectiveParticipants = participants ?? group?.members.map((m) => m.id) ?? [];
@@ -167,6 +224,8 @@ export default function AddExpense() {
         <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600' }}>{editing ? t('add.editTitle') : t('add.newTitle')}</Text>
         <View style={{ width: 90 }} />
       </Row>
+      {!editing ? <Button label={t('scan.button')} variant="secondary" onPress={askScan} /> : null}
+      {scanMessage ? <Muted style={{ textAlign: 'center' }}>{scanMessage}</Muted> : null}
 
       <View style={{ alignItems: 'center', gap: space.sm }}>
         <Muted>{t('add.amount')}</Muted>
@@ -248,6 +307,7 @@ export default function AddExpense() {
             {group.members.map((m) => (
               <Chip key={m.id} label={name(m.id)} selected={effectivePaidBy === m.id} onPress={() => setPaidBy(m.id)} />
             ))}
+            {group.pot ? <Chip label={`🫙 ${t('pot.name')}`} selected={effectivePaidBy === POT} onPress={() => setPaidBy(POT)} /> : null}
           </Row>
 
           <Row style={{ flexWrap: 'wrap' }}>

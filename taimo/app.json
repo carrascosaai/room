@@ -53,6 +53,14 @@
         {
           "faceIDPermission": "Taimo uses Face ID to keep your spending private."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Taimo uses the camera to read your receipts. Photos stay on your phone.",
+          "photosPermission": "Taimo reads receipts from your photos. They stay on your phone.",
+          "microphonePermission": false
+        }
       ]
     ],
     "scheme": "taimo",

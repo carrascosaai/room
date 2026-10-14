@@ -47,3 +47,34 @@ export async function notifyNow(title: string, body: string) {
   if (!perm.granted) return;
   await Notifications.scheduleNotificationAsync({ content: { title, body }, trigger: null });
 }
+
+const SUB_PREFIX = 'taimo-sub-';
+
+/**
+ * Un aviso a las 10:00 del día antes de cada cobro de suscripción: «Mañana te
+ * cobran Netflix (12,99 €). ¿Lo sigues usando?». Se reprograma al abrir la app.
+ */
+export async function scheduleSubscriptionAlerts(subs: { merchant: string; monthly: number; next: Date }[], i18n: I18n) {
+  if (Platform.OS === 'web') return;
+  const perm = await Notifications.getPermissionsAsync();
+  if (!perm.granted) return;
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  await Promise.all(
+    scheduled.filter((n) => n.identifier.startsWith(SUB_PREFIX)).map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)),
+  );
+  const now = Date.now();
+  for (const s of subs) {
+    const when = new Date(s.next);
+    when.setDate(when.getDate() - 1);
+    when.setHours(10, 0, 0, 0);
+    if (when.getTime() <= now || when.getTime() - now > 40 * 86_400_000) continue;
+    await Notifications.scheduleNotificationAsync({
+      identifier: `${SUB_PREFIX}${s.merchant.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      content: {
+        title: i18n.t('subx.title', { merchant: s.merchant }),
+        body: i18n.t('subx.body', { amount: i18n.money(s.monthly) }),
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
+    });
+  }
+}

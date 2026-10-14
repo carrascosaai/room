@@ -3,10 +3,12 @@ import { Platform, Pressable, Text, View } from 'react-native';
 
 import { categoryStatus, monthKey, monthSummary } from '@/domain/budget';
 import { CATEGORIES, category } from '@/domain/categories';
+import { dailyStreak, evaluateChallenge } from '@/domain/challenges';
 import { categoryTrend, expectedLeftover, monthForecast } from '@/domain/insights';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { Button, Card, CategoryBadge, Empty, H2, Muted, ProgressBar, Row, Screen } from '@/ui/components';
+import { challengeTitle } from '@/ui/challengeTitle';
 import { ExpenseRow } from '@/ui/ExpenseRow';
 import { QuickAdd } from '@/ui/QuickAdd';
 import { TripSuggestion } from '@/ui/TripSuggestion';
@@ -26,6 +28,8 @@ export default function Home() {
   const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
   const trend = categoryTrend(state, today);
   const goals = state.goals ?? [];
+  const streak = dailyStreak(state, today);
+  const activeChallenge = (state.challenges ?? []).map((c) => ({ c, s: evaluateChallenge(c, state, today) })).find((x) => x.s.status === 'active');
   const openGoal = goals.find((g) => g.saved < g.target);
   const leftover = state.leftoverMonth === monthKey(today) ? 0 : expectedLeftover(forecast);
   const hasAuto = state.expenses.some((e) => e.source === 'applepay' || e.source === 'notificacion');
@@ -39,6 +43,18 @@ export default function Home() {
         </View>
 
         <QuickAdd />
+        <Pressable onPress={() => router.push('/assistant')} accessibilityRole="button">
+          <Card>
+            <Row>
+              <Text style={{ fontSize: 24 }}>💬</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>{t('asst.title')}</Text>
+                <Muted>{t('asst.ex1')}</Muted>
+              </View>
+              <Text style={{ color: colors.primary, fontSize: 22 }}>›</Text>
+            </Row>
+          </Card>
+        </Pressable>
         {today.getDate() <= 7 && state.expenses.some((e) => monthKey(e.date) === monthKey(lastMonth)) ? (
           <Button
             label={t('recap.open', { month: date(lastMonth, { month: 'long' }) })}
@@ -98,6 +114,19 @@ export default function Home() {
             </Card>
           </Pressable>
         ) : null}
+
+        <Pressable onPress={() => router.push('/challenges')} accessibilityRole="button">
+          <Card>
+            <Row>
+              <Text style={{ fontSize: 24 }}>🔥</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>{t('ch.streak', { count: streak })}</Text>
+                <Muted>{activeChallenge ? `${challengeTitle(activeChallenge.c, t)} · ${t('ch.day', { day: activeChallenge.s.day, days: activeChallenge.c.days })}` : t('ch.cta')}</Muted>
+              </View>
+              <Text style={{ color: colors.primary, fontSize: 22 }}>›</Text>
+            </Row>
+          </Card>
+        </Pressable>
 
         <Pressable onPress={() => router.push('/goals')} accessibilityRole="button">
           <Card>

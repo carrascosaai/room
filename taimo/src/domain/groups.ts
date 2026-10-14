@@ -130,3 +130,33 @@ export function splitByItems(total: Cents, items: ReceiptItem[]): Record<string,
   const extra = rest > 0 ? splitByWeights(rest, base) : {};
   return Object.fromEntries(Object.entries(base).map(([id, v]) => [id, v + (extra[id] ?? 0)]));
 }
+
+/**
+ * El bote común se comporta como un miembro más: lo que alguien pone en el bote
+ * es un pago de esa persona al bote, y un gasto pagado con el bote lo «paga» él.
+ * Así los saldos siguen siendo justos aunque cada uno ponga cantidades distintas,
+ * y lo que sobre se devuelve («Bote → Ana»).
+ */
+export const POT = '__pot__';
+
+/** Dinero que queda en el bote. */
+export function potLeft(balance: Record<string, Cents>): Cents {
+  return -(balance[POT] ?? 0);
+}
+
+/** Lo que ha puesto cada uno en el bote (menos lo que se le ha devuelto). */
+export function potContributions(group: Group, settlements: Settlement[]): Record<string, Cents> {
+  const out: Record<string, Cents> = {};
+  for (const s of settlements) {
+    if (s.groupId !== group.id) continue;
+    if (s.to === POT) out[s.from] = (out[s.from] ?? 0) + s.amount;
+    if (s.from === POT) out[s.to] = (out[s.to] ?? 0) - s.amount;
+  }
+  return out;
+}
+
+/** Los saldos sin el bote (para decidir a quién le toca pagar). */
+export function withoutPot(balance: Record<string, Cents>): Record<string, Cents> {
+  const { [POT]: _pot, ...rest } = balance;
+  return rest;
+}

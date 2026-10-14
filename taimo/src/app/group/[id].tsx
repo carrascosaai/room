@@ -1,11 +1,11 @@
 import * as Clipboard from 'expo-clipboard';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, Share, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, Share, Switch, Text, View } from 'react-native';
 
 import { category as categoryInfo } from '@/domain/categories';
 import { groupBudgetPlan, groupInsights, tripDays } from '@/domain/groupInsights';
-import { balances, nextPayer, suggestTransfers } from '@/domain/groups';
+import { balances, nextPayer, POT, potContributions, potLeft, suggestTransfers, withoutPot } from '@/domain/groups';
 import { parseAmount } from '@/domain/money';
 import { buildPush } from '@/domain/sync';
 import type { Group, Recurring } from '@/domain/types';
@@ -16,6 +16,7 @@ import { Button, Card, Chip, Empty, H2, Input, Muted, ProgressBar, Row, Screen }
 import { confirm } from '@/ui/confirm';
 import { CurrencyButton, CurrencyPicker, currencyFlag } from '@/ui/CurrencyPicker';
 import { ExpenseRow } from '@/ui/ExpenseRow';
+import { PayButtons } from '@/ui/PayButtons';
 import { paymentLines } from '@/ui/messages';
 import { colors, radius, space } from '@/ui/theme';
 
@@ -41,11 +42,13 @@ export default function GroupDetail() {
   const cur = group.currency ?? i18n.currency;
   const money = (c: number) => moneyIn(c, cur);
   const name = (memberId: string) => {
+    if (memberId === POT) return `🫙 ${t('pot.name')}`;
     const m = group.members.find((x) => x.id === memberId);
     return !m ? t('common.unknown') : m.isMe ? t('common.you') : m.name;
   };
   // En los mensajes que se mandan a otros, cada uno con su nombre (nunca "Tú").
   const realName = (memberId: string) => {
+    if (memberId === POT) return `🫙 ${t('pot.name')}`;
     const m = group.members.find((x) => x.id === memberId);
     return !m ? t('common.unknown') : m.isMe ? state.profile.name || m.name : m.name;
   };
@@ -55,7 +58,7 @@ export default function GroupDetail() {
   const insights = groupInsights(group, state.expenses);
   const plan = groupBudgetPlan(group, state.expenses);
   const days = tripDays(group);
-  const payer = group.kind === 'couple' || group.kind === 'flat' ? nextPayer(balance) : null;
+  const payer = group.kind === 'couple' || group.kind === 'flat' ? nextPayer(withoutPot(balance)) : null;
   const currencies = Object.entries(insights.byCurrency).filter(([c]) => c && c !== cur);
 
   function settle(from: string, to: string, amount: number) {
@@ -191,8 +194,13 @@ export default function GroupDetail() {
             <Text style={{ color: colors.text, fontSize: 15 }}>
               {name(tr.from)} → {name(tr.to)}: <Text style={{ fontWeight: '700' }}>{money(tr.amount)}</Text>
             </Text>
+            {group.members.find((m) => m.id === tr.from)?.isMe ? (
+              <PayButtons name={realName(tr.to)} pay={group.members.find((m) => m.id === tr.to)?.pay} amount={tr.amount} currency={cur} />
+            ) : null}
             <Button label={t('group.markPaid')} variant="secondary" onPress={() => settle(tr.from, tr.to, tr.amount)} />
-            <Button label={`🔔 ${t('gx.remind')}`} variant="ghost" onPress={() => remind(tr.from, tr.to, tr.amount)} />
+            {group.members.find((m) => m.id === tr.from)?.isMe ? null : (
+              <Button label={`🔔 ${t('gx.remind')}`} variant="ghost" onPress={() => remind(tr.from, tr.to, tr.amount)} />
+            )}
           </View>
         ))}
       </Card>
@@ -234,6 +242,8 @@ export default function GroupDetail() {
           ) : null}
         </Card>
       ) : null}
+
+      {group.pot ? <PotCard group={group} left={potLeft(balance)} name={name} money={money} /> : null}
 
       {group.kind === 'flat' || group.kind === 'couple' ? <RecurringCard group={group} /> : null}
 
@@ -381,6 +391,7 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
   const [weights, setWeights] = useState<Record<string, string>>(
     Object.fromEntries(group.members.map((m) => [m.id, String(group.weights?.[m.id] ?? 1)])),
   );
+  const [pot, setPot] = useState(!!group.pot);
 
   function save() {
     const w = Object.fromEntries(Object.entries(weights).map(([k, v]) => [k, Number(v.replace(',', '.')) || 0]));
@@ -394,6 +405,7 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
         budget: parseAmount(budget) || undefined,
         trip: group.kind === 'trip' ? { start: start || undefined, end: end || undefined } : group.trip,
         weights: allEqual ? undefined : w,
+        pot: pot || undefined,
       },
     });
     onDone();
@@ -437,9 +449,60 @@ function GroupSettings({ group, onDone }: { group: Group; onDone: () => void }) 
           </View>
         </Row>
       ))}
+      <Row>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={{ color: colors.text, fontWeight: '600' }}>🫙 {t('pot.enable')}</Text>
+          <Muted>{t('pot.hint')}</Muted>
+        </View>
+        <Switch value={pot} onValueChange={setPot} trackColor={{ true: colors.primary, false: colors.border }} />
+      </Row>
       <Button label={t('gx.saveSettings')} onPress={save} />
       <Button label={t('common.cancel')} variant="ghost" onPress={onDone} />
       <CurrencyPicker visible={picking} value={currency} onClose={() => setPicking(false)} onSelect={setCurrency} />
+    </Card>
+  );
+}
+
+/** Bote común: cuánto queda, lo que ha puesto cada uno y poner dinero. */
+function PotCard({ group, left, name, money }: { group: Group; left: number; name: (id: string) => string; money: (c: number) => string }) {
+  const { state, dispatch } = useStore();
+  const { t } = useI18n();
+  const me = group.members.find((m) => m.isMe)?.id ?? group.members[0].id;
+  const [who, setWho] = useState(me);
+  const [amount, setAmount] = useState('');
+  const put = potContributions(group, state.settlements);
+
+  function add() {
+    const value = parseAmount(amount);
+    if (!value) return;
+    dispatch({ type: 'addSettlement', settlement: { id: newId(), groupId: group.id, from: who, to: POT, amount: value, date: new Date().toISOString() } });
+    setAmount('');
+  }
+
+  return (
+    <Card>
+      <H2>🫙 {t('pot.title')}</H2>
+      <Text style={{ color: left < 0 ? colors.danger : colors.primary, fontSize: 28, fontWeight: '800' }}>{t('pot.left', { amount: money(left) })}</Text>
+      {group.members
+        .filter((m) => put[m.id])
+        .map((m) => (
+          <Row key={m.id} style={{ justifyContent: 'space-between' }}>
+            <Text style={{ color: colors.text }}>{name(m.id)}</Text>
+            <Muted>{money(put[m.id])}</Muted>
+          </Row>
+        ))}
+      <Muted>{t('pot.who')}</Muted>
+      <Row style={{ flexWrap: 'wrap' }}>
+        {group.members.map((m) => (
+          <Chip key={m.id} label={name(m.id)} selected={who === m.id} onPress={() => setWho(m.id)} />
+        ))}
+      </Row>
+      <Row>
+        <View style={{ flex: 1 }}>
+          <Input value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder={money(5000)} />
+        </View>
+        <Button label={t('pot.add')} onPress={add} disabled={!parseAmount(amount)} />
+      </Row>
     </Card>
   );
 }

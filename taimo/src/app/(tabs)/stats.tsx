@@ -4,7 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { monthKey } from '@/domain/budget';
 import { category } from '@/domain/categories';
-import { detectSubscriptions } from '@/domain/insights';
+import { detectSubscriptions, nextCharge } from '@/domain/insights';
 import { changePct, periodStats, shiftAnchor, type Bucket, type Period, type Range } from '@/domain/stats';
 import { useI18n, type I18n, type TKey } from '@/i18n';
 import { useStore } from '@/store/store';
@@ -291,7 +291,7 @@ function rangeLabel(i18n: I18n, period: Period, r: Range, partial: boolean): str
 /** Cobros que se repiten cada mes: lo que cuestan al mes y al año. */
 function SubscriptionsCard() {
   const { state } = useStore();
-  const { t, money } = useI18n();
+  const { t, money, date } = useI18n();
   const subs = useMemo(() => detectSubscriptions(state.expenses), [state.expenses]);
   if (subs.length === 0) return null;
   const monthly = subs.reduce((s, x) => s + x.monthly, 0);
@@ -308,7 +308,10 @@ function SubscriptionsCard() {
           <Text style={{ color: colors.text, flex: 1, fontSize: 15 }} numberOfLines={1}>
             {s.merchant}
           </Text>
-          <Text style={{ color: colors.text, fontWeight: '600' }}>{t('ins.subsMonthly', { amount: money(s.monthly) })}</Text>
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={{ color: colors.text, fontWeight: '600' }}>{t('ins.subsMonthly', { amount: money(s.monthly) })}</Text>
+            <Muted>{t('subx.next', { date: date(nextCharge(s), { day: 'numeric', month: 'short' }) })}</Muted>
+          </View>
         </Row>
       ))}
     </Card>

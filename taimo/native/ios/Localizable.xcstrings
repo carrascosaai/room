@@ -1,0 +1,462 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Add an expense to Taimo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add an expense to Taimo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apuntar un gasto en Taimo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une dépense dans Taimo"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgabe in Taimo hinzufügen"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi una spesa in Taimo"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar uma despesa no Taimo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitgave toevoegen in Taimo"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lägg till en utgift i Taimo"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legg til en utgift i Taimo"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj en udgift i Taimo"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lisää kulu Taimoon"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taimo'ya harcama ekle"
+          }
+        }
+      }
+    },
+    "Say what you spent, for example “50 euros on food”. Taimo logs it without opening the app.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Say what you spent, for example “50 euros on food”. Taimo logs it without opening the app."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Di lo que has gastado, por ejemplo «50 euros en comida». Taimo lo apunta sin abrir la app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dis ce que tu as dépensé, par exemple « 50 euros de courses ». Taimo le note sans ouvrir l’app."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sag, was du ausgegeben hast, z. B. „50 Euro für Essen“. Taimo erfasst es, ohne die App zu öffnen."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Di’ cosa hai speso, ad esempio «50 euro di cibo». Taimo lo registra senza aprire l’app."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diz o que gastaste, por exemplo «50 euros em comida». O Taimo regista sem abrir a app."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeg wat je hebt uitgegeven, bijvoorbeeld ‘50 euro aan eten’. Taimo noteert het zonder de app te openen."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Säg vad du spenderade, till exempel ”50 euro på mat”. Taimo bokför det utan att öppna appen."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si hva du brukte, for eksempel «50 euro på mat». Taimo fører det uten å åpne appen."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sig, hvad du har brugt, fx “50 euro på mad”. Taimo noterer det uden at åbne appen."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kerro, mitä käytit, esimerkiksi ”50 euroa ruokaan”. Taimo kirjaa sen avaamatta sovellusta."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ne harcadığını söyle, örneğin “yemeğe 50 euro”. Taimo uygulamayı açmadan kaydeder."
+          }
+        }
+      }
+    },
+    "What did you spend?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What did you spend?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué has gastado?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qu’as-tu dépensé ?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was hast du ausgegeben?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cosa hai speso?"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que gastaste?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wat heb je uitgegeven?"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vad spenderade du?"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hva brukte du?"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad har du brugt?"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitä käytit?"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ne harcadın?"
+          }
+        }
+      }
+    },
+    "What did you spend? For example: 50 euros on food": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What did you spend? For example: 50 euros on food"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué has gastado? Por ejemplo: 50 euros en comida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qu’as-tu dépensé ? Par exemple : 50 euros de courses"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was hast du ausgegeben? Zum Beispiel: 50 Euro für Essen"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cosa hai speso? Per esempio: 50 euro di cibo"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que gastaste? Por exemplo: 50 euros em comida"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wat heb je uitgegeven? Bijvoorbeeld: 50 euro aan eten"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vad spenderade du? Till exempel: 50 euro på mat"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hva brukte du? For eksempel: 50 euro på mat"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad har du brugt? For eksempel: 50 euro på mad"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitä käytit? Esimerkiksi: 50 euroa ruokaan"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ne harcadın? Örneğin: yemeğe 50 euro"
+          }
+        }
+      }
+    },
+    "I didn’t catch the amount. Try again with something like “12 euros on coffee”.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I didn’t catch the amount. Try again with something like “12 euros on coffee”."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No he pillado el importe. Prueba otra vez con algo como «12 euros en café»."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je n’ai pas compris le montant. Réessaie avec par exemple « 12 euros de café »."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich habe den Betrag nicht verstanden. Versuch es mit etwas wie „12 Euro für Kaffee“."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non ho capito l’importo. Riprova con qualcosa come «12 euro di caffè»."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não percebi o valor. Tenta outra vez com algo como «12 euros em café»."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ik verstond het bedrag niet. Probeer iets als ‘12 euro aan koffie’."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jag uppfattade inte beloppet. Försök med något som ”12 euro på kaffe”."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeg fikk ikke med meg beløpet. Prøv med noe som «12 euro på kaffe»."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeg fangede ikke beløbet. Prøv med noget som “12 euro på kaffe”."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En saanut summaa selville. Yritä esimerkiksi ”12 euroa kahviin”."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tutarı anlayamadım. “Kahveye 12 euro” gibi bir şeyle tekrar dene."
+          }
+        }
+      }
+    },
+    "Done, logged in Taimo: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done, logged in Taimo: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hecho, apuntado en Taimo: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C’est fait, noté dans Taimo : %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erledigt, in Taimo erfasst: %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fatto, registrato in Taimo: %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feito, registado no Taimo: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klaar, genoteerd in Taimo: %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klart, bokfört i Taimo: %@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ferdig, ført i Taimo: %@"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Færdig, noteret i Taimo: %@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valmis, kirjattu Taimoon: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamam, Taimo'ya kaydedildi: %@"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

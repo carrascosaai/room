@@ -136,6 +136,15 @@ export default function Automation() {
         <AndroidSetup />
       ) : (
         <>
+          <Card style={{ borderColor: colors.primary }}>
+            <Row style={{ alignItems: 'flex-start' }}>
+              <Text style={{ fontSize: 22 }}>🎙️</Text>
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>{t('siri.title')}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 15, lineHeight: 21 }}>{t('siri.text')}</Text>
+              </View>
+            </Row>
+          </Card>
           <Muted>{t('automation.introIos')}</Muted>
           <Card>
             <Row style={{ alignItems: 'flex-start' }}>

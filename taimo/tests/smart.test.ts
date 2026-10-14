@@ -97,3 +97,38 @@ describe('categorías en todo el mundo', () => {
     expect(categorize(m)).toBe(cat);
   });
 });
+
+describe('Siri: «50 euros en comida»', () => {
+  it('crea el gasto en efectivo con categoría, y en el grupo si lo nombras', async () => {
+    const { quickExpense } = await import('../src/domain/smart');
+    const state = {
+      groups: [{ id: 'par', name: 'Ana y yo', emoji: '❤️', createdAt: '', members: [me, ana] }] as Group[],
+      learnedCategories: {},
+      profile: { name: '', currency: 'EUR' },
+    };
+    const now = new Date(2026, 9, 14, 20);
+    const a = quickExpense(parseQuickAdd('50 euros en comida', state)!, state, FALLBACK, { id: 's1', now, fallbackMerchant: 'X', note: '🎙️ Siri' });
+    expect(a).toMatchObject({ amount: 5000, merchant: 'Comida', category: 'comer', note: '🎙️ Siri' });
+    expect(a.groupId).toBeUndefined();
+    const b = quickExpense(parseQuickAdd('cena 40 € con Ana y yo', state)!, state, FALLBACK, { id: 's2', now, fallbackMerchant: 'X' });
+    expect(b).toMatchObject({ amount: 4000, groupId: 'par', paidBy: 'me', shares: { me: 2000, ana: 2000 } });
+  });
+});
+
+describe('bote común', () => {
+  it('Ana pone 50, el bote paga 30 entre tres: B y C le deben 10 y sobran 20 que vuelven a Ana', async () => {
+    const { POT, balances, potContributions, potLeft, suggestTransfers } = await import('../src/domain/groups');
+    const g = { id: 'g', name: 'Piso', emoji: '🏠', createdAt: '', members: [me, ana, luis], pot: true } as Group;
+    const settlements = [{ id: 's1', groupId: 'g', from: 'ana', to: POT, amount: 5000, date: '' }];
+    const expenses = [{ id: 'e', amount: 3000, merchant: 'Súper', category: 'super' as const, date: '', source: 'manual' as const, groupId: 'g', paidBy: POT, shares: { me: 1000, ana: 1000, luis: 1000 } }];
+    const b = balances(g, expenses, settlements);
+    expect(potLeft(b)).toBe(2000);
+    expect(potContributions(g, settlements)).toEqual({ ana: 5000 });
+    const tr = suggestTransfers(b);
+    expect(tr).toEqual(expect.arrayContaining([
+      { from: POT, to: 'ana', amount: 2000 },
+      { from: 'me', to: 'ana', amount: 1000 },
+      { from: 'luis', to: 'ana', amount: 1000 },
+    ]));
+  });
+});

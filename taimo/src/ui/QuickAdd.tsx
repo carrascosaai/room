@@ -1,14 +1,14 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { router } from "expo-router";
+import { useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
 
-import { parseQuickAdd } from '@/domain/smart';
-import { FALLBACK, rateBetween } from '@/fx/fx';
-import { useI18n } from '@/i18n';
-import { newId, useStore } from '@/store/store';
+import { parseQuickAdd, quickExpense } from "@/domain/smart";
+import { FALLBACK } from "@/fx/fx";
+import { useI18n } from "@/i18n";
+import { newId, useStore } from "@/store/store";
 
-import { Muted, Row } from './components';
-import { colors, radius, space } from './theme';
+import { Muted, Row } from "./components";
+import { colors, radius, space } from "./theme";
 
 /**
  * Apuntar escribiendo como hablas: «café 2,50», «cena 45 con Ana y yo ayer».
@@ -17,85 +17,109 @@ import { colors, radius, space } from './theme';
 export function QuickAdd() {
   const { state, dispatch } = useStore();
   const { t, money } = useI18n();
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const [done, setDone] = useState<{ id: string; label: string } | null>(null);
 
   function submit() {
     const q = parseQuickAdd(text, state);
     if (!q) return;
-    setText('');
+    setText("");
     if (q.groupId) {
       router.push({
-        pathname: '/add',
-        params: { groupId: q.groupId, amount: String(q.amount), merchant: q.merchant, currency: q.currency, daysAgo: String(q.daysAgo) },
+        pathname: "/add",
+        params: {
+          groupId: q.groupId,
+          amount: String(q.amount),
+          merchant: q.merchant,
+          currency: q.currency,
+          daysAgo: String(q.daysAgo),
+        },
       });
       return;
     }
-    const home = state.profile.currency;
-    const rate = q.currency !== home ? rateBetween(q.currency, home, state.fx ?? FALLBACK) : null;
-    const when = new Date();
-    if (q.daysAgo) {
-      when.setDate(when.getDate() - q.daysAgo);
-      when.setHours(12, 0, 0, 0);
-    }
     const id = newId();
-    const merchant = q.merchant || t(`cat.${q.category}`);
-    const amount = rate ? Math.round(q.amount * rate) : q.amount;
-    dispatch({
-      type: 'addExpense',
-      expense: {
-        id,
-        amount,
-        merchant,
-        category: q.category,
-        date: when.toISOString(),
-        source: 'manual',
-        original: rate ? { amount: q.amount, currency: q.currency, rate } : undefined,
-      },
+    const expense = quickExpense(q, state, state.fx ?? FALLBACK, {
+      id,
+      fallbackMerchant: t(`cat.${q.category}`),
     });
-    setDone({ id, label: t('quick.added', { merchant, amount: money(amount) }) });
+    dispatch({ type: "addExpense", expense });
+    const merchant = expense.merchant;
+    const amount = expense.amount;
+    setDone({
+      id,
+      label: t("quick.added", { merchant, amount: money(amount) }),
+    });
   }
 
   return (
     <View style={{ gap: space.xs }}>
-      <TextInput
-        value={text}
-        onChangeText={(v) => {
-          setText(v);
-          if (done) setDone(null);
-        }}
-        onSubmitEditing={submit}
-        returnKeyType="done"
-        placeholder={t('quick.placeholder')}
-        placeholderTextColor={colors.textFaint}
-        accessibilityLabel={t('quick.hint')}
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: colors.border,
-          borderWidth: 1,
-          borderRadius: radius.pill,
-          paddingHorizontal: space.lg,
-          paddingVertical: 12,
-          color: colors.text,
-          fontSize: 16,
-        }}
-      />
+      <Row style={{ gap: space.sm }}>
+        <TextInput
+          value={text}
+          onChangeText={(v) => {
+            setText(v);
+            if (done) setDone(null);
+          }}
+          onSubmitEditing={submit}
+          returnKeyType="done"
+          placeholder={t("quick.placeholder")}
+          placeholderTextColor={colors.textFaint}
+          accessibilityLabel={t("quick.hint")}
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            borderWidth: 1,
+            borderRadius: radius.pill,
+            paddingHorizontal: space.lg,
+            paddingVertical: 12,
+            color: colors.text,
+            fontSize: 16,
+            flex: 1,
+          }}
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("scan.button")}
+          onPress={() =>
+            router.push({ pathname: "/add", params: { scan: "1" } })
+          }
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            borderWidth: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 22 }}>📷</Text>
+        </Pressable>
+      </Row>
       {done ? (
-        <Row style={{ justifyContent: 'space-between', paddingHorizontal: space.sm }}>
+        <Row
+          style={{
+            justifyContent: "space-between",
+            paddingHorizontal: space.sm,
+          }}
+        >
           <Text style={{ color: colors.primary, flex: 1 }}>{done.label}</Text>
           <Pressable
             hitSlop={10}
             accessibilityRole="button"
             onPress={() => {
-              dispatch({ type: 'deleteExpense', id: done.id });
+              dispatch({ type: "deleteExpense", id: done.id });
               setDone(null);
             }}
           >
-            <Text style={{ color: colors.textMuted, fontWeight: '600' }}>{t('quick.undo')}</Text>
+            <Text style={{ color: colors.textMuted, fontWeight: "600" }}>
+              {t("quick.undo")}
+            </Text>
           </Pressable>
         </Row>
       ) : text ? (
-        <Muted style={{ paddingHorizontal: space.sm }}>{t('quick.hint')}</Muted>
+        <Muted style={{ paddingHorizontal: space.sm }}>{t("quick.hint")}</Muted>
       ) : null}
     </View>
   );

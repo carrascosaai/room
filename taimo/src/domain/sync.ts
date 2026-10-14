@@ -1,4 +1,4 @@
-import type { AppState, CategoryId, Cents, Expense, Group, GroupKind, Member, OriginalAmount, ReceiptItem, Recurring, Settlement, SplitMode } from './types';
+import type { AppState, CategoryId, Cents, Expense, Group, GroupKind, Member, OriginalAmount, PaymentInfo, ReceiptItem, Recurring, Settlement, SplitMode } from './types';
 
 /**
  * Formato que se intercambia con el servidor para un grupo compartido.
@@ -9,6 +9,7 @@ export interface RemoteMember {
   name: string;
   claimed: boolean;
   updatedAt: string;
+  pay?: PaymentInfo | null;
 }
 
 export interface RemoteExpense {
@@ -33,7 +34,7 @@ export interface RemoteGroupMeta {
   emoji: string;
   kind: GroupKind | null;
   currency: string | null;
-  meta: { weights?: Record<string, number>; budget?: Cents; trip?: Group['trip']; recurring?: Recurring[] };
+  meta: { weights?: Record<string, number>; budget?: Cents; trip?: Group['trip']; recurring?: Recurring[]; pot?: boolean };
   updatedAt: string;
 }
 
@@ -69,7 +70,7 @@ export function groupMeta(g: Group): RemoteGroupMeta {
     emoji: g.emoji,
     kind: g.kind ?? null,
     currency: g.currency ?? null,
-    meta: { weights: g.weights, budget: g.budget, trip: g.trip, recurring: g.recurring },
+    meta: { weights: g.weights, budget: g.budget, trip: g.trip, recurring: g.recurring, pot: g.pot },
     updatedAt: g.updatedAt ?? g.createdAt,
   };
 }
@@ -84,6 +85,7 @@ function metaFromSnapshot(sg: GroupSnapshot['group']): Partial<Group> {
     budget: sg.meta?.budget,
     trip: sg.meta?.trip,
     recurring: sg.meta?.recurring,
+    pot: sg.meta?.pot,
     updatedAt: sg.updatedAt,
   };
 }
@@ -93,12 +95,18 @@ export function buildPush(state: AppState, groupId: string): GroupPush {
   const group = state.groups.find((g) => g.id === groupId);
   if (!group) return { members: [], expenses: [], settlements: [] };
   const meta = groupMeta(group);
-  const members: RemoteMember[] = group.members.map((m) => ({
-    id: m.id,
-    name: m.name,
-    claimed: Boolean(m.claimed || m.isMe),
-    updatedAt: m.updatedAt ?? group.createdAt,
-  }));
+  const members: RemoteMember[] = group.members.map((m) => {
+    const updatedAt = m.updatedAt ?? group.createdAt;
+    // Tus datos de cobro salen de Ajustes; si los cambiaste después, ese cambio manda.
+    const paymentAt = m.isMe ? state.profile?.paymentAt : undefined;
+    return {
+      id: m.id,
+      name: m.name,
+      claimed: Boolean(m.claimed || m.isMe),
+      updatedAt: paymentAt && paymentAt > updatedAt ? paymentAt : updatedAt,
+      pay: (m.isMe ? state.profile?.payment : m.pay) ?? null,
+    };
+  });
   const expenses: RemoteExpense[] = state.expenses
     .filter((e) => e.groupId === groupId && e.paidBy && e.shares)
     .map((e) => ({
@@ -153,7 +161,7 @@ export function applySnapshot(
   const members: Member[] = snapshot.members.map((r) => {
     const l = localMembers.get(r.id);
     if (l && newer(l.updatedAt, syncStartedAt)) return l;
-    return { id: r.id, name: r.name, claimed: r.claimed, updatedAt: r.updatedAt, ...(l?.isMe ? { isMe: true } : {}) };
+    return { id: r.id, name: r.name, claimed: r.claimed, updatedAt: r.updatedAt, ...(r.pay ? { pay: r.pay } : {}), ...(l?.isMe ? { isMe: true } : {}) };
   });
   for (const l of local.members) {
     if (!snapshot.members.some((r) => r.id === l.id) && (l.isMe || newer(l.updatedAt, syncStartedAt))) members.push(l);
@@ -259,6 +267,7 @@ export function groupFromSnapshot(snapshot: GroupSnapshot, meMemberId: string, n
         name: m.name,
         claimed: m.id === meMemberId ? true : m.claimed,
         updatedAt: m.id === meMemberId ? now : m.updatedAt,
+        ...(m.pay ? { pay: m.pay } : {}),
         ...(m.id === meMemberId ? { isMe: true } : {}),
       })),
     },

@@ -88,9 +88,53 @@ enum TaimoPendingQueue {
   }
 }
 
+/// «Oye Siri, apunta un gasto en Taimo» → «¿Qué has gastado?» → «50 euros en comida».
+/// Pensado para lo que pagas en efectivo: se apunta sin abrir la app. La frase se
+/// guarda tal cual y Taimo la entiende al abrirse (importe, moneda, comercio,
+/// categoría, grupo y «ayer»), igual que «Apuntar rápido».
+@available(iOS 16.0, *)
+struct TaimoApuntarGastoIntent: AppIntent {
+  static var title: LocalizedStringResource = "Add an expense to Taimo"
+  static var description = IntentDescription("Say what you spent, for example “50 euros on food”. Taimo logs it without opening the app.")
+  static var openAppWhenRun: Bool = false
+
+  @Parameter(title: "What did you spend?", requestValueDialog: IntentDialog("What did you spend? For example: 50 euros on food"))
+  var frase: String
+
+  static var parameterSummary: some ParameterSummary {
+    Summary("Add \(\.$frase) to Taimo")
+  }
+
+  func perform() async throws -> some IntentResult & ProvidesDialog {
+    let text = frase.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard text.rangeOfCharacter(from: .decimalDigits) != nil else {
+      return .result(dialog: IntentDialog("I didn’t catch the amount. Try again with something like “12 euros on coffee”."))
+    }
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    TaimoPendingQueue.append([
+      "text": text,
+      "date": formatter.string(from: Date()),
+      "source": "siri",
+    ])
+    return .result(dialog: IntentDialog("Done, logged in Taimo: \(text)"))
+  }
+}
+
 @available(iOS 16.0, *)
 struct TaimoAppShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
+    AppShortcut(
+      intent: TaimoApuntarGastoIntent(),
+      phrases: [
+        "Add an expense in \(.applicationName)",
+        "Log an expense in \(.applicationName)",
+        "Log cash in \(.applicationName)",
+        "I spent money, log it in \(.applicationName)",
+      ],
+      shortTitle: "Add expense",
+      systemImageName: "eurosign.circle"
+    )
     AppShortcut(
       intent: TaimoRegistrarPagoIntent(),
       phrases: ["Log payment in \(.applicationName)"],

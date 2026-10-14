@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 
 import { findDuplicate, type CapturePayload } from '@/domain/capture';
+import type { Challenge } from '@/domain/challenges';
 import { normalizeMerchant } from '@/domain/categorize';
 import { applySnapshot, groupFromSnapshot, type GroupSnapshot } from '@/domain/sync';
 import type { AppState, CategoryId, Cents, Expense, Goal, Group, Member, PaymentInfo, Settlement } from '@/domain/types';
@@ -40,6 +41,8 @@ export type Action =
   | { type: 'deleteGoal'; id: string }
   | { type: 'toggleIgnoredApp'; app: string }
   | { type: 'dismissTrip'; ids: string[] }
+  | { type: 'startChallenge'; challenge: Challenge }
+  | { type: 'removeChallenge'; id: string }
   | { type: 'setLanguage'; language: NonNullable<AppState['profile']['language']> }
   | { type: 'setCurrency'; currency: string }
   | { type: 'setAccount'; account: AppState['profile']['account'] }
@@ -90,6 +93,10 @@ export function reducer(state: AppState, action: Action): AppState {
         goals: (state.goals ?? []).map((g) => (g.id === action.id ? { ...g, saved: Math.max(0, g.saved + action.amount) } : g)),
         leftoverMonth: action.leftoverMonth ?? state.leftoverMonth,
       };
+    case 'startChallenge':
+      return { ...state, challenges: [action.challenge, ...(state.challenges ?? [])].slice(0, 30) };
+    case 'removeChallenge':
+      return { ...state, challenges: (state.challenges ?? []).filter((c) => c.id !== action.id) };
     case 'dismissTrip':
       return { ...state, tripDismissed: [...(state.tripDismissed ?? []), ...action.ids].slice(-500) };
     case 'toggleIgnoredApp': {
@@ -103,7 +110,7 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'setLock':
       return { ...state, profile: { ...state.profile, lock: action.lock } };
     case 'setPayment':
-      return { ...state, profile: { ...state.profile, payment: action.payment } };
+      return { ...state, profile: { ...state.profile, payment: action.payment, paymentAt: now() } };
     case 'setLanguage':
       return { ...state, profile: { ...state.profile, language: action.language } };
     case 'setCurrency':

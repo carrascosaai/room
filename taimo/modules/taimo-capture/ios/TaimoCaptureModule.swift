@@ -1,4 +1,6 @@
 import ExpoModulesCore
+import UIKit
+import Vision
 
 /// Puente con JavaScript. El App Intent (en el target de la app, ver
 /// native/ios/TaimoCaptureIntent.swift) deja los pagos en una cola de
@@ -24,6 +26,24 @@ public class TaimoCaptureModule: Module {
     }
 
     Function("openNotificationAccessSettings") { () -> Void in
+    }
+
+    /// Lee el texto de una foto (un ticket) con Vision, en el propio iPhone.
+    /// Devuelve cada línea con su posición (0..1, desde arriba a la izquierda)
+    /// para que JavaScript pueda juntar «producto … precio» en la misma fila.
+    AsyncFunction("recognizeText") { (uri: String) -> [[String: Any]] in
+      let path = uri.hasPrefix("file://") ? String(uri.dropFirst(7)) : uri
+      guard let image = UIImage(contentsOfFile: path.removingPercentEncoding ?? path)?.cgImage else { return [] }
+      let request = VNRecognizeTextRequest()
+      request.recognitionLevel = .accurate
+      request.usesLanguageCorrection = true
+      request.automaticallyDetectsLanguage = true
+      try VNImageRequestHandler(cgImage: image, options: [:]).perform([request])
+      return (request.results ?? []).compactMap { obs -> [String: Any]? in
+        guard let text = obs.topCandidates(1).first?.string else { return nil }
+        let box = obs.boundingBox  // origen abajo a la izquierda
+        return ["text": text, "x": box.minX, "y": 1 - box.maxY, "w": box.width, "h": box.height]
+      }
     }
 
     /// Solo tiene sentido en Android (lector de notificaciones).

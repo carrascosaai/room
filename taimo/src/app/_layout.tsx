@@ -10,10 +10,11 @@ import { unlock } from '@/auth/lock';
 import { useAccountSync } from '@/auth/useAccountSync';
 import { useNativeCaptures } from '@/capture/useNativeCaptures';
 import { dueRecurring } from '@/domain/groupInsights';
+import { detectSubscriptions, nextCharge } from '@/domain/insights';
 import { splitByWeights, splitEqually } from '@/domain/groups';
 import { useAutoRefreshRates } from '@/fx/useRates';
 import { useI18n } from '@/i18n';
-import { scheduleWeeklySummary } from '@/notifications/local';
+import { scheduleSubscriptionAlerts, scheduleWeeklySummary } from '@/notifications/local';
 import { StoreProvider, useStore } from '@/store/store';
 import { useGroupSync } from '@/sync/useGroupSync';
 import { applyTheme, colors } from '@/ui/theme';
@@ -44,6 +45,13 @@ function BackgroundWork() {
   // El lector nativo de Android tampoco debe anunciar pagos de las apps ignoradas.
   const ignoredKey = (state.ignoredApps ?? []).join();
   useEffect(() => setIgnoredApps(state.ignoredApps ?? []), [ignoredKey]);
+
+  // Aviso el día antes de cada cobro de suscripción.
+  const subsKey = `${state.expenses.length}:${i18n.lang}`;
+  useEffect(() => {
+    const subs = detectSubscriptions(state.expenses).map((sub) => ({ merchant: sub.merchant, monthly: sub.monthly, next: nextCharge(sub) }));
+    scheduleSubscriptionAlerts(subs, i18n).catch(() => {});
+  }, [subsKey]);
 
   // Resumen semanal con los números al día y en el idioma elegido.
   const summaryKey = `${state.expenses.length}:${JSON.stringify(state.budgets)}:${i18n.lang}:${i18n.currency}`;
@@ -80,6 +88,8 @@ function RootStack() {
         <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
         <Stack.Screen name="join" options={{ presentation: 'modal' }} />
         <Stack.Screen name="language" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="assistant" options={{ headerShown: true, title: t('asst.title') }} />
+        <Stack.Screen name="challenges" options={{ headerShown: true, title: t('ch.title') }} />
         <Stack.Screen name="recap" options={{ headerShown: true, title: '' }} />
         <Stack.Screen name="goals" options={{ headerShown: true, title: t('goal.title') }} />
         <Stack.Screen name="history" options={{ headerShown: true, title: t('history.title') }} />

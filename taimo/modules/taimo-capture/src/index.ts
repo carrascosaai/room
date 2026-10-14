@@ -5,6 +5,7 @@ interface TaimoCaptureNative {
   hasNotificationAccess(): boolean;
   openNotificationAccessSettings(): void;
   setIgnoredApps?(apps: string[]): void;
+  recognizeText?(uri: string): Promise<OcrLine[]>;
 }
 
 // No existe en Expo Go ni en web: allí la app funciona sin captura nativa.
@@ -40,4 +41,22 @@ export function setIgnoredApps(apps: string[]): void {
   } catch {
     // Versiones antiguas del módulo nativo no la tienen.
   }
+}
+
+/** Una línea de texto leída de una foto, con su posición (0..1, desde arriba a la izquierda). */
+export interface OcrLine {
+  text: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** ¿Puede este móvil leer tickets? (no en web ni en Expo Go). */
+export const canRecognizeText = typeof native?.recognizeText === 'function';
+
+/** Lee el texto de una foto en el propio móvil (Vision en iPhone, ML Kit en Android). */
+export async function recognizeText(uri: string): Promise<OcrLine[]> {
+  if (!native?.recognizeText) return [];
+  return native.recognizeText(uri);
 }

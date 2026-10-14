@@ -85,3 +85,15 @@ describe('resumen del mes', () => {
     expect(r.biggestDay?.date.getDate()).toBe(3);
   });
 });
+
+describe('próximo cobro de una suscripción', () => {
+  it('mismo día del mes siguiente, ajustado a meses cortos', async () => {
+    const { nextCharge } = await import('../src/domain/insights');
+    const sub = { merchant: 'Netflix', monthly: 1299, category: 'suscripciones' as const, months: 3, lastDate: new Date(2026, 8, 5, 12).toISOString() };
+    expect(nextCharge(sub, new Date(2026, 8, 20)).toDateString()).toBe(new Date(2026, 9, 5).toDateString());
+    // Si el cobro de octubre aún no ha llegado pero hoy ya es 20 de octubre, toca noviembre.
+    expect(nextCharge(sub, new Date(2026, 9, 20)).toDateString()).toBe(new Date(2026, 10, 5).toDateString());
+    const eom = { ...sub, lastDate: new Date(2026, 0, 31, 12).toISOString() };
+    expect(nextCharge(eom, new Date(2026, 1, 1)).getDate()).toBe(28);
+  });
+});

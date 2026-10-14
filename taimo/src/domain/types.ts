@@ -73,6 +73,8 @@ export interface Member {
   /** Alguien ya se ha unido al grupo como este miembro desde su móvil. */
   claimed?: boolean;
   updatedAt?: string;
+  /** Cómo cobra este miembro (lo comparte él desde su móvil). */
+  pay?: PaymentInfo;
 }
 
 export type GroupKind = 'couple' | 'flat' | 'trip' | 'other';
@@ -104,6 +106,8 @@ export interface Group {
   /** Fechas del viaje (ISO, solo fecha). */
   trip?: { start?: string; end?: string };
   recurring?: Recurring[];
+  /** Bote común: cada uno pone dinero y los gastos comunes se pagan de ahí. */
+  pot?: boolean;
   /** Última modificación de los ajustes del grupo (para sincronizar). */
   updatedAt?: string;
   /** Si el grupo está compartido en la nube: código de invitación y última sincronización. */
@@ -139,6 +143,8 @@ export interface Profile {
   account?: { id: string; email?: string; provider: 'apple' | 'google' };
   /** Cómo te pagan los demás: se añade a los recordatorios de deudas. */
   payment?: PaymentInfo;
+  /** Cuándo cambiaste «Cómo te pagan» (para mandarlo a tus grupos). */
+  paymentAt?: string;
   /** Pedir Face ID / huella / código al abrir la app. */
   lock?: boolean;
   /** Apariencia: la del móvil, clara u oscura. */
@@ -178,6 +184,8 @@ export interface AppState {
   ignoredApps?: string[];
   /** Gastos que dijiste que no eran del viaje (para no volver a proponerlo). */
   tripDismissed?: string[];
+  /** Retos de ahorro empezados. */
+  challenges?: import('./challenges').Challenge[];
 }
 
 export interface Goal {

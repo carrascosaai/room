@@ -87,5 +87,15 @@ select (public.taimo_sync(:'code', '[]',
   -> 'expenses') @> '[{"id":"e9","extra":{"original":{"currency":"JPY"}}}]' as extra_ok \gset
 \if :extra_ok \else \echo 'FALLO extra del gasto' \quit \endif
 
+-- v3: cada miembro comparte cómo cobra; el bote común es un "miembro" especial en los pagos.
+select (public.taimo_sync(:'code',
+  '[{"id":"m-ana","name":"Ana","claimed":true,"updatedAt":"2026-12-01T00:00:00Z","pay":{"bizum":"600111222","paypal":"ana"}}]')
+  -> 'members') @> '[{"id":"m-ana","pay":{"paypal":"ana"}}]' as pay_ok \gset
+\if :pay_ok \else \echo 'FALLO datos de cobro del miembro' \quit \endif
+select (public.taimo_sync(:'code', '[]', '[]',
+  '[{"id":"p1","from":"m-ana","to":"__pot__","amount":5000,"date":"2026-12-01T00:00:00Z","deleted":false,"updatedAt":"2026-12-01T00:00:00Z"}]')
+  -> 'settlements') @> '[{"id":"p1","to":"__pot__"}]' as pot_ok \gset
+\if :pot_ok \else \echo 'FALLO aportación al bote' \quit \endif
+
 \echo 'OK: todas las pruebas de grupos pasan'
 rollback;
