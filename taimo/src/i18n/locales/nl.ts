@@ -376,6 +376,12 @@ const nl: Translation = {
     text: "Het gemiddelde van je laatste maanden, naar boven afgerond. Pas elk bedrag aan.",
     none: "Nog niet genoeg uitgaven: importeer een afschrift of gebruik Taimo een paar weken.",
   },
+  theme: {
+    title: "Weergave",
+    auto: "Zoals mijn telefoon",
+    light: "☀️ Licht",
+    dark: "🌙 Donker",
+  },
   csv: { date: 'Datum', merchant: 'Winkel', category: 'Categorie', total: 'Totaalbedrag', myShare: 'Mijn deel', group: 'Groep', source: 'Bron', note: 'Notitie' },
 };
 

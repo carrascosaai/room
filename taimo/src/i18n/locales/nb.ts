@@ -376,6 +376,12 @@ const nb: Translation = {
     text: "Snittet av de siste månedene dine, rundet opp. Endre hvilket tall du vil.",
     none: "Ikke nok utgifter ennå: importer en kontoutskrift eller bruk Taimo noen uker.",
   },
+  theme: {
+    title: "Utseende",
+    auto: "Som mobilen",
+    light: "☀️ Lyst",
+    dark: "🌙 Mørkt",
+  },
   csv: { date: 'Dato', merchant: 'Brukersted', category: 'Kategori', total: 'Totalbeløp', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Notat' },
 };
 

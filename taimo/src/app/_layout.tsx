@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, AppState as RNAppState, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, AppState as RNAppState, Platform, Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { setIgnoredApps } from 'taimo-capture';
@@ -16,7 +16,7 @@ import { useI18n } from '@/i18n';
 import { scheduleWeeklySummary } from '@/notifications/local';
 import { StoreProvider, useStore } from '@/store/store';
 import { useGroupSync } from '@/sync/useGroupSync';
-import { colors } from '@/ui/theme';
+import { applyTheme, colors } from '@/ui/theme';
 
 /** Tareas de fondo mientras la app está abierta. */
 function BackgroundWork() {
@@ -145,12 +145,26 @@ function LockGate({ children }: { children: ReactNode }) {
   );
 }
 
+/** Elige claro u oscuro (preferencia o la del móvil) y vuelve a montar la app al cambiar. */
+function ThemedRoot() {
+  const { state } = useStore();
+  const system = useColorScheme();
+  const pref = state.profile.theme ?? 'auto';
+  const mode = pref === 'auto' ? (system === 'light' ? 'light' : 'dark') : pref;
+  applyTheme(mode);
+  return (
+    <View key={mode} style={{ flex: 1, backgroundColor: colors.bg }}>
+      <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+      <RootStack />
+    </View>
+  );
+}
+
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StoreProvider>
-        <StatusBar style="light" />
-        <RootStack />
+        <ThemedRoot />
       </StoreProvider>
     </SafeAreaProvider>
   );

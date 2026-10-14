@@ -376,6 +376,12 @@ const ca: Translation = {
     text: "La mitjana dels darrers mesos, arrodonida cap amunt. Canvia la xifra que vulguis.",
     none: "Encara no hi ha prou despeses: importa un extracte o fes servir Taimo un parell de setmanes.",
   },
+  theme: {
+    title: "Aparença",
+    auto: "Com el mòbil",
+    light: "☀️ Clar",
+    dark: "🌙 Fosc",
+  },
   csv: { date: 'Data', merchant: 'Comerç', category: 'Categoria', total: 'Import total', myShare: 'La meva part', group: 'Grup', source: 'Origen', note: 'Nota' },
 };
 

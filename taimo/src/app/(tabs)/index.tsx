@@ -102,7 +102,7 @@ export default function Home() {
                   </Text>
                   <Muted>{t('goal.progress', { saved: money(g.saved), target: money(g.target) })}</Muted>
                 </Row>
-                <ProgressBar progress={Math.min(1, g.saved / g.target)} color={colors.primary} />
+                <ProgressBar progress={Math.min(1, g.saved / g.target)} color={colors.primary} alerts={false} />
               </View>
             ))}
             {openGoal && leftover > 0 ? (

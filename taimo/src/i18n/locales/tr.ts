@@ -376,6 +376,12 @@ const tr: Translation = {
     text: "Son aylarının ortalaması, yukarı yuvarlanmış. İstediğin tutarı değiştir.",
     none: "Henüz yeterli harcama yok: bir ekstre içe aktar veya Taimo'yu birkaç hafta kullan.",
   },
+  theme: {
+    title: "Görünüm",
+    auto: "Telefon gibi",
+    light: "☀️ Açık",
+    dark: "🌙 Koyu",
+  },
   csv: { date: 'Tarih', merchant: 'Satıcı', category: 'Kategori', total: 'Toplam tutar', myShare: 'Benim payım', group: 'Grup', source: 'Kaynak', note: 'Not' },
 };
 

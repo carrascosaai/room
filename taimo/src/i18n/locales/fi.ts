@@ -376,6 +376,12 @@ const fi: Translation = {
     text: "Viime kuukausiesi keskiarvo ylöspäin pyöristettynä. Muuta mitä tahansa lukua.",
     none: "Kuluja ei ole vielä tarpeeksi: tuo tiliote tai käytä Taimoa pari viikkoa.",
   },
+  theme: {
+    title: "Ulkoasu",
+    auto: "Kuten puhelimessa",
+    light: "☀️ Vaalea",
+    dark: "🌙 Tumma",
+  },
   csv: { date: 'Päivämäärä', merchant: 'Kauppias', category: 'Luokka', total: 'Kokonaissumma', myShare: 'Oma osuus', group: 'Ryhmä', source: 'Lähde', note: 'Huomautus' },
 };
 

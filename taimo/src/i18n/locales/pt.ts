@@ -376,6 +376,12 @@ const pt: Translation = {
     text: "A média dos teus últimos meses, arredondada para cima. Muda o valor que quiseres.",
     none: "Ainda não há despesas suficientes: importa um extrato ou usa o Taimo umas semanas.",
   },
+  theme: {
+    title: "Aparência",
+    auto: "Como o telemóvel",
+    light: "☀️ Claro",
+    dark: "🌙 Escuro",
+  },
   csv: { date: 'Data', merchant: 'Comerciante', category: 'Categoria', total: 'Valor total', myShare: 'A minha parte', group: 'Grupo', source: 'Origem', note: 'Nota' },
 };
 

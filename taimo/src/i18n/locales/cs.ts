@@ -376,6 +376,12 @@ const cs: Translation = {
     text: "Průměr tvých posledních měsíců, zaokrouhlený nahoru. Změň libovolnou částku.",
     none: "Zatím málo výdajů: importuj výpis nebo používej Taimo pár týdnů.",
   },
+  theme: {
+    title: "Vzhled",
+    auto: "Podle telefonu",
+    light: "☀️ Světlý",
+    dark: "🌙 Tmavý",
+  },
   csv: { date: 'Datum', merchant: 'Obchodník', category: 'Kategorie', total: 'Celková částka', myShare: 'Můj podíl', group: 'Skupina', source: 'Zdroj', note: 'Poznámka' },
 };
 

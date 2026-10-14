@@ -376,6 +376,12 @@ const sv: Translation = {
     text: "Snittet för dina senaste månader, avrundat uppåt. Ändra vilken siffra du vill.",
     none: "Inte tillräckligt med utgifter än: importera ett kontoutdrag eller använd Taimo några veckor.",
   },
+  theme: {
+    title: "Utseende",
+    auto: "Som mobilen",
+    light: "☀️ Ljust",
+    dark: "🌙 Mörkt",
+  },
   csv: { date: 'Datum', merchant: 'Handlare', category: 'Kategori', total: 'Totalbelopp', myShare: 'Min del', group: 'Grupp', source: 'Källa', note: 'Anteckning' },
 };
 

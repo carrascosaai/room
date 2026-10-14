@@ -376,6 +376,12 @@ const eu: Translation = {
     text: "Azken hilabeteetako batez bestekoa, gorantz biribilduta. Aldatu nahi duzun zenbakia.",
     none: "Oraindik ez dago gastu nahikorik: inportatu laburpen bat edo erabili Taimo aste batzuetan.",
   },
+  theme: {
+    title: "Itxura",
+    auto: "Mugikorraren arabera",
+    light: "☀️ Argia",
+    dark: "🌙 Iluna",
+  },
   csv: { date: 'Data', merchant: 'Denda', category: 'Kategoria', total: 'Zenbateko osoa', myShare: 'Nire zatia', group: 'Taldea', source: 'Jatorria', note: 'Oharra' },
 };
 

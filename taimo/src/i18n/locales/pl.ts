@@ -376,6 +376,12 @@ const pl: Translation = {
     text: "Średnia z ostatnich miesięcy, zaokrąglona w górę. Zmień dowolną kwotę.",
     none: "Za mało wydatków: zaimportuj wyciąg lub używaj Taimo przez kilka tygodni.",
   },
+  theme: {
+    title: "Wygląd",
+    auto: "Jak w telefonie",
+    light: "☀️ Jasny",
+    dark: "🌙 Ciemny",
+  },
   csv: { date: 'Data', merchant: 'Sprzedawca', category: 'Kategoria', total: 'Kwota całkowita', myShare: 'Moja część', group: 'Grupa', source: 'Źródło', note: 'Notatka' },
 };
 

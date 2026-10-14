@@ -102,7 +102,7 @@ function GoalCard({ goal }: { goal: Goal }) {
         </View>
         <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 17 }}>{Math.min(100, Math.floor((goal.saved / goal.target) * 100))}%</Text>
       </Row>
-      <ProgressBar progress={Math.min(1, goal.saved / goal.target)} color={colors.primary} />
+      <ProgressBar progress={Math.min(1, goal.saved / goal.target)} color={colors.primary} alerts={false} />
       {done ? (
         <Text style={{ color: colors.primary, fontWeight: '700' }}>{t('goal.done')}</Text>
       ) : perMonth ? (

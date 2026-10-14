@@ -376,6 +376,12 @@ const fr: Translation = {
     text: "La moyenne de tes derniers mois, arrondie au-dessus. Change le chiffre que tu veux.",
     none: "Pas encore assez de dépenses : importe un relevé ou utilise Taimo quelques semaines.",
   },
+  theme: {
+    title: "Apparence",
+    auto: "Comme le téléphone",
+    light: "☀️ Clair",
+    dark: "🌙 Sombre",
+  },
   csv: { date: 'Date', merchant: 'Commerçant', category: 'Catégorie', total: 'Montant total', myShare: 'Ma part', group: 'Groupe', source: 'Origine', note: 'Note' },
 };
 

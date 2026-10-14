@@ -5,12 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { category } from '@/domain/categories';
 import type { CategoryId } from '@/domain/types';
 
-import { colors, font, radius, space } from './theme';
+import { colors, font, radius, scheme, space } from './theme';
 
 export function Screen({ children, scroll = true, padded = true }: { children: ReactNode; scroll?: boolean; padded?: boolean }) {
-  const content = <View style={[padded && styles.padded, { gap: space.lg }]}>{children}</View>;
+  const content = <View style={[padded && st().padded, { gap: space.lg }]}>{children}</View>;
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={st().screen} edges={['top', 'left', 'right']}>
       {scroll ? (
         <ScrollView contentContainerStyle={{ paddingBottom: 120 }} keyboardShouldPersistTaps="handled">
           {content}
@@ -23,7 +23,7 @@ export function Screen({ children, scroll = true, padded = true }: { children: R
 }
 
 export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  return <View style={[st().card, style]}>{children}</View>;
 }
 
 export function Title({ children }: { children: ReactNode }) {
@@ -55,7 +55,7 @@ export function Button({
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [
-        styles.button,
+        st().button,
         variant === 'primary' && { backgroundColor: colors.primary },
         variant === 'secondary' && { backgroundColor: colors.surfaceAlt, borderColor: colors.border, borderWidth: 1 },
         variant === 'ghost' && { backgroundColor: 'transparent' },
@@ -65,7 +65,7 @@ export function Button({
     >
       <Text
         style={[
-          styles.buttonText,
+          st().buttonText,
           variant === 'primary' && { color: colors.onPrimary },
           variant === 'ghost' && { color: colors.primary },
           variant === 'danger' && { color: colors.danger },
@@ -82,7 +82,7 @@ export function Input(props: TextInputProps & { label?: string }) {
   return (
     <View style={{ gap: space.xs }}>
       {label ? <Muted>{label}</Muted> : null}
-      <TextInput placeholderTextColor={colors.textFaint} style={[styles.input, style]} {...rest} />
+      <TextInput placeholderTextColor={colors.textFaint} style={[st().input, style]} {...rest} />
     </View>
   );
 }
@@ -92,8 +92,8 @@ export function ProgressBar({ progress, color = colors.primary, alerts = true }:
   const pct = Math.max(0, Math.min(1, progress)) * 100;
   const barColor = !alerts ? color : progress > 1 ? colors.danger : progress >= 0.8 ? colors.warning : color;
   return (
-    <View style={styles.track}>
-      <View style={[styles.fill, { width: `${pct}%`, backgroundColor: barColor }]} />
+    <View style={st().track}>
+      <View style={[st().fill, { width: `${pct}%`, backgroundColor: barColor }]} />
     </View>
   );
 }
@@ -120,7 +120,7 @@ export function Chip({ label, selected, onPress }: { label: string; selected?: b
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
+      style={[st().chip, selected && { backgroundColor: colors.primary, borderColor: colors.primary }]}
     >
       <Text style={{ color: selected ? colors.onPrimary : colors.text, fontSize: 14, fontWeight: selected ? '600' : '400' }}>{label}</Text>
     </Pressable>
@@ -140,7 +140,14 @@ export function Empty({ emoji, text }: { emoji: string; text: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+/** Estilos rehechos cuando cambia el tema (claro/oscuro). */
+let cached: { scheme: string; styles: ReturnType<typeof makeStyles> } | null = null;
+function st() {
+  if (!cached || cached.scheme !== scheme()) cached = { scheme: scheme(), styles: makeStyles() };
+  return cached.styles;
+}
+
+const makeStyles = () => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   padded: { padding: space.lg },
   card: {
@@ -157,7 +164,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.xl,
     alignItems: 'center',
   },
-  buttonText: { color: colors.white, fontSize: 16, fontWeight: '600' },
+  buttonText: { color: colors.text, fontSize: 16, fontWeight: '600' },
   input: {
     backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,

@@ -78,7 +78,7 @@ function ProviderButton({
       style={({ pressed }) => ({
         height: 50,
         borderRadius: radius.pill,
-        backgroundColor: dark ? colors.surfaceAlt : colors.white,
+        backgroundColor: dark ? colors.surfaceAlt : colors.appleBg,
         borderWidth: dark ? 1 : 0,
         borderColor: colors.border,
         flexDirection: 'row',
@@ -89,12 +89,12 @@ function ProviderButton({
       })}
     >
       {loading ? (
-        <ActivityIndicator color={dark ? colors.text : '#000'} />
+        <ActivityIndicator color={dark ? colors.text : colors.appleText} />
       ) : (
         <>
           <Text
             style={{
-              color: dark ? colors.text : '#000',
+              color: dark ? colors.text : colors.appleText,
               fontSize: 18,
               fontWeight: '700',
               fontFamily: Platform.select({ ios: 'System', default: undefined }),
@@ -102,7 +102,7 @@ function ProviderButton({
           >
             {icon}
           </Text>
-          <Text style={{ color: dark ? colors.text : '#000', fontSize: 16, fontWeight: '600' }}>{label}</Text>
+          <Text style={{ color: dark ? colors.text : colors.appleText, fontSize: 16, fontWeight: '600' }}>{label}</Text>
         </>
       )}
     </Pressable>

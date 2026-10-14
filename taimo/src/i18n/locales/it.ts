@@ -376,6 +376,12 @@ const it: Translation = {
     text: "La media degli ultimi mesi, arrotondata per eccesso. Cambia qualsiasi cifra.",
     none: "Non ci sono ancora abbastanza spese: importa un estratto conto o usa Taimo per qualche settimana.",
   },
+  theme: {
+    title: "Aspetto",
+    auto: "Come il telefono",
+    light: "☀️ Chiaro",
+    dark: "🌙 Scuro",
+  },
   csv: { date: 'Data', merchant: 'Esercente', category: 'Categoria', total: 'Importo totale', myShare: 'La mia parte', group: 'Gruppo', source: 'Origine', note: 'Nota' },
 };
 

@@ -376,6 +376,12 @@ const de: Translation = {
     text: "Der Durchschnitt deiner letzten Monate, aufgerundet. Ändere jede Zahl, wie du willst.",
     none: "Noch zu wenige Ausgaben: Importiere einen Kontoauszug oder nutze Taimo ein paar Wochen.",
   },
+  theme: {
+    title: "Darstellung",
+    auto: "Wie das Handy",
+    light: "☀️ Hell",
+    dark: "🌙 Dunkel",
+  },
   csv: { date: 'Datum', merchant: 'Händler', category: 'Kategorie', total: 'Gesamtbetrag', myShare: 'Mein Anteil', group: 'Gruppe', source: 'Quelle', note: 'Notiz' },
 };
 

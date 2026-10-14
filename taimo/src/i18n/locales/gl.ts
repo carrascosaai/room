@@ -376,6 +376,12 @@ const gl: Translation = {
     text: "A media dos teus últimos meses, redondeada cara arriba. Cambia a cifra que queiras.",
     none: "Aínda non hai gastos dabondo: importa un extracto ou usa Taimo un par de semanas.",
   },
+  theme: {
+    title: "Aparencia",
+    auto: "Como o móbil",
+    light: "☀️ Claro",
+    dark: "🌙 Escuro",
+  },
   csv: { date: 'Data', merchant: 'Comercio', category: 'Categoría', total: 'Importe total', myShare: 'A miña parte', group: 'Grupo', source: 'Orixe', note: 'Nota' },
 };
 

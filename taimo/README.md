@@ -19,6 +19,7 @@ App para iPhone y Android hecha con [Expo](https://expo.dev) (React Native + Typ
 - **Presupuesto automático**: «✨ Proponer según lo que gasto» pone en cada categoría la media de tus últimos meses
   (o extrapola este mes si aún no hay historial), redondeada hacia arriba.
 - **Avisos al 80 % y al 100 %** de cada categoría también con los pagos que se apuntan solos.
+- **Modo claro, oscuro o como el móvil.**
 - **Copia en un archivo** (sin cuenta) para pasar todo a otro móvil, y **bloqueo con Face ID, huella o código**.
 - **Previsión de fin de mes**: «a este ritmo acabarás el mes en 1105 €: te pasarás 465 €» (los gastos fijos se
   cuentan una vez, el resto al ritmo que llevas) y aviso cuando una categoría va disparada frente a lo que sueles

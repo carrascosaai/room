@@ -1,5 +1,6 @@
-// Paleta de Taimo: fondo casi negro y verde menta (el color del dinero que te queda).
-export const colors = {
+// Paleta de Taimo: verde menta (el color del dinero que te queda) sobre fondo casi negro
+// o, en modo claro, verde más oscuro sobre blanco para que se lea bien.
+const dark = {
   bg: '#0A0F0D',
   surface: '#121A17',
   surfaceAlt: '#1A2420',
@@ -16,7 +17,39 @@ export const colors = {
   warning: '#F59E0B',
   danger: '#EF4444',
   white: '#FFFFFF',
-} as const;
+  /** Botón de Apple: blanco sobre oscuro, negro sobre claro (como pide Apple). */
+  appleBg: '#FFFFFF',
+  appleText: '#000000',
+};
+
+export type Palette = typeof dark;
+export type Scheme = 'dark' | 'light';
+
+const light: Palette = {
+  bg: '#F5F8F6',
+  surface: '#FFFFFF',
+  surfaceAlt: '#EDF3F0',
+  border: '#DCE5E0',
+  primary: '#08875A',
+  primaryDark: '#06724B',
+  primarySoft: '#E2F5EC',
+  onPrimary: '#FFFFFF',
+  text: '#0B1A14',
+  textMuted: '#52665E',
+  textFaint: '#8A9B94',
+  success: '#08875A',
+  warning: '#B45309',
+  danger: '#DC2626',
+  white: '#FFFFFF',
+  appleBg: '#000000',
+  appleText: '#FFFFFF',
+};
+
+/** Colores actuales. Se cambian en sitio con applyTheme y la app se vuelve a montar. */
+export const colors: Palette = { ...dark };
+let current: Scheme = 'dark';
+
+export const scheme = () => current;
 
 export const radius = { sm: 10, md: 16, lg: 22, pill: 999 } as const;
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
@@ -27,3 +60,13 @@ export const font = {
   body: { fontSize: 16, color: colors.text },
   small: { fontSize: 13, color: colors.textMuted },
 };
+
+export function applyTheme(next: Scheme) {
+  if (next === current) return;
+  current = next;
+  Object.assign(colors, next === 'light' ? light : dark);
+  font.title.color = colors.text;
+  font.h2.color = colors.text;
+  font.body.color = colors.text;
+  font.small.color = colors.textMuted;
+}

@@ -376,6 +376,12 @@ const ro: Translation = {
     text: "Media ultimelor luni, rotunjită în sus. Schimbă orice sumă.",
     none: "Încă nu sunt destule cheltuieli: importă un extras sau folosește Taimo câteva săptămâni.",
   },
+  theme: {
+    title: "Aspect",
+    auto: "Ca telefonul",
+    light: "☀️ Luminos",
+    dark: "🌙 Întunecat",
+  },
   csv: { date: 'Dată', merchant: 'Comerciant', category: 'Categorie', total: 'Sumă totală', myShare: 'Partea mea', group: 'Grup', source: 'Sursă', note: 'Notă' },
 };
 

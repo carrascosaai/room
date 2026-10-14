@@ -131,6 +131,8 @@ export interface Profile {
   payment?: PaymentInfo;
   /** Pedir Face ID / huella / código al abrir la app. */
   lock?: boolean;
+  /** Apariencia: la del móvil, clara u oscura. */
+  theme?: 'auto' | 'light' | 'dark';
 }
 
 export interface PaymentInfo {

@@ -400,6 +400,12 @@ const es: Translation = {
     text: "La media de tus últimos meses, redondeada hacia arriba. Cambia la cifra que quieras.",
     none: "Aún no hay gastos suficientes: importa un extracto del banco o usa Taimo un par de semanas.",
   },
+  theme: {
+    title: "Apariencia",
+    auto: "Como el móvil",
+    light: "☀️ Claro",
+    dark: "🌙 Oscuro",
+  },
   csv: {
     date: 'Fecha',
     merchant: 'Comercio',

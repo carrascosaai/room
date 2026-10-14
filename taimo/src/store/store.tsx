@@ -34,6 +34,7 @@ export type Action =
   | { type: 'setProfileName'; name: string }
   | { type: 'setPayment'; payment: PaymentInfo }
   | { type: 'setLock'; lock: boolean }
+  | { type: 'setTheme'; theme: 'auto' | 'light' | 'dark' }
   | { type: 'addGoal'; goal: Goal }
   | { type: 'saveToGoal'; id: string; amount: Cents; leftoverMonth?: string }
   | { type: 'deleteGoal'; id: string }
@@ -94,6 +95,8 @@ export function reducer(state: AppState, action: Action): AppState {
     }
     case 'deleteGoal':
       return { ...state, goals: (state.goals ?? []).filter((g) => g.id !== action.id) };
+    case 'setTheme':
+      return { ...state, profile: { ...state.profile, theme: action.theme } };
     case 'setLock':
       return { ...state, profile: { ...state.profile, lock: action.lock } };
     case 'setPayment':

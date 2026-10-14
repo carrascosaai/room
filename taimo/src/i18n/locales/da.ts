@@ -376,6 +376,12 @@ const da: Translation = {
     text: "Gennemsnittet af dine seneste måneder, rundet op. Ret det tal, du vil.",
     none: "Ikke nok udgifter endnu: importér et kontoudtog eller brug Taimo et par uger.",
   },
+  theme: {
+    title: "Udseende",
+    auto: "Som telefonen",
+    light: "☀️ Lyst",
+    dark: "🌙 Mørkt",
+  },
   csv: { date: 'Dato', merchant: 'Forretning', category: 'Kategori', total: 'Samlet beløb', myShare: 'Min del', group: 'Gruppe', source: 'Kilde', note: 'Note' },
 };
 

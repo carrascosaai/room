@@ -405,6 +405,12 @@ const en = {
     text: "The average of your last months, rounded up. Change any number you like.",
     none: "Not enough spending yet: import a bank statement or use Taimo for a couple of weeks.",
   },
+  theme: {
+    title: "Appearance",
+    auto: "Like my phone",
+    light: "☀️ Light",
+    dark: "🌙 Dark",
+  },
   csv: {
     date: 'Date',
     merchant: 'Merchant',

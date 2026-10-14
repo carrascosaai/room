@@ -218,6 +218,15 @@ export default function Settings() {
       </Pressable>
 
       <Card>
+        <H2>{t('theme.title')}</H2>
+        <Row style={{ flexWrap: 'wrap' }}>
+          {(['auto', 'light', 'dark'] as const).map((th) => (
+            <Chip key={th} label={t(`theme.${th}`)} selected={(state.profile.theme ?? 'auto') === th} onPress={() => dispatch({ type: 'setTheme', theme: th })} />
+          ))}
+        </Row>
+      </Card>
+
+      <Card>
         <H2>{t('settings.currency')}</H2>
         <Row>
           <CurrencyButton value={i18n.currency} onPress={() => setPickingCurrency(true)} />
