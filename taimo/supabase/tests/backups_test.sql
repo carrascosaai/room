@@ -40,4 +40,24 @@ do $$ begin
 exception when insufficient_privilege then null;
 end $$;
 \echo 'OK: las copias de seguridad son privadas'
+
+-- Borrar la cuenta: cada uno solo borra la suya (copia y usuario).
+reset role;
+\i supabase/migrations/20261018000000_taimo_delete_account.sql
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+select public.taimo_delete_account();
+reset role;
+select (select count(*) from auth.users where id = '11111111-1111-1111-1111-111111111111') = 0
+   and (select count(*) from public.taimo_backups where user_id = '11111111-1111-1111-1111-111111111111') = 0
+   and (select count(*) from auth.users where id = '22222222-2222-2222-2222-222222222222') = 1 as borrado_ok \gset
+\if :borrado_ok \else \echo 'FALLO: borrar la cuenta' \quit \endif
+set local role anon;
+do $$ begin
+  perform public.taimo_delete_account();
+  raise exception 'FALLO: anon puede llamar a borrar cuenta';
+exception when insufficient_privilege then null;
+end $$;
+reset role;
+\echo 'OK: borrar la cuenta solo borra la tuya'
 rollback;

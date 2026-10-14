@@ -93,7 +93,7 @@ Iniciar sesión es **opcional**. Si lo haces:
 
 Si cierras sesión, se deja de subir la copia. Para borrar tu cuenta y tu copia, consulta el apartado 9.
 
-[PENDIENTE: la versión actual no tiene un botón para borrar la cuenta dentro de la app. Mientras no exista, se atiende por correo. Apple exige ese botón; ver `launch-checklist.md`.]
+Puedes borrar tu cuenta cuando quieras desde la app: **Ajustes → Cuenta → Borrar mi cuenta**. Se borran al momento tu usuario y tu copia en la nube; lo que hay en tu móvil se queda en tu móvil.
 
 ### 5.2 Grupos compartidos
 

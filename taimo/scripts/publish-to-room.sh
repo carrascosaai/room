@@ -7,4 +7,6 @@ export EXPO_PUBLIC_BASE_PATH=/taimo
 npx expo export --platform web --output-dir dist-room
 rm -rf ../public/taimo
 mv dist-room ../public/taimo
+# Textos legales (privacidad, términos) en /taimo/legal/, si ya están completos.
+python3 scripts/legal-to-html.py ../public/taimo/legal
 echo "Listo: public/taimo"

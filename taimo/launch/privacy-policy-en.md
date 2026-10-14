@@ -93,7 +93,7 @@ Signing in is **optional**. If you do:
 
 If you sign out, backups stop. To delete your account and backup, see section 9.
 
-[PENDING: the current version has no in-app "delete account" button. Until it exists, deletion is handled by email. Apple requires this button; see `launch-checklist.md`.]
+You can delete your account at any time in the app: **Settings → Account → Delete my account**. Your user and cloud backup are deleted immediately; what's on your phone stays on your phone.
 
 ### 5.2 Shared groups
 
