@@ -16,6 +16,7 @@ const SOURCE_BADGE: Record<Expense['source'], string> = {
   notificacion: ' · ⚡',
   csv: ' · CSV',
   fijo: ' · 🔁',
+  efectivo: ' · 💶',
 };
 
 /**

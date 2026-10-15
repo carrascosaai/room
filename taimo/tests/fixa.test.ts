@@ -101,3 +101,35 @@ describe('nombres del extracto del banco', async () => {
     expect(e).toMatchObject({ merchant: 'MERCADONA', category: 'super' });
   });
 });
+
+describe('asistente: lo que queda y los saludos', async () => {
+  const { answer } = await import('../src/domain/assistant');
+  const { initialState } = await import('../src/store/store');
+  // t devuelve la clave y los datos: así no depende de los textos.
+  const i18n = {
+    lang: 'es',
+    locale: 'es-ES',
+    currency: 'EUR',
+    t: (key: string, p: Record<string, unknown> = {}) => `${key}${Object.keys(p).length ? JSON.stringify(p) : ''}`,
+    money: (c: number) => `${(c / 100).toFixed(2)}`,
+    date: () => '',
+  } as any;
+  const today = new Date(2026, 9, 14, 18);
+  const state = {
+    ...initialState,
+    budgets: { super: 30000 },
+    expenses: [{ id: 'x', amount: 6400, merchant: 'Mercadona', category: 'super' as const, date: new Date(2026, 9, 5, 12).toISOString(), source: 'manual' as const }],
+  };
+  it('«¿Cuánto me queda para el súper?» dice lo que queda, no lo gastado', () => {
+    const [line] = answer('¿Cuánto me queda para el súper?', { state, i18n, today });
+    expect(line).toContain('fixa.leftCat');
+    expect(line).toContain('"left":"236.00"');
+  });
+  it('«hola» saluda y da ejemplos', () => {
+    const lines = answer('hola', { state, i18n, today });
+    expect(lines[0]).toBe('asst.hello');
+    expect(lines.length).toBeGreaterThanOrEqual(3);
+    // Con una pregunta detrás, se responde la pregunta.
+    expect(answer('hola, ¿cuánto gasté este mes?', { state, i18n, today })[0]).toContain('asst.spentTotal');
+  });
+});

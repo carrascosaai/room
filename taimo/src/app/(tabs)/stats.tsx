@@ -176,7 +176,7 @@ export default function Stats() {
 
   return (
     <Screen>
-      <Title>{t('stats.title')}</Title>
+      <Title>{t('tabs.stats')}</Title>
 
       {/* Selector de periodo */}
       <View style={{ flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.pill, padding: 4, borderWidth: 1, borderColor: colors.border }}>

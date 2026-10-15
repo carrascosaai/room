@@ -11,6 +11,7 @@ import { webBase } from '@/sync/api';
 import { BigButton, Button, Card, Empty, H2, Muted, Row, Screen } from '@/ui/components';
 import { handle } from '@/ui/messages';
 import { colors, radius, space } from '@/ui/theme';
+import { HomeButton } from '@/ui/HomeButton';
 
 /**
  * Página que abre quien te debe dinero, normalmente en el navegador y sin
@@ -65,6 +66,7 @@ export default function Pay() {
   return (
     <Screen>
       <Stack.Screen options={{ headerShown: false }} />
+      {Platform.OS !== 'web' ? <HomeButton /> : null}
       <Text style={{ fontSize: 52, textAlign: 'center' }}>{req.e || '💸'}</Text>
 
       <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark, alignItems: 'center' }}>

@@ -8,6 +8,7 @@ import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { BigButton, Button, Card, Empty, Muted, Screen } from '@/ui/components';
 import { tableClaimMessage } from '@/ui/messages';
+import { HomeButton } from '@/ui/HomeButton';
 import { colors } from '@/ui/theme';
 
 /**
@@ -62,6 +63,7 @@ export default function MesaPagado() {
           </Card>
         ) : null}
         <BigButton label={t('mesa.seeTable')} onPress={() => router.replace({ pathname: '/mesa-nueva', params: { groupId: group.id } })} />
+        <HomeButton />
       </Screen>
     );
   }

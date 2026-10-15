@@ -18,11 +18,13 @@ import { convert, FALLBACK } from '../fx/fx';
  * «¿en qué gasto más?», «mayor gasto del mes», «¿cuánto me deben?»…
  */
 
-type Intent = 'spend' | 'afford' | 'top' | 'biggest' | 'average' | 'subs' | 'debts' | 'goals' | 'help';
+type Intent = 'left' | 'spend' | 'afford' | 'top' | 'biggest' | 'average' | 'subs' | 'debts' | 'goals' | 'help';
 
 const RX = (words: string[]) => new RegExp(`(^|\\s)(${words.join('|')})(?=\\s|$)`, 'u');
 
 const INTENTS: [Intent, RegExp][] = [
+  // «¿Cuánto me queda para el súper?»: lo que queda del presupuesto, no lo gastado.
+  ['left', RX(['queda', 'quedan', 'me queda', 'left', 'remaining', 'reste', 'restant', 'ubrig', 'rimane', 'rimasto', 'resta', 'sobra', 'queden', 'queda me', 'over voor'])],
   ['afford', RX(['permitirme', 'permitir', 'afford', 'permettre', 'leisten', 'permettermi', 'permitir me', 'pagar me', 'puc permetre', 'veroorloven', 'puedo gastar', 'can i spend', 'me da para', 'llego'])],
   ['subs', RX(['suscripciones', 'suscripcion', 'subscriptions', 'subscription', 'abonnements', 'abos', 'abonnamenti', 'assinaturas', 'subscripcions', 'abonnementen'])],
   ['debts', RX(['deben', 'debo', 'owe', 'owes', 'owed', 'doit', 'dois', 'schulde', 'schuldet', 'devo', 'deve', 'devem', 'deuen', 'dec', 'schuld', 'deudas', 'debts'])],
@@ -76,6 +78,9 @@ const CAT_WORDS: Partial<Record<CategoryId, string[]>> = {
 };
 
 const DAY = 86_400_000;
+
+// Saludos: «hola» no es una pregunta sobre gastos.
+const GREETING = RX(['hola', 'buenas', 'buenos dias', 'buenas tardes', 'hello', 'hi', 'hey', 'good morning', 'bonjour', 'salut', 'hallo', 'guten tag', 'ciao', 'buongiorno', 'ola', 'oi', 'bom dia', 'bon dia', 'hoi', 'goedemorgen', 'hej', 'moi', 'czesc', 'ahoj', 'buna', 'merhaba', 'pryvit']);
 
 function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -165,7 +170,10 @@ export function answer(question: string, { state, i18n, today = new Date() }: As
   const { t, money } = i18n;
   const q = normalizeMerchant(question);
   if (!q) return [t('asst.help')];
-  const intent = INTENTS.find(([, rx]) => rx.test(q))?.[0] ?? (findMoney(question, state.profile.currency) ? 'afford' : 'spend');
+  const found = INTENTS.find(([, rx]) => rx.test(q))?.[0];
+  // Solo un saludo («hola», «buenas»): se saluda y se dan ejemplos de preguntas.
+  if (!found && GREETING.test(q) && q.split(' ').length <= 3) return [t('asst.hello'), `• ${t('fixa.exLeft')}`, `• ${t('asst.ex1')}`, `• ${t('asst.ex5')}`];
+  const intent = found ?? (findMoney(question, state.profile.currency) ? 'afford' : 'spend');
   const home = homeOf(state);
   const share = (e: Expense) => myShare(e, state.groups, home);
   const period = detectPeriod(q, today, i18n.locale);
@@ -197,6 +205,23 @@ export function answer(question: string, { state, i18n, today = new Date() }: As
     return left >= amount
       ? [t('asst.affordYes', { amount: money(amount), left: money(left), period: label })]
       : [t('asst.affordNo', { amount: money(amount), left: money(Math.max(0, left)), missing: money(amount - Math.max(0, left)), period: label })];
+  }
+
+  if (intent === 'left') {
+    const category = detectCategory(q, i18n);
+    const month = periodRange('thisMonth', today);
+    const spent = mine.filter((e) => inRange(e, month) && (!category || e.category === category)).reduce((s, e) => s + share(e), 0);
+    const budget = category ? state.budgets[category] ?? 0 : Object.values(state.budgets).reduce<number>((s, v) => s + (v ?? 0), 0);
+    if (!budget) return category ? [t('fixa.leftNoBudget', { category: t(`cat.${category}`), spent: money(spent) })] : [t('asst.noBudget')];
+    const left = budget - spent;
+    if (category) {
+      return left >= 0
+        ? [t('fixa.leftCat', { left: money(left), category: t(`cat.${category}`), spent: money(spent), budget: money(budget) })]
+        : [t('fixa.leftCatOver', { over: money(-left), category: t(`cat.${category}`), budget: money(budget) })];
+    }
+    return left >= 0
+      ? [t('fixa.leftTotal', { left: money(left), spent: money(spent), budget: money(budget) })]
+      : [t('fixa.leftTotalOver', { over: money(-left), budget: money(budget) })];
   }
 
   if (intent === 'subs') {

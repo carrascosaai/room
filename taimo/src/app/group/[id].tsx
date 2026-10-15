@@ -199,7 +199,7 @@ export default function GroupDetail() {
             </Text>
             {plan.remaining > 0 ? (
               <View style={{ backgroundColor: colors.bg, borderRadius: radius.md, padding: space.md, gap: 2 }}>
-                <Text style={{ color: colors.text }}>{t('gx.perDayAll', { amount: money(plan.perDay) })}</Text>
+                <Text style={{ color: colors.text }}>{t(group.members.length === 2 ? 'fixa.perDayTwo' : 'gx.perDayAll', { amount: money(plan.perDay) })}</Text>
                 <Muted>{t('gx.perPerson', { amount: money(plan.perPersonPerDay) })}</Muted>
               </View>
             ) : null}

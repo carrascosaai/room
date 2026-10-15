@@ -59,7 +59,7 @@ export default function Settings() {
     // Con menos de un mes de gastos la propuesta saldría mal: mejor esperar.
     const days = historyDays(state.expenses);
     if (days < MIN_DAYS_FOR_BUDGET) {
-      setBudgetMessage(t('fixa.suggestNeedDays', { days }));
+      setBudgetMessage(t('fixa.suggestNeedDays', { count: days }));
       return;
     }
     const s = suggestBudgets(state);

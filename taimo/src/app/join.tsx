@@ -2,11 +2,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
+import { sameName } from '@/domain/names';
 import type { GroupSnapshot } from '@/domain/sync';
 import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
 import { extractCode, joinRemoteGroup, SyncError, syncConfigured } from '@/sync/api';
 import { Button, Card, Chip, Input, Muted, Row, Screen, Title } from '@/ui/components';
+import { HomeButton } from '@/ui/HomeButton';
 import { colors, space } from '@/ui/theme';
 
 /**
@@ -72,9 +74,11 @@ export default function Join() {
     const free = snapshot.members.filter((m) => !m.claimed);
     const count = snapshot.expenses.filter((e) => !e.deleted).length;
     const chosenMember = free.find((m) => m.id === chosen);
+    const taken = snapshot.members.some((m) => sameName(m.name, newName));
     return (
       <Screen>
         <Text style={{ fontSize: 48, textAlign: 'center' }}>{snapshot.group.emoji}</Text>
+        <HomeButton />
         <Title>{snapshot.group.name}</Title>
         <Muted>
           {snapshot.members.map((m) => m.name).join(', ')} · {t('join.expenses', { count })}
@@ -100,7 +104,9 @@ export default function Join() {
             {free.length > 0 ? t('join.notListed') : t('join.joinTitle')}
           </Text>
           <Input placeholder={t('onboarding.namePlaceholder')} value={newName} onChangeText={setNewName} />
-          <Button label={t('join.joinButton')} disabled={!newName.trim()} onPress={() => joinAs(newId(), true)} />
+          {/* Un nombre que ya está en el grupo lía las cuentas: se pide otro (o elegirse arriba). */}
+          {taken ? <Text style={{ color: colors.danger, fontSize: 15 }}>{t('fixa.duplicateName', { name: newName.trim() })}</Text> : null}
+          <Button label={t('join.joinButton')} disabled={!newName.trim() || taken} onPress={() => joinAs(newId(), true)} />
         </Card>
         <Muted>{t('join.note')}</Muted>
       </Screen>
@@ -109,6 +115,7 @@ export default function Join() {
 
   return (
     <Screen>
+      <HomeButton />
       <Title>{t('join.title')}</Title>
       <Muted>{t('join.text')}</Muted>
       <Input placeholder={t('join.placeholder')} value={input} onChangeText={setInput} autoCapitalize="characters" autoCorrect={false} />
@@ -120,7 +127,7 @@ export default function Join() {
       ) : (
         <Button label={t('join.search')} disabled={!input.trim()} onPress={() => lookup(input)} />
       )}
-      <Button label={t('common.cancel')} variant="ghost" onPress={() => router.back()} />
+      <Button label={t('common.cancel')} variant="ghost" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
     </Screen>
   );
 }
