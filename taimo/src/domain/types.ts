@@ -159,6 +159,10 @@ export interface Profile {
   lock?: boolean;
   /** iPhone: recordatorio cada noche para apuntar lo pagado con la tarjeta de plástico. */
   nightly?: boolean;
+  /** Modo sencillo: letra más grande y solo lo esencial (para quien quiere lo mínimo). */
+  simple?: boolean;
+  /** «Antes de pagar, comprueba»: persona a la que llamar si algo huele a estafa. */
+  trusted?: { name: string; phone: string };
   /** Apariencia: la del móvil, clara u oscura. */
   theme?: 'auto' | 'light' | 'dark';
   /** Para traducir gastos a horas de trabajo (opcional, solo en tu móvil). */
