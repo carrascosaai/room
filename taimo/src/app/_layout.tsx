@@ -104,6 +104,7 @@ function RootStack() {
           <Stack.Screen name="monedero" options={{ headerShown: true, title: t('cash.title') }} />
           <Stack.Screen name="calendario" options={{ headerShown: true, title: t('cal.title') }} />
           <Stack.Screen name="revisar" options={{ headerShown: true, title: t('rev.title') }} />
+          <Stack.Screen name="comprueba" options={{ headerShown: true, title: t('scam.title') }} />
           <Stack.Screen name="mesa" />
           <Stack.Screen name="mesa-pagado" />
           <Stack.Screen name="mesa-nueva" options={{ headerShown: true, title: t('mesa.title') }} />
@@ -114,6 +115,8 @@ function RootStack() {
           <Stack.Screen name="challenges" options={{ headerShown: true, title: t('ch.title') }} />
           <Stack.Screen name="recap" options={{ headerShown: true, title: '' }} />
           <Stack.Screen name="goals" options={{ headerShown: true, title: t('goal.title') }} />
+          <Stack.Screen name="tu-ano" options={{ headerShown: true, title: '' }} />
+          <Stack.Screen name="paga" options={{ headerShown: true, title: t('kids.title') }} />
           <Stack.Screen name="history" options={{ headerShown: true, title: t('history.title') }} />
           <Stack.Screen name="converter" options={{ headerShown: true, title: t('fx.title') }} />
           <Stack.Screen name="group/new" options={{ headerShown: true, title: t('groups.newGroup') }} />

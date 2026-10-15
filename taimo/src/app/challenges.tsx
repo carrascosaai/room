@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { category } from '@/domain/categories';
-import { dailyStreak, evaluateChallenge, type ChallengeKind } from '@/domain/challenges';
+import { activityStreak, dailyStreak, evaluateChallenge, type ChallengeKind } from '@/domain/challenges';
 import { ACHIEVEMENTS, achievements } from '@/domain/habits';
 import type { CategoryId } from '@/domain/types';
 import { useI18n } from '@/i18n';
@@ -16,9 +16,13 @@ const CATS: CategoryId[] = ['comer', 'compras', 'ocio', 'transporte', 'suscripci
 /** Retos de ahorro de una semana y la racha de días dentro del límite. */
 export default function Challenges() {
   const { state, dispatch } = useStore();
-  const { t, money } = useI18n();
+  const { t, money, date } = useI18n();
   const [cat, setCat] = useState<CategoryId>('comer');
   const streak = dailyStreak(state);
+  const activity = activityStreak(state);
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const lastSaved = activity.saved[activity.saved.length - 1];
   const got = achievements(state);
   const list = (state.challenges ?? []).map((c) => ({ c, s: evaluateChallenge(c, state) }));
 
@@ -35,8 +39,28 @@ export default function Challenges() {
 
   return (
     <Screen>
+      {/* Racha de días apuntando, con 1 comodín por semana que salva un día olvidado. */}
       <Card style={{ backgroundColor: colors.primarySoft, borderColor: colors.primaryDark }}>
-        <Text style={{ color: colors.text, fontSize: 30, fontWeight: '800' }}>{t('ch.streak', { count: streak })}</Text>
+        <Row style={{ flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          <Text style={{ color: colors.text, fontSize: 34, fontWeight: '800' }} accessibilityRole="header">
+            {t('streak.days', { count: activity.days })}
+          </Text>
+          <Text style={{ color: activity.freezes > 0 ? colors.text : colors.textMuted, fontSize: 22, fontWeight: '700' }}>
+            {t('streak.freezes', { count: activity.freezes })}
+          </Text>
+        </Row>
+        <Muted>{t('streak.hint')}</Muted>
+        {lastSaved ? <Text style={{ color: colors.text, fontSize: 16 }}>{t('streak.saved', { date: date(`${lastSaved}T12:00:00`, { weekday: 'long', day: 'numeric' }) })}</Text> : null}
+        {activity.freezes === 0 ? <Muted>{t('streak.noFreeze')}</Muted> : null}
+        {activity.best > activity.days ? <Muted>{t('streak.best', { count: activity.best })}</Muted> : null}
+        {activity.today ? (
+          <Text style={{ color: colors.primary, fontSize: 17, fontWeight: '700' }}>{t('streak.checkedIn')}</Text>
+        ) : (
+          <Button label={`✅ ${t('streak.checkIn')}`} variant="secondary" onPress={() => dispatch({ type: 'checkIn', day: todayIso })} />
+        )}
+      </Card>
+      <Card>
+        <Text style={{ color: colors.text, fontSize: 20, fontWeight: '800' }}>{t('ch.streak', { count: streak })}</Text>
         <Muted>{t('ch.streakHint')}</Muted>
       </Card>
 

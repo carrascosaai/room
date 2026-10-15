@@ -26,6 +26,7 @@ import { CurrencyButton, CurrencyPicker } from '@/ui/CurrencyPicker';
 import { confirm } from '@/ui/confirm';
 import { colors, space } from '@/ui/theme';
 import { toast } from '@/ui/Toast';
+import { TrustedForm } from '@/ui/Trusted';
 
 export default function Settings() {
   const { state, dispatch } = useStore();
@@ -249,6 +250,28 @@ export default function Settings() {
       <Card>
         <H2>{t('settings.name')}</H2>
         <Input value={name} onChangeText={setName} onBlur={() => dispatch({ type: 'setProfileName', name: name.trim() })} />
+      </Card>
+
+      {/* Modo sencillo: letra más grande y solo lo esencial en Inicio. */}
+      <Card>
+        <Row>
+          <View style={{ flex: 1, gap: 2 }}>
+            <H2>🔎 {t('simple.title')}</H2>
+            <Muted>{t('simple.text')}</Muted>
+          </View>
+          <Switch
+            accessibilityLabel={t('simple.title')}
+            value={!!state.profile.simple}
+            onValueChange={(on) => dispatch({ type: 'setSimple', on })}
+            trackColor={{ true: colors.primary, false: colors.border }}
+          />
+        </Row>
+      </Card>
+
+      {/* Persona a la que llamar antes de pagar algo que huele raro. */}
+      <Card>
+        <TrustedForm />
+        <Button label={`🛡️ ${t('scam.title')}`} variant="ghost" onPress={() => router.push('/comprueba')} />
       </Card>
 
       <Pressable onPress={() => router.push('/language')} accessibilityRole="button">

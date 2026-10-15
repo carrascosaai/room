@@ -1,12 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 
+import { rebaseKid, sanitizeKids, type Kid, type KidMove } from '@/domain/allowance';
 import { restoredState } from '@/domain/backup';
 import { adjusted, withWithdrawal, type CashWallet } from '@/domain/cash';
 import { findDuplicate, type CapturePayload } from '@/domain/capture';
 import type { Challenge } from '@/domain/challenges';
 import type { Wish } from '@/domain/habits';
 import { normalizeMerchant } from '@/domain/categorize';
+import { withRollover } from '@/domain/rollover';
 import { isAutomatic } from '@/domain/review';
 import { isRecurringInstanceId, withRecurringSkipped } from '@/domain/groupInsights';
 import { changeGroupCurrency, groupExpenseToPersonal } from '@/domain/currencyChange';
@@ -91,6 +93,16 @@ export type Action =
   | { type: 'cashAdjust'; balance: Cents }
   /** Revisión rápida: «Bien» (sin cambios). */
   | { type: 'markReviewed'; ids: string[] }
+  /** Sobrante: lo que sobra (o te pasas) en esta categoría pasa al mes siguiente. */
+  | { type: 'setRollover'; category: CategoryId; on: boolean }
+  /** Racha: «hoy no he gastado nada» (YYYY-MM-DD). */
+  | { type: 'checkIn'; day: string }
+  /** Paga para niños. */
+  | { type: 'addKid'; kid: Kid }
+  | { type: 'updateKid'; id: string; changes: Partial<Pick<Kid, 'name' | 'emoji' | 'amount' | 'weekday' | 'split' | 'goal'>> }
+  | { type: 'deleteKid'; id: string }
+  | { type: 'kidMove'; kidId: string; move: KidMove }
+  | { type: 'removeKidMove'; kidId: string; moveId: string }
   | { type: 'reset' };
 
 const now = () => new Date().toISOString();
@@ -351,6 +363,35 @@ export function reducer(state: AppState, action: Action): AppState {
       const ids = new Set(action.ids);
       return { ...state, expenses: state.expenses.map((e) => (ids.has(e.id) ? { ...e, reviewed: true } : e)) };
     }
+    case 'setRollover':
+      return { ...state, rollover: withRollover(state.rollover, action.category, action.on) };
+    case 'checkIn': {
+      const list = state.checkins ?? [];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(action.day) || list.includes(action.day)) return state;
+      return { ...state, checkins: [...list, action.day].sort().slice(-800) };
+    }
+    case 'addKid':
+      return { ...state, kids: [...(state.kids ?? []), action.kid] };
+    case 'updateKid':
+      return {
+        ...state,
+        kids: (state.kids ?? []).map((k) => {
+          if (k.id !== action.id) return k;
+          // Cambiar la paga no toca lo ya cobrado (se guarda como saldo).
+          const { amount, weekday, split, ...rest } = action.changes;
+          return { ...rebaseKid(k, { amount, weekday, split }, new Date(), newId), ...rest };
+        }),
+      };
+    case 'deleteKid':
+      return { ...state, kids: (state.kids ?? []).filter((k) => k.id !== action.id) };
+    case 'kidMove':
+      if (!Number.isFinite(action.move.amount) || action.move.amount === 0) return state;
+      return { ...state, kids: (state.kids ?? []).map((k) => (k.id === action.kidId ? { ...k, moves: [...k.moves, action.move].slice(-1000) } : k)) };
+    case 'removeKidMove':
+      return {
+        ...state,
+        kids: (state.kids ?? []).map((k) => (k.id === action.kidId ? { ...k, moves: k.moves.filter((m) => m.id !== action.moveId) } : k)),
+      };
     case 'reset':
       return { ...initialState };
   }
@@ -382,6 +423,9 @@ export function migrate(saved: Partial<AppState> | null | undefined): AppState {
     tombstones: arr(s.tombstones),
     learnedCategories: s.learnedCategories && typeof s.learnedCategories === 'object' ? s.learnedCategories : {},
     cash: migrateCash(s.cash),
+    rollover: s.rollover && typeof s.rollover === 'object' && !Array.isArray(s.rollover) ? s.rollover : undefined,
+    checkins: Array.isArray(s.checkins) ? s.checkins.filter((d) => typeof d === 'string') : undefined,
+    kids: sanitizeKids(s.kids),
   };
 }
 

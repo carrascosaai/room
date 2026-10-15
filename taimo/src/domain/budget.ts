@@ -65,8 +65,62 @@ export function totalBudget(budgets: AppState['budgets']): Cents {
   return Object.values(budgets).reduce<number>((sum, v) => sum + (v ?? 0), 0);
 }
 
+/** Lo necesario para el presupuesto: gastos, límites y, si lo usas, el sobrante por categoría. */
+export type BudgetState = ShareState & Pick<AppState, 'budgets'> & Partial<Pick<AppState, 'rollover'>>;
+
+/** Hasta cuántos meses atrás se mira para calcular el sobrante (más que suficiente y rápido). */
+const ROLL_MONTHS = 24;
+
+/**
+ * Sobrante: lo que pasa a este mes desde los anteriores en cada categoría que lo
+ * tiene activado. Cada mes ya terminado (desde el que lo activaste) suma lo que
+ * te sobró o resta lo que te pasaste. Si te pasas mucho, como mucho se resta la
+ * mitad del límite: un mal mes no te deja el siguiente a cero.
+ * No se guarda ningún saldo: siempre se calcula con tus gastos.
+ */
+export function rolloverCarry(state: BudgetState, today: Date = new Date()): Partial<Record<CategoryId, Cents>> {
+  const roll = state.rollover ?? {};
+  const cats = (Object.keys(roll) as CategoryId[]).filter((c) => roll[c] && (state.budgets[c] ?? 0) > 0);
+  if (cats.length === 0) return {};
+  const current = monthKey(today);
+  const wanted = new Set(cats);
+  const home = homeOf(state);
+  const spent = new Map<string, Cents>();
+  for (const e of state.expenses) {
+    if (!wanted.has(e.category)) continue;
+    const m = monthKey(e.date);
+    if (m >= current) continue;
+    const k = `${m}|${e.category}`;
+    spent.set(k, (spent.get(k) ?? 0) + myShare(e, state.groups, home));
+  }
+  const out: Partial<Record<CategoryId, Cents>> = {};
+  for (const c of cats) {
+    const budget = state.budgets[c] ?? 0;
+    const since = roll[c]!;
+    let carry = 0;
+    for (let i = ROLL_MONTHS; i >= 1; i--) {
+      const key = monthKey(new Date(today.getFullYear(), today.getMonth() - i, 1));
+      if (key < since) continue;
+      carry = Math.max(-Math.floor(budget / 2), carry + budget - (spent.get(`${key}|${c}`) ?? 0));
+    }
+    out[c] = carry;
+  }
+  return out;
+}
+
+/** El límite de cada categoría este mes, ya con el sobrante de los anteriores. */
+export function effectiveBudgets(state: BudgetState, today: Date = new Date()): Partial<Record<CategoryId, Cents>> {
+  const carry = rolloverCarry(state, today);
+  const out: Partial<Record<CategoryId, Cents>> = { ...state.budgets };
+  for (const [c, v] of Object.entries(carry) as [CategoryId, Cents][]) out[c] = Math.max(0, (state.budgets[c] ?? 0) + v);
+  return out;
+}
+
 export interface MonthSummary {
+  /** Límite del mes, con el sobrante de meses anteriores si lo usas. */
   budget: Cents;
+  /** Parte del límite que viene del sobrante (puede ser negativa si te pasaste). */
+  carry: Cents;
   spent: Cents;
   remaining: Cents;
   /** Lo que puedes gastar cada día que queda del mes (incluido hoy) sin pasarte. */
@@ -76,18 +130,17 @@ export interface MonthSummary {
   progress: number;
 }
 
-export function monthSummary(
-  state: ShareState & Pick<AppState, 'budgets'>,
-  today: Date = new Date(),
-): MonthSummary {
+export function monthSummary(state: BudgetState, today: Date = new Date()): MonthSummary {
   const month = monthKey(today);
   const byCat = spentByCategory(state, month);
   const spent = Object.values(byCat).reduce((a, b) => a + b, 0);
-  const budget = totalBudget(state.budgets);
+  const base = totalBudget(state.budgets);
+  const budget = totalBudget(effectiveBudgets(state, today));
   const remaining = budget - spent;
   const daysLeft = daysInMonth(today) - today.getDate() + 1;
   return {
     budget,
+    carry: budget - base,
     spent,
     remaining,
     dailyAllowance: remaining > 0 ? Math.floor(remaining / daysLeft) : 0,
@@ -98,24 +151,25 @@ export function monthSummary(
 
 export interface CategoryStatus {
   category: CategoryId;
+  /** Límite de este mes (con el sobrante, si está activado en la categoría). */
   budget: Cents;
+  /** Lo que viene del sobrante de meses anteriores (0 si no está activado). */
+  carry: Cents;
   spent: Cents;
   remaining: Cents;
   progress: number;
   level: 'ok' | 'warning' | 'over' | 'none';
 }
 
-export function categoryStatus(
-  state: ShareState & Pick<AppState, 'budgets'>,
-  category: CategoryId,
-  today: Date = new Date(),
-): CategoryStatus {
+export function categoryStatus(state: BudgetState, category: CategoryId, today: Date = new Date()): CategoryStatus {
   const spent = spentByCategory(state, monthKey(today))[category];
-  const budget = state.budgets[category] ?? 0;
+  const base = state.budgets[category] ?? 0;
+  const carry = state.rollover?.[category] && base > 0 ? (rolloverCarry({ ...state, rollover: { [category]: state.rollover[category] } }, today)[category] ?? 0) : 0;
+  const budget = Math.max(0, base + carry);
   const progress = budget > 0 ? spent / budget : 0;
   let level: CategoryStatus['level'] = 'none';
   if (budget > 0) level = progress > 1 ? 'over' : progress >= 0.8 ? 'warning' : 'ok';
-  return { category, budget, spent, remaining: budget - spent, progress, level };
+  return { category, budget, carry: budget - base, spent, remaining: budget - spent, progress, level };
 }
 
 /** Gasto mío por día del mes (índice 0 = día 1). */

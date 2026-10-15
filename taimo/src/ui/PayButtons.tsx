@@ -1,15 +1,27 @@
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { plainAmount } from '@/domain/money';
 import type { Cents, PaymentInfo } from '@/domain/types';
 import { useI18n } from '@/i18n';
 
-import { Button, Muted } from './components';
+import { Button, Muted, useFontScale } from './components';
 import { handle } from './messages';
-import { space } from './theme';
+import { colors, space } from './theme';
+
+/** Enlace pequeño justo antes de mandar dinero: «¿Dudas? Comprueba antes de pagar». */
+export function CheckFirstLink() {
+  const { t } = useI18n();
+  const fs = useFontScale();
+  return (
+    <Pressable accessibilityRole="link" onPress={() => router.push('/comprueba')} style={{ minHeight: 44, justifyContent: 'center', paddingVertical: space.xs }}>
+      <Text style={{ color: colors.primary, fontSize: fs(16), fontWeight: '700', textAlign: 'center', textDecorationLine: 'underline' }}>🛡️ {t('scam.doubts')}</Text>
+    </Pressable>
+  );
+}
 
 /**
  * Pagar una deuda en un toque con lo que la otra persona ha compartido:
@@ -34,6 +46,7 @@ export function PayButtons({ name, pay, amount, currency }: { name: string; pay?
       {pay?.bizum ? <Button label={t('payx.copy', { what: `Bizum ${pay.bizum}` })} variant="secondary" onPress={() => copy('Bizum', pay.bizum!)} /> : null}
       {pay?.iban ? <Button label={t('payx.copy', { what: 'IBAN' })} variant="secondary" onPress={() => copy('IBAN', pay.iban!.replace(/\s+/g, ''))} /> : null}
       {copied ? <Muted>{copied}</Muted> : null}
+      <CheckFirstLink />
     </View>
   );
 }

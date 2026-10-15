@@ -1,12 +1,16 @@
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Switch, Text, View } from 'react-native';
 
+import { monthKey } from '@/domain/budget';
+import { category } from '@/domain/categories';
 import { goalPerMonth } from '@/domain/insights';
+import { rolloverRows } from '@/domain/rollover';
 import { parseAmount } from '@/domain/money';
 import type { Goal } from '@/domain/types';
 import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
-import { Button, Card, Chip, Input, Muted, ProgressBar, Row, Screen } from '@/ui/components';
+import { Button, Card, Chip, H2, Input, Muted, ProgressBar, Row, Screen } from '@/ui/components';
 import { confirm } from '@/ui/confirm';
 import { colors, space } from '@/ui/theme';
 
@@ -15,6 +19,7 @@ const DEADLINES = [3, 6, 12] as const;
 
 /** Metas de ahorro: dinero apartado para algo concreto, con cuánto apartar al mes. */
 export default function Goals() {
+  const { roll } = useLocalSearchParams<{ roll?: string }>();
   const { state, dispatch } = useStore();
   const i18n = useI18n();
   const { t, money, locale } = i18n;
@@ -48,6 +53,8 @@ export default function Goals() {
 
   return (
     <Screen>
+      {/* Desde «Más › Sobrante y huchas» se abre con el sobrante arriba. */}
+      {roll ? <Rollover /> : null}
       <Muted>{t('goal.hint')}</Muted>
 
       {goals.map((g) => (
@@ -72,7 +79,60 @@ export default function Goals() {
         </Row>
         <Button label={t('goal.create')} onPress={create} disabled={!name.trim() || !parseAmount(target)} />
       </Card>
+      {roll ? null : <Rollover />}
     </Screen>
+  );
+}
+
+/**
+ * Sobrante y huchas: en las categorías que elijas, lo que te sobra a final de mes
+ * pasa al siguiente (y lo que te pasas se resta). Inicio lo tiene en cuenta solo.
+ */
+function Rollover() {
+  const { state, dispatch } = useStore();
+  const { t, money } = useI18n();
+  const rows = rolloverRows(state);
+  return (
+    <View style={{ gap: space.md }}>
+      <H2>🐷 {t('roll.title')}</H2>
+      <Muted>{t('roll.hint')}</Muted>
+      {rows.length === 0 ? (
+        <Card>
+          <Muted>{t('roll.noBudgets')}</Muted>
+          <Button label={t('settings.title')} variant="secondary" onPress={() => router.push('/settings')} />
+        </Card>
+      ) : (
+        rows.map((r) => {
+          const label = t('roll.toggle', { category: t(`cat.${r.category}`) });
+          return (
+            <Card key={r.category} style={r.on ? { borderColor: colors.primary } : undefined}>
+              <Row>
+                <Text style={{ fontSize: 26 }}>{category(r.category).emoji}</Text>
+                <Text style={{ color: colors.text, fontSize: 17, fontWeight: '600', flex: 1 }}>{label}</Text>
+                <Switch
+                  accessibilityLabel={label}
+                  value={r.on}
+                  onValueChange={(on) => dispatch({ type: 'setRollover', category: r.category, on })}
+                  trackColor={{ true: colors.primary, false: colors.border }}
+                />
+              </Row>
+              {r.on ? (
+                <Text style={{ color: r.carry < 0 ? colors.warning : colors.primary, fontSize: 17, fontWeight: '700' }}>
+                  {r.carry > 0
+                    ? t('roll.carryUp', { amount: money(r.carry) })
+                    : r.carry < 0
+                      ? t('roll.carryDown', { amount: money(-r.carry) })
+                      : state.rollover?.[r.category] === monthKey(new Date())
+                        ? t('roll.startsNext')
+                        : t('roll.carryZero')}
+                </Text>
+              ) : null}
+            </Card>
+          );
+        })
+      )}
+      {rows.some((r) => r.on) ? <Muted>{t('roll.huchaHint')}</Muted> : null}
+    </View>
   );
 }
 

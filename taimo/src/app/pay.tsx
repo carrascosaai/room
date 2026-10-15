@@ -12,6 +12,7 @@ import { BigButton, Button, Card, Empty, H2, Muted, Row, Screen } from '@/ui/com
 import { handle } from '@/ui/messages';
 import { colors, radius, space } from '@/ui/theme';
 import { HomeButton } from '@/ui/HomeButton';
+import { CheckFirstLink } from '@/ui/PayButtons';
 
 /**
  * Página que abre quien te debe dinero, normalmente en el navegador y sin
@@ -101,6 +102,7 @@ export default function Pay() {
         <Text style={{ fontSize: 20 }}>🛡️</Text>
         <Text style={{ color: colors.text, fontSize: 17, lineHeight: 24, flex: 1 }}>{t('plink.verify', { name: req.t })}</Text>
       </View>
+      <CheckFirstLink />
 
       {req.p.bizum ? (
         <Card>

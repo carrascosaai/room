@@ -210,6 +210,16 @@ export interface AppState {
   moneyBack?: import('./moneyback').MoneyBackState;
   /** Monedero de efectivo: lo sacado del cajero y el último recuento. */
   cash?: import('./cash').CashWallet;
+  /**
+   * Sobrante: categorías en las que lo que te sobra (o te pasas) cada mes pasa al
+   * siguiente. El valor es el mes (YYYY-MM) desde el que cuenta. No se guardan
+   * saldos: se calculan con los gastos de los meses ya pasados.
+   */
+  rollover?: Partial<Record<CategoryId, string>>;
+  /** Días (YYYY-MM-DD) en los que dijiste «hoy no he gastado nada» (cuentan para la racha). */
+  checkins?: string[];
+  /** Paga para niños: huchas de mentira (no hay dinero real). */
+  kids?: import('./allowance').Kid[];
 }
 
 export interface Goal {

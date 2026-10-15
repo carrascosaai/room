@@ -1,4 +1,4 @@
-import { categoryStatus, daysInMonth, homeOf, myShare, type ShareState } from './budget';
+import { categoryStatus, daysInMonth, effectiveBudgets, homeOf, myShare, totalBudget, type BudgetState, type ShareState } from './budget';
 import { CATEGORIES } from './categories';
 import { normalizeMerchant } from './categorize';
 import type { AppState, Cents, CategoryId, Expense, Goal } from './types';
@@ -11,6 +11,12 @@ export interface Forecast {
   /** Lo que gastarás este mes si sigues a este ritmo. */
   projected: Cents;
   budget: Cents;
+  /**
+   * Lo mismo sin las categorías con sobrante (lo que sobra en ellas ya pasa al
+   * mes que viene): con esto se calcula lo que puedes apartar a una meta sin
+   * contarlo dos veces.
+   */
+  free?: { projected: Cents; budget: Cents };
 }
 
 /**
@@ -18,28 +24,37 @@ export interface Forecast {
  * vez; el resto se proyecta al ritmo diario que llevas. Antes del día 5 no hay
  * datos suficientes y devuelve null.
  */
-export function monthForecast(state: ShareState & Pick<AppState, 'budgets'>, today: Date = new Date()): Forecast | null {
+export function monthForecast(state: BudgetState, today: Date = new Date()): Forecast | null {
   const day = today.getDate();
   if (day < 5) return null;
   const home = homeOf(state);
   const start = new Date(today.getFullYear(), today.getMonth(), 1).getTime();
   const end = new Date(today.getFullYear(), today.getMonth(), day + 1).getTime();
+  const rolls = (c: CategoryId) => Boolean(state.rollover?.[c] && (state.budgets[c] ?? 0) > 0);
   let fixed = 0;
   let variable = 0;
+  let rollFixed = 0;
+  let rollVariable = 0;
   for (const e of state.expenses) {
     const t = new Date(e.date).getTime();
     if (t < start || t >= end) continue;
     const share = myShare(e, state.groups, home);
-    if (FIXED.includes(e.category)) fixed += share;
+    const isFixed = FIXED.includes(e.category);
+    if (isFixed) fixed += share;
     else variable += share;
+    if (rolls(e.category)) {
+      if (isFixed) rollFixed += share;
+      else rollVariable += share;
+    }
   }
   if (fixed + variable === 0) return null;
-  const budget = Object.values(state.budgets).reduce<number>((s, v) => s + (v ?? 0), 0);
-  return {
-    spent: fixed + variable,
-    projected: fixed + Math.round((variable / day) * daysInMonth(today)),
-    budget,
-  };
+  const budgets = effectiveBudgets(state, today);
+  const budget = totalBudget(budgets);
+  const project = (f: Cents, v: Cents) => f + Math.round((v / day) * daysInMonth(today));
+  const forecast: Forecast = { spent: fixed + variable, projected: project(fixed, variable), budget };
+  const rolled = Object.entries(budgets).filter(([c]) => rolls(c as CategoryId)).reduce((s, [, v]) => s + (v ?? 0), 0);
+  if (rolled > 0) forecast.free = { projected: project(fixed - rollFixed, variable - rollVariable), budget: budget - rolled };
+  return forecast;
 }
 
 export interface CategoryTrend {
@@ -167,7 +182,8 @@ export function goalPerMonth(goal: Goal, today: Date = new Date()): Cents | null
 /** Lo que previsiblemente te sobrará este mes (para apartarlo a una meta), o 0. */
 export function expectedLeftover(forecast: Forecast | null): Cents {
   if (!forecast || forecast.budget === 0) return 0;
-  const left = forecast.budget - forecast.projected;
+  const base = forecast.free ?? forecast;
+  const left = base.budget - base.projected;
   // Redondeado a la baja de 5 en 5 para que sea una cifra cómoda.
   return left >= 1000 ? Math.floor(left / 500) * 500 : 0;
 }
@@ -259,7 +275,7 @@ export interface MonthRecap {
 }
 
 /** El resumen de un mes ya terminado (o el actual), para verlo y compartirlo. */
-export function monthRecap(state: ShareState & Pick<AppState, 'budgets'>, month: Date, now: Date = new Date()): MonthRecap {
+export function monthRecap(state: BudgetState, month: Date, now: Date = new Date()): MonthRecap {
   const home = homeOf(state);
   const start = new Date(month.getFullYear(), month.getMonth(), 1);
   const end = new Date(month.getFullYear(), month.getMonth() + 1, 1);
@@ -296,7 +312,8 @@ export function monthRecap(state: ShareState & Pick<AppState, 'budgets'>, month:
     auto,
     top: topEntry ? { category: topEntry[0], total: topEntry[1] } : null,
     biggestDay: dayEntry ? { date: new Date(start.getFullYear(), start.getMonth(), dayEntry[0]), total: dayEntry[1] } : null,
-    budget: Object.values(state.budgets).reduce<number>((s, v) => s + (v ?? 0), 0),
+    // Con sobrante, el límite de ese mes incluye lo que venía de los anteriores.
+    budget: totalBudget(effectiveBudgets(state, start)),
     shared,
     partial,
     previousRange: { start: prevStart, end: prevEnd },

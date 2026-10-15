@@ -62,6 +62,28 @@ export const font = {
   small: { fontSize: 15, lineHeight: 21, color: colors.textMuted },
 };
 
+/**
+ * Modo sencillo: toda la letra un 18 % más grande. Escala a nivel de módulo
+ * (como los colores); los componentes la aplican al pintarse con useFontScale.
+ */
+const SIMPLE_SCALE = 1.18;
+const BASE_SIZE = { title: 30, h2: 21, body: 17, small: 15, smallLine: 21 };
+let fontScale = 1;
+
+/** Tamaño de letra con la escala actual: fs(17) → 17, o 20 en modo sencillo. */
+export const fs = (size: number) => Math.round(size * fontScale);
+
+export function applyFontScale(simple: boolean) {
+  const next = simple ? SIMPLE_SCALE : 1;
+  if (next === fontScale) return;
+  fontScale = next;
+  font.title.fontSize = fs(BASE_SIZE.title);
+  font.h2.fontSize = fs(BASE_SIZE.h2);
+  font.body.fontSize = fs(BASE_SIZE.body);
+  font.small.fontSize = fs(BASE_SIZE.small);
+  font.small.lineHeight = fs(BASE_SIZE.smallLine);
+}
+
 export function applyTheme(next: Scheme) {
   if (next === current) return;
   current = next;

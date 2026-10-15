@@ -97,3 +97,71 @@ export function dailyStreak(state: ShareState & Pick<AppState, 'budgets'>, today
   }
   return streak;
 }
+
+export interface ActivityStreak {
+  /** Días seguidos apuntando (un gasto o «hoy no he gastado nada»). */
+  days: number;
+  /** Comodines que quedan esta semana (0 o 1). */
+  freezes: number;
+  /** Días que salvó un comodín dentro de la racha actual (YYYY-MM-DD). */
+  saved: string[];
+  /** Hoy ya cuenta (has apuntado algo). */
+  today: boolean;
+  /** Récord: la racha más larga. */
+  best: number;
+}
+
+/** Comodines por semana (de lunes a domingo). */
+export const FREEZES_PER_WEEK = 1;
+
+const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+/** Lunes de la semana de ese día (clave de la semana). */
+const weekOf = (d: Date) => isoDay(new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7)));
+
+/** Días (YYYY-MM-DD) en que apuntaste algo: un gasto o «hoy no he gastado nada». */
+export function activeDays(state: Pick<AppState, 'expenses'> & Partial<Pick<AppState, 'checkins'>>): Set<string> {
+  const days = new Set<string>(state.checkins ?? []);
+  for (const e of state.expenses) days.add(isoDay(new Date(e.date)));
+  return days;
+}
+
+/**
+ * Racha con comodín: días seguidos con al menos un gasto apuntado o un «hoy no
+ * he gastado nada». Cada semana (de lunes a domingo) tienes 1 comodín que salva
+ * solo un día que se te olvidó: la racha sigue (ese día no suma, pero no la
+ * rompe). Hoy no rompe nada hasta que termina el día.
+ */
+export function activityStreak(
+  state: Pick<AppState, 'expenses'> & Partial<Pick<AppState, 'checkins'>>,
+  today: Date = new Date(),
+): ActivityStreak {
+  const active = activeDays(state);
+  const todayKey = isoDay(today);
+  const thisWeek = weekOf(today);
+  const past = [...active].filter((d) => d < todayKey).sort();
+  let days = 0;
+  let best = 0;
+  let saved: string[] = [];
+  const used = new Map<string, number>();
+  if (past.length > 0) {
+    // Se recorre en orden, del primer día apuntado a ayer (como habría pasado de verdad).
+    const [y, m, d] = past[0].split('-').map(Number);
+    for (let day = new Date(y, m - 1, d, 12); isoDay(day) < todayKey; day = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1, 12)) {
+      const key = isoDay(day);
+      if (active.has(key)) {
+        days++;
+      } else if (days > 0 && (used.get(weekOf(day)) ?? 0) < FREEZES_PER_WEEK) {
+        used.set(weekOf(day), (used.get(weekOf(day)) ?? 0) + 1);
+        saved.push(key);
+      } else {
+        days = 0;
+        saved = [];
+      }
+      best = Math.max(best, days);
+    }
+  }
+  const isToday = active.has(todayKey);
+  if (isToday) days++;
+  best = Math.max(best, days);
+  return { days, freezes: Math.max(0, FREEZES_PER_WEEK - (used.get(thisWeek) ?? 0)), saved: days > 0 ? saved : [], today: isToday, best };
+}

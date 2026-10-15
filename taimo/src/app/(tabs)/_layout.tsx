@@ -7,6 +7,7 @@ import { Platform, Text } from 'react-native';
 
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
+import { useFontScale } from '@/ui/components';
 import { colors } from '@/ui/theme';
 
 function icon(emoji: string) {
@@ -18,6 +19,9 @@ function icon(emoji: string) {
 export default function TabsLayout() {
   const { state } = useStore();
   const { t } = useI18n();
+  const fs = useFontScale();
+  // Modo sencillo: solo Inicio y Más (Grupos y Resumen siguen en «Más»).
+  const simple = !!state.profile.simple;
   // Accesos rápidos del icono (mantener pulsado): «Apuntar gasto», «Escanear ticket»…
   useQuickActionRouting();
   useEffect(() => {
@@ -36,13 +40,13 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textFaint,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, height: 72, paddingTop: 6, paddingBottom: 10 },
-        tabBarLabelStyle: { fontSize: 14, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: fs(14), fontWeight: '600' },
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
       <Tabs.Screen name="index" options={{ title: t('tabs.home'), tabBarIcon: icon('🏠') }} />
-      <Tabs.Screen name="groups" options={{ title: t('tabs.groups'), tabBarIcon: icon('👥') }} />
-      <Tabs.Screen name="stats" options={{ title: t('tabs.stats'), tabBarIcon: icon('📊') }} />
+      <Tabs.Screen name="groups" options={{ title: t('tabs.groups'), tabBarIcon: icon('👥'), href: simple ? null : undefined }} />
+      <Tabs.Screen name="stats" options={{ title: t('tabs.stats'), tabBarIcon: icon('📊'), href: simple ? null : undefined }} />
       <Tabs.Screen name="more" options={{ title: t('tabs.more'), tabBarIcon: icon('☰') }} />
     </Tabs>
   );
