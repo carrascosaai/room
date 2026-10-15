@@ -1,11 +1,12 @@
 import * as Clipboard from 'expo-clipboard';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Share, Text, View } from 'react-native';
 
 import { category } from '@/domain/categories';
 import { monthRecap } from '@/domain/insights';
 import { changePct } from '@/domain/stats';
+import { isRecapSeason } from '@/domain/yearRecap';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/store/store';
 import { Button, Card, Muted, Notice, Screen } from '@/ui/components';
@@ -78,6 +79,8 @@ export default function Recap() {
       </View>
       <Button label={`📤 ${t('recap.share')}`} onPress={() => share().catch(() => {})} />
       {copied ? <Notice text={t('fixa.messageCopied')} /> : null}
+      {/* En diciembre y enero, el resumen del año entero está a un toque. */}
+      {isRecapSeason() ? <Button label={`✨ ${t('year.moreTitle')}`} variant="secondary" onPress={() => router.push('/tu-ano')} /> : null}
       {r.count === 0 ? (
         <Card>
           <Muted>{t('home.empty')}</Muted>
