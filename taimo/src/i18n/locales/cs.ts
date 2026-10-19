@@ -956,7 +956,7 @@ const cs: Translation = {
   },
   diag: {
     restrictedTitle: "Je přepínač šedý?",
-    restrictedText: "Android blokuje toto oprávnění aplikacím mimo Google Play. Klepněte na „Otevřít nastavení Taima“, pak na tři tečky ⋮ vpravo nahoře → „Povolit omezená nastavení“ a udělte přístup znovu.",
+    restrictedText: "Android blokuje toto oprávnění aplikacím mimo Google Play. Řešení: 1) Klepněte na „Povolit přístup“ a zkuste Taimo zapnout (bude zablokováno, to je normální). 2) Vraťte se a klepněte na „Otevřít nastavení Taima“. 3) Klepněte na ⋮ vpravo nahoře → „Povolit omezená nastavení“. 4) Znovu klepněte na „Povolit přístup“ a zapněte Taimo.",
     title: "Funguje to?",
     alive: "Taimo přijímá oznámení. Poslední přišlo: {when}.",
     waiting: "Zatím nepřišlo žádné oznámení. Přijměte jakékoli (stačí WhatsApp) a vraťte se sem.",

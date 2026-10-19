@@ -926,7 +926,7 @@ const tr: Translation = {
   },
   diag: {
     restrictedTitle: "Düğme gri mi görünüyor?",
-    restrictedText: "Android, Google Play'den gelmeyen uygulamalar için bu izni engeller. «Taimo ayarlarını aç»a dokun, sonra sağ üstteki üç nokta ⋮ → «Kısıtlanmış ayarlara izin ver», ve izni yeniden ver.",
+    restrictedText: "Android, Google Play'den gelmeyen uygulamalar için bu izni engeller. Çözümü: 1) «İzin ver»e dokun ve Taimo'yu açmayı dene (engellenecek, bu normal). 2) Buraya dön ve «Taimo ayarlarını aç»a dokun. 3) Sağ üstteki üç nokta ⋮ → «Kısıtlanmış ayarlara izin ver». 4) Yeniden «İzin ver»e dokun ve Taimo'yu aç.",
     title: "Çalışıyor mu?",
     alive: "Taimo bildirimleri alıyor. Sonuncusu geldi: {when}.",
     waiting: "Henüz bildirim gelmedi. Herhangi bir bildirim al (bir WhatsApp yeter) ve buraya dön.",

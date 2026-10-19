@@ -14,7 +14,7 @@ object PendingStore {
   @Synchronized
   fun append(context: Context, item: JSONObject) {
     val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-    val current = JSONArray(prefs.getString(KEY, "[]"))
+    val current = safeArray(prefs.getString(KEY, "[]"))
     current.put(item)
     // Si nadie abre la app en mucho tiempo, guardamos solo los últimos.
     val trimmed = JSONArray()
@@ -34,8 +34,8 @@ object PendingStore {
   /** Apps cuyos avisos de pago el usuario ha pedido ignorar (la app las manda con setIgnoredApps). */
   fun ignoredApps(context: Context): Set<String> {
     val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(IGNORED, "[]") ?: "[]"
-    val array = JSONArray(raw)
-    return (0 until array.length()).map { array.getString(it) }.toSet()
+    val array = safeArray(raw)
+    return (0 until array.length()).mapNotNull { array.optString(it, null) }.toSet()
   }
 
   fun setIgnoredApps(context: Context, apps: List<String>) {
@@ -77,7 +77,7 @@ object PendingStore {
   @Synchronized
   fun addMissed(context: Context, item: JSONObject) {
     val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-    val current = JSONArray(prefs.getString(MISSED, "[]"))
+    val current = safeArray(prefs.getString(MISSED, "[]"))
     current.put(item)
     val trimmed = JSONArray()
     for (i in maxOf(0, current.length() - MAX_MISSED) until current.length()) trimmed.put(current.get(i))
@@ -89,5 +89,12 @@ object PendingStore {
 
   fun clearMissed(context: Context) {
     context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove(MISSED).apply()
+  }
+
+  /** Lo guardado nunca debería estar roto, pero si lo está se empieza de cero en vez de fallar. */
+  private fun safeArray(raw: String?): JSONArray = try {
+    JSONArray(raw ?: "[]")
+  } catch (_: Throwable) {
+    JSONArray()
   }
 }

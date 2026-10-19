@@ -926,7 +926,7 @@ const it: Translation = {
   },
   diag: {
     restrictedTitle: "L’interruttore è grigio?",
-    restrictedText: "Android blocca questo permesso per le app che non arrivano da Google Play. Tocca «Apri le impostazioni di Taimo», poi i tre puntini ⋮ in alto a destra → «Consenti impostazioni con limitazioni» e riprova.",
+    restrictedText: "Android blocca questo permesso per le app che non arrivano da Google Play. Si risolve così: 1) Tocca «Concedi il permesso» e prova ad attivare Taimo (sarà bloccato, è normale). 2) Torna qui e tocca «Apri le impostazioni di Taimo». 3) Tocca i tre puntini ⋮ in alto a destra → «Consenti impostazioni con limitazioni». 4) Tocca di nuovo «Concedi il permesso» e attiva Taimo.",
     title: "Funziona?",
     alive: "Taimo sta ricevendo le notifiche. L’ultima è arrivata: {when}.",
     waiting: "Non è ancora arrivata nessuna notifica. Ricevine una qualsiasi (va bene un WhatsApp) e torna qui.",

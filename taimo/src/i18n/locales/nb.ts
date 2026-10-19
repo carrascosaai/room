@@ -926,7 +926,7 @@ const nb: Translation = {
   },
   diag: {
     restrictedTitle: "Er bryteren grå?",
-    restrictedText: "Android blokkerer denne tillatelsen for apper som ikke kommer fra Google Play. Trykk «Åpne Taimo-innstillinger», så de tre prikkene ⋮ øverst til høyre → «Tillat begrensede innstillinger», og gi tilgang igjen.",
+    restrictedText: "Android blokkerer denne tillatelsen for apper som ikke kommer fra Google Play. Slik fikser du det: 1) Trykk «Gi tilgang» og prøv å slå på Taimo (det blir blokkert, det er normalt). 2) Kom tilbake og trykk «Åpne Taimo-innstillinger». 3) Trykk ⋮ øverst til høyre → «Tillat begrensede innstillinger». 4) Trykk «Gi tilgang» igjen og slå på Taimo.",
     title: "Fungerer det?",
     alive: "Taimo mottar varsler. Det siste kom: {when}.",
     waiting: "Ingen varsler har kommet ennå. Motta et hvilket som helst (en WhatsApp holder) og kom tilbake.",

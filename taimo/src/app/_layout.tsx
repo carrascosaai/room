@@ -2,7 +2,8 @@ import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, AppState as RNAppState, Platform, Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, AppState as RNAppState, Platform, Pressable, Share, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { getLocales } from 'expo-localization';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { setIgnoredApps } from 'taimo-capture';
@@ -217,6 +218,41 @@ function ThemedRoot() {
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <RootStack />
       <ToastHost />
+    </View>
+  );
+}
+
+/**
+ * Si algo de la app falla, en vez de una pantalla en blanco o que se cierre:
+ * un aviso tranquilo, «Reintentar» y la opción de mandarnos el error.
+ * Tus datos no se tocan. Va fuera de los textos traducidos por si el fallo es ahí.
+ */
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+  let es = true;
+  try {
+    es = (getLocales()[0]?.languageCode ?? 'es') === 'es';
+  } catch {
+    // Sin idioma: en español.
+  }
+  const msg = es
+    ? { title: 'Algo ha fallado', text: 'Tus gastos están a salvo. Prueba otra vez; si se repite, mándanos el error y lo arreglamos.', retry: 'Reintentar', send: 'Enviar el error a Taimo' }
+    : { title: 'Something went wrong', text: 'Your data is safe. Try again; if it keeps happening, send us the error and we will fix it.', retry: 'Try again', send: 'Send the error to Taimo' };
+  const btn = { minHeight: 52, borderRadius: 14, alignItems: 'center' as const, justifyContent: 'center' as const, paddingHorizontal: 20 };
+  return (
+    <View style={{ flex: 1, backgroundColor: '#0A0F0D', alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
+      <Text style={{ fontSize: 48 }}>🛟</Text>
+      <Text style={{ color: '#FFFFFF', fontSize: 24, fontWeight: '800', textAlign: 'center' }}>{msg.title}</Text>
+      <Text style={{ color: '#B8C2BD', fontSize: 17, lineHeight: 24, textAlign: 'center' }}>{msg.text}</Text>
+      <Pressable accessibilityRole="button" onPress={() => retry()} style={{ ...btn, backgroundColor: '#2EE59D', alignSelf: 'stretch' }}>
+        <Text style={{ color: '#0A0F0D', fontSize: 18, fontWeight: '800' }}>{msg.retry}</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => Share.share({ message: `Taimo · ${Platform.OS} ${String(Platform.Version)}\n${error?.name ?? ''}: ${error?.message ?? ''}\n${(error?.stack ?? '').slice(0, 1500)}` }).catch(() => {})}
+        style={{ ...btn, alignSelf: 'stretch', borderWidth: 1, borderColor: '#2EE59D' }}
+      >
+        <Text style={{ color: '#2EE59D', fontSize: 17, fontWeight: '700' }}>{msg.send}</Text>
+      </Pressable>
     </View>
   );
 }

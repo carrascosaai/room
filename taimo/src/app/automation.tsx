@@ -8,6 +8,7 @@ import {
   captureStatus,
   clearMissed,
   hasNotificationAccess,
+  installSource,
   missedNotices,
   nativeCaptureAvailable,
   openAppSettings,
@@ -66,6 +67,8 @@ function AndroidSetup() {
   const { t } = useI18n();
   const [enabled, setEnabled] = useState(hasNotificationAccess());
   const [tried, setTried] = useState(false);
+  // Android 13+ con la app instalada fuera de Google Play: el permiso sale bloqueado («ajuste restringido»).
+  const restricted = Number(Platform.Version) >= 33 && installSource() === 'sideload';
   useEffect(() => {
     const sub = RNAppState.addEventListener('change', (s) => {
       if (s === 'active') setEnabled(hasNotificationAccess());
@@ -98,7 +101,7 @@ function AndroidSetup() {
         />
       ) : null}
       {/* Android 13+: si la app no viene de Google Play, el permiso sale en gris («ajuste restringido»). */}
-      {!enabled && tried && Number(Platform.Version) >= 33 ? (
+      {!enabled && (restricted || (tried && Number(Platform.Version) >= 33)) ? (
         <Card style={{ borderColor: colors.warning, borderWidth: 1.5 }}>
           <H2>{t('diag.restrictedTitle')}</H2>
           <Text style={{ color: colors.text, fontSize: 16, lineHeight: 23 }}>{t('diag.restrictedText')}</Text>

@@ -37,6 +37,15 @@ class TaimoNotificationListener : NotificationListenerService() {
   }
 
   override fun onNotificationPosted(sbn: StatusBarNotification) {
+    // Nunca dejar que un aviso raro tumbe el lector: Android lo desconectaría.
+    try {
+      handle(sbn)
+    } catch (_: Throwable) {
+      // Se ignora ese aviso y se sigue escuchando.
+    }
+  }
+
+  private fun handle(sbn: StatusBarNotification) {
     if (sbn.packageName == packageName) return
     val extras = sbn.notification?.extras ?: return
     val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""

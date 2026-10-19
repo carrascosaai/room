@@ -926,7 +926,7 @@ const eu: Translation = {
   },
   diag: {
     restrictedTitle: "Etengailua grisez ageri da?",
-    restrictedText: "Androidek baimen hau blokeatzen die Google Playtik ez datozen aplikazioei. Sakatu «Ireki Taimoren ezarpenak», gero goian eskuinean dauden hiru puntuak ⋮ → «Baimendu ezarpen mugatuak», eta eman baimena berriro.",
+    restrictedText: "Androidek baimen hau blokeatzen die Google Playtik ez datozen aplikazioei. Honela konpontzen da: 1) Sakatu «Eman baimena» eta saiatu Taimo aktibatzen (blokeatuta aterako da, normala da). 2) Itzuli hona eta sakatu «Ireki Taimoren ezarpenak». 3) Sakatu goian eskuinean dauden hiru puntuak ⋮ → «Baimendu ezarpen mugatuak». 4) Sakatu berriro «Eman baimena» eta aktibatu Taimo.",
     title: "Badabil?",
     alive: "Taimo jakinarazpenak jasotzen ari da. Azkena: {when}.",
     waiting: "Oraindik ez da jakinarazpenik iritsi. Jaso edozein (WhatsApp bat nahikoa da) eta itzuli hona.",

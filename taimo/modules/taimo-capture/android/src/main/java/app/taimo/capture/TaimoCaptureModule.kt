@@ -82,11 +82,32 @@ class TaimoCaptureModule : Module() {
 
     /** Ajustes de Taimo en el móvil (batería «Sin restricciones» en Samsung, Xiaomi…). */
     Function("openAppSettings") {
-      val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      if (!tryStart(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))) {
+        tryStart(Intent(Settings.ACTION_SETTINGS))
       }
-      context.startActivity(intent)
       Unit
+    }
+
+    /**
+     * De dónde se instaló Taimo: "play" (Google Play), "sideload" (APK por WhatsApp,
+     * navegador… → en Android 13+ el permiso sale como «ajuste restringido») o "unknown".
+     */
+    Function("installSource") {
+      try {
+        val pm = context.packageManager
+        val installer = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+          pm.getInstallSourceInfo(context.packageName).installingPackageName
+        } else {
+          @Suppress("DEPRECATION") pm.getInstallerPackageName(context.packageName)
+        }
+        when (installer) {
+          "com.android.vending", "com.google.android.feedback" -> "play"
+          null -> "sideload"
+          else -> if (installer.contains("packageinstaller")) "sideload" else "store"
+        }
+      } catch (_: Throwable) {
+        "unknown"
+      }
     }
 
     /**
@@ -94,30 +115,48 @@ class TaimoCaptureModule : Module() {
      * Con permiso dado, se le pide a Android que lo vuelva a conectar; si ya lo está, no pasa nada.
      */
     Function("rebindListener") {
-      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N &&
-        NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
-      ) {
-        try {
+      try {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N &&
+          NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+        ) {
           android.service.notification.NotificationListenerService.requestRebind(
             android.content.ComponentName(context, TaimoNotificationListener::class.java)
           )
-        } catch (_: Exception) {
-          // Algunos fabricantes no lo permiten: no pasa nada.
         }
+      } catch (_: Throwable) {
+        // Algunos fabricantes no lo permiten: no pasa nada.
       }
       Unit
     }
 
     Function("hasNotificationAccess") {
-      NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+      try {
+        NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+      } catch (_: Throwable) {
+        false
+      }
     }
 
+    /** Va directo al interruptor de Taimo (Android 11+); si el móvil no lo tiene, a la lista. */
     Function("openNotificationAccessSettings") {
-      val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      val direct = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R && tryStart(
+        Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS).putExtra(
+          Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
+          android.content.ComponentName(context, TaimoNotificationListener::class.java).flattenToString(),
+        )
+      )
+      if (!direct && !tryStart(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))) {
+        tryStart(Intent(Settings.ACTION_SETTINGS))
       }
-      context.startActivity(intent)
       Unit
     }
+  }
+
+  /** Abre una pantalla de Ajustes sin poder cerrar la app si el fabricante no la tiene. */
+  private fun tryStart(intent: Intent): Boolean = try {
+    context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    true
+  } catch (_: Throwable) {
+    false
   }
 }

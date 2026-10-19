@@ -956,7 +956,7 @@ const pl: Translation = {
   },
   diag: {
     restrictedTitle: "Przełącznik jest wyszarzony?",
-    restrictedText: "Android blokuje to uprawnienie aplikacjom spoza Google Play. Dotknij „Otwórz ustawienia Taimo”, potem trzech kropek ⋮ w prawym górnym rogu → „Zezwól na ustawienia z ograniczeniami” i nadaj dostęp ponownie.",
+    restrictedText: "Android blokuje to uprawnienie aplikacjom spoza Google Play. Rozwiązanie: 1) Dotknij „Przyznaj dostęp” i spróbuj włączyć Taimo (zostanie zablokowane, to normalne). 2) Wróć tutaj i dotknij „Otwórz ustawienia Taimo”. 3) Dotknij ⋮ w prawym górnym rogu → „Zezwól na ustawienia z ograniczeniami”. 4) Ponownie dotknij „Przyznaj dostęp” i włącz Taimo.",
     title: "Działa?",
     alive: "Taimo odbiera powiadomienia. Ostatnie przyszło: {when}.",
     waiting: "Nie przyszło jeszcze żadne powiadomienie. Odbierz dowolne (wystarczy WhatsApp) i wróć tutaj.",

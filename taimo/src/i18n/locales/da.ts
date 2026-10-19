@@ -926,7 +926,7 @@ const da: Translation = {
   },
   diag: {
     restrictedTitle: "Er kontakten grå?",
-    restrictedText: "Android blokerer denne tilladelse for apps, der ikke kommer fra Google Play. Tryk på “Åbn Taimo-indstillinger”, så de tre prikker ⋮ øverst til højre → “Tillad begrænsede indstillinger”, og giv adgang igen.",
+    restrictedText: "Android blokerer denne tilladelse for apps, der ikke kommer fra Google Play. Sådan løser du det: 1) Tryk på “Giv adgang”, og prøv at slå Taimo til (det bliver blokeret, det er normalt). 2) Kom tilbage, og tryk på “Åbn Taimo-indstillinger”. 3) Tryk på ⋮ øverst til højre → “Tillad begrænsede indstillinger”. 4) Tryk på “Giv adgang” igen, og slå Taimo til.",
     title: "Virker det?",
     alive: "Taimo modtager notifikationer. Den seneste kom: {when}.",
     waiting: "Der er ikke kommet nogen notifikation endnu. Modtag en hvilken som helst (en WhatsApp er nok) og kom tilbage.",

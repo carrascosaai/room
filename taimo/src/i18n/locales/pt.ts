@@ -926,7 +926,7 @@ const pt: Translation = {
   },
   diag: {
     restrictedTitle: "O interruptor está cinzento?",
-    restrictedText: "O Android bloqueia esta permissão a apps que não vêm do Google Play. Toca em «Abrir definições do Taimo», depois nos três pontos ⋮ em cima à direita → «Permitir definições restritas», e dá a permissão outra vez.",
+    restrictedText: "O Android bloqueia esta permissão a apps que não vêm do Google Play. Resolve-se assim: 1) Toca em «Dar autorização» e tenta ativar o Taimo (vai aparecer bloqueado, é normal). 2) Volta aqui e toca em «Abrir definições do Taimo». 3) Toca nos três pontos ⋮ em cima à direita → «Permitir definições restritas». 4) Toca outra vez em «Dar autorização» e ativa o Taimo.",
     title: "Está a funcionar?",
     alive: "O Taimo está a receber notificações. A última chegou: {when}.",
     waiting: "Ainda não chegou nenhuma notificação. Recebe uma qualquer (um WhatsApp serve) e volta aqui.",

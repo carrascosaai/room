@@ -14,6 +14,7 @@ interface TaimoCaptureNative {
   reportMissed?(json: string): void;
   openAppSettings?(): void;
   rebindListener?(): void;
+  installSource?(): string;
 }
 
 // No existe en Expo Go ni en web: allí la app funciona sin captura nativa.
@@ -35,11 +36,19 @@ export function drainPending(): PendingItem[] {
 }
 
 export function hasNotificationAccess(): boolean {
-  return native?.hasNotificationAccess() ?? false;
+  try {
+    return native?.hasNotificationAccess() ?? false;
+  } catch {
+    return false;
+  }
 }
 
 export function openNotificationAccessSettings(): void {
-  native?.openNotificationAccessSettings();
+  try {
+    native?.openNotificationAccessSettings();
+  } catch {
+    // El móvil no tiene esa pantalla: no pasa nada.
+  }
 }
 
 /** Android: apps cuyos avisos el lector nativo no debe guardar ni anunciar. */
@@ -148,5 +157,15 @@ export function rebindListener(): void {
     native?.rebindListener?.();
   } catch {
     // Módulo antiguo o fabricante que no lo permite.
+  }
+}
+
+/** Android: de dónde se instaló Taimo ("play", "sideload", "store" o "unknown"). */
+export function installSource(): 'play' | 'sideload' | 'store' | 'unknown' {
+  try {
+    const s = native?.installSource?.();
+    return s === 'play' || s === 'sideload' || s === 'store' ? s : 'unknown';
+  } catch {
+    return 'unknown';
   }
 }

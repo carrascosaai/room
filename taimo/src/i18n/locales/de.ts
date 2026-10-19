@@ -926,7 +926,7 @@ const de: Translation = {
   },
   diag: {
     restrictedTitle: "Ist der Schalter ausgegraut?",
-    restrictedText: "Android sperrt diese Berechtigung für Apps, die nicht aus Google Play stammen. Tippe auf „Taimo-Einstellungen öffnen“, dann oben rechts auf ⋮ → „Eingeschränkte Einstellungen zulassen“ und erteile die Berechtigung erneut.",
+    restrictedText: "Android sperrt diese Berechtigung für Apps, die nicht aus Google Play stammen. So geht’s: 1) Tippe auf „Zugriff erlauben“ und versuche, Taimo einzuschalten (es wird gesperrt, das ist normal). 2) Komm zurück und tippe auf „Taimo-Einstellungen öffnen“. 3) Oben rechts auf ⋮ → „Eingeschränkte Einstellungen zulassen“. 4) Erneut „Zugriff erlauben“ und Taimo einschalten.",
     title: "Funktioniert es?",
     alive: "Taimo empfängt Benachrichtigungen. Die letzte kam: {when}.",
     waiting: "Noch keine Benachrichtigung angekommen. Empfange irgendeine (eine WhatsApp reicht) und komm zurück.",

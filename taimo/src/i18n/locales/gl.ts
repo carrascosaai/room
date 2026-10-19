@@ -926,7 +926,7 @@ const gl: Translation = {
   },
   diag: {
     restrictedTitle: "O interruptor sae en gris?",
-    restrictedText: "Android bloquea este permiso ás apps que non veñen de Google Play. Toca «Abrir axustes de Taimo», despois os tres puntos ⋮ de arriba á dereita → «Permitir axustes restrinxidos», e volve dar permiso.",
+    restrictedText: "Android bloquea este permiso ás apps que non veñen de Google Play. Arránxase así: 1) Toca «Dar permiso» e intenta activar Taimo (sairá bloqueado, é normal). 2) Volve aquí e toca «Abrir axustes de Taimo». 3) Toca os tres puntos ⋮ de arriba á dereita → «Permitir axustes restrinxidos». 4) Toca outra vez «Dar permiso» e activa Taimo.",
     title: "Funciona?",
     alive: "Taimo está a recibir avisos. O último chegou: {when}.",
     waiting: "Aínda non chegou ningún aviso. Recibe un calquera (un WhatsApp vale) e volve aquí.",

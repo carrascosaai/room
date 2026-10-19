@@ -957,7 +957,7 @@ const en = {
   },
   diag: {
     restrictedTitle: "Is the switch greyed out?",
-    restrictedText: "Android blocks this permission for apps not installed from Google Play. Tap \"Open Taimo settings\", then the three dots ⋮ at the top right → \"Allow restricted settings\", and grant access again.",
+    restrictedText: "Android blocks this permission for apps not installed from Google Play. To fix it: 1) Tap \"Grant permission\" and try to turn Taimo on (it will be blocked, that's normal). 2) Come back and tap \"Open Taimo settings\". 3) Tap the three dots ⋮ at the top right → \"Allow restricted settings\". 4) Tap \"Grant permission\" again and turn Taimo on.",
     title: "Is it working?",
     alive: "Taimo is receiving notifications. The last one arrived: {when}.",
     waiting: "No notification has arrived yet. Get any notification (a WhatsApp will do) and come back.",

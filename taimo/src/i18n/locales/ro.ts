@@ -941,7 +941,7 @@ const ro: Translation = {
   },
   diag: {
     restrictedTitle: "Comutatorul e gri?",
-    restrictedText: "Android blochează această permisiune pentru aplicațiile care nu vin din Google Play. Atinge „Deschide setările Taimo”, apoi cele trei puncte ⋮ din dreapta sus → „Permite setări restricționate” și acordă din nou accesul.",
+    restrictedText: "Android blochează această permisiune pentru aplicațiile care nu vin din Google Play. Se rezolvă așa: 1) Atinge „Acordă acces” și încearcă să activezi Taimo (va fi blocat, e normal). 2) Revino aici și atinge „Deschide setările Taimo”. 3) Atinge cele trei puncte ⋮ din dreapta sus → „Permite setări restricționate”. 4) Atinge din nou „Acordă acces” și activează Taimo.",
     title: "Funcționează?",
     alive: "Taimo primește notificări. Ultima a sosit: {when}.",
     waiting: "Nu a sosit încă nicio notificare. Primește una oarecare (merge și un WhatsApp) și revino aici.",

@@ -926,7 +926,7 @@ const ca: Translation = {
   },
   diag: {
     restrictedTitle: "L’interruptor surt gris?",
-    restrictedText: "Android bloqueja aquest permís a les apps que no vénen de Google Play. Toca «Obrir la configuració de Taimo», després els tres punts ⋮ de dalt a la dreta → «Permet la configuració restringida», i torna a donar permís.",
+    restrictedText: "Android bloqueja aquest permís a les apps que no vénen de Google Play. S’arregla així: 1) Toca «Dona permís» i intenta activar Taimo (sortirà bloquejat, és normal). 2) Torna aquí i toca «Obrir la configuració de Taimo». 3) Toca els tres punts ⋮ de dalt a la dreta → «Permet la configuració restringida». 4) Torna a tocar «Dona permís» i activa Taimo.",
     title: "Funciona?",
     alive: "Taimo està rebent avisos. L’últim va arribar: {when}.",
     waiting: "Encara no ha arribat cap avís. Rep-ne un qualsevol (un WhatsApp ja serveix) i torna aquí.",

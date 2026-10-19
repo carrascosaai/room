@@ -926,7 +926,7 @@ const sv: Translation = {
   },
   diag: {
     restrictedTitle: "Är reglaget grått?",
-    restrictedText: "Android blockerar den här behörigheten för appar som inte kommer från Google Play. Tryck på ”Öppna Taimos inställningar”, sedan de tre prickarna ⋮ uppe till höger → ”Tillåt begränsade inställningar”, och ge åtkomst igen.",
+    restrictedText: "Android blockerar den här behörigheten för appar som inte kommer från Google Play. Så här löser du det: 1) Tryck på ”Ge behörighet” och försök slå på Taimo (det blockeras, det är normalt). 2) Kom tillbaka och tryck på ”Öppna Taimos inställningar”. 3) Tryck på ⋮ uppe till höger → ”Tillåt begränsade inställningar”. 4) Tryck på ”Ge behörighet” igen och slå på Taimo.",
     title: "Fungerar det?",
     alive: "Taimo tar emot aviseringar. Den senaste kom: {when}.",
     waiting: "Ingen avisering har kommit än. Ta emot någon (ett WhatsApp räcker) och kom tillbaka.",

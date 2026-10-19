@@ -926,7 +926,7 @@ const fi: Translation = {
   },
   diag: {
     restrictedTitle: "Onko kytkin harmaa?",
-    restrictedText: "Android estää tämän luvan sovelluksilta, jotka eivät tule Google Playsta. Napauta ”Avaa Taimon asetukset”, sitten oikean yläkulman kolmea pistettä ⋮ → ”Salli rajoitetut asetukset” ja anna lupa uudelleen.",
+    restrictedText: "Android estää tämän luvan sovelluksilta, jotka eivät tule Google Playsta. Korjaa näin: 1) Napauta ”Anna lupa” ja yritä ottaa Taimo käyttöön (se estetään, se on normaalia). 2) Palaa tänne ja napauta ”Avaa Taimon asetukset”. 3) Napauta oikean yläkulman ⋮ → ”Salli rajoitetut asetukset”. 4) Napauta uudelleen ”Anna lupa” ja ota Taimo käyttöön.",
     title: "Toimiiko?",
     alive: "Taimo vastaanottaa ilmoituksia. Viimeisin tuli: {when}.",
     waiting: "Yhtään ilmoitusta ei ole vielä tullut. Vastaanota mikä tahansa (WhatsApp käy) ja palaa tänne.",

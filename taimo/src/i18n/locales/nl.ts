@@ -926,7 +926,7 @@ const nl: Translation = {
   },
   diag: {
     restrictedTitle: "Is de schakelaar grijs?",
-    restrictedText: "Android blokkeert deze toestemming voor apps die niet uit Google Play komen. Tik op ‘Taimo-instellingen openen’, dan rechtsboven op ⋮ → ‘Beperkte instellingen toestaan’, en geef opnieuw toegang.",
+    restrictedText: "Android blokkeert deze toestemming voor apps die niet uit Google Play komen. Zo los je het op: 1) Tik op ‘Toegang geven’ en probeer Taimo aan te zetten (het wordt geblokkeerd, dat is normaal). 2) Kom terug en tik op ‘Taimo-instellingen openen’. 3) Tik rechtsboven op ⋮ → ‘Beperkte instellingen toestaan’. 4) Tik opnieuw op ‘Toegang geven’ en zet Taimo aan.",
     title: "Werkt het?",
     alive: "Taimo ontvangt meldingen. De laatste kwam: {when}.",
     waiting: "Er is nog geen melding binnengekomen. Ontvang er een (een WhatsApp is genoeg) en kom terug.",

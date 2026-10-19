@@ -926,7 +926,7 @@ const fr: Translation = {
   },
   diag: {
     restrictedTitle: "L’interrupteur est grisé ?",
-    restrictedText: "Android bloque cette autorisation pour les apps qui ne viennent pas de Google Play. Touchez « Ouvrir les réglages de Taimo », puis les trois points ⋮ en haut à droite → « Autoriser les paramètres restreints », et réessayez.",
+    restrictedText: "Android bloque cette autorisation pour les apps qui ne viennent pas de Google Play. Solution : 1) Touchez « Autoriser » et essayez d’activer Taimo (ce sera bloqué, c’est normal). 2) Revenez ici et touchez « Ouvrir les réglages de Taimo ». 3) Touchez les trois points ⋮ en haut à droite → « Autoriser les paramètres restreints ». 4) Touchez à nouveau « Autoriser » et activez Taimo.",
     title: "Ça marche ?",
     alive: "Taimo reçoit les notifications. La dernière est arrivée : {when}.",
     waiting: "Aucune notification reçue pour l’instant. Recevez-en une (un WhatsApp suffit) et revenez ici.",
