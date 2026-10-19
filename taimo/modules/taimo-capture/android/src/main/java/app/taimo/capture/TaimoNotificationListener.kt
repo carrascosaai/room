@@ -30,20 +30,32 @@ class TaimoNotificationListener : NotificationListenerService() {
     val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
     val text = (extras.getCharSequence(Notification.EXTRA_BIG_TEXT)
       ?: extras.getCharSequence(Notification.EXTRA_TEXT))?.toString() ?: ""
+    // Solo la hora: prueba de que el lector sigue vivo (Samsung, Xiaomi… lo cierran a veces).
+    PendingStore.markSeen(this, sbn.postTime)
     if (text.isEmpty() && title.isEmpty()) return
-    val amount = PaymentRules.get(this).match(sbn.packageName, PendingStore.ignoredApps(this), title, text) ?: return
-
-    val iso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-      timeZone = TimeZone.getTimeZone("UTC")
-    }.format(Date(sbn.postTime))
-    PendingStore.append(this, JSONObject().apply {
+    val rules = PaymentRules.get(this)
+    val ignored = PendingStore.ignoredApps(this)
+    val item = JSONObject().apply {
       put("package", sbn.packageName)
       put("title", title)
       put("text", text)
-      put("postedAt", iso)
-    })
+      put("postedAt", iso(sbn.postTime))
+    }
+    val amount = rules.match(sbn.packageName, ignored, title, text)
+    if (amount == null) {
+      // Modo comprobación (lo enciende el usuario): guarda los avisos con importe que no se apuntan.
+      if (PendingStore.diagnostics(this) && rules.looksLikeMoney(sbn.packageName, ignored, title, text)) {
+        PendingStore.addMissed(this, item)
+      }
+      return
+    }
+    PendingStore.append(this, item)
     notifyCaptured(amount.trim())
   }
+
+  private fun iso(time: Long): String = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
+    timeZone = TimeZone.getTimeZone("UTC")
+  }.format(Date(time))
 
   /** Textos del aviso según el idioma del móvil (los de la app se traducen en JavaScript). */
   private fun strings(): Pair<String, String> = when (java.util.Locale.getDefault().language) {

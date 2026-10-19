@@ -7,6 +7,12 @@ interface TaimoCaptureNative {
   setIgnoredApps?(apps: string[]): void;
   recognizeText?(uri: string): Promise<OcrLine[]>;
   setWidgetData?(json: string): void;
+  captureStatus?(): string;
+  setDiagnostics?(on: boolean): void;
+  missedNotices?(): string;
+  clearMissed?(): void;
+  reportMissed?(json: string): void;
+  openAppSettings?(): void;
 }
 
 // No existe en Expo Go ni en web: allí la app funciona sin captura nativa.
@@ -68,5 +74,69 @@ export function setWidgetData(json: string): void {
     native?.setWidgetData?.(json);
   } catch {
     // Sin widget (Android, web o versiones antiguas del módulo).
+  }
+}
+
+/** Android: si el lector de avisos está vivo (último aviso que ha llegado, de cualquier app). */
+export interface CaptureStatus {
+  /** Milisegundos; 0 si aún no ha llegado ninguno. */
+  seenAt: number;
+  seenCount: number;
+  diagnostics: boolean;
+}
+
+export const canDiagnose = typeof native?.captureStatus === 'function';
+
+export function captureStatus(): CaptureStatus | null {
+  if (!native?.captureStatus) return null;
+  try {
+    const s = JSON.parse(native.captureStatus());
+    return { seenAt: Number(s.seenAt) || 0, seenCount: Number(s.seenCount) || 0, diagnostics: !!s.diagnostics };
+  } catch {
+    return null;
+  }
+}
+
+/** Modo comprobación: guarda en el móvil los avisos con importe que no se apuntan. Al apagarlo se borran. */
+export function setDiagnostics(on: boolean): void {
+  try {
+    native?.setDiagnostics?.(on);
+  } catch {
+    // Módulo antiguo.
+  }
+}
+
+export function missedNotices(): PendingItem[] {
+  if (!native?.missedNotices) return [];
+  try {
+    const parsed = JSON.parse(native.missedNotices());
+    return Array.isArray(parsed) ? parsed.reverse() : [];
+  } catch {
+    return [];
+  }
+}
+
+export function clearMissed(): void {
+  try {
+    native?.clearMissed?.();
+  } catch {
+    // Módulo antiguo.
+  }
+}
+
+/** Un aviso que el lector guardó pero la app no supo convertir en gasto. */
+export function reportMissed(item: PendingItem): void {
+  try {
+    native?.reportMissed?.(JSON.stringify(item));
+  } catch {
+    // Módulo antiguo.
+  }
+}
+
+export function openAppSettings(): void {
+  try {
+    native?.openAppSettings?.();
+  } catch {
+    // Módulo antiguo.
   }
 }

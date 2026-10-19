@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { AppState as RNAppState, Platform } from 'react-native';
 
-import { drainPending } from 'taimo-capture';
+import { drainPending, reportMissed } from 'taimo-capture';
 
 import { categoryStatus } from '@/domain/budget';
 import { parseCaptureParams, pendingKind, type CapturePayload } from '@/domain/capture';
@@ -62,7 +62,11 @@ export function useNativeCaptures(i18n: I18n, onCaptured?: (count: number) => vo
         const when = item.date ? new Date(item.date) : new Date();
         payload = parseCaptureParams(item, current.learnedCategories, Number.isNaN(when.getTime()) ? new Date() : when, defaultMerchant, current.profile.currency);
       }
-      if (!payload) continue;
+      if (!payload) {
+        // Para la pantalla «¿Funciona?» (solo se guarda si el modo comprobación está encendido).
+        if (kind === 'notification') reportMissed(item);
+        continue;
+      }
       const { expense, duplicate } = expenseFromCapture(current, payload);
       if (duplicate) continue;
       const action = { type: 'addExpense', expense } as const;

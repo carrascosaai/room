@@ -45,6 +45,13 @@ class PaymentRules private constructor(json: JSONObject) {
     return if (isPayment) amount else null
   }
 
+  /**
+   * Para la pantalla «¿Funciona?»: un aviso con importe que no se ha apuntado
+   * (de una app que no está en la lista negra). Sirve para ver qué banco falla.
+   */
+  fun looksLikeMoney(pkg: String, ignored: Set<String>, title: String, text: String): Boolean =
+    pkg !in deny && pkg !in ignored && findAmount("$title\n$text") != null
+
   private fun findAmount(full: String): String? {
     val candidates = money.flatMap { it.findAll(full).toList() }.sortedBy { it.range.first }
     for (m in candidates) {

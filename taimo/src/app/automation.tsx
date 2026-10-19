@@ -1,11 +1,22 @@
 import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { AppState as RNAppState, Platform, Switch, Text, View } from 'react-native';
+import { AppState as RNAppState, Platform, Share, Switch, Text, View } from 'react-native';
 
-import { hasNotificationAccess, nativeCaptureAvailable, openNotificationAccessSettings } from 'taimo-capture';
+import {
+  canDiagnose,
+  captureStatus,
+  clearMissed,
+  hasNotificationAccess,
+  missedNotices,
+  nativeCaptureAvailable,
+  openAppSettings,
+  openNotificationAccessSettings,
+  setDiagnostics,
+  type PendingItem,
+} from 'taimo-capture';
 
-import { PAYMENT_APPS } from '@/domain/notifications';
+import { PAYMENT_APPS, parsePastedPayment } from '@/domain/notifications';
 import { useI18n, type TKey } from '@/i18n';
 import { ensureNotificationPermission } from '@/notifications/local';
 import { useStore } from '@/store/store';
@@ -85,8 +96,96 @@ function AndroidSetup() {
         />
       ) : null}
       <Muted>{t('automation.androidHint')}</Muted>
+      {enabled ? <CaptureCheck /> : null}
       <CaptureApps />
     </>
+  );
+}
+
+/**
+ * «¿Funciona?»: si el lector de avisos está vivo y, con el modo comprobación,
+ * los avisos con importe que no se han apuntado (para apuntarlos o mandárnoslos).
+ */
+function CaptureCheck() {
+  const { state } = useStore();
+  const { t, date } = useI18n();
+  const [status, setStatus] = useState(captureStatus());
+  const [missed, setMissed] = useState<PendingItem[]>(missedNotices());
+  useEffect(() => {
+    const refresh = () => {
+      setStatus(captureStatus());
+      setMissed(missedNotices());
+    };
+    const sub = RNAppState.addEventListener('change', (s) => {
+      if (s === 'active') refresh();
+    });
+    return () => sub.remove();
+  }, []);
+  if (!canDiagnose || !status) return null;
+
+  const alive = status.seenAt > 0;
+  const when = alive ? date(new Date(status.seenAt), { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+
+  function toggle(on: boolean) {
+    setDiagnostics(on);
+    setStatus(captureStatus());
+    setMissed(missedNotices());
+  }
+
+  function logIt(item: PendingItem) {
+    const r = parsePastedPayment(`${item.title ?? ''}\n${item.text ?? ''}`, { home: state.profile.currency, learned: state.learnedCategories });
+    router.push({ pathname: '/add', params: r ? { amount: String(r.amount), merchant: r.merchant ?? '', currency: r.currency } : {} });
+  }
+
+  function send(item: PendingItem) {
+    const app = PAYMENT_APPS[item.package] ?? item.package;
+    Share.share({ message: `${t('diag.shareIntro')}\n\nApp: ${app} (${item.package})\n${item.title ?? ''}\n${item.text ?? ''}` }).catch(() => {});
+  }
+
+  return (
+    <Card style={{ borderColor: alive ? colors.success : colors.warning }}>
+      <H2>{t('diag.title')}</H2>
+      <Text style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}>
+        {alive ? `✅ ${t('diag.alive', { when })}` : `⏳ ${t('diag.waiting')}`}
+      </Text>
+      <Muted>{t('diag.battery')}</Muted>
+      <Button label={t('diag.openBattery')} variant="secondary" onPress={openAppSettings} />
+
+      <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>{t('diag.mode')}</Text>
+          <Muted>{t('diag.modeHint')}</Muted>
+        </View>
+        <Switch value={status.diagnostics} onValueChange={toggle} accessibilityLabel={t('diag.mode')} />
+      </Row>
+
+      {status.diagnostics && missed.length === 0 ? <Muted>{t('diag.none')}</Muted> : null}
+      {status.diagnostics && missed.length > 0 ? (
+        <>
+          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700' }}>{t('diag.missedTitle')}</Text>
+          {missed.map((item, i) => (
+            <View key={`${item.postedAt}-${i}`} style={{ gap: space.xs, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: space.sm }}>
+              <Text style={{ color: colors.text, fontWeight: '600' }}>{PAYMENT_APPS[item.package] ?? item.package}</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 15, lineHeight: 20 }} numberOfLines={4}>
+                {[item.title, item.text].filter(Boolean).join(' · ')}
+              </Text>
+              <Row style={{ flexWrap: 'wrap' }}>
+                <Button label={t('diag.logIt')} variant="secondary" onPress={() => logIt(item)} />
+                <Button label={t('diag.send')} variant="ghost" onPress={() => send(item)} />
+              </Row>
+            </View>
+          ))}
+          <Button
+            label={t('diag.clear')}
+            variant="ghost"
+            onPress={() => {
+              clearMissed();
+              setMissed([]);
+            }}
+          />
+        </>
+      ) : null}
+    </Card>
   );
 }
 

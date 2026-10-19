@@ -58,6 +58,37 @@ class TaimoCaptureModule : Module() {
       PendingStore.setIgnoredApps(context, apps)
     }
 
+    /** Para la pantalla «¿Funciona?»: último aviso recibido y si el modo comprobación está encendido. */
+    Function("captureStatus") {
+      PendingStore.status(context)
+    }
+
+    Function("setDiagnostics") { on: Boolean ->
+      PendingStore.setDiagnostics(context, on)
+    }
+
+    Function("missedNotices") {
+      PendingStore.missed(context)
+    }
+
+    Function("clearMissed") {
+      PendingStore.clearMissed(context)
+    }
+
+    /** Un aviso que el lector guardó pero la app no supo leer: a la lista de no apuntados. */
+    Function("reportMissed") { json: String ->
+      if (PendingStore.diagnostics(context)) PendingStore.addMissed(context, org.json.JSONObject(json))
+    }
+
+    /** Ajustes de Taimo en el móvil (batería «Sin restricciones» en Samsung, Xiaomi…). */
+    Function("openAppSettings") {
+      val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      }
+      context.startActivity(intent)
+      Unit
+    }
+
     Function("hasNotificationAccess") {
       NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
     }
