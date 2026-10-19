@@ -49,6 +49,14 @@ jobs:
         env:
           # Versión que se ve en «Danos tu opinión», para saber qué APK tiene cada probador.
           EXPO_PUBLIC_BUILD: ${{ github.run_number }}-${{ github.sha }}
+      - name: Comprobar el lector de avisos en el APK
+        # Si el servicio no está en el manifiesto final, Taimo no sale en «Acceso a notificaciones».
+        run: |
+          manifest=$(find android/app/build/intermediates -path '*release*' -name AndroidManifest.xml | xargs grep -l 'TaimoNotificationListener' | head -1)
+          test -n "$manifest" || { echo "::error::Falta TaimoNotificationListener en el manifiesto"; exit 1; }
+          echo "Manifiesto: $manifest"
+          grep -n -B2 -A8 'TaimoNotificationListener' "$manifest"
+          grep -n 'targetSdkVersion\|minSdkVersion' "$manifest" || true
       - name: Nombre del APK
         run: mv android/app/build/outputs/apk/release/app-release.apk "android/app/build/outputs/apk/release/taimo-${{ github.run_number }}.apk"
       - uses: actions/upload-artifact@v4
