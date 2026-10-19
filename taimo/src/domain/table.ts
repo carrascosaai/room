@@ -44,6 +44,8 @@ export interface TableClaim {
    * nombres en otro alfabeto, no se pisan. Los avisos antiguos no lo traen.
    */
   u?: string;
+  /** «cash»: pagado en efectivo (lo marca el comensal o quien pagó). */
+  k?: 'cash';
 }
 
 export const MAX_ITEMS = 40;
@@ -129,7 +131,7 @@ export function decodeClaim(input: string): TableClaim | null {
     if (!b || !w || a === null || a <= 0) return null;
     const i = Array.isArray(raw.i) ? raw.i.filter((x): x is number => Number.isInteger(x) && x >= 0 && x < MAX_ITEMS).slice(0, MAX_ITEMS) : [];
     const u = typeof raw.u === 'string' && /^[A-Za-z0-9_-]{4,24}$/.test(raw.u) ? raw.u : '';
-    return { b, w, i, a, ...(u ? { u } : {}) };
+    return { b, w, i, a, ...(u ? { u } : {}), ...(raw.k === 'cash' ? { k: 'cash' as const } : {}) };
   } catch {
     return null;
   }
@@ -235,7 +237,16 @@ export function applyTableClaim(state: AppState, claim: TableClaim, now = new Da
   const amount = Math.min(claim.a, left);
   shares[memberId] = amount;
   shares[me.id] = left - amount;
-  const settlement: Settlement = { id: `${group.id}-${memberId}`, groupId: group.id, from: memberId, to: me.id, amount, date: at, updatedAt: at };
+  const settlement: Settlement = {
+    id: `${group.id}-${memberId}`,
+    groupId: group.id,
+    from: memberId,
+    to: me.id,
+    amount,
+    date: at,
+    updatedAt: at,
+    ...(claim.k === 'cash' ? { method: 'cash' as const } : {}),
+  };
   // Con id de comensal, si corrige su nombre al reenviar el aviso, se actualiza.
   const members = existing
     ? group.members.map((m) => (claim.u && m.id === memberId && m.name !== claim.w ? { ...m, name: claim.w, updatedAt: at } : m))
@@ -289,4 +300,29 @@ export function tableUnpaid(group: Group, settlements: Settlement[]): number {
   const me = group.members.find((m) => m.isMe)?.id;
   const paid = new Set(settlements.filter((s) => s.groupId === group.id && s.from !== me).map((s) => s.from));
   return Math.max(0, group.table.n - 1 - paid.size);
+}
+
+/**
+ * Quien pagó apunta a mano que alguien le ha dado su parte en efectivo (o le
+ * ha pagado sin mandar el aviso): es como si esa persona hubiera mandado el suyo.
+ */
+export function cashClaim(bill: TableBill, name: string, amount: Cents, random: () => number = Math.random): TableClaim {
+  return { b: bill.id, w: name.trim().slice(0, 40), i: [], a: amount, u: newDinerId(random), k: 'cash' };
+}
+
+/**
+ * Lo que le toca a cada uno de los que faltan, para proponerlo al apuntar un
+ * pago en efectivo: lo que queda por cobrar repartido entre los que faltan.
+ */
+export function suggestedShare(group: Group, expense: Expense | undefined, settlements: Settlement[]): Cents {
+  const bill = group.table;
+  if (!bill) return 0;
+  const total = expense?.amount ?? billTotal(bill);
+  const me = group.members.find((m) => m.isMe)?.id;
+  const paid = settlements.filter((s) => s.groupId === group.id && s.from !== me).reduce((sum, s) => sum + s.amount, 0);
+  const unpaid = tableUnpaid(group, settlements);
+  if (unpaid <= 0) return 0;
+  // Lo de quien pagó (una parte igual) no se cobra.
+  const pending = Math.max(0, total - paid - Math.round(total / bill.n));
+  return Math.round(pending / unpaid);
 }

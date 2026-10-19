@@ -133,6 +133,8 @@ export interface Settlement {
   amount: Cents;
   date: string;
   updatedAt?: string;
+  /** Pagado en mano (solo se muestra; el servidor no lo guarda). */
+  method?: 'cash';
 }
 
 /** Marca de borrado de algo de un grupo compartido, pendiente de enviar al servidor. */

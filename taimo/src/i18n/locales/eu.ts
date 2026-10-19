@@ -970,6 +970,17 @@ const eu: Translation = {
     step4: "Gehitu «Erregistratu bankuaren jakinarazpena Taimon» ekintza. «Jakinarazpenaren testua» atalean aukeratu jakinarazpenaren aldagaia eta «Bankua» atalean idatzi haren izena.",
     step5: "Prest. Ordaindu txartelarekin: bankuaren jakinarazpena iristean, Taimok bakarrik apuntatuko du.",
   },
+  mesa2: {
+    cashTitle: "Eskudirutan ordaindu didate",
+    cashName: "Nork?",
+    cashAmount: "Zenbat?",
+    cashSave: "Apuntatu",
+    remind: "Ordaindu ez dutenei gogorarazi",
+    reminder: "Kaixo! 😊 {place}-ko zure zatia falta da oraindik. Hemen ikusiko duzu zer hartu zenuen eta berehala ordainduko duzu, ezer instalatu gabe: {link}",
+    reminderNoPlace: "Kaixo! 😊 Kontuko zure zatia falta da oraindik. Hemen ikusiko duzu zer hartu zenuen eta berehala ordainduko duzu, ezer instalatu gabe: {link}",
+    iPaidCash: "{name}-ri eskudirutan ordaindu diot",
+    sentCash: "💵 {name}, {amount} eman dizkizut eskudirutan. Ireki apuntatzeko: {link}",
+  },
   pot: {
     name: "Poltsa",
     title: "Poltsa komuna",

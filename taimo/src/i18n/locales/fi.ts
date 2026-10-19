@@ -970,6 +970,17 @@ const fi: Translation = {
     step4: "Lisää toiminto ”Kirjaa pankki-ilmoitus Taimoon”. Valitse kohtaan ”Ilmoituksen teksti” ilmoituksen muuttuja ja kirjoita kohtaan ”Pankki” sen nimi.",
     step5: "Valmista. Maksa kortilla: kun pankin ilmoitus tulee, Taimo kirjaa sen itsestään.",
   },
+  mesa2: {
+    cashTitle: "Joku maksoi käteisellä",
+    cashName: "Kuka?",
+    cashAmount: "Paljonko?",
+    cashSave: "Kirjaa",
+    remind: "Muistuta niitä, jotka eivät ole maksaneet",
+    reminder: "Hei! 😊 Osuutesi paikasta {place} puuttuu vielä. Täältä näet, mitä otit, ja maksat hetkessä ilman sovellusta: {link}",
+    reminderNoPlace: "Hei! 😊 Osuutesi laskusta puuttuu vielä. Täältä näet, mitä otit, ja maksat hetkessä ilman sovellusta: {link}",
+    iPaidCash: "Maksoin käteisellä henkilölle {name}",
+    sentCash: "💵 {name}, annoin sinulle {amount} käteisellä. Avaa kirjataksesi sen: {link}",
+  },
   pot: {
     name: "Kassa",
     title: "Yhteinen kassa",

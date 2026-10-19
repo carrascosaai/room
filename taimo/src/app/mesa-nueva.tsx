@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { Platform, Pressable, Share, Text, View } from 'react-native';
 import { canRecognizeText, recognizeText } from 'taimo-capture';
 
-import { parseAmount } from '@/domain/money';
+import { parseAmount, plainAmount } from '@/domain/money';
 import { parseReceipt } from '@/domain/receipt';
-import { billLink, billTotal, compactBill, findClaimInText, MAX_ITEMS, MAX_PEOPLE, previewTableClaim, sharedPart, tableUnpaid, type TableBill } from '@/domain/table';
+import { billLink, billTotal, cashClaim, compactBill, findClaimInText, MAX_ITEMS, MAX_PEOPLE, previewTableClaim, sharedPart, suggestedShare, tableUnpaid, type TableBill } from '@/domain/table';
 import type { Expense } from '@/domain/types';
 import { useI18n } from '@/i18n';
 import { newId, useStore } from '@/store/store';
@@ -230,6 +230,38 @@ function TableQr({ groupId }: { groupId: string }) {
   const total = expense?.amount ?? billTotal(bill);
   const unpaid = tableUnpaid(group, state.settlements);
   const nameOf = (id: string) => group.members.find((m) => m.id === id)?.name ?? '?';
+  const [cashOpen, setCashOpen] = useState(false);
+  const [cashName, setCashName] = useState('');
+  const [cashAmount, setCashAmount] = useState('');
+  const suggested = suggestedShare(group, expense, state.settlements);
+
+  function openCash() {
+    setCashOpen(true);
+    setCashName('');
+    setCashAmount(suggested > 0 ? plainAmount(suggested, group.currency ?? bill.c).replace('.', ',') : '');
+  }
+
+  /** Alguien le ha dado su parte en mano (o pagó sin mandar el aviso). */
+  function saveCash() {
+    const amount = parseAmount(cashAmount) ?? 0;
+    if (!cashName.trim() || amount <= 0) return;
+    const claim = cashClaim(bill, cashName, amount);
+    const msg = tableClaimMessage(i18n, claim, previewTableClaim(state, claim), group.currency ?? bill.c);
+    dispatch({ type: 'tableClaim', claim });
+    setNote(msg.text);
+    setWarning(msg.warning);
+    setCashOpen(false);
+  }
+
+  /** Recordatorio amable al grupo para los que aún no han pagado. */
+  async function remind() {
+    const message = bill.m ? t('mesa2.reminder', { place: bill.m, link }) : t('mesa2.reminderNoPlace', { link });
+    if (Platform.OS === 'web') {
+      await Clipboard.setStringAsync(message).catch(() => {});
+      setCopied(true);
+      setTimeout(() => setCopied(false), 6000);
+    } else await Share.share({ message });
+  }
 
   async function share() {
     const message = bill.m ? t('mesa.shareMessage', { place: bill.m, link }) : t('fixa.shareMessageNoPlace', { link });
@@ -274,7 +306,9 @@ function TableQr({ groupId }: { groupId: string }) {
         {unpaid > 0 ? <Text style={{ color: colors.warning, fontSize: 17, fontWeight: '700' }}>{t('fixa.tableUnpaid', { count: unpaid })}</Text> : null}
         {paid.map((s) => (
           <Row key={s.id} style={{ justifyContent: 'space-between' }}>
-            <Text style={{ color: colors.text, fontSize: 18, flex: 1 }} numberOfLines={1}>✅ {nameOf(s.from)}</Text>
+            <Text style={{ color: colors.text, fontSize: 18, flex: 1 }} numberOfLines={1}>
+              {s.method === 'cash' ? '💵' : '✅'} {nameOf(s.from)}
+            </Text>
             <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700' }}>{money(s.amount)}</Text>
           </Row>
         ))}
@@ -282,7 +316,19 @@ function TableQr({ groupId }: { groupId: string }) {
           <Text style={{ color: colors.textMuted, fontSize: 17 }}>{t('mesa.yours')}</Text>
           <Text style={{ color: colors.text, fontSize: 18, fontWeight: '800' }}>{money(me && expense?.shares ? expense.shares[me.id] ?? 0 : total - paidSum)}</Text>
         </Row>
+        {unpaid > 0 ? <Button label={`🔔 ${t('mesa2.remind')}`} onPress={remind} /> : null}
         <Button label={t('mesa.paste')} variant="secondary" onPress={paste} />
+        {cashOpen ? (
+          <View style={{ gap: space.sm, borderTopWidth: 1, borderColor: colors.border, paddingTop: space.sm }}>
+            <H2>💵 {t('mesa2.cashTitle')}</H2>
+            <Input label={t('mesa2.cashName')} placeholder={t('mesa.whoPlaceholder')} value={cashName} onChangeText={setCashName} autoCapitalize="words" />
+            <Input label={t('mesa2.cashAmount')} keyboardType="decimal-pad" placeholder={money(0)} value={cashAmount} onChangeText={setCashAmount} />
+            <Button label={t('mesa2.cashSave')} onPress={saveCash} disabled={!cashName.trim() || !(parseAmount(cashAmount) ?? 0)} />
+            <Button label={t('common.cancel')} variant="ghost" onPress={() => setCashOpen(false)} />
+          </View>
+        ) : (
+          <Button label={`💵 ${t('mesa2.cashTitle')}`} variant="ghost" onPress={openCash} />
+        )}
         {note ? <Text style={{ color: colors.text, fontSize: 16, textAlign: 'center' }}>{note}</Text> : null}
         {warning ? <Text style={{ color: colors.danger, fontSize: 16, textAlign: 'center' }}>⚠️ {warning}</Text> : null}
       </Card>

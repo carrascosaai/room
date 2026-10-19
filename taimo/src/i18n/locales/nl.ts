@@ -970,6 +970,17 @@ const nl: Translation = {
     step4: "Voeg de actie ‘Bankmelding noteren in Taimo’ toe. Kies bij ‘Tekst van de melding’ de meldingsvariabele en typ bij ‘Bank’ de naam.",
     step5: "Klaar. Betaal met je pas: zodra de melding van je bank binnenkomt, noteert Taimo het vanzelf.",
   },
+  mesa2: {
+    cashTitle: "Iemand heeft contant betaald",
+    cashName: "Wie?",
+    cashAmount: "Hoeveel?",
+    cashSave: "Noteren",
+    remind: "Herinner wie nog niet betaald heeft",
+    reminder: "Hoi! 😊 Jouw deel van {place} staat nog open. Hier zie je wat je had en betaal je zo, zonder app: {link}",
+    reminderNoPlace: "Hoi! 😊 Jouw deel van de rekening staat nog open. Hier zie je wat je had en betaal je zo, zonder app: {link}",
+    iPaidCash: "Ik heb {name} contant betaald",
+    sentCash: "💵 {name}, ik heb je {amount} contant gegeven. Open dit om het te noteren: {link}",
+  },
   pot: {
     name: "Pot",
     title: "Gezamenlijke pot",

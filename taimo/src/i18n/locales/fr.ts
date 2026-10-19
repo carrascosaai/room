@@ -970,6 +970,17 @@ const fr: Translation = {
     step4: "Ajoutez l’action « Enregistrer la notification bancaire dans Taimo ». Pour « Texte de la notification », choisissez la variable de la notification et saisissez le nom de votre banque dans « Banque ».",
     step5: "C’est prêt. Payez avec votre carte : quand la notification de la banque arrive, Taimo l’enregistre tout seul.",
   },
+  mesa2: {
+    cashTitle: "On m’a payé en espèces",
+    cashName: "Qui ?",
+    cashAmount: "Combien ?",
+    cashSave: "Enregistrer",
+    remind: "Relancer ceux qui n’ont pas payé",
+    reminder: "Coucou ! 😊 Il manque encore ta part pour {place}. Vois ce que tu as pris et paie en un instant, sans app : {link}",
+    reminderNoPlace: "Coucou ! 😊 Il manque encore ta part de l’addition. Vois ce que tu as pris et paie en un instant, sans app : {link}",
+    iPaidCash: "J’ai payé {name} en espèces",
+    sentCash: "💵 {name}, je t’ai donné {amount} en espèces. Ouvre ce lien pour l’enregistrer : {link}",
+  },
   pot: {
     name: "Cagnotte",
     title: "Cagnotte commune",

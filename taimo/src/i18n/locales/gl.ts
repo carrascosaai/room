@@ -970,6 +970,17 @@ const gl: Translation = {
     step4: "Engade a acción «Rexistrar aviso do banco en Taimo». En «Texto do aviso» escolle a variable da notificación e en «Banco» escribe o seu nome.",
     step5: "Listo. Paga coa tarxeta: cando chegue o aviso do banco, Taimo apúntao só.",
   },
+  mesa2: {
+    cashTitle: "Pagáronme en efectivo",
+    cashName: "Quen?",
+    cashAmount: "Canto?",
+    cashSave: "Apuntar",
+    remind: "Lembrarllo aos que faltan",
+    reminder: "Ola! 😊 Aínda falta a túa parte de {place}. Aquí ves o que tomaches e págalo nun momento, sen instalar nada: {link}",
+    reminderNoPlace: "Ola! 😊 Aínda falta a túa parte da conta. Aquí ves o que tomaches e págalo nun momento, sen instalar nada: {link}",
+    iPaidCash: "Pagueille a {name} en efectivo",
+    sentCash: "💵 {name}, deiche {amount} en efectivo. Ábreo para apuntalo: {link}",
+  },
   pot: {
     name: "Bote",
     title: "Bote común",

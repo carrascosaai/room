@@ -970,6 +970,17 @@ const ca: Translation = {
     step4: "Afegeix l’acció «Registrar avís del banc a Taimo». A «Text de l’avís» tria la variable de la notificació i a «Banc» escriu-ne el nom.",
     step5: "Fet. Paga amb la targeta: quan arribi l’avís del banc, Taimo l’apunta sol.",
   },
+  mesa2: {
+    cashTitle: "M’han pagat en efectiu",
+    cashName: "Qui?",
+    cashAmount: "Quant?",
+    cashSave: "Apuntar",
+    remind: "Recordar-ho als que falten",
+    reminder: "Hola! 😊 Encara falta la teva part de {place}. Aquí veus el que vas prendre i ho pagues en un moment, sense instal·lar res: {link}",
+    reminderNoPlace: "Hola! 😊 Encara falta la teva part del compte. Aquí veus el que vas prendre i ho pagues en un moment, sense instal·lar res: {link}",
+    iPaidCash: "He pagat a {name} en efectiu",
+    sentCash: "💵 {name}, t’he donat {amount} en efectiu. Obre-ho per apuntar-ho: {link}",
+  },
   pot: {
     name: "Pot",
     title: "Pot comú",

@@ -970,6 +970,17 @@ const da: Translation = {
     step4: "Tilføj handlingen “Notér banknotifikation i Taimo”. Vælg notifikationsvariablen under “Notifikationstekst”, og skriv bankens navn under “Bank”.",
     step5: "Færdig. Betal med kortet: når bankens notifikation kommer, noterer Taimo den automatisk.",
   },
+  mesa2: {
+    cashTitle: "Nogen betalte kontant",
+    cashName: "Hvem?",
+    cashAmount: "Hvor meget?",
+    cashSave: "Notér",
+    remind: "Mind dem, der ikke har betalt",
+    reminder: "Hej! 😊 Din del for {place} mangler stadig. Her kan du se, hvad du fik, og betale på et øjeblik uden app: {link}",
+    reminderNoPlace: "Hej! 😊 Din del af regningen mangler stadig. Her kan du se, hvad du fik, og betale på et øjeblik uden app: {link}",
+    iPaidCash: "Jeg betalte {name} kontant",
+    sentCash: "💵 {name}, jeg gav dig {amount} kontant. Åbn for at notere det: {link}",
+  },
   pot: {
     name: "Pulje",
     title: "Fælles pulje",

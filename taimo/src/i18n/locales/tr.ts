@@ -970,6 +970,17 @@ const tr: Translation = {
     step4: "«Banka bildirimini Taimo'ya kaydet» eylemini ekle. «Bildirim metni» için bildirim değişkenini seç, «Banka» kısmına adını yaz.",
     step5: "Hazır. Kartla öde: banka bildirimi geldiğinde Taimo onu kendiliğinden kaydeder.",
   },
+  mesa2: {
+    cashTitle: "Biri nakit ödedi",
+    cashName: "Kim?",
+    cashAmount: "Ne kadar?",
+    cashSave: "Kaydet",
+    remind: "Ödemeyenlere hatırlat",
+    reminder: "Selam! 😊 {place} hesabındaki payın hâlâ eksik. Burada ne aldığını görür, uygulama kurmadan hemen ödersin: {link}",
+    reminderNoPlace: "Selam! 😊 Hesaptaki payın hâlâ eksik. Burada ne aldığını görür, uygulama kurmadan hemen ödersin: {link}",
+    iPaidCash: "{name} kişisine nakit ödedim",
+    sentCash: "💵 {name}, sana {amount} nakit verdim. Kaydetmek için aç: {link}",
+  },
   pot: {
     name: "Kumbara",
     title: "Ortak kumbara",

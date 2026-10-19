@@ -43,7 +43,20 @@ export function PayButtons({ name, pay, amount, currency }: { name: string; pay?
         <Button label={t('payx.with', { method: 'PayPal' })} onPress={() => Linking.openURL(`https://paypal.me/${paypal}/${plainAmount(amount, currency)}${currency}`)} />
       ) : null}
       {revolut ? <Button label={t('payx.with', { method: 'Revolut' })} onPress={() => Linking.openURL(`https://revolut.me/${revolut}`)} /> : null}
-      {pay?.bizum ? <Button label={t('payx.copy', { what: `Bizum ${pay.bizum}` })} variant="secondary" onPress={() => copy('Bizum', pay.bizum!)} /> : null}
+      {/* Bizum no tiene enlaces de pago entre personas: número e importe listos para pegar en la app del banco. */}
+      {pay?.bizum ? (
+        <View style={{ gap: space.xs, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: space.sm }}>
+          <Text style={{ color: colors.text, fontSize: 18, fontWeight: '800' }}>Bizum · {pay.bizum}</Text>
+          <Button label={`📋 ${t('plink.copyNumber')}`} variant="secondary" onPress={() => copy('Bizum', pay.bizum!.replace(/\s+/g, ''))} />
+          {amount > 0 ? (
+            <Button
+              label={`📋 ${t('plink.copyAmount')} (${plainAmount(amount, currency).replace('.', currency === 'EUR' ? ',' : '.')})`}
+              variant="secondary"
+              onPress={() => copy(t('plink.copyAmount'), plainAmount(amount, currency).replace('.', currency === 'EUR' ? ',' : '.'))}
+            />
+          ) : null}
+        </View>
+      ) : null}
       {pay?.iban ? <Button label={t('payx.copy', { what: 'IBAN' })} variant="secondary" onPress={() => copy('IBAN', pay.iban!.replace(/\s+/g, ''))} /> : null}
       {copied ? <Muted>{copied}</Muted> : null}
       <CheckFirstLink />

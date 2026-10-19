@@ -985,6 +985,17 @@ const ro: Translation = {
     step4: "Adaugă acțiunea „Înregistrează notificarea băncii în Taimo”. La „Textul notificării” alege variabila notificării, iar la „Bancă” scrie numele ei.",
     step5: "Gata. Plătește cu cardul: când sosește notificarea băncii, Taimo o înregistrează singur.",
   },
+  mesa2: {
+    cashTitle: "Mi-a plătit cineva cash",
+    cashName: "Cine?",
+    cashAmount: "Cât?",
+    cashSave: "Înregistrează",
+    remind: "Amintește-le celor care n-au plătit",
+    reminder: "Salut! 😊 Încă lipsește partea ta de la {place}. Aici vezi ce ai luat și plătești imediat, fără aplicație: {link}",
+    reminderNoPlace: "Salut! 😊 Încă lipsește partea ta din notă. Aici vezi ce ai luat și plătești imediat, fără aplicație: {link}",
+    iPaidCash: "I-am plătit lui {name} cash",
+    sentCash: "💵 {name}, ți-am dat {amount} cash. Deschide ca să înregistrezi: {link}",
+  },
   pot: {
     name: "Pușculiță",
     title: "Pușculiță comună",

@@ -970,6 +970,17 @@ const sv: Translation = {
     step4: "Lägg till åtgärden ”Bokför bankavisering i Taimo”. Välj notisvariabeln för ”Aviseringens text” och skriv bankens namn under ”Bank”.",
     step5: "Klart. Betala med kortet: när bankens avisering kommer bokför Taimo den automatiskt.",
   },
+  mesa2: {
+    cashTitle: "Någon betalade kontant",
+    cashName: "Vem?",
+    cashAmount: "Hur mycket?",
+    cashSave: "Bokför",
+    remind: "Påminn dem som inte har betalat",
+    reminder: "Hej! 😊 Din del för {place} saknas fortfarande. Här ser du vad du tog och betalar på ett ögonblick, utan app: {link}",
+    reminderNoPlace: "Hej! 😊 Din del av notan saknas fortfarande. Här ser du vad du tog och betalar på ett ögonblick, utan app: {link}",
+    iPaidCash: "Jag betalade {name} kontant",
+    sentCash: "💵 {name}, jag gav dig {amount} kontant. Öppna för att bokföra det: {link}",
+  },
   pot: {
     name: "Pott",
     title: "Gemensam pott",

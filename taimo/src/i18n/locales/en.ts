@@ -1001,6 +1001,17 @@ const en = {
     step4: "Add the action “Log bank notification in Taimo”. For “Notification text” choose the notification variable, and type your bank's name in “Bank”.",
     step5: "Done. Pay with your card: when your bank's notification arrives, Taimo logs it automatically.",
   },
+  mesa2: {
+    cashTitle: "Someone paid me in cash",
+    cashName: "Who?",
+    cashAmount: "How much?",
+    cashSave: "Record it",
+    remind: "Remind those who haven't paid",
+    reminder: "Hi! 😊 Your share for {place} is still pending. See what you had and pay in a moment, no app needed: {link}",
+    reminderNoPlace: "Hi! 😊 Your share of the bill is still pending. See what you had and pay in a moment, no app needed: {link}",
+    iPaidCash: "I paid {name} in cash",
+    sentCash: "💵 {name}, I gave you {amount} in cash. Open this to record it: {link}",
+  },
   pot: {
     name: "Pot",
     title: "Shared pot",

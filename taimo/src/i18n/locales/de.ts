@@ -970,6 +970,17 @@ const de: Translation = {
     step4: "Füge die Aktion „Bank-Benachrichtigung in Taimo erfassen“ hinzu. Wähle für „Text der Benachrichtigung“ die Mitteilungs-Variable und trage bei „Bank“ ihren Namen ein.",
     step5: "Fertig. Bezahle mit der Karte: Sobald die Bank-Benachrichtigung kommt, erfasst Taimo die Zahlung automatisch.",
   },
+  mesa2: {
+    cashTitle: "Jemand hat bar bezahlt",
+    cashName: "Wer?",
+    cashAmount: "Wie viel?",
+    cashSave: "Erfassen",
+    remind: "An die erinnern, die noch nicht gezahlt haben",
+    reminder: "Hallo! 😊 Dein Anteil für {place} fehlt noch. Hier siehst du, was du hattest, und zahlst in einem Moment – ohne App: {link}",
+    reminderNoPlace: "Hallo! 😊 Dein Anteil an der Rechnung fehlt noch. Hier siehst du, was du hattest, und zahlst in einem Moment – ohne App: {link}",
+    iPaidCash: "Ich habe {name} bar bezahlt",
+    sentCash: "💵 {name}, ich habe dir {amount} bar gegeben. Öffne den Link, um es zu erfassen: {link}",
+  },
   pot: {
     name: "Kasse",
     title: "Gemeinsame Kasse",

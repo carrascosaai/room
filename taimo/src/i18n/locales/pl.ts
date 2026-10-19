@@ -1000,6 +1000,17 @@ const pl: Translation = {
     step4: "Dodaj czynność „Zapisz powiadomienie banku w Taimo”. W „Tekst powiadomienia” wybierz zmienną powiadomienia, a w „Bank” wpisz jego nazwę.",
     step5: "Gotowe. Zapłać kartą: gdy przyjdzie powiadomienie z banku, Taimo zapisze je samo.",
   },
+  mesa2: {
+    cashTitle: "Ktoś zapłacił gotówką",
+    cashName: "Kto?",
+    cashAmount: "Ile?",
+    cashSave: "Zapisz",
+    remind: "Przypomnij tym, którzy nie zapłacili",
+    reminder: "Cześć! 😊 Wciąż brakuje Twojej części za {place}. Tu zobaczysz, co było Twoje, i zapłacisz w chwilę, bez aplikacji: {link}",
+    reminderNoPlace: "Cześć! 😊 Wciąż brakuje Twojej części rachunku. Tu zobaczysz, co było Twoje, i zapłacisz w chwilę, bez aplikacji: {link}",
+    iPaidCash: "Zapłaciłem(-am) {name} gotówką",
+    sentCash: "💵 {name}, dałem(-am) Ci {amount} gotówką. Otwórz, żeby to zapisać: {link}",
+  },
   pot: {
     name: "Skarbonka",
     title: "Wspólna skarbonka",

@@ -970,6 +970,17 @@ const nb: Translation = {
     step4: "Legg til handlingen «Før bankvarsel i Taimo». Velg varslingsvariabelen for «Varselstekst», og skriv bankens navn under «Bank».",
     step5: "Ferdig. Betal med kortet: når varselet fra banken kommer, fører Taimo det automatisk.",
   },
+  mesa2: {
+    cashTitle: "Noen betalte kontant",
+    cashName: "Hvem?",
+    cashAmount: "Hvor mye?",
+    cashSave: "Før",
+    remind: "Minn dem som ikke har betalt",
+    reminder: "Hei! 😊 Din del for {place} mangler fortsatt. Her ser du hva du tok og betaler på et øyeblikk, uten app: {link}",
+    reminderNoPlace: "Hei! 😊 Din del av regningen mangler fortsatt. Her ser du hva du tok og betaler på et øyeblikk, uten app: {link}",
+    iPaidCash: "Jeg betalte {name} kontant",
+    sentCash: "💵 {name}, jeg ga deg {amount} kontant. Åpne for å føre det: {link}",
+  },
   pot: {
     name: "Pott",
     title: "Felles pott",

@@ -73,12 +73,14 @@ export default function Mesa() {
   const toggle = (i: number) => setPicked((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
   const ready = name.trim().length > 0 && amount > 0;
 
-  async function notify() {
-    const link = claimLink(webBase(), { b: bill!.id, w: name.trim(), i: picked, a: amount, u: diner });
+  async function notify(cash = false) {
+    const link = claimLink(webBase(), { b: bill!.id, w: name.trim(), i: picked, a: amount, u: diner, ...(cash ? { k: 'cash' as const } : {}) });
     // Sin nombre del sitio, la frase va sin «de …» (nada de «de 🍽️»).
-    const message = bill!.m
-      ? t('mesa.sentMessage', { name: bill!.t, amount: money(amount), place: bill!.m, link })
-      : t('fixa.sentMessageNoPlace', { name: bill!.t, amount: money(amount), link });
+    const message = cash
+      ? t('mesa2.sentCash', { name: bill!.t, amount: money(amount), link })
+      : bill!.m
+        ? t('mesa.sentMessage', { name: bill!.t, amount: money(amount), place: bill!.m, link })
+        : t('fixa.sentMessageNoPlace', { name: bill!.t, amount: money(amount), link });
     setSent(true);
     if (Platform.OS !== 'web') {
       await Share.share({ message });
@@ -177,6 +179,7 @@ export default function Mesa() {
         </Card>
       ) : null}
       <BigButton emoji="✅" label={t('mesa.notify', { name: bill.t })} onPress={() => (ready ? notify() : undefined)} variant={ready ? 'primary' : 'secondary'} />
+      {ready ? <Button label={`💵 ${t('mesa2.iPaidCash', { name: bill.t })}`} variant="ghost" onPress={() => notify(true)} /> : null}
       {!ready ? <Muted style={{ textAlign: 'center' }}>{name.trim() ? t('mesa.pickSomething') : t('mesa.needName')}</Muted> : null}
 
       {Platform.OS === 'web' ? (

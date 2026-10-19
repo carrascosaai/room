@@ -1000,6 +1000,17 @@ const cs: Translation = {
     step4: "Přidejte akci „Zapsat oznámení banky do Taima“. U „Text oznámení“ vyberte proměnnou oznámení a do „Banka“ napište její název.",
     step5: "Hotovo. Zaplaťte kartou: jakmile přijde oznámení banky, Taimo ho zapíše samo.",
   },
+  mesa2: {
+    cashTitle: "Někdo zaplatil hotově",
+    cashName: "Kdo?",
+    cashAmount: "Kolik?",
+    cashSave: "Zapsat",
+    remind: "Připomenout těm, kdo nezaplatili",
+    reminder: "Ahoj! 😊 Ještě chybí tvoje část za {place}. Tady uvidíš, co jsi měl(a), a zaplatíš hned, bez aplikace: {link}",
+    reminderNoPlace: "Ahoj! 😊 Ještě chybí tvoje část účtu. Tady uvidíš, co jsi měl(a), a zaplatíš hned, bez aplikace: {link}",
+    iPaidCash: "Zaplatil(a) jsem {name} hotově",
+    sentCash: "💵 {name}, dal(a) jsem ti {amount} hotově. Otevři pro zápis: {link}",
+  },
   pot: {
     name: "Kasička",
     title: "Společná kasička",

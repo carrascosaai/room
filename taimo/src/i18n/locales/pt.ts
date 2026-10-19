@@ -970,6 +970,17 @@ const pt: Translation = {
     step4: "Adiciona a ação «Registar notificação do banco no Taimo». Em «Texto da notificação» escolhe a variável da notificação e em «Banco» escreve o nome.",
     step5: "Pronto. Paga com o cartão: quando chegar a notificação do banco, o Taimo regista-a sozinho.",
   },
+  mesa2: {
+    cashTitle: "Pagaram-me em dinheiro",
+    cashName: "Quem?",
+    cashAmount: "Quanto?",
+    cashSave: "Registar",
+    remind: "Lembrar quem ainda não pagou",
+    reminder: "Olá! 😊 Ainda falta a tua parte de {place}. Aqui vês o que consumiste e pagas num instante, sem instalar nada: {link}",
+    reminderNoPlace: "Olá! 😊 Ainda falta a tua parte da conta. Aqui vês o que consumiste e pagas num instante, sem instalar nada: {link}",
+    iPaidCash: "Paguei a {name} em dinheiro",
+    sentCash: "💵 {name}, dei-te {amount} em dinheiro. Abre para registar: {link}",
+  },
   pot: {
     name: "Fundo",
     title: "Fundo comum",

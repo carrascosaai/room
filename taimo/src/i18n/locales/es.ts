@@ -995,6 +995,17 @@ const es: Translation = {
     step4: "Añade la acción «Registrar aviso del banco en Taimo». En «Texto del aviso» elige la variable de la notificación y en «Banco» escribe su nombre.",
     step5: "Listo. Paga algo con la tarjeta: cuando llegue el aviso del banco, Taimo lo apunta solo.",
   },
+  mesa2: {
+    cashTitle: "Me han pagado en efectivo",
+    cashName: "¿Quién?",
+    cashAmount: "¿Cuánto?",
+    cashSave: "Apuntar",
+    remind: "Recordar a los que faltan",
+    reminder: "¡Hola! 😊 De {place} aún falta tu parte. Aquí ves lo tuyo y lo pagas en un momento, sin instalar nada: {link}",
+    reminderNoPlace: "¡Hola! 😊 Aún falta tu parte de la cuenta. Aquí ves lo tuyo y lo pagas en un momento, sin instalar nada: {link}",
+    iPaidCash: "Le he pagado en efectivo a {name}",
+    sentCash: "💵 {name}, te he dado {amount} en efectivo. Ábrelo para apuntarlo: {link}",
+  },
   pot: {
     name: "Bote",
     title: "Bote común",
