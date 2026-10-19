@@ -22,7 +22,7 @@ concurrency:
 jobs:
   apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     defaults:
       run:
         working-directory: taimo
@@ -58,12 +58,24 @@ jobs:
           grep -n -B2 -A8 'TaimoNotificationListener' "$manifest"
           grep -n 'targetSdkVersion\|minSdkVersion' "$manifest" || true
       - name: Nombre del APK
-        run: mv android/app/build/outputs/apk/release/app-release.apk "android/app/build/outputs/apk/release/taimo-${{ github.run_number }}.apk"
+        run: mkdir -p dist && mv android/app/build/outputs/apk/release/app-release.apk "dist/taimo-${{ github.run_number }}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: taimo-android-apk
-          path: taimo/android/app/build/outputs/apk/release/*.apk
+          path: taimo/dist/*.apk
           retention-days: 30
+      # Copia solo para la prueba: el emulador de GitHub es x86_64 y el APK de
+      # los móviles (arm64) no arranca ahí. Mismo código, otra arquitectura.
+      - name: Compilar APK de prueba (x86_64)
+        working-directory: taimo/android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=x86_64
+        env:
+          EXPO_PUBLIC_BUILD: ${{ github.run_number }}-${{ github.sha }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: taimo-android-apk-emulador
+          path: taimo/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 3
 
   # Prueba de punta a punta en un móvil Android virtual (Android 14): instala el
   # APK, simula avisos de pago y comprueba que se apuntan y que nada se cierra.
@@ -75,7 +87,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: taimo-android-apk
+          name: taimo-android-apk-emulador
           path: apk
       - name: Activar KVM para el emulador
         run: |
