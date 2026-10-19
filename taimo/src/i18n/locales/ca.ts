@@ -960,6 +960,16 @@ const ca: Translation = {
     infoGroups: "Grups",
     infoCapture: "Detecció",
   },
+  ios27: {
+    title: "Nou a iOS 27: també la targeta de plàstic",
+    text: "Amb iOS 27, l’iPhone pot passar a Taimo l’avís que t’envia el banc a cada pagament. Així s’apunten sols els pagaments amb la targeta física, en línia i a les apps, a l’instant i sense connectar el banc.",
+    update: "Si actualitzes l’iPhone a iOS 27 (Configuració → General → Actualització de programari), Taimo també podrà apuntar els pagaments amb la targeta de plàstic, en línia i a les apps llegint l’avís del banc.",
+    step1: "Obre Dreceres → Automatització → «+» → «Notificació».",
+    step2: "A «App», tria l’app del teu banc. Si en tens diverses, fes una automatització per a cadascuna.",
+    step3: "Marca «Executar immediatament» i toca «Següent».",
+    step4: "Afegeix l’acció «Registrar avís del banc a Taimo». A «Text de l’avís» tria la variable de la notificació i a «Banc» escriu-ne el nom.",
+    step5: "Fet. Paga amb la targeta: quan arribi l’avís del banc, Taimo l’apunta sol.",
+  },
   pot: {
     name: "Pot",
     title: "Pot comú",

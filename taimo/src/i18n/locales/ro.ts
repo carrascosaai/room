@@ -975,6 +975,16 @@ const ro: Translation = {
     infoGroups: "Grupuri",
     infoCapture: "Detectare",
   },
+  ios27: {
+    title: "Nou în iOS 27: și cardul fizic",
+    text: "Cu iOS 27, iPhone-ul poate transmite Taimo notificarea pe care banca ți-o trimite la fiecare plată. Astfel plățile cu cardul fizic, online și în aplicații se înregistrează singure, pe loc și fără să conectezi banca.",
+    update: "Actualizează iPhone-ul la iOS 27 (Configurări → General → Actualizare software) și Taimo va putea înregistra și plățile cu cardul fizic, online și în aplicații citind notificarea băncii.",
+    step1: "Deschide Scurtături → Automatizare → „+” → „Notificare”.",
+    step2: "La „Aplicație”, alege aplicația băncii tale. Dacă ai mai multe, fă câte o automatizare pentru fiecare.",
+    step3: "Bifează „Rulează imediat” și atinge „Următorul”.",
+    step4: "Adaugă acțiunea „Înregistrează notificarea băncii în Taimo”. La „Textul notificării” alege variabila notificării, iar la „Bancă” scrie numele ei.",
+    step5: "Gata. Plătește cu cardul: când sosește notificarea băncii, Taimo o înregistrează singur.",
+  },
   pot: {
     name: "Pușculiță",
     title: "Pușculiță comună",

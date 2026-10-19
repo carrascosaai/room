@@ -960,6 +960,16 @@ const fr: Translation = {
     infoGroups: "Groupes",
     infoCapture: "Détection",
   },
+  ios27: {
+    title: "Nouveau dans iOS 27 : la carte physique aussi",
+    text: "Avec iOS 27, l’iPhone peut transmettre à Taimo la notification que votre banque envoie à chaque paiement. Les paiements par carte physique, en ligne et dans les apps s’enregistrent seuls, instantanément et sans connecter votre banque.",
+    update: "Mettez votre iPhone à jour vers iOS 27 (Réglages → Général → Mise à jour logicielle) et Taimo pourra aussi enregistrer les paiements par carte physique, en ligne et dans les apps grâce à la notification de votre banque.",
+    step1: "Ouvrez Raccourcis → Automatisation → « + » → « Notification ».",
+    step2: "Dans « App », choisissez l’app de votre banque. Si vous en avez plusieurs, créez une automatisation pour chacune.",
+    step3: "Cochez « Exécuter immédiatement » et touchez « Suivant ».",
+    step4: "Ajoutez l’action « Enregistrer la notification bancaire dans Taimo ». Pour « Texte de la notification », choisissez la variable de la notification et saisissez le nom de votre banque dans « Banque ».",
+    step5: "C’est prêt. Payez avec votre carte : quand la notification de la banque arrive, Taimo l’enregistre tout seul.",
+  },
   pot: {
     name: "Cagnotte",
     title: "Cagnotte commune",

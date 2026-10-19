@@ -69,11 +69,13 @@ export function parseCaptureParams(
  * - Android (lector de notificaciones): `{ package, title, text, postedAt }`.
  * - iPhone, Siri «Apunta en Taimo…»: `{ text, date, source: 'siri' }`.
  * - iPhone, Atajo de Wallet: `{ amount, merchant, card, date, source: 'applepay' }`.
+ * - iPhone (iOS 27+), aviso del banco por Atajos: `{ text, app, date, source: 'banknotice' }`.
  * Ojo: las notificaciones de Android también traen `text`, así que no basta con
  * mirar esa clave; lo que las distingue es `package`.
  */
-export function pendingKind(item: Record<string, unknown>, platform: string): 'notification' | 'siri' | 'wallet' {
+export function pendingKind(item: Record<string, unknown>, platform: string): 'notification' | 'siri' | 'wallet' | 'banknotice' {
   if (typeof item.package === 'string' && item.package !== '') return 'notification';
+  if (item.source === 'banknotice' && typeof item.text === 'string') return 'banknotice';
   if (item.source === 'siri' && typeof item.text === 'string') return 'siri';
   return platform === 'android' ? 'notification' : 'wallet';
 }

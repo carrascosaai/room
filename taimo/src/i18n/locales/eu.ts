@@ -960,6 +960,16 @@ const eu: Translation = {
     infoGroups: "Taldeak",
     infoCapture: "Detekzioa",
   },
+  ios27: {
+    title: "Berria iOS 27n: plastikozko txartela ere bai",
+    text: "iOS 27rekin, iPhoneak bankuak ordainketa bakoitzean bidaltzen dizun jakinarazpena pasa diezaioke Taimori. Horrela txartel fisikoarekin, sarean eta aplikazioetan egindako ordainketak bakarrik apuntatzen dira, berehala eta bankua konektatu gabe.",
+    update: "iPhonea iOS 27ra eguneratzen baduzu (Ezarpenak → Orokorra → Software eguneraketa), Taimok plastikozko txartelarekin, sarean eta aplikazioetan egindako ordainketak ere apuntatu ahal izango ditu bankuaren jakinarazpena irakurrita.",
+    step1: "Ireki Lasterbideak → Automatizazioa → «+» → «Jakinarazpena».",
+    step2: "«App» atalean, aukeratu zure bankuaren aplikazioa. Hainbat badituzu, egin automatizazio bat bakoitzeko.",
+    step3: "Markatu «Exekutatu berehala» eta sakatu «Hurrengoa».",
+    step4: "Gehitu «Erregistratu bankuaren jakinarazpena Taimon» ekintza. «Jakinarazpenaren testua» atalean aukeratu jakinarazpenaren aldagaia eta «Bankua» atalean idatzi haren izena.",
+    step5: "Prest. Ordaindu txartelarekin: bankuaren jakinarazpena iristean, Taimok bakarrik apuntatuko du.",
+  },
   pot: {
     name: "Poltsa",
     title: "Poltsa komuna",

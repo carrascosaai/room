@@ -220,6 +220,37 @@ export function parsePastedPayment(
 }
 
 /**
+ * iPhone (iOS 27+): aviso del banco que llega por la automatización de Atajos
+ * «Cuando recibo una notificación de [app del banco]» → «Registrar aviso del
+ * banco en Taimo». Como el usuario eligió esa app, basta con que parezca un
+ * pago (no exige pista de tarjeta), pero se descartan ingresos, Bizum
+ * recibidos, códigos y saldos igual que al pegar un aviso.
+ */
+export function parseBankNotice(
+  text: string,
+  app: string,
+  opts: ParseOptions & { now?: Date; postedAt?: string } = {},
+): (CapturePayload & { currency: string }) | null {
+  const r = parsePastedPayment(text, opts);
+  if (!r) return null;
+  const bank = app.trim().slice(0, 32);
+  // «Has pagado 9,99 € a Netflix» / «You paid £5 to Pret»: el comercio va tras «a»/«to» (con mayúscula).
+  const toWhom = r.merchant ? null : text.match(/\b(?:a|to)\s+(\p{Lu}[\p{L}\d&'’.\- ]{1,40}?)\s*(?:[.,;:!\n]|$)/u)?.[1];
+  const found = r.merchant ?? toWhom ?? null;
+  const merchant = found ? tidyMerchant(found) : opts.defaultMerchant ?? 'Card payment';
+  return {
+    amount: r.amount,
+    currency: r.currency,
+    merchant,
+    card: bank || undefined,
+    category: r.category ?? categorize(merchant, opts.learned ?? {}),
+    source: 'notificacion',
+    date: opts.postedAt ?? (opts.now ?? new Date()).toISOString(),
+    app: bank ? `ios:${bank}` : undefined,
+  };
+}
+
+/**
  * El comercio tal como se pegó, pero sin gritar: «BURGER KING» → «Burger King».
  * Si ya viene con mayúsculas y minúsculas («McDonald's»), se deja igual.
  */

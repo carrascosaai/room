@@ -960,6 +960,16 @@ const tr: Translation = {
     infoGroups: "Gruplar",
     infoCapture: "Algılama",
   },
+  ios27: {
+    title: "iOS 27'de yeni: plastik kart da",
+    text: "iOS 27 ile iPhone, bankanın her ödemede gönderdiği bildirimi Taimo'ya iletebilir. Böylece fiziksel kartla, internetten ve uygulamalarda yapılan ödemeler anında ve banka bağlamadan kendiliğinden kaydedilir.",
+    update: "iPhone'unu iOS 27'ye güncellersen (Ayarlar → Genel → Yazılım Güncelleme) Taimo plastik kartla, internetten ve uygulamalarda yapılan ödemeleri de bankanın bildiriminden kaydedebilir.",
+    step1: "Kestirmeler → Otomasyon → «+» → «Bildirim»i aç.",
+    step2: "«Uygulama» kısmında bankanın uygulamasını seç. Birden fazlaysa her biri için ayrı otomasyon oluştur.",
+    step3: "«Hemen Çalıştır»ı seç ve «İleri»ye dokun.",
+    step4: "«Banka bildirimini Taimo'ya kaydet» eylemini ekle. «Bildirim metni» için bildirim değişkenini seç, «Banka» kısmına adını yaz.",
+    step5: "Hazır. Kartla öde: banka bildirimi geldiğinde Taimo onu kendiliğinden kaydeder.",
+  },
   pot: {
     name: "Kumbara",
     title: "Ortak kumbara",

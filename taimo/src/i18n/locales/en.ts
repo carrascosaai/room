@@ -991,6 +991,16 @@ const en = {
     infoGroups: "Groups",
     infoCapture: "Detection",
   },
+  ios27: {
+    title: "New in iOS 27: your plastic card too",
+    text: "With iOS 27, your iPhone can pass Taimo the notification your bank sends for each payment. Payments with your physical card, online and in apps are logged automatically, instantly and without connecting your bank.",
+    update: "Update your iPhone to iOS 27 (Settings → General → Software Update) and Taimo can also log payments with your plastic card, online and in apps by reading your bank's notification.",
+    step1: "Open Shortcuts → Automation → “+” → “Notification”.",
+    step2: "Under “App”, choose your bank's app. If you have several, create one automation for each.",
+    step3: "Select “Run Immediately” and tap “Next”.",
+    step4: "Add the action “Log bank notification in Taimo”. For “Notification text” choose the notification variable, and type your bank's name in “Bank”.",
+    step5: "Done. Pay with your card: when your bank's notification arrives, Taimo logs it automatically.",
+  },
   pot: {
     name: "Pot",
     title: "Shared pot",

@@ -960,6 +960,16 @@ const gl: Translation = {
     infoGroups: "Grupos",
     infoCapture: "Detección",
   },
+  ios27: {
+    title: "Novo en iOS 27: tamén a tarxeta de plástico",
+    text: "Con iOS 27, o iPhone pode pasarlle a Taimo o aviso que che manda o banco en cada pago. Así apúntanse sós os pagos coa tarxeta física, en liña e nas apps, ao instante e sen conectar o banco.",
+    update: "Se actualizas o iPhone a iOS 27 (Axustes → Xeral → Actualización de software), Taimo poderá apuntar tamén os pagos coa tarxeta de plástico, en liña e nas apps lendo o aviso do teu banco.",
+    step1: "Abre Atallos → Automatización → «+» → «Notificación».",
+    step2: "En «App», escolle a app do teu banco. Se tes varias, fai unha automatización para cada unha.",
+    step3: "Marca «Executar inmediatamente» e toca «Seguinte».",
+    step4: "Engade a acción «Rexistrar aviso do banco en Taimo». En «Texto do aviso» escolle a variable da notificación e en «Banco» escribe o seu nome.",
+    step5: "Listo. Paga coa tarxeta: cando chegue o aviso do banco, Taimo apúntao só.",
+  },
   pot: {
     name: "Bote",
     title: "Bote común",

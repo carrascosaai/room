@@ -960,6 +960,16 @@ const da: Translation = {
     infoGroups: "Grupper",
     infoCapture: "Genkendelse",
   },
+  ios27: {
+    title: "Nyt i iOS 27: også plastikkortet",
+    text: "Med iOS 27 kan iPhone give Taimo den notifikation, banken sender ved hver betaling. Så noteres betalinger med det fysiske kort, online og i apps automatisk, med det samme og uden at forbinde banken.",
+    update: "Opdater din iPhone til iOS 27 (Indstillinger → Generelt → Softwareopdatering), så kan Taimo også notere betalinger med plastikkortet, online og i apps via bankens notifikation.",
+    step1: "Åbn Genveje → Automatisering → “+” → “Notifikation”.",
+    step2: "Vælg din banks app under “App”. Har du flere, så lav én automatisering for hver.",
+    step3: "Vælg “Kør med det samme”, og tryk på “Næste”.",
+    step4: "Tilføj handlingen “Notér banknotifikation i Taimo”. Vælg notifikationsvariablen under “Notifikationstekst”, og skriv bankens navn under “Bank”.",
+    step5: "Færdig. Betal med kortet: når bankens notifikation kommer, noterer Taimo den automatisk.",
+  },
   pot: {
     name: "Pulje",
     title: "Fælles pulje",

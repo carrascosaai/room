@@ -960,6 +960,16 @@ const fi: Translation = {
     infoGroups: "Ryhmät",
     infoCapture: "Tunnistus",
   },
+  ios27: {
+    title: "Uutta iOS 27:ssä: myös muovikortti",
+    text: "iOS 27:n avulla iPhone voi välittää Taimolle ilmoituksen, jonka pankki lähettää jokaisesta maksusta. Näin fyysisellä kortilla, verkossa ja sovelluksissa tehdyt maksut kirjautuvat itsestään, heti ja ilman pankkiyhteyttä.",
+    update: "Päivitä iPhone iOS 27:ään (Asetukset → Yleiset → Ohjelmistopäivitys), niin Taimo voi kirjata myös muovikortilla, verkossa ja sovelluksissa tehdyt maksut pankin ilmoituksesta.",
+    step1: "Avaa Pikakomennot → Automaatio → ”+” → ”Ilmoitus”.",
+    step2: "Valitse kohdassa ”App” pankkisi sovellus. Jos pankkeja on useita, tee automaatio jokaiselle.",
+    step3: "Valitse ”Suorita heti” ja napauta ”Seuraava”.",
+    step4: "Lisää toiminto ”Kirjaa pankki-ilmoitus Taimoon”. Valitse kohtaan ”Ilmoituksen teksti” ilmoituksen muuttuja ja kirjoita kohtaan ”Pankki” sen nimi.",
+    step5: "Valmista. Maksa kortilla: kun pankin ilmoitus tulee, Taimo kirjaa sen itsestään.",
+  },
   pot: {
     name: "Kassa",
     title: "Yhteinen kassa",

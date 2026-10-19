@@ -235,6 +235,33 @@ function CaptureApps() {
   );
 }
 
+/**
+ * iPhone con iOS 27+: la automatización «Cuando recibo una notificación de [banco]»
+ * pasa el aviso del banco a Taimo → se apuntan también los pagos con la tarjeta de
+ * plástico, online y en apps, al instante y sin conectar el banco.
+ */
+function BankNoticeSetup() {
+  const { t } = useI18n();
+  const major = parseInt(String(Platform.Version), 10) || 0;
+  if (major < 27) {
+    return (
+      <Card style={{ borderColor: colors.primary }}>
+        <Text style={{ color: colors.text, fontWeight: '700', fontSize: 17 }}>🔔 {t('ios27.title')}</Text>
+        <Text style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}>{t('ios27.update')}</Text>
+      </Card>
+    );
+  }
+  return (
+    <>
+      <Card style={{ borderColor: colors.primary, borderWidth: 1.5 }}>
+        <Text style={{ color: colors.text, fontWeight: '800', fontSize: 18 }}>🔔 {t('ios27.title')}</Text>
+        <Text style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}>{t('ios27.text')}</Text>
+      </Card>
+      <Steps steps={['ios27.step1', 'ios27.step2', 'ios27.step3', 'ios27.step4', 'ios27.step5']} />
+    </>
+  );
+}
+
 /** iPhone: lo que pasa con la tarjeta de plástico y cómo no perder esos pagos. */
 function PlasticCard() {
   const { state, dispatch } = useStore();
@@ -301,6 +328,7 @@ export default function Automation() {
               <Text style={{ color: colors.text, flex: 1, fontSize: 15, lineHeight: 21 }}>{t('cap.iosWorld')}</Text>
             </Row>
           </Card>
+          {nativeCaptureAvailable ? <BankNoticeSetup /> : null}
           <PlasticCard />
           {nativeCaptureAvailable ? <Steps steps={STEPS_INTENT} /> : null}
           {nativeCaptureAvailable ? <H2>{t('automation.fallbackTitle')}</H2> : null}

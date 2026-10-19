@@ -960,6 +960,16 @@ const sv: Translation = {
     infoGroups: "Grupper",
     infoCapture: "Igenkänning",
   },
+  ios27: {
+    title: "Nytt i iOS 27: även plastkortet",
+    text: "Med iOS 27 kan iPhone skicka vidare aviseringen som banken skickar vid varje betalning till Taimo. Då bokförs betalningar med det fysiska kortet, online och i appar automatiskt, direkt och utan att koppla banken.",
+    update: "Uppdatera iPhone till iOS 27 (Inställningar → Allmänt → Programuppdatering) så kan Taimo även bokföra betalningar med plastkortet, online och i appar genom bankens avisering.",
+    step1: "Öppna Genvägar → Automation → ”+” → ”Notis”.",
+    step2: "Välj din banks app under ”App”. Har du flera, skapa en automation för varje.",
+    step3: "Välj ”Kör omedelbart” och tryck på ”Nästa”.",
+    step4: "Lägg till åtgärden ”Bokför bankavisering i Taimo”. Välj notisvariabeln för ”Aviseringens text” och skriv bankens namn under ”Bank”.",
+    step5: "Klart. Betala med kortet: när bankens avisering kommer bokför Taimo den automatiskt.",
+  },
   pot: {
     name: "Pott",
     title: "Gemensam pott",

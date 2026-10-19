@@ -985,6 +985,16 @@ const es: Translation = {
     infoGroups: "Grupos",
     infoCapture: "Detección",
   },
+  ios27: {
+    title: "Nuevo en iOS 27: también la tarjeta de plástico",
+    text: "Con iOS 27, el iPhone puede pasar a Taimo el aviso que te manda tu banco en cada pago. Así se apuntan solos los pagos con la tarjeta física, online y en apps, al instante y sin conectar el banco.",
+    update: "Si actualizas el iPhone a iOS 27 (Ajustes → General → Actualización de software), Taimo podrá apuntar también los pagos con la tarjeta de plástico, online y en apps leyendo el aviso de tu banco.",
+    step1: "Abre Atajos → Automatización → «+» → «Notificación».",
+    step2: "En «App», elige la app de tu banco (BBVA, Santander, CaixaBank, Revolut…). Si tienes varias, haz una automatización por cada una.",
+    step3: "Marca «Ejecutar inmediatamente» y toca «Siguiente».",
+    step4: "Añade la acción «Registrar aviso del banco en Taimo». En «Texto del aviso» elige la variable de la notificación y en «Banco» escribe su nombre.",
+    step5: "Listo. Paga algo con la tarjeta: cuando llegue el aviso del banco, Taimo lo apunta solo.",
+  },
   pot: {
     name: "Bote",
     title: "Bote común",

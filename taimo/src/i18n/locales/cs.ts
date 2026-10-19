@@ -990,6 +990,16 @@ const cs: Translation = {
     infoGroups: "Skupiny",
     infoCapture: "Rozpoznávání",
   },
+  ios27: {
+    title: "Novinka v iOS 27: i plastová karta",
+    text: "S iOS 27 může iPhone předat Taimu oznámení, které vám banka posílá při každé platbě. Platby fyzickou kartou, online i v aplikacích se tak zapíší samy, okamžitě a bez připojení banky.",
+    update: "Aktualizujte iPhone na iOS 27 (Nastavení → Obecné → Aktualizace softwaru) a Taimo bude moci zapisovat i platby plastovou kartou, online a v aplikacích z oznámení banky.",
+    step1: "Otevřete Zkratky → Automatizace → „+“ → „Oznámení“.",
+    step2: "V „Aplikace“ vyberte aplikaci své banky. Máte-li jich více, vytvořte automatizaci pro každou.",
+    step3: "Zvolte „Spustit okamžitě“ a klepněte na „Další“.",
+    step4: "Přidejte akci „Zapsat oznámení banky do Taima“. U „Text oznámení“ vyberte proměnnou oznámení a do „Banka“ napište její název.",
+    step5: "Hotovo. Zaplaťte kartou: jakmile přijde oznámení banky, Taimo ho zapíše samo.",
+  },
   pot: {
     name: "Kasička",
     title: "Společná kasička",

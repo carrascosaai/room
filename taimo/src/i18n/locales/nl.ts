@@ -960,6 +960,16 @@ const nl: Translation = {
     infoGroups: "Groepen",
     infoCapture: "Herkenning",
   },
+  ios27: {
+    title: "Nieuw in iOS 27: ook je plastic pas",
+    text: "Met iOS 27 kan je iPhone de melding die je bank bij elke betaling stuurt aan Taimo doorgeven. Zo worden betalingen met je fysieke pas, online en in apps vanzelf genoteerd, direct en zonder je bank te koppelen.",
+    update: "Werk je iPhone bij naar iOS 27 (Instellingen → Algemeen → Software-update) en Taimo kan ook betalingen met je plastic pas, online en in apps noteren via de melding van je bank.",
+    step1: "Open Opdrachten → Automatisering → ‘+’ → ‘Melding’.",
+    step2: "Kies bij ‘App’ de app van je bank. Heb je er meerdere, maak dan per bank een automatisering.",
+    step3: "Kies ‘Voer direct uit’ en tik op ‘Volgende’.",
+    step4: "Voeg de actie ‘Bankmelding noteren in Taimo’ toe. Kies bij ‘Tekst van de melding’ de meldingsvariabele en typ bij ‘Bank’ de naam.",
+    step5: "Klaar. Betaal met je pas: zodra de melding van je bank binnenkomt, noteert Taimo het vanzelf.",
+  },
   pot: {
     name: "Pot",
     title: "Gezamenlijke pot",

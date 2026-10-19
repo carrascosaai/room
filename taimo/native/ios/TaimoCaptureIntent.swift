@@ -121,6 +121,62 @@ struct TaimoApuntarGastoIntent: AppIntent {
   }
 }
 
+/// iOS 27+: automatización «Cuando recibo una notificación de [app del banco]» →
+/// «Registrar aviso del banco en Taimo» con el texto del aviso. Así se apuntan
+/// también los pagos con la tarjeta de plástico, online y en apps, al instante y
+/// sin conectar el banco. Taimo lee el importe y el comercio al abrirse (igual que
+/// «Pegar aviso del banco»); aquí solo se descarta lo que claramente no es un gasto.
+@available(iOS 16.0, *)
+struct TaimoAvisoBancoIntent: AppIntent {
+  static var title: LocalizedStringResource = "Log bank notification in Taimo"
+  static var description = IntentDescription("Logs a payment from your bank's notification text, without opening Taimo. Use it with the automation “When I get a notification from” your bank app.")
+  static var openAppWhenRun: Bool = false
+
+  @Parameter(title: "Notification text")
+  var texto: String
+
+  @Parameter(title: "Bank", default: "")
+  var banco: String
+
+  static var parameterSummary: some ParameterSummary {
+    Summary("Log \(\.$texto) in Taimo") {
+      \.$banco
+    }
+  }
+
+  /// Dinero que llega, códigos y saldos: no son gastos (la app vuelve a comprobarlo).
+  static let notSpending = try! NSRegularExpression(
+    pattern: "recibid|ingres|abono|nómina|nomina|devoluci|reembols|código|codigo|\\bcode\\b|contraseña|received|refund|credited|deposit|saldo disponible es|your balance",
+    options: [.caseInsensitive]
+  )
+
+  func perform() async throws -> some IntentResult & ProvidesDialog {
+    let text = texto.trimmingCharacters(in: .whitespacesAndNewlines)
+    let range = NSRange(text.startIndex..., in: text)
+    guard text.rangeOfCharacter(from: .decimalDigits) != nil,
+          Self.notSpending.firstMatch(in: text, range: range) == nil else {
+      return .result(dialog: IntentDialog(""))
+    }
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    TaimoPendingQueue.append([
+      "text": String(text.prefix(600)),
+      "app": String(banco.prefix(32)),
+      "date": formatter.string(from: Date()),
+      "source": "banknotice",
+    ])
+
+    let strings = TaimoStrings.current
+    let content = UNMutableNotificationContent()
+    content.title = strings.title
+    content.body = "\(String(text.prefix(80))). \(strings.body)"
+    content.sound = nil
+    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+    try? await UNUserNotificationCenter.current().add(request)
+    return .result(dialog: "\(strings.title)")
+  }
+}
+
 @available(iOS 16.0, *)
 struct TaimoAppShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
@@ -140,6 +196,12 @@ struct TaimoAppShortcuts: AppShortcutsProvider {
       phrases: ["Log payment in \(.applicationName)"],
       shortTitle: "Log payment",
       systemImageName: "creditcard"
+    )
+    AppShortcut(
+      intent: TaimoAvisoBancoIntent(),
+      phrases: ["Log bank notification in \(.applicationName)"],
+      shortTitle: "Log bank notification",
+      systemImageName: "bell.badge"
     )
   }
 }

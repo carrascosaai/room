@@ -24,6 +24,14 @@ Todavía no está en la App Store. De momento puedes probar la versión web en e
 3. Comprueba que la app de tu banco te avisa de cada pago (si no, actívalo en la app del banco).
 4. Enciende **«Modo comprobación»**.
 
+### iPhone con iOS 27 (cuando tengas la app): que apunte también la tarjeta de plástico
+
+1. Atajos → **Automatización** → **«+»** → **«Notificación»**.
+2. En «App», elige la app de tu banco (una automatización por banco).
+3. **«Ejecutar inmediatamente»** → Siguiente.
+4. Acción **«Registrar aviso del banco en Taimo»**: en «Texto del aviso» elige la variable de la notificación y en «Banco» escribe su nombre.
+5. Paga con la tarjeta y mira si Taimo lo apunta al llegar el aviso del banco. **Cuéntanos si funciona y con qué banco**: es lo más importante que puedes probar en iPhone.
+
 ## 3. Qué probar (marca lo que hagas)
 
 - [ ] Paga algo con tarjeta (física, móvil o reloj). ¿Ha aparecido solo en Taimo?

@@ -960,6 +960,16 @@ const it: Translation = {
     infoGroups: "Gruppi",
     infoCapture: "Rilevamento",
   },
+  ios27: {
+    title: "Novità di iOS 27: anche la carta fisica",
+    text: "Con iOS 27 l’iPhone può passare a Taimo la notifica che la banca ti invia a ogni pagamento. Così i pagamenti con carta fisica, online e nelle app si registrano da soli, all’istante e senza collegare la banca.",
+    update: "Aggiorna l’iPhone a iOS 27 (Impostazioni → Generali → Aggiornamento software) e Taimo potrà registrare anche i pagamenti con carta fisica, online e nelle app leggendo la notifica della banca.",
+    step1: "Apri Comandi → Automazione → «+» → «Notifica».",
+    step2: "In «App» scegli l’app della tua banca. Se ne hai più di una, crea un’automazione per ciascuna.",
+    step3: "Seleziona «Esegui immediatamente» e tocca «Avanti».",
+    step4: "Aggiungi l’azione «Registra notifica bancaria in Taimo». In «Testo della notifica» scegli la variabile della notifica e in «Banca» scrivi il suo nome.",
+    step5: "Fatto. Paga con la carta: quando arriva la notifica della banca, Taimo la registra da solo.",
+  },
   pot: {
     name: "Cassa",
     title: "Cassa comune",

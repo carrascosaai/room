@@ -990,6 +990,16 @@ const pl: Translation = {
     infoGroups: "Grupy",
     infoCapture: "Wykrywanie",
   },
+  ios27: {
+    title: "Nowość w iOS 27: także plastikowa karta",
+    text: "Dzięki iOS 27 iPhone może przekazać Taimo powiadomienie, które bank wysyła przy każdej płatności. Płatności kartą fizyczną, online i w aplikacjach zapisują się same, od razu i bez łączenia z bankiem.",
+    update: "Zaktualizuj iPhone’a do iOS 27 (Ustawienia → Ogólne → Uaktualnienia), a Taimo będzie mogło zapisywać też płatności plastikową kartą, online i w aplikacjach na podstawie powiadomienia banku.",
+    step1: "Otwórz Skróty → Automatyzacja → „+” → „Powiadomienie”.",
+    step2: "W „Aplikacja” wybierz aplikację swojego banku. Jeśli masz kilka, utwórz automatyzację dla każdej.",
+    step3: "Zaznacz „Uruchom natychmiast” i dotknij „Dalej”.",
+    step4: "Dodaj czynność „Zapisz powiadomienie banku w Taimo”. W „Tekst powiadomienia” wybierz zmienną powiadomienia, a w „Bank” wpisz jego nazwę.",
+    step5: "Gotowe. Zapłać kartą: gdy przyjdzie powiadomienie z banku, Taimo zapisze je samo.",
+  },
   pot: {
     name: "Skarbonka",
     title: "Wspólna skarbonka",

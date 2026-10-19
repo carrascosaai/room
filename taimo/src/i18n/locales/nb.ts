@@ -960,6 +960,16 @@ const nb: Translation = {
     infoGroups: "Grupper",
     infoCapture: "Gjenkjenning",
   },
+  ios27: {
+    title: "Nytt i iOS 27: også plastkortet",
+    text: "Med iOS 27 kan iPhone gi Taimo varselet banken sender ved hver betaling. Da føres betalinger med det fysiske kortet, på nett og i apper automatisk, med en gang og uten å koble til banken.",
+    update: "Oppdater iPhone til iOS 27 (Innstillinger → Generelt → Programvareoppdatering), så kan Taimo også føre betalinger med plastkortet, på nett og i apper via varselet fra banken.",
+    step1: "Åpne Snarveier → Automatisering → «+» → «Varsling».",
+    step2: "Velg bankens app under «App». Har du flere, lag én automatisering for hver.",
+    step3: "Velg «Kjør umiddelbart» og trykk «Neste».",
+    step4: "Legg til handlingen «Før bankvarsel i Taimo». Velg varslingsvariabelen for «Varselstekst», og skriv bankens navn under «Bank».",
+    step5: "Ferdig. Betal med kortet: når varselet fra banken kommer, fører Taimo det automatisk.",
+  },
   pot: {
     name: "Pott",
     title: "Felles pott",

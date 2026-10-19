@@ -8,7 +8,7 @@ import { parseCaptureParams, pendingKind, type CapturePayload } from '@/domain/c
 import { budgetCrossings } from '@/domain/insights';
 import { parseQuickAdd, quickExpense } from '@/domain/smart';
 import { FALLBACK } from '@/fx/fx';
-import { parsePaymentNotification, type RawNotification } from '@/domain/notifications';
+import { parseBankNotice, parsePaymentNotification, type RawNotification } from '@/domain/notifications';
 import type { I18n } from '@/i18n';
 import { notifyNow } from '@/notifications/local';
 import { expenseFromCapture, newId, reducer, useStore } from '@/store/store';
@@ -51,7 +51,15 @@ export function useNativeCaptures(i18n: I18n, onCaptured?: (count: number) => vo
         continue;
       }
       let payload: CapturePayload | null;
-      if (kind === 'notification') {
+      if (kind === 'banknotice') {
+        const when = item.date ? new Date(item.date) : new Date();
+        payload = parseBankNotice(item.text ?? '', item.app ?? '', {
+          learned: current.learnedCategories,
+          home: current.profile.currency,
+          defaultMerchant,
+          postedAt: Number.isNaN(when.getTime()) ? undefined : when.toISOString(),
+        });
+      } else if (kind === 'notification') {
         payload = parsePaymentNotification(item as unknown as RawNotification, {
           learned: current.learnedCategories,
           home: current.profile.currency,
