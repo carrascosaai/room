@@ -925,6 +925,8 @@ const ca: Translation = {
     deleteConfirm: "Esborrar {name} i les seves guardioles?",
   },
   diag: {
+    restrictedTitle: "L’interruptor surt gris?",
+    restrictedText: "Android bloqueja aquest permís a les apps que no vénen de Google Play. Toca «Obrir la configuració de Taimo», després els tres punts ⋮ de dalt a la dreta → «Permet la configuració restringida», i torna a donar permís.",
     title: "Funciona?",
     alive: "Taimo està rebent avisos. L’últim va arribar: {when}.",
     waiting: "Encara no ha arribat cap avís. Rep-ne un qualsevol (un WhatsApp ja serveix) i torna aquí.",

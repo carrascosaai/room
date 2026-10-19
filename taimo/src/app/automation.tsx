@@ -65,6 +65,7 @@ function Steps({ steps }: { steps: TKey[] }) {
 function AndroidSetup() {
   const { t } = useI18n();
   const [enabled, setEnabled] = useState(hasNotificationAccess());
+  const [tried, setTried] = useState(false);
   useEffect(() => {
     const sub = RNAppState.addEventListener('change', (s) => {
       if (s === 'active') setEnabled(hasNotificationAccess());
@@ -91,9 +92,18 @@ function AndroidSetup() {
           label={t('automation.androidGrant')}
           onPress={async () => {
             await ensureNotificationPermission();
+            setTried(true);
             openNotificationAccessSettings();
           }}
         />
+      ) : null}
+      {/* Android 13+: si la app no viene de Google Play, el permiso sale en gris («ajuste restringido»). */}
+      {!enabled && tried && Number(Platform.Version) >= 33 ? (
+        <Card style={{ borderColor: colors.warning, borderWidth: 1.5 }}>
+          <H2>{t('diag.restrictedTitle')}</H2>
+          <Text style={{ color: colors.text, fontSize: 16, lineHeight: 23 }}>{t('diag.restrictedText')}</Text>
+          <Button label={t('diag.openBattery')} variant="secondary" onPress={openAppSettings} />
+        </Card>
       ) : null}
       <Muted>{t('automation.androidHint')}</Muted>
       {enabled ? <CaptureCheck /> : null}

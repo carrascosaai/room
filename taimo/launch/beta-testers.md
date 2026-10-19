@@ -19,6 +19,7 @@ Todavía no está en la App Store. De momento puedes probar la versión web en e
 ## 2. Lo primero (solo Android): que apunte tus pagos sola
 
 1. Abre Taimo → **Automático → Activar** → activa **Taimo** en «Acceso a notificaciones».
+   - **¿El interruptor sale en gris o pone «Ajuste restringido»?** Es normal en Android 13 o más nuevo cuando la app no viene de Google Play. Ve a Ajustes → Aplicaciones → Taimo → los tres puntos **⋮** de arriba a la derecha → **«Permitir ajustes restringidos»**, y vuelve a activarlo.
 2. En la tarjeta **«¿Funciona?»**, toca **«Abrir ajustes de Taimo»** → Batería → **«Sin restricciones»**.
 3. Comprueba que la app de tu banco te avisa de cada pago (si no, actívalo en la app del banco).
 4. Enciende **«Modo comprobación»**.

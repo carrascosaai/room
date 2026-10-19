@@ -956,6 +956,8 @@ const en = {
     deleteConfirm: "Delete {name} and their jars?",
   },
   diag: {
+    restrictedTitle: "Is the switch greyed out?",
+    restrictedText: "Android blocks this permission for apps not installed from Google Play. Tap \"Open Taimo settings\", then the three dots ⋮ at the top right → \"Allow restricted settings\", and grant access again.",
     title: "Is it working?",
     alive: "Taimo is receiving notifications. The last one arrived: {when}.",
     waiting: "No notification has arrived yet. Get any notification (a WhatsApp will do) and come back.",

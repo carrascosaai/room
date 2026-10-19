@@ -940,6 +940,8 @@ const ro: Translation = {
     deleteConfirm: "Ștergi {name} și pușculițele?",
   },
   diag: {
+    restrictedTitle: "Comutatorul e gri?",
+    restrictedText: "Android blochează această permisiune pentru aplicațiile care nu vin din Google Play. Atinge „Deschide setările Taimo”, apoi cele trei puncte ⋮ din dreapta sus → „Permite setări restricționate” și acordă din nou accesul.",
     title: "Funcționează?",
     alive: "Taimo primește notificări. Ultima a sosit: {when}.",
     waiting: "Nu a sosit încă nicio notificare. Primește una oarecare (merge și un WhatsApp) și revino aici.",

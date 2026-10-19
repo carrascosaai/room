@@ -925,6 +925,8 @@ const fi: Translation = {
     deleteConfirm: "Poistetaanko {name} ja säästöpossut?",
   },
   diag: {
+    restrictedTitle: "Onko kytkin harmaa?",
+    restrictedText: "Android estää tämän luvan sovelluksilta, jotka eivät tule Google Playsta. Napauta ”Avaa Taimon asetukset”, sitten oikean yläkulman kolmea pistettä ⋮ → ”Salli rajoitetut asetukset” ja anna lupa uudelleen.",
     title: "Toimiiko?",
     alive: "Taimo vastaanottaa ilmoituksia. Viimeisin tuli: {when}.",
     waiting: "Yhtään ilmoitusta ei ole vielä tullut. Vastaanota mikä tahansa (WhatsApp käy) ja palaa tänne.",

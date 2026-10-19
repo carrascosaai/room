@@ -43,7 +43,14 @@ jobs:
       - run: npx expo prebuild --platform android --no-install
       - name: Compilar APK
         working-directory: taimo/android
-        run: ./gradlew assembleRelease --no-daemon
+        # Solo arm64 (todos los Android de los últimos ~8 años): el APK pesa la mitad
+        # y se pasa mejor por WhatsApp.
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
+        env:
+          # Versión que se ve en «Danos tu opinión», para saber qué APK tiene cada probador.
+          EXPO_PUBLIC_BUILD: ${{ github.run_number }}-${{ github.sha }}
+      - name: Nombre del APK
+        run: mv android/app/build/outputs/apk/release/app-release.apk "android/app/build/outputs/apk/release/taimo-${{ github.run_number }}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: taimo-android-apk

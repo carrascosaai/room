@@ -925,6 +925,8 @@ const de: Translation = {
     deleteConfirm: "{name} und die Spardosen löschen?",
   },
   diag: {
+    restrictedTitle: "Ist der Schalter ausgegraut?",
+    restrictedText: "Android sperrt diese Berechtigung für Apps, die nicht aus Google Play stammen. Tippe auf „Taimo-Einstellungen öffnen“, dann oben rechts auf ⋮ → „Eingeschränkte Einstellungen zulassen“ und erteile die Berechtigung erneut.",
     title: "Funktioniert es?",
     alive: "Taimo empfängt Benachrichtigungen. Die letzte kam: {when}.",
     waiting: "Noch keine Benachrichtigung angekommen. Empfange irgendeine (eine WhatsApp reicht) und komm zurück.",

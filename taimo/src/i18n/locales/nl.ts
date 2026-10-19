@@ -925,6 +925,8 @@ const nl: Translation = {
     deleteConfirm: "{name} en de spaarpotten verwijderen?",
   },
   diag: {
+    restrictedTitle: "Is de schakelaar grijs?",
+    restrictedText: "Android blokkeert deze toestemming voor apps die niet uit Google Play komen. Tik op ‘Taimo-instellingen openen’, dan rechtsboven op ⋮ → ‘Beperkte instellingen toestaan’, en geef opnieuw toegang.",
     title: "Werkt het?",
     alive: "Taimo ontvangt meldingen. De laatste kwam: {when}.",
     waiting: "Er is nog geen melding binnengekomen. Ontvang er een (een WhatsApp is genoeg) en kom terug.",

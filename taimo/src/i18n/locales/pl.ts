@@ -955,6 +955,8 @@ const pl: Translation = {
     deleteConfirm: "Usunąć {name} i skarbonki?",
   },
   diag: {
+    restrictedTitle: "Przełącznik jest wyszarzony?",
+    restrictedText: "Android blokuje to uprawnienie aplikacjom spoza Google Play. Dotknij „Otwórz ustawienia Taimo”, potem trzech kropek ⋮ w prawym górnym rogu → „Zezwól na ustawienia z ograniczeniami” i nadaj dostęp ponownie.",
     title: "Działa?",
     alive: "Taimo odbiera powiadomienia. Ostatnie przyszło: {when}.",
     waiting: "Nie przyszło jeszcze żadne powiadomienie. Odbierz dowolne (wystarczy WhatsApp) i wróć tutaj.",

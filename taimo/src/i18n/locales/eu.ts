@@ -925,6 +925,8 @@ const eu: Translation = {
     deleteConfirm: "{name} eta bere kutxatilak ezabatu?",
   },
   diag: {
+    restrictedTitle: "Etengailua grisez ageri da?",
+    restrictedText: "Androidek baimen hau blokeatzen die Google Playtik ez datozen aplikazioei. Sakatu «Ireki Taimoren ezarpenak», gero goian eskuinean dauden hiru puntuak ⋮ → «Baimendu ezarpen mugatuak», eta eman baimena berriro.",
     title: "Badabil?",
     alive: "Taimo jakinarazpenak jasotzen ari da. Azkena: {when}.",
     waiting: "Oraindik ez da jakinarazpenik iritsi. Jaso edozein (WhatsApp bat nahikoa da) eta itzuli hona.",

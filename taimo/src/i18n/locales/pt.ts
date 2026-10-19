@@ -925,6 +925,8 @@ const pt: Translation = {
     deleteConfirm: "Apagar {name} e os seus mealheiros?",
   },
   diag: {
+    restrictedTitle: "O interruptor está cinzento?",
+    restrictedText: "O Android bloqueia esta permissão a apps que não vêm do Google Play. Toca em «Abrir definições do Taimo», depois nos três pontos ⋮ em cima à direita → «Permitir definições restritas», e dá a permissão outra vez.",
     title: "Está a funcionar?",
     alive: "O Taimo está a receber notificações. A última chegou: {when}.",
     waiting: "Ainda não chegou nenhuma notificação. Recebe uma qualquer (um WhatsApp serve) e volta aqui.",

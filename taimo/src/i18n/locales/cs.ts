@@ -955,6 +955,8 @@ const cs: Translation = {
     deleteConfirm: "Smazat {name} a jeho pokladničky?",
   },
   diag: {
+    restrictedTitle: "Je přepínač šedý?",
+    restrictedText: "Android blokuje toto oprávnění aplikacím mimo Google Play. Klepněte na „Otevřít nastavení Taima“, pak na tři tečky ⋮ vpravo nahoře → „Povolit omezená nastavení“ a udělte přístup znovu.",
     title: "Funguje to?",
     alive: "Taimo přijímá oznámení. Poslední přišlo: {when}.",
     waiting: "Zatím nepřišlo žádné oznámení. Přijměte jakékoli (stačí WhatsApp) a vraťte se sem.",

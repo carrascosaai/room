@@ -13,6 +13,9 @@ import { colors, radius, space } from '@/ui/theme';
 /** A dónde llegan las opiniones (se pone al compilar). Sin número, se elige con quién compartir. */
 const FEEDBACK_WHATSAPP = (process.env.EXPO_PUBLIC_FEEDBACK_WHATSAPP ?? '').replace(/[^\d]/g, '');
 
+/** Número de compilación del APK de pruebas («7-ab12cd3»), si lo hay. */
+const BUILD = (process.env.EXPO_PUBLIC_BUILD ?? '').slice(0, 12);
+
 const FACES = ['😞', '😐', '🙂', '😍'] as const;
 
 /**
@@ -30,7 +33,7 @@ export default function Opinion() {
   function deviceInfo(): string {
     const status = captureStatus();
     const lines = [
-      `Taimo ${Constants.expoConfig?.version ?? '?'} · ${Platform.OS} ${String(Platform.Version)}`,
+      `Taimo ${Constants.expoConfig?.version ?? '?'}${BUILD ? ` (${BUILD})` : ''} · ${Platform.OS} ${String(Platform.Version)}`,
       `${t('opinion.infoLanguage')}: ${locale} · ${state.profile.currency}`,
       `${t('opinion.infoExpenses')}: ${state.expenses.length} · ${t('opinion.infoGroups')}: ${state.groups.length}`,
     ];

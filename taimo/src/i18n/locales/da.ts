@@ -925,6 +925,8 @@ const da: Translation = {
     deleteConfirm: "Slet {name} og sparegrisene?",
   },
   diag: {
+    restrictedTitle: "Er kontakten grå?",
+    restrictedText: "Android blokerer denne tilladelse for apps, der ikke kommer fra Google Play. Tryk på “Åbn Taimo-indstillinger”, så de tre prikker ⋮ øverst til højre → “Tillad begrænsede indstillinger”, og giv adgang igen.",
     title: "Virker det?",
     alive: "Taimo modtager notifikationer. Den seneste kom: {when}.",
     waiting: "Der er ikke kommet nogen notifikation endnu. Modtag en hvilken som helst (en WhatsApp er nok) og kom tilbage.",

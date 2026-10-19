@@ -925,6 +925,8 @@ const it: Translation = {
     deleteConfirm: "Eliminare {name} e i suoi salvadanai?",
   },
   diag: {
+    restrictedTitle: "L’interruttore è grigio?",
+    restrictedText: "Android blocca questo permesso per le app che non arrivano da Google Play. Tocca «Apri le impostazioni di Taimo», poi i tre puntini ⋮ in alto a destra → «Consenti impostazioni con limitazioni» e riprova.",
     title: "Funziona?",
     alive: "Taimo sta ricevendo le notifiche. L’ultima è arrivata: {when}.",
     waiting: "Non è ancora arrivata nessuna notifica. Ricevine una qualsiasi (va bene un WhatsApp) e torna qui.",

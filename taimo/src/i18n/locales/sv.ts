@@ -925,6 +925,8 @@ const sv: Translation = {
     deleteConfirm: "Ta bort {name} och spargrisarna?",
   },
   diag: {
+    restrictedTitle: "Är reglaget grått?",
+    restrictedText: "Android blockerar den här behörigheten för appar som inte kommer från Google Play. Tryck på ”Öppna Taimos inställningar”, sedan de tre prickarna ⋮ uppe till höger → ”Tillåt begränsade inställningar”, och ge åtkomst igen.",
     title: "Fungerar det?",
     alive: "Taimo tar emot aviseringar. Den senaste kom: {when}.",
     waiting: "Ingen avisering har kommit än. Ta emot någon (ett WhatsApp räcker) och kom tillbaka.",

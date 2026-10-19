@@ -950,6 +950,8 @@ const es: Translation = {
     deleteConfirm: "¿Borrar a {name} y sus huchas?",
   },
   diag: {
+    restrictedTitle: "¿El interruptor sale en gris?",
+    restrictedText: "Android bloquea este permiso a las apps que no vienen de Google Play. Toca «Abrir ajustes de Taimo», luego los tres puntos ⋮ de arriba a la derecha → «Permitir ajustes restringidos», y vuelve a dar permiso.",
     title: "¿Funciona?",
     alive: "Taimo está recibiendo avisos. El último llegó: {when}.",
     waiting: "Aún no ha llegado ningún aviso. Recibe uno cualquiera (un WhatsApp vale) y vuelve aquí.",

@@ -925,6 +925,8 @@ const gl: Translation = {
     deleteConfirm: "Borrar a {name} e as súas huchas?",
   },
   diag: {
+    restrictedTitle: "O interruptor sae en gris?",
+    restrictedText: "Android bloquea este permiso ás apps que non veñen de Google Play. Toca «Abrir axustes de Taimo», despois os tres puntos ⋮ de arriba á dereita → «Permitir axustes restrinxidos», e volve dar permiso.",
     title: "Funciona?",
     alive: "Taimo está a recibir avisos. O último chegou: {when}.",
     waiting: "Aínda non chegou ningún aviso. Recibe un calquera (un WhatsApp vale) e volve aquí.",

@@ -925,6 +925,8 @@ const tr: Translation = {
     deleteConfirm: "{name} ve kumbaraları silinsin mi?",
   },
   diag: {
+    restrictedTitle: "Düğme gri mi görünüyor?",
+    restrictedText: "Android, Google Play'den gelmeyen uygulamalar için bu izni engeller. «Taimo ayarlarını aç»a dokun, sonra sağ üstteki üç nokta ⋮ → «Kısıtlanmış ayarlara izin ver», ve izni yeniden ver.",
     title: "Çalışıyor mu?",
     alive: "Taimo bildirimleri alıyor. Sonuncusu geldi: {when}.",
     waiting: "Henüz bildirim gelmedi. Herhangi bir bildirim al (bir WhatsApp yeter) ve buraya dön.",
