@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { AppState as RNAppState, Platform } from 'react-native';
 
-import { drainPending, reportMissed } from 'taimo-capture';
+import { drainPending, rebindListener, reportMissed } from 'taimo-capture';
 
 import { categoryStatus } from '@/domain/budget';
 import { parseCaptureParams, pendingKind, type CapturePayload } from '@/domain/capture';
@@ -83,6 +83,8 @@ export function useNativeCaptures(i18n: I18n, onCaptured?: (count: number) => vo
   }, [dispatch, onCaptured, defaultMerchant, i18n]);
 
   useEffect(() => {
+    // Por si Samsung, Xiaomi… han desconectado el lector mientras Taimo estaba cerrado.
+    if (Platform.OS === 'android') rebindListener();
     drain();
     const sub = RNAppState.addEventListener('change', (s) => {
       if (s === 'active') drain();

@@ -13,6 +13,7 @@ interface TaimoCaptureNative {
   clearMissed?(): void;
   reportMissed?(json: string): void;
   openAppSettings?(): void;
+  rebindListener?(): void;
 }
 
 // No existe en Expo Go ni en web: allí la app funciona sin captura nativa.
@@ -138,5 +139,14 @@ export function openAppSettings(): void {
     native?.openAppSettings?.();
   } catch {
     // Módulo antiguo.
+  }
+}
+
+/** Android: vuelve a conectar el lector de avisos si el móvil lo ha desconectado. */
+export function rebindListener(): void {
+  try {
+    native?.rebindListener?.();
+  } catch {
+    // Módulo antiguo o fabricante que no lo permite.
   }
 }

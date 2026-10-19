@@ -89,6 +89,25 @@ class TaimoCaptureModule : Module() {
       Unit
     }
 
+    /**
+     * Samsung, Xiaomi… a veces desconectan el lector (sobre todo tras actualizar la app).
+     * Con permiso dado, se le pide a Android que lo vuelva a conectar; si ya lo está, no pasa nada.
+     */
+    Function("rebindListener") {
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N &&
+        NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+      ) {
+        try {
+          android.service.notification.NotificationListenerService.requestRebind(
+            android.content.ComponentName(context, TaimoNotificationListener::class.java)
+          )
+        } catch (_: Exception) {
+          // Algunos fabricantes no lo permiten: no pasa nada.
+        }
+      }
+      Unit
+    }
+
     Function("hasNotificationAccess") {
       NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
     }

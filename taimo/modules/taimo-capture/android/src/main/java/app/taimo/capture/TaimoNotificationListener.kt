@@ -24,6 +24,18 @@ class TaimoNotificationListener : NotificationListenerService() {
     private const val CHANNEL_ID = "taimo_captures"
   }
 
+  /** Si Android desconecta el lector (ahorro de batería, actualización…), se pide volver a conectarlo. */
+  override fun onListenerDisconnected() {
+    super.onListenerDisconnected()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      try {
+        NotificationListenerService.requestRebind(android.content.ComponentName(this, TaimoNotificationListener::class.java))
+      } catch (_: Exception) {
+        // Algunos fabricantes no lo permiten.
+      }
+    }
+  }
+
   override fun onNotificationPosted(sbn: StatusBarNotification) {
     if (sbn.packageName == packageName) return
     val extras = sbn.notification?.extras ?: return

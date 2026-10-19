@@ -268,6 +268,8 @@ export default function Settings() {
         </Row>
       </Card>
 
+      <Button label={`💬 ${t('opinion.title')}`} variant="secondary" onPress={() => router.push('/opinion')} />
+
       {/* Persona a la que llamar antes de pagar algo que huele raro. */}
       <Card>
         <TrustedForm />

@@ -105,6 +105,7 @@ function RootStack() {
           <Stack.Screen name="calendario" options={{ headerShown: true, title: t('cal.title') }} />
           <Stack.Screen name="revisar" options={{ headerShown: true, title: t('rev.title') }} />
           <Stack.Screen name="comprueba" options={{ headerShown: true, title: t('scam.title') }} />
+          <Stack.Screen name="opinion" options={{ headerShown: true, title: '' }} />
           <Stack.Screen name="mesa" />
           <Stack.Screen name="mesa-pagado" />
           <Stack.Screen name="mesa-nueva" options={{ headerShown: true, title: t('mesa.title') }} />
